@@ -6,21 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { artists, type Artist } from "@/data/artists";
-import { locations } from "@/data/locations";
+import { events, getEventsByDay, type Event } from "@/data/events";
 
 const Program = () => {
   const navigate = useNavigate();
-  const [selectedEvent, setSelectedEvent] = useState<Artist | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   
-  const handleViewOnMap = (locationName: string) => {
-    // Find the location id based on the location name
-    const location = locations.find(loc => loc.name === locationName);
-    if (location) {
-      navigate(`/map?location=${location.id}`);
-    } else {
-      navigate("/map");
-    }
+  const handleViewOnMap = (event: Event) => {
+    navigate(`/map?location=${event.id}`);
   };
   
   return (
@@ -44,25 +37,23 @@ const Program = () => {
             <TabsTrigger value="dimanche">Dimanche</TabsTrigger>
           </TabsList>
           <TabsContent value="samedi" className="space-y-4">
-            {artists
-              .filter(artist => artist.day === "samedi")
-              .map((artist) => (
+            {getEventsByDay("samedi").map((event) => (
                 <Card 
-                  key={artist.id}
+                  key={event.id}
                   className="hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => setSelectedEvent(artist)}
+                  onClick={() => setSelectedEvent(event)}
                 >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-medium">{artist.title}</h3>
-                        <p className="text-sm text-gray-600">{artist.name}</p>
-                        <p className="text-sm text-gray-500">{artist.location} • {artist.time}</p>
+                        <h3 className="font-medium">{event.title}</h3>
+                        <p className="text-sm text-gray-600">{event.artistName}</p>
+                        <p className="text-sm text-gray-500">{event.locationName} • {event.time}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded ${
-                        artist.type === "exposition" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
+                        event.type === "exposition" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
                       }`}>
-                        {artist.type === "exposition" ? "Expo" : "Concert"}
+                        {event.type === "exposition" ? "Expo" : "Concert"}
                       </span>
                     </div>
                   </CardContent>
@@ -70,25 +61,23 @@ const Program = () => {
               ))}
           </TabsContent>
           <TabsContent value="dimanche" className="space-y-4">
-            {artists
-              .filter(artist => artist.day === "dimanche")
-              .map((artist) => (
+            {getEventsByDay("dimanche").map((event) => (
                 <Card 
-                  key={artist.id}
+                  key={event.id}
                   className="hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => setSelectedEvent(artist)}
+                  onClick={() => setSelectedEvent(event)}
                 >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-medium">{artist.title}</h3>
-                        <p className="text-sm text-gray-600">{artist.name}</p>
-                        <p className="text-sm text-gray-500">{artist.location} • {artist.time}</p>
+                        <h3 className="font-medium">{event.title}</h3>
+                        <p className="text-sm text-gray-600">{event.artistName}</p>
+                        <p className="text-sm text-gray-500">{event.locationName} • {event.time}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded ${
-                        artist.type === "exposition" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
+                        event.type === "exposition" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
                       }`}>
-                        {artist.type === "exposition" ? "Expo" : "Concert"}
+                        {event.type === "exposition" ? "Expo" : "Concert"}
                       </span>
                     </div>
                   </CardContent>
@@ -104,14 +93,14 @@ const Program = () => {
                 <DialogTitle>{selectedEvent.title}</DialogTitle>
               </DialogHeader>
               <div className="py-4">
-                <p className="text-sm font-medium">Par {selectedEvent.name}</p>
-                <p className="text-sm text-gray-500 mb-4">{selectedEvent.location} • {selectedEvent.time}</p>
+                <p className="text-sm font-medium">Par {selectedEvent.artistName}</p>
+                <p className="text-sm text-gray-500 mb-4">{selectedEvent.locationName} • {selectedEvent.time}</p>
                 
                 <p className="text-sm mb-4">{selectedEvent.description}</p>
                 
                 <div className="border-t pt-4 mt-4">
                   <h4 className="text-sm font-medium mb-1">À propos de l'artiste</h4>
-                  <p className="text-sm text-gray-600 mb-4">{selectedEvent.bio}</p>
+                  <p className="text-sm text-gray-600 mb-4">{selectedEvent.artistBio}</p>
                   
                   <h4 className="text-sm font-medium mb-1">Contact</h4>
                   <p className="text-sm text-gray-600">{selectedEvent.contact}</p>
@@ -121,7 +110,7 @@ const Program = () => {
                   size="sm" 
                   className="mt-4 w-full"
                   onClick={() => {
-                    handleViewOnMap(selectedEvent.location);
+                    handleViewOnMap(selectedEvent);
                     setSelectedEvent(null);
                   }}
                 >

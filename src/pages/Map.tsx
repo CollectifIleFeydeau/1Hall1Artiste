@@ -4,13 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Calendar } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { locations, type Location } from "@/data/locations";
-import { artists } from "@/data/artists";
+import { events, getLocations, getEventById, type Event } from "@/data/events";
 
 const Map = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [mapLocations, setMapLocations] = useState<Location[]>(locations);
+  const [mapLocations, setMapLocations] = useState(getLocations());
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
 
   // Parse query parameters
@@ -46,8 +45,8 @@ const Map = () => {
     if (!location) return [];
     
     return location.events.map(eventId => 
-      artists.find(artist => artist.id === eventId)
-    ).filter(Boolean);
+      getEventById(eventId)
+    ).filter(Boolean) as Event[];
   };
 
   return (
@@ -120,7 +119,7 @@ const Map = () => {
                   <div className="space-y-2">
                     {getLocationEvents(activeLocation).map(event => event && (
                       <div key={event.id} className="text-sm">
-                        <span className="font-medium">{event.title}</span> par {event.name}
+                        <span className="font-medium">{event.title}</span> par {event.artistName}
                         <p className="text-xs text-gray-500">{event.time}</p>
                       </div>
                     ))}
