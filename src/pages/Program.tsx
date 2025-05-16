@@ -7,10 +7,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ArrowLeft, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { artists, type Artist } from "@/data/artists";
+import { locations } from "@/data/locations";
 
 const Program = () => {
   const navigate = useNavigate();
   const [selectedEvent, setSelectedEvent] = useState<Artist | null>(null);
+  
+  const handleViewOnMap = (locationName: string) => {
+    // Find the location id based on the location name
+    const location = locations.find(loc => loc.name === locationName);
+    if (location) {
+      navigate(`/map?location=${location.id}`);
+    } else {
+      navigate("/map");
+    }
+  };
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 p-4">
@@ -105,6 +116,18 @@ const Program = () => {
                   <h4 className="text-sm font-medium mb-1">Contact</h4>
                   <p className="text-sm text-gray-600">{selectedEvent.contact}</p>
                 </div>
+                
+                <Button 
+                  size="sm" 
+                  className="mt-4 w-full"
+                  onClick={() => {
+                    handleViewOnMap(selectedEvent.location);
+                    setSelectedEvent(null);
+                  }}
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Voir sur la carte
+                </Button>
               </div>
             </DialogContent>
           )}
