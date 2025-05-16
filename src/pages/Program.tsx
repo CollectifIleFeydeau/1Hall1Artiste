@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { artists, type Artist } from "@/data/artists";
 
@@ -15,12 +15,16 @@ const Program = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 p-4">
       <div className="max-w-md mx-auto">
-        <header className="mb-4 flex items-center">
+        <header className="mb-4 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/home")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
-          <h1 className="text-xl font-bold ml-2">Programme</h1>
+          <h1 className="text-xl font-bold">Programme</h1>
+          <Button variant="outline" size="sm" onClick={() => navigate("/map")}>
+            <MapPin className="h-4 w-4 mr-2" />
+            Voir la carte
+          </Button>
         </header>
         
         <Tabs defaultValue="samedi" className="w-full">

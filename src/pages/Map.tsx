@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { locations, type Location } from "@/data/locations";
 import { artists } from "@/data/artists";
@@ -35,12 +35,16 @@ const Map = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 p-4">
       <div className="max-w-md mx-auto">
-        <header className="mb-4 flex items-center">
+        <header className="mb-4 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/home")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
-          <h1 className="text-xl font-bold ml-2">Carte & Parcours</h1>
+          <h1 className="text-xl font-bold">Carte & Parcours</h1>
+          <Button variant="outline" size="sm" onClick={() => navigate("/program")}>
+            <Calendar className="h-4 w-4 mr-2" />
+            Programme
+          </Button>
         </header>
         
         <div className="bg-white rounded-lg p-4 shadow-md mb-4">
