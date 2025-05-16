@@ -1,16 +1,34 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Calendar } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { locations, type Location } from "@/data/locations";
 import { artists } from "@/data/artists";
 
 const Map = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mapLocations, setMapLocations] = useState<Location[]>(locations);
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
+
+  // Parse query parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const locationId = searchParams.get('location');
+    
+    if (locationId) {
+      setActiveLocation(locationId);
+      
+      // Mark location as visited
+      setMapLocations(prevLocations => 
+        prevLocations.map(loc => 
+          loc.id === locationId ? { ...loc, visited: true } : loc
+        )
+      );
+    }
+  }, [location.search]);
 
   const handleLocationClick = (locationId: string) => {
     setActiveLocation(locationId);
