@@ -4,17 +4,33 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { locations, type Location } from "@/data/locations";
+import { artists } from "@/data/artists";
 
 const Map = () => {
   const navigate = useNavigate();
+  const [mapLocations, setMapLocations] = useState<Location[]>(locations);
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
 
-  const locations = [
-    { id: "hall1", name: "Hall Principal", x: 30, y: 40, visited: true },
-    { id: "courtyard", name: "Cour Intérieure", x: 60, y: 55, visited: false },
-    { id: "hall2", name: "Galerie Est", x: 75, y: 30, visited: false },
-    { id: "garden", name: "Jardin", x: 45, y: 75, visited: false },
-  ];
+  const handleLocationClick = (locationId: string) => {
+    setActiveLocation(locationId);
+    
+    // Mark location as visited
+    setMapLocations(prevLocations => 
+      prevLocations.map(loc => 
+        loc.id === locationId ? { ...loc, visited: true } : loc
+      )
+    );
+  };
+
+  const getLocationEvents = (locationId: string) => {
+    const location = mapLocations.find(l => l.id === locationId);
+    if (!location) return [];
+    
+    return location.events.map(eventId => 
+      artists.find(artist => artist.id === eventId)
+    ).filter(Boolean);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 p-4">
@@ -36,7 +52,7 @@ const Map = () => {
                   Carte du quartier
                 </div>
                 
-                {locations.map((location) => (
+                {mapLocations.map((location) => (
                   <div 
                     key={location.id}
                     className={`absolute w-4 h-4 transform -translate-x-1/2 -translate-y-1/2 rounded-full cursor-pointer
@@ -44,7 +60,7 @@ const Map = () => {
                       ${location.visited ? 'bg-green-500' : 'bg-gray-400'}
                     `}
                     style={{ left: `${location.x}%`, top: `${location.y}%` }}
-                    onClick={() => setActiveLocation(location.id)}
+                    onClick={() => handleLocationClick(location.id)}
                   />
                 ))}
               </div>
@@ -70,11 +86,34 @@ const Map = () => {
           <Card className="mb-4 animate-fade-in">
             <CardContent className="p-4">
               <h3 className="font-medium mb-1">
-                {locations.find(l => l.id === activeLocation)?.name}
+                {mapLocations.find(l => l.id === activeLocation)?.name}
               </h3>
-              <p className="text-sm text-gray-600">
-                Description du lieu et activités disponibles ici. Cliquez sur le programme pour plus de détails.
+              <p className="text-sm text-gray-600 mb-3">
+                {mapLocations.find(l => l.id === activeLocation)?.description}
               </p>
+              
+              {getLocationEvents(activeLocation).length > 0 && (
+                <div className="mt-3">
+                  <h4 className="text-sm font-medium mb-1">Événements :</h4>
+                  <div className="space-y-2">
+                    {getLocationEvents(activeLocation).map(event => event && (
+                      <div key={event.id} className="text-sm">
+                        <span className="font-medium">{event.title}</span> par {event.name}
+                        <p className="text-xs text-gray-500">{event.time}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="mt-3 text-xs" 
+                onClick={() => navigate("/program")}
+              >
+                Voir le programme complet
+              </Button>
             </CardContent>
           </Card>
         )}

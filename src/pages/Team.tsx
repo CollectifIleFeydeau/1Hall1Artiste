@@ -3,49 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-type TeamMember = {
-  id: string;
-  name: string;
-  role: string;
-  description: string;
-};
+import { teamMembers } from "@/data/team";
+import { associationInfo } from "@/data/association";
 
 const Team = () => {
   const navigate = useNavigate();
-
-  const team: TeamMember[] = [
-    {
-      id: "member1",
-      name: "Claire Martin",
-      role: "Présidente",
-      description: "Fondatrice de l'association et passionnée d'histoire locale."
-    },
-    {
-      id: "member2",
-      name: "Thomas Rivière",
-      role: "Trésorier",
-      description: "En charge des finances et de la logistique des événements."
-    },
-    {
-      id: "member3",
-      name: "Sophie Laurent",
-      role: "Secrétaire",
-      description: "Coordonne les communications et les partenariats artistiques."
-    },
-    {
-      id: "member4",
-      name: "Marc Dubois",
-      role: "Programmation artistique",
-      description: "Sélectionne les artistes et organise les expositions."
-    },
-    {
-      id: "member5",
-      name: "Émilie Blanc",
-      role: "Communication",
-      description: "Gère la présence en ligne et les relations avec la presse."
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 p-4">
@@ -60,13 +22,13 @@ const Team = () => {
         
         <div className="bg-white rounded-lg p-6 shadow-md mb-6">
           <p className="text-gray-700 mb-4">
-            Notre association compte 20 membres actifs, tous habitants du quartier et passionnés 
+            Notre association compte {associationInfo.memberCount} membres actifs, tous habitants du quartier et passionnés 
             par sa valorisation. Voici quelques-uns des membres du bureau qui coordonnent nos actions.
           </p>
         </div>
         
         <div className="space-y-4">
-          {team.map((member) => (
+          {teamMembers.map((member) => (
             <Card key={member.id}>
               <CardContent className="p-4">
                 <div className="flex items-center space-x-4">
