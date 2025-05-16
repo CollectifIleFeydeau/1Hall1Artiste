@@ -100,7 +100,7 @@ export function getLocations() {
   events.forEach(event => {
     if (!uniqueLocations.has(event.locationName)) {
       uniqueLocations.set(event.locationName, {
-        id: event.id.split('').reverse().join(''), // Create a unique ID based on event ID
+        id: event.locationName.toLowerCase().replace(/\s+/g, '-'), // Create a location ID based on name
         name: event.locationName,
         description: event.locationDescription,
         x: event.x,
@@ -117,4 +117,12 @@ export function getLocations() {
   });
   
   return Array.from(uniqueLocations.values());
+}
+
+// Get location ID from event ID
+export function getLocationIdForEvent(eventId: string): string | null {
+  const event = getEventById(eventId);
+  if (!event) return null;
+  
+  return event.locationName.toLowerCase().replace(/\s+/g, '-');
 }
