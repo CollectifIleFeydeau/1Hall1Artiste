@@ -11,11 +11,11 @@ export type AssociationInfo = {
 };
 
 export const associationInfo: AssociationInfo = {
-  name: "Nantes Association Culturelle",
-  shortName: "NAC",
+  name: "Collectif Ile Feydeau",
+  shortName: "FEYDEAU",
   description: "Association culturelle mettant en valeur le patrimoine historique d'un ancien quartier insulaire de Nantes.",
   yearFounded: 2010,
   memberCount: 20,
   eventWeekend: "Troisième week-end de septembre",
-  contactEmail: "contact@nac-example.org"
+  contactEmail: "collectif.ile.feydeau@gmail.com"
 };
