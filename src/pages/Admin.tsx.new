@@ -253,12 +253,18 @@ export default function Admin() {
           <div className="w-20"></div>
         </header>
         
+        {/* Panneau d'import/export */}
+        <Card className="mb-4">
+          <CardContent className="pt-4">
+            <ImportExportPanel />
+          </CardContent>
+        </Card>
+        
         {/* Système d'onglets */}
         <Tabs defaultValue="coordinates" className="mb-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="coordinates">Coordonnées</TabsTrigger>
             <TabsTrigger value="events">Événements</TabsTrigger>
-            <TabsTrigger value="import-export">Import / Export</TabsTrigger>
           </TabsList>
           
           {/* Onglet de gestion des coordonnées */}
@@ -363,28 +369,14 @@ export default function Admin() {
               </CardContent>
             </Card>
           </TabsContent>
-          
-          {/* Onglet d'import/export */}
-          <TabsContent value="import-export">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-[#4a5d94]">Import / Export des données</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ImportExportPanel />
-                
-                <div className="mt-4">
-                  <Button 
-                    className="w-full bg-[#4a5d94]" 
-                    onClick={exportLocations}
-                  >
-                    Exporter les coordonnées
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
+        
+        <Button 
+          className="w-full mb-4 bg-[#4a5d94]" 
+          onClick={exportLocations}
+        >
+          Exporter les coordonnées
+        </Button>
       </div>
     </div>
   );

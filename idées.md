@@ -1,23 +1,25 @@
---------------------------
-Liste de choses à faire plus tard
-
-- Remettre le mot de passe plus tard
 
 --------------------------
 # Priorités actuelles (phase de saisie d'événements et de contenus)
 
 ## Priorités immédiates à faire
 
-2. **Formulaire de saisie d'événements**
+0. **Correction de bug**
+   - J'ai testé sur 2 navigateurs et le point n'est pas à la même place.
+
+1. **Formulaire de saisie d'événements**
    - Créer un formulaire de saisie d'événements qui utilise le système de validation
    - Intégrer le formulaire à la page Admin
 
-3. **Documentation**
+2. **Documentation**
    - Documenter les composants principaux et leur utilisation
    - Ajouter des commentaires explicatifs aux parties complexes du code
 
 4. **Performance**
    - Optimiser les rendus avec React.memo pour les composants qui ne changent pas souvent
+
+5. **Petits changements**
+   - Changer le title de l'application en "Collectif Feydeau" au lieu de "island-f"
 
 --------------------------
 # Améliorations Potentielles (long terme)
@@ -44,6 +46,7 @@ Liste de choses à faire plus tard
 1. **Interface**
    - Améliorer la navigation entre les différentes sections
    - Optimiser l'interface pour les appareils mobiles et tablettes
+   - Remettre le mot de passe plus tard
 
 3. **Support hors ligne**
    - Ajouter une fonctionnalité hors ligne basique pour permettre aux utilisateurs de consulter le contenu en cache

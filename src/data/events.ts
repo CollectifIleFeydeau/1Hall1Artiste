@@ -10,10 +10,10 @@ export type Event = {
   time: string;
   days: ("samedi" | "dimanche")[];
   // Location information
-  locationName: string;
-  locationDescription: string;
-  x: number;
-  y: number;
+  locationId: string; // Référence à l'ID du lieu
+  locationName: string; // Nom du lieu (pour la rétrocompatibilité)
+  x: number; // Coordonnées (pour la rétrocompatibilité)
+  y: number; // Coordonnées (pour la rétrocompatibilité)
   image?: string;
 };
 
@@ -28,8 +28,8 @@ export const events: Event[] = [
     contact: "emmanuelle.boisson1@gmail.com",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
+    locationId: "quai-turenne",
     locationName: "8 quai Turenne",
-    locationDescription: "Bâtiment historique du XVIIIe siècle situé au 8 allée Turenne/9 rue Kervégan. Construit en 1753 pour Jacques Berouette, négociant et actionnaire d'origine du lotissement de l'Île Feydeau. L'immeuble présente des façades richement décorées avec des mascarons à thèmes marins. Les façades et la cage d'escalier sont inscrites aux monuments historiques depuis 1984.",
     x: 350,
     y: 250
   },
@@ -43,8 +43,8 @@ export const events: Event[] = [
     contact: "katclement@orange.fr",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
+    locationId: "quai-turenne",
     locationName: "8 quai Turenne",
-    locationDescription: "Bâtiment historique du XVIIIe siècle situé au 8 allée Turenne/9 rue Kervégan. Construit en 1753 pour Jacques Berouette, négociant et actionnaire d'origine du lotissement de l'Île Feydeau. L'immeuble présente des façades richement décorées avec des mascarons à thèmes marins. Les façades et la cage d'escalier sont inscrites aux monuments historiques depuis 1984.",
     x: 350,
     y: 250
   },
@@ -58,8 +58,8 @@ export const events: Event[] = [
     contact: "rouinemostapha@gmail.com",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
+    locationId: "quai-turenne",
     locationName: "8 quai Turenne",
-    locationDescription: "Bâtiment historique du XVIIIe siècle situé au 8 allée Turenne/9 rue Kervégan. Construit en 1753 pour Jacques Berouette, négociant et actionnaire d'origine du lotissement de l'Île Feydeau. L'immeuble présente des façades richement décorées avec des mascarons à thèmes marins. Les façades et la cage d'escalier sont inscrites aux monuments historiques depuis 1984.",
     x: 350,
     y: 250
   },
@@ -73,8 +73,8 @@ export const events: Event[] = [
     contact: "joss.proof@gmail.com",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
+    locationId: "quai-turenne",
     locationName: "8 quai Turenne",
-    locationDescription: "Bâtiment historique du XVIIIe siècle situé au 8 allée Turenne/9 rue Kervégan. Construit en 1753 pour Jacques Berouette, négociant et actionnaire d'origine du lotissement de l'Île Feydeau. L'immeuble présente des façades richement décorées avec des mascarons à thèmes marins. Les façades et la cage d'escalier sont inscrites aux monuments historiques depuis 1984.",
     x: 350,
     y: 250
   }
@@ -97,12 +97,41 @@ export function getEventsByLocation(locationName: string) {
 export function getLocations() {
   const uniqueLocations = new Map<string, { id: string, name: string, description: string, x: number, y: number, events: string[], visited: boolean }>();
   
+  // Import locations data to get descriptions
+  import('../data/locations').then(locationsModule => {
+    const locationsData = locationsModule.locations;
+    
+    events.forEach(event => {
+      if (!uniqueLocations.has(event.locationName)) {
+        // Trouver la description du lieu dans les données de lieux
+        const locationData = locationsData.find(loc => loc.id === event.locationId);
+        const description = locationData ? locationData.description : '';
+        
+        uniqueLocations.set(event.locationName, {
+          id: event.locationId, // Utiliser l'ID du lieu défini
+          name: event.locationName,
+          description: description,
+          x: event.x,
+          y: event.y,
+          events: [event.id],
+          visited: false
+        });
+      } else {
+        const location = uniqueLocations.get(event.locationName);
+        if (location) {
+          location.events.push(event.id);
+        }
+      }
+    });
+  });
+  
+  // Version synchrone pour la compatibilité
   events.forEach(event => {
     if (!uniqueLocations.has(event.locationName)) {
       uniqueLocations.set(event.locationName, {
-        id: event.locationName.toLowerCase().replace(/\s+/g, '-'), // Create a location ID based on name
+        id: event.locationId,
         name: event.locationName,
-        description: event.locationDescription,
+        description: '', // La description sera mise à jour par le service de données
         x: event.x,
         y: event.y,
         events: [event.id],
@@ -124,5 +153,5 @@ export function getLocationIdForEvent(eventId: string): string | null {
   const event = getEventById(eventId);
   if (!event) return null;
   
-  return event.locationName.toLowerCase().replace(/\s+/g, '-');
+  return event.locationId;
 }

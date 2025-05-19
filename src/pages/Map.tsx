@@ -38,27 +38,14 @@ const Map = ({ fullScreen = false }: MapProps) => {
   const { locations } = useLocations();
   const { getEventById } = useEvents();
   
-  // Charger les emplacements depuis le service de données
-  const [mapLocations, setMapLocations] = useState(() => {
-    logger.info('Initialisation des emplacements sur la carte');
-    const savedLocations = localStorage.getItem('mapLocations');
-    
-    if (savedLocations) {
-      try {
-        const parsedLocations = JSON.parse(savedLocations);
-        logger.info('Emplacements chargés depuis localStorage');
-        logger.debug('Détails des emplacements chargés', parsedLocations);
-        return parsedLocations;
-      } catch (error) {
-        logger.error('Erreur lors du parsing des emplacements depuis localStorage', error);
-        return locations;
-      }
-    } else {
-      logger.info('Aucun emplacement trouvé dans localStorage, utilisation des valeurs par défaut');
-      logger.debug('Emplacements par défaut', locations);
-      return locations;
-    }
-  });
+  // Utiliser directement les emplacements du service de données
+  const [mapLocations, setMapLocations] = useState(locations);
+  
+  // Mettre à jour les emplacements lorsque les données changent
+  useEffect(() => {
+    logger.info('Mise à jour des emplacements sur la carte depuis le service de données');
+    setMapLocations(locations);
+  }, [locations]);
   
   const [activeLocation, setActiveLocation] = useState<string | null>(() => {
     // Si on arrive depuis l'histoire complète, on active le lieu correspondant
@@ -229,9 +216,43 @@ const Map = ({ fullScreen = false }: MapProps) => {
           </div>
         </header>
         
+        {/* Légende sous le titre - toujours visible */}
+        <div className="flex items-center justify-center mb-4 text-sm text-[#4a5d94] fade-in">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-5 h-5 bg-[#ff7a45] rounded-full mr-1 text-white text-xs font-medium">
+                {visitedCount}
+              </div>
+              <span className="text-xs">{visitedCount > 1 ? 'Visités' : 'Visité'}</span>
+            </div>
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-5 h-5 bg-[#4a5d94] rounded-full mr-1 text-white text-xs font-medium">
+                {totalCount - visitedCount}
+              </div>
+              <span className="text-xs">À découvrir</span>
+            </div>
+          </div>
+        </div>
+        
         {!fullScreen && (
           <div className="text-center mb-4 text-sm text-[#4a5d94] fade-in">
             <p>Explorez l'île Feydeau et marquez les lieux visités</p>
+            
+            {/* Légende sous le titre */}
+            <div className="flex items-center justify-center mt-2 space-x-4">
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-5 h-5 bg-[#ff7a45] rounded-full mr-1 text-white text-xs font-medium">
+                  {visitedCount}
+                </div>
+                <span className="text-xs">{visitedCount > 1 ? 'Visités' : 'Visité'}</span>
+              </div>
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-5 h-5 bg-[#4a5d94] rounded-full mr-1 text-white text-xs font-medium">
+                  {totalCount - visitedCount}
+                </div>
+                <span className="text-xs">À découvrir</span>
+              </div>
+            </div>
           </div>
         )}
         
@@ -257,23 +278,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
             </div>
           </div>
           
-          {/* Legend overlay - positioned at the top left */}
-          <div className="absolute top-4 left-4 bg-white bg-opacity-90 p-3 rounded-md shadow-md text-[#4a5d94] z-10">
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center">
-                <div className="flex items-center justify-center w-7 h-7 bg-[#ff7a45] rounded-full mr-2 text-white text-sm font-medium">
-                  {visitedCount}
-                </div>
-                <span className="text-base">{visitedCount > 1 ? 'Visités' : 'Visité'}</span>
-              </div>
-              <div className="flex items-center">
-                <div className="flex items-center justify-center w-7 h-7 bg-[#4a5d94] rounded-full mr-2 text-white text-sm font-medium">
-                  {totalCount - visitedCount}
-                </div>
-                <span className="text-base">À découvrir</span>
-              </div>
-            </div>
-          </div>
+          {/* La légende a été déplacée sous le titre */}
         </div>
         
         {/* Bottom text instruction */}
@@ -445,14 +450,15 @@ const Map = ({ fullScreen = false }: MapProps) => {
                   <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
                   Le lieu
                 </h4>
-                <p className="text-sm text-[#4a5d94] mb-2 ml-4">{selectedEvent.locationDescription}</p>
+                <p className="text-sm text-[#4a5d94] mb-2 ml-4">
+                  {locations.find(loc => loc.id === selectedEvent.locationId)?.description || ''}
+                </p>
                 <Button 
                   size="sm" 
                   variant="outline" 
                   className="ml-4 text-xs border-[#4a5d94] text-[#4a5d94]"
                   onClick={() => {
-                    const locationId = selectedEvent.locationName.toLowerCase().replace(/\s+/g, '-');
-                    navigate('/location-history', { state: { selectedLocationId: locationId } });
+                    navigate('/location-history', { state: { selectedLocationId: selectedEvent.locationId } });
                   }}
                 >
                   <Info className="h-3 w-3 mr-1" />
