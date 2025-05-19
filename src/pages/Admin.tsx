@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { events } from "@/data/events";
-import { locations, Location } from "@/data/locations";
+import { Location } from "@/data/locations";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { createLogger } from "@/utils/logger";
 import { MapComponent, MAP_WIDTH, MAP_HEIGHT } from "@/components/MapComponent";
+import { useData, useEvents, useLocations } from "@/hooks/useData";
+import { ImportExportPanel } from "@/components/ImportExportPanel";
 
 // Créer un logger pour le composant Admin
 const logger = createLogger('Admin');
@@ -17,6 +18,11 @@ export default function Admin() {
   logger.info('Initialisation du composant Admin');
   
   const navigate = useNavigate();
+  // Utiliser les hooks personnalisés pour accéder aux données
+  const { events } = useEvents();
+  const { locations } = useLocations();
+  const { updateEvent, updateLocation } = useData();
+  
   // Authentification désactivée temporairement
   const [mapLocations, setMapLocations] = useState<Location[]>([]);
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
@@ -28,7 +34,7 @@ export default function Admin() {
     logger.info('Chargement initial des lieux');
     logger.debug('Données de lieux chargées', locations);
     setMapLocations(locations);
-  }, []);
+  }, [locations]);
 
   // Authentification temporairement désactivée
 
@@ -95,29 +101,36 @@ export default function Admin() {
       const locationName = mapLocations.find(l => l.id === activeLocation)?.name;
       logger.info(`Position mise à jour pour ${locationName}`);
       alert(`Position mise à jour pour ${locationName}\nX: ${x}, Y: ${y}\n\nCliquez sur "Mettre à jour les coordonnées" pour sauvegarder.`);
-      
       // Save to localStorage for persistence
       logger.info('Sauvegarde des emplacements dans localStorage');
       localStorage.setItem('mapLocations', JSON.stringify(updatedLocations));
       
       // Mettre à jour les coordonnées dans l'application
-      const locationIndex = locations.findIndex(loc => loc.id === activeLocation);
-      if (locationIndex !== -1) {
-        // Mettre à jour l'objet locations global
-        logger.debug('Mise à jour de l\'objet locations global', { index: locationIndex, id: locations[locationIndex].id, name: locations[locationIndex].name });
-        locations[locationIndex].x = x;
-        locations[locationIndex].y = y;
+      const locationToUpdate = locations.find(loc => loc.id === activeLocation);
+      
+      if (locationToUpdate) {
+        // Créer une copie mise à jour du lieu
+        const updatedLocation = { ...locationToUpdate, x, y };
         
-        // Mettre à jour les événements associés à ce lieu
-        const locationEvents = events.filter(event => event.locationName === locations[locationIndex].name);
-        logger.info(`Mise à jour de ${locationEvents.length} événements associés au lieu ${locations[locationIndex].name}`);
-        locationEvents.forEach(event => {
-          logger.debug('Mise à jour de l\'événement', { id: event.id, title: event.title, oldX: event.x, oldY: event.y, newX: x, newY: y });
-          event.x = x;
-          event.y = y;
-        });
+        // Mettre à jour le lieu via le service de données
+        logger.debug('Mise à jour du lieu via le service de données', { id: updatedLocation.id, name: updatedLocation.name });
+        const result = updateLocation(updatedLocation);
         
-        logger.info(`Coordonnées mises à jour par clic pour ${locations[locationIndex].name} et ${locationEvents.length} événements associés`);
+        if (result.success) {
+          // Mettre à jour les événements associés à ce lieu
+          const locationEvents = events.filter(event => event.locationName === updatedLocation.name);
+          logger.info(`Mise à jour de ${locationEvents.length} événements associés au lieu ${updatedLocation.name}`);
+          
+          locationEvents.forEach(event => {
+            const updatedEvent = { ...event, x, y };
+            logger.debug('Mise à jour de l\'événement', { id: event.id, title: event.title, oldX: event.x, oldY: event.y, newX: x, newY: y });
+            updateEvent(updatedEvent);
+          });
+          
+          logger.info(`Coordonnées mises à jour par clic pour ${updatedLocation.name} et ${locationEvents.length} événements associés`);
+        } else {
+          logger.error('Erreur lors de la mise à jour du lieu', result.error);
+        }
       } else {
         logger.warn(`Lieu avec ID ${activeLocation} non trouvé dans la liste globale des lieux`);
       }
@@ -169,48 +182,69 @@ export default function Admin() {
       localStorage.setItem('mapLocations', JSON.stringify(updatedLocations));
       logger.debug('Données sauvegardées dans localStorage', updatedLocations);
       
-      // Mettre à jour les coordonnées dans l'application
-      // Cette partie est importante pour que les changements soient visibles dans toute l'application
-      const locationIndex = locations.findIndex(loc => loc.id === activeLocation);
-      if (locationIndex !== -1) {
-        logger.info(`Mise à jour des coordonnées dans l'objet global pour ${locations[locationIndex].name}`);
+      // Mettre à jour les coordonnées dans l'application en utilisant le service de données centralisé
+      const locationToUpdate = locations.find(loc => loc.id === activeLocation);
+      
+      if (locationToUpdate) {
+        logger.info(`Mise à jour des coordonnées dans le service de données pour ${locationToUpdate.name}`);
         
-        // Mettre à jour l'objet locations global
-        const oldX = locations[locationIndex].x;
-        const oldY = locations[locationIndex].y;
-        locations[locationIndex].x = coordinates.x;
-        locations[locationIndex].y = coordinates.y;
+        // Créer une copie mise à jour du lieu
+        const updatedLocation = { 
+          ...locationToUpdate, 
+          x: coordinates.x, 
+          y: coordinates.y 
+        };
         
-        logger.debug('Coordonnées mises à jour dans l\'objet global', {
-          id: locations[locationIndex].id,
-          name: locations[locationIndex].name,
-          oldX,
-          oldY,
-          newX: coordinates.x,
-          newY: coordinates.y
-        });
+        // Mettre à jour le lieu via le service de données
+        const updateResult = updateLocation(updatedLocation);
         
-        // Mettre à jour les événements associés à ce lieu
-        const locationEvents = events.filter(event => event.locationName === locations[locationIndex].name);
-        logger.info(`Mise à jour de ${locationEvents.length} événements associés au lieu ${locations[locationIndex].name}`);
-        
-        locationEvents.forEach(event => {
-          const oldEventX = event.x;
-          const oldEventY = event.y;
-          event.x = coordinates.x;
-          event.y = coordinates.y;
-          
-          logger.debug('Événement mis à jour', {
-            id: event.id,
-            title: event.title,
-            oldX: oldEventX,
-            oldY: oldEventY,
+        if (updateResult.success) {
+          logger.debug('Coordonnées mises à jour dans le service de données', {
+            id: updatedLocation.id,
+            name: updatedLocation.name,
+            oldX: locationToUpdate.x,
+            oldY: locationToUpdate.y,
             newX: coordinates.x,
             newY: coordinates.y
           });
-        });
-        
-        logger.info(`Coordonnées mises à jour pour ${locations[locationIndex].name} et ${locationEvents.length} événements associés`);
+          
+          // Mettre à jour les événements associés à ce lieu
+          const locationEvents = events.filter(event => event.locationName === updatedLocation.name);
+          logger.info(`Mise à jour de ${locationEvents.length} événements associés au lieu ${updatedLocation.name}`);
+          
+          let updatedEventsCount = 0;
+          
+          locationEvents.forEach(event => {
+            // Créer une copie mise à jour de l'événement
+            const updatedEvent = { 
+              ...event, 
+              x: coordinates.x, 
+              y: coordinates.y 
+            };
+            
+            // Mettre à jour l'événement via le service de données
+            const eventUpdateResult = updateEvent(updatedEvent);
+            
+            if (eventUpdateResult.success) {
+              updatedEventsCount++;
+              
+              logger.debug('Événement mis à jour', {
+                id: updatedEvent.id,
+                title: updatedEvent.title,
+                oldX: event.x,
+                oldY: event.y,
+                newX: coordinates.x,
+                newY: coordinates.y
+              });
+            } else {
+              logger.error(`Erreur lors de la mise à jour de l'événement ${event.id}`, eventUpdateResult.error);
+            }
+          });
+          
+          logger.info(`Coordonnées mises à jour pour ${updatedLocation.name} et ${updatedEventsCount} événements associés`);
+        } else {
+          logger.error(`Erreur lors de la mise à jour du lieu ${locationToUpdate.id}`, updateResult.error);
+        }
       } else {
         logger.warn(`Lieu avec ID ${activeLocation} non trouvé dans la liste globale des lieux`);
       }
@@ -255,7 +289,7 @@ export default function Admin() {
   // Authentification temporairement désactivée - accès direct à l'interface d'administration
 
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen bg-white">
       <div className="max-w-md mx-auto px-4 pt-4">
         <header className="mb-4 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
@@ -265,6 +299,13 @@ export default function Admin() {
           <h1 className="text-xl font-bold text-[#4a5d94] text-center">Administration</h1>
           <div className="w-20"></div>
         </header>
+        
+        {/* Panneau d'import/export */}
+        <Card className="mb-4">
+          <CardContent className="pt-4">
+            <ImportExportPanel />
+          </CardContent>
+        </Card>
         
         <div className="mb-4">
           <h2 className="text-lg font-semibold mb-2">Sélectionner un lieu</h2>

@@ -19,8 +19,9 @@ import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { saveEvent, getSavedEvents, removeSavedEvent } from "@/services/savedEvents";
 import { useToast } from "@/components/ui/use-toast";
-import { events, getEventById, getLocationIdForEvent, type Event } from "@/data/events";
-import { locations } from "@/data/locations";
+import { type Event } from "@/data/events";
+import { useData, useEvents, useLocations } from "@/hooks/useData";
+import { getLocationIdForEvent } from "@/services/dataService";
 
 // Créer un logger pour le composant Map
 const logger = createLogger('Map');
@@ -33,7 +34,11 @@ const Map = ({ fullScreen = false }: MapProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Charger les emplacements depuis localStorage s'ils existent, sinon utiliser les valeurs par défaut
+  // Utiliser les hooks pour accéder aux données centralisées
+  const { locations } = useLocations();
+  const { getEventById } = useEvents();
+  
+  // Charger les emplacements depuis le service de données
   const [mapLocations, setMapLocations] = useState(() => {
     logger.info('Initialisation des emplacements sur la carte');
     const savedLocations = localStorage.getItem('mapLocations');
@@ -135,7 +140,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
     logger.info(`Clic sur l'emplacement ${locationId}`);
     setActiveLocation(locationId);
     
-    // Trouver les événements associés à ce lieu
+    // Trouver les événements associés à ce lieu en utilisant le hook useEvents
     const locationEvents = mapLocations.find(l => l.id === locationId)?.events || [];
     const eventsData = locationEvents.map(eventId => getEventById(eventId)).filter(Boolean) as Event[];
     logger.debug(`Événements trouvés pour ${locationId}`, eventsData);

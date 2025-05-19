@@ -6,31 +6,17 @@ Liste de choses à faire plus tard
 --------------------------
 # Priorités actuelles (phase de saisie d'événements et de contenus)
 
-## Priorités immédiates
+## Priorités immédiates à faire
 
-1. **Structure des données**
-   - Centraliser les données dans un service unique pour faciliter les mises à jour
-   - Utiliser des hooks personnalisés pour la gestion des données (ex: `useLocations`, `useEvents`)
+2. **Formulaire de saisie d'événements**
+   - Créer un formulaire de saisie d'événements qui utilise le système de validation
+   - Intégrer le formulaire à la page Admin
 
-   *Justification* : Établir une bonne structure de données dès le début facilitera grandement l'ajout et la modification des événements et contenus.
-
-2. **Gestion des événements**
-   - Ajouter un système de validation des données pour éviter les erreurs
-
-   *Justification* : Pendant la phase de saisie, un système de validation évitera de devoir corriger des erreurs plus tard et garantira la cohérence des données.
-
-3. **Automatisation**
-   - Mettre en place un système d'importation/exportation des données (JSON, CSV)
-
-   *Justification* : Si vous avez beaucoup d'événements à saisir, pouvoir les importer en masse vous fera gagner un temps considérable.
-
-## Priorités secondaires (après la saisie initiale)
-
-1. **Documentation**
+3. **Documentation**
    - Documenter les composants principaux et leur utilisation
    - Ajouter des commentaires explicatifs aux parties complexes du code
 
-2. **Performance**
+4. **Performance**
    - Optimiser les rendus avec React.memo pour les composants qui ne changent pas souvent
 
 --------------------------
