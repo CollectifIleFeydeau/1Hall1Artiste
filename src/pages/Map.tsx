@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createLogger } from "@/utils/logger";
+import { MapComponent, MAP_WIDTH, MAP_HEIGHT } from "@/components/MapComponent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SettingsToggle } from "@/components/SettingsToggle";
@@ -53,6 +54,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
       return locations;
     }
   });
+  
   const [activeLocation, setActiveLocation] = useState<string | null>(() => {
     // Si on arrive depuis l'histoire complète, on active le lieu correspondant
     return location.state?.highlightLocationId || null;
@@ -78,7 +80,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
       logger.info(`Mise en évidence du lieu avec ID: ${locationIdToHighlight}`);
       setActiveLocation(locationIdToHighlight);
       
-      // Centrer la carte sur le lieu
+      // Trouver l'emplacement correspondant
       const locationToHighlight = mapLocations.find(loc => loc.id === locationIdToHighlight);
       if (locationToHighlight) {
         logger.debug('Lieu trouvé pour mise en évidence', { 
@@ -87,27 +89,6 @@ const Map = ({ fullScreen = false }: MapProps) => {
           x: locationToHighlight.x,
           y: locationToHighlight.y
         });
-        
-        // Mettre en évidence visuellement le lieu
-        const locationElement = document.getElementById(`location-${locationToHighlight.id}`);
-        if (locationElement) {
-          logger.info(`Application de l'animation sur l'élément DOM pour le lieu ${locationToHighlight.name}`);
-          
-          // Ajouter une animation plus visible
-          locationElement.classList.add('animate-ping');
-          locationElement.classList.add('ring-4');
-          locationElement.classList.add('ring-[#ff7a45]');
-          locationElement.classList.add('ring-opacity-70');
-          locationElement.classList.add('scale-125');
-          
-          // Supprimer l'animation après 3 secondes
-          setTimeout(() => {
-            logger.debug(`Suppression de l'animation pour le lieu ${locationToHighlight.name}`);
-            locationElement.classList.remove('animate-ping');
-          }, 3000);
-        } else {
-          logger.warn(`Élément DOM non trouvé pour le lieu ${locationToHighlight.id}`);
-        }
       } else {
         logger.warn(`Lieu avec ID ${locationIdToHighlight} non trouvé dans mapLocations`);
       }
@@ -115,85 +96,72 @@ const Map = ({ fullScreen = false }: MapProps) => {
       logger.info('Aucun lieu à mettre en évidence');
     }
   }, [location, mapLocations]);
+  
+  // Effet pour vérifier que les coordonnées sont dans les limites
+  useEffect(() => {
+    logger.info('Vérification des coordonnées des emplacements');
+    logger.debug('Dimensions du conteneur de la carte', {
+      mapWidth: MAP_WIDTH,
+      mapHeight: MAP_HEIGHT
+    });
+    
+    // Vérifier que les coordonnées sont dans les limites
+    mapLocations.forEach(loc => {
+      if (loc.x < 0 || loc.x > MAP_WIDTH || loc.y < 0 || loc.y > MAP_HEIGHT) {
+        logger.warn(`Coordonnées hors limites pour ${loc.name}`, {
+          id: loc.id,
+          x: loc.x,
+          y: loc.y,
+          mapWidth: MAP_WIDTH,
+          mapHeight: MAP_HEIGHT
+        });
+      }
+    });
+  }, [mapLocations]);
+  
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
   const { toast } = useToast();
-  // Fonctionnalité de localisation retirée
-
+  
   // Charger les événements sauvegardés
   useEffect(() => {
+    // Extraire uniquement les IDs des événements sauvegardés
     const savedEvents = getSavedEvents();
-    setSavedEventIds(savedEvents.map(event => event.id));
-    
-    // Charger les coordonnées depuis le localStorage si elles existent
-    const savedLocations = localStorage.getItem('mapLocations');
-    if (savedLocations) {
-      try {
-        const parsedLocations = JSON.parse(savedLocations);
-        // Mettre à jour les coordonnées des lieux
-        parsedLocations.forEach((savedLoc: any) => {
-          const locationIndex = mapLocations.findIndex(loc => loc.id === savedLoc.id);
-          if (locationIndex !== -1) {
-            mapLocations[locationIndex].x = savedLoc.x;
-            mapLocations[locationIndex].y = savedLoc.y;
-            
-            // Mettre à jour les événements associés à ce lieu
-            const locationEvents = events.filter(event => event.locationName === mapLocations[locationIndex].name);
-            locationEvents.forEach(event => {
-              event.x = savedLoc.x;
-              event.y = savedLoc.y;
-            });
-          }
-        });
-        setMapLocations([...mapLocations]); // Force refresh
-        console.log('Coordonnées chargées depuis le localStorage');
-      } catch (error) {
-        console.error('Erreur lors du chargement des coordonnées:', error);
-      }
-    }
+    const savedIds = savedEvents.map(event => event.id);
+    setSavedEventIds(savedIds);
   }, []);
 
-  // Parse query parameters
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const eventOrLocationId = searchParams.get('location');
-    
-    if (eventOrLocationId) {
-      // First, check if this is an event ID
-      const locationId = getLocationIdForEvent(eventOrLocationId) || eventOrLocationId;
-      
-      // Set the active location
-      setActiveLocation(locationId);
-      
-      // Mark location as visited
-      setMapLocations(prevLocations => 
-        prevLocations.map(loc => 
-          loc.id === locationId ? { ...loc, visited: true } : loc
-        )
-      );
-    }
-  }, [location.search]);
-
   const handleLocationClick = (locationId: string) => {
+    logger.info(`Clic sur l'emplacement ${locationId}`);
     setActiveLocation(locationId);
-    // Track location view in analytics
-    trackFeatureUsage.mapLocation(locationId);
-    // Just show the location details, don't show dialog automatically
-  };
-  
-  const markLocationAsVisited = (locationId: string, visited: boolean) => {
-    setMapLocations(prev => prev.map(loc => 
-      loc.id === locationId ? { ...loc, visited } : loc
-    ));
     
-    // Save to localStorage
-    const visitedLocations = JSON.parse(localStorage.getItem('visitedLocations') || '[]');
+    // Trouver les événements associés à ce lieu
+    const locationEvents = mapLocations.find(l => l.id === locationId)?.events || [];
+    const eventsData = locationEvents.map(eventId => getEventById(eventId)).filter(Boolean) as Event[];
+    logger.debug(`Événements trouvés pour ${locationId}`, eventsData);
     
-    if (visited && !visitedLocations.includes(locationId)) {
-      localStorage.setItem('visitedLocations', JSON.stringify([...visitedLocations, locationId]));
-    } else if (!visited && visitedLocations.includes(locationId)) {
-      localStorage.setItem('visitedLocations', JSON.stringify(visitedLocations.filter((id: string) => id !== locationId)));
+    if (eventsData.length === 1) {
+      // S'il n'y a qu'un seul événement, l'afficher directement
+      setSelectedEvent(eventsData[0]);
+    } else if (eventsData.length > 1) {
+      // S'il y a plusieurs événements, afficher une liste
+      setSelectedEvent(null);
+      // Afficher la liste des événements (à implémenter)
     }
+  };
+
+  const markLocationAsVisited = (locationId: string, visited: boolean) => {
+    const updatedLocations = mapLocations.map(loc => 
+      loc.id === locationId ? { ...loc, visited } : loc
+    );
+    
+    setMapLocations(updatedLocations);
+    localStorage.setItem('mapLocations', JSON.stringify(updatedLocations));
+    
+    toast({
+      title: visited ? "Lieu marqué comme visité" : "Lieu marqué comme non visité",
+      description: `${mapLocations.find(l => l.id === locationId)?.name} a été mis à jour.`,
+    });
   };
 
   const handleSaveEvent = (event: Event, e: React.MouseEvent) => {
@@ -238,8 +206,6 @@ const Map = ({ fullScreen = false }: MapProps) => {
     ).filter(Boolean) as Event[];
   };
 
-  // Fonctionnalités de localisation retirées
-
   // Calculate visited locations count
   const visitedCount = mapLocations.filter(loc => loc.visited).length;
   const totalCount = mapLocations.length;
@@ -267,194 +233,87 @@ const Map = ({ fullScreen = false }: MapProps) => {
         <div className="relative">
           {/* Map container */}
           <div className="bg-white rounded-lg mb-4 border-0 transition-all duration-300 hover:shadow-lg w-full">
-            <div className="relative border border-[#d8e3ff] rounded-lg h-[calc(100vh-150px)] bg-[#f0f5ff] mb-4 overflow-hidden">
-            {/* Map background with image */}
-            <div className="absolute inset-0 bg-white flex items-center justify-center">
-              <img 
-                src="/Plan Île Feydeau.png" 
-                alt="Plan de l'Île Feydeau" 
-                className="max-w-full max-h-full object-contain transition-opacity duration-500 opacity-100"
-                onLoad={(e) => e.currentTarget.classList.add('opacity-100')}
-                style={{ opacity: 0.9 }}
+            <div className="flex justify-center" style={{ minWidth: MAP_WIDTH, minHeight: MAP_HEIGHT }}>
+              <MapComponent 
+                locations={mapLocations} 
+                activeLocation={activeLocation} 
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  const locationId = target.id?.replace('location-', '');
+                  
+                  if (locationId && mapLocations.some(loc => loc.id === locationId)) {
+                    handleLocationClick(locationId);
+                  } else if (activeLocation) {
+                    handleLocationClick(activeLocation);
+                  }
+                }}
+                readOnly={false} 
               />
             </div>
-            
-            {/* Map locations overlay avec coordonnées fixes */}
-            <div className="absolute inset-0">
-              <div className="relative w-full h-full">
-                {mapLocations.map((location) => (
-                  <div 
-                    key={location.id}
-                    id={`location-${location.id}`}
-                    className={`absolute w-10 h-10 transform -translate-x-1/2 -translate-y-1/2 rounded-full cursor-pointer shadow-lg border-2 border-white transition-all duration-200
-                      ${activeLocation === location.id ? 'ring-2 ring-[#ff7a45] ring-offset-2 scale-125 z-10' : ''}
-                      ${location.visited ? 'bg-[#ff7a45]' : 'bg-[#4a5d94]'}
-                    `}
-                    style={{ 
-                      position: 'absolute',
-                      left: `${location.x}px`, 
-                      top: `${location.y}px`,
-                      zIndex: 20
-                    }}
-                    onClick={() => handleLocationClick(location.id)}
-                  />
-                ))}
-              </div>
-              
-              {/* Marqueur de localisation retiré */}
-            </div>
           </div>
           
-            {/* Legend overlay - positioned at the top left */}
-            <div className="absolute top-4 left-4 bg-white bg-opacity-90 p-3 rounded-md shadow-md text-[#4a5d94] z-10">
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center">
-                  <div className="flex items-center justify-center w-7 h-7 bg-[#ff7a45] rounded-full mr-2 text-white text-sm font-medium">
-                    {visitedCount}
-                  </div>
-                  <span className="text-base">{visitedCount > 1 ? 'Visités' : 'Visité'}</span>
+          {/* Legend overlay - positioned at the top left */}
+          <div className="absolute top-4 left-4 bg-white bg-opacity-90 p-3 rounded-md shadow-md text-[#4a5d94] z-10">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-7 h-7 bg-[#ff7a45] rounded-full mr-2 text-white text-sm font-medium">
+                  {visitedCount}
                 </div>
-                <div className="flex items-center">
-                  <div className="flex items-center justify-center w-7 h-7 bg-[#4a5d94] rounded-full mr-2 text-white text-sm font-medium">
-                    {totalCount - visitedCount}
-                  </div>
-                  <span className="text-base">À découvrir</span>
+                <span className="text-base">{visitedCount > 1 ? 'Visités' : 'Visité'}</span>
+              </div>
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-7 h-7 bg-[#4a5d94] rounded-full mr-2 text-white text-sm font-medium">
+                  {totalCount - visitedCount}
                 </div>
+                <span className="text-base">À découvrir</span>
               </div>
             </div>
-            
-            {/* Bouton de localisation retiré */}
-            
-            {/* Progress overlay removed as it's now in the legend */}
           </div>
-          
-          {/* Bottom text instruction */}
-          {!fullScreen ? (
-            <p className="text-center text-sm text-[#4a5d94] mt-2">Cliquez sur les points pour plus d'informations sur chaque lieu.</p>
-          ) : null}
-          
-          {/* Location list - only shown in non-fullscreen mode */}
-          {!fullScreen && (
-            <div className="bg-white rounded-lg p-4 shadow-md border-0 mt-4">
-              <h3 className="font-medium text-[#4a5d94] mb-3">Lieux à visiter</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {mapLocations.map((location) => (
-                  <div 
-                    key={location.id} 
-                    className={`p-2 rounded-lg cursor-pointer transition-all duration-200 ${activeLocation === location.id ? 'bg-[#f0f5ff] border-l-2 border-[#4a5d94]' : 'hover:bg-gray-50'}`}
-                    onClick={() => handleLocationClick(location.id)}
-                  >
-                    <div className="flex items-center">
-                      <div className={`w-2 h-2 mr-2 rounded-full ${location.visited ? 'bg-[#ff7a45]' : 'bg-[#4a5d94]'}`} />
-                      <div className="text-sm truncate">
-                        <p className="font-medium text-[#1a2138]">{location.name}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
         
-        {activeLocation && (
-          <Card className="mb-4 animate-fade-in shadow-md border-0 overflow-hidden">
-            <div className="h-2 bg-[#ff7a45]"></div>
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <h3 className="font-medium mb-1 text-[#1a2138]">
-                  {mapLocations.find(l => l.id === activeLocation)?.name}
-                </h3>
-                
-                {/* Visited status indicator */}
-                {mapLocations.find(l => l.id === activeLocation)?.visited ? (
-                  <div className="flex items-center text-[#ff7a45] text-sm">
-                    <span className="inline-block w-4 h-4 mr-1 rounded-full border border-current flex items-center justify-center">
-                      <span className="block w-2 h-2 bg-current rounded-full"></span>
-                    </span>
-                    Visité
-                  </div>
-                ) : null}
-              </div>
-              
-              <p className="text-sm text-[#4a5d94] mb-3">
-                {mapLocations.find(l => l.id === activeLocation)?.description}
-              </p>
-              
-              {getLocationEvents(activeLocation).length > 0 && (
-                <div className="mt-3 bg-[#f0f5ff] p-3 rounded-lg">
-                  <h4 className="text-sm font-medium mb-2 text-[#4a5d94] flex items-center">
-                    <Calendar className="h-4 w-4 mr-1 text-[#4a5d94]" />
-                    Événements à cet endroit
-                  </h4>
-                  <div className="space-y-2">
-                    {getLocationEvents(activeLocation).map(event => event && (
-                      <div 
-                        key={event.id} 
-                        className="text-sm bg-white p-2 rounded-md shadow-sm cursor-pointer hover:bg-gray-50"
-                        onClick={() => setSelectedEvent(event)}
+        {/* Bottom text instruction */}
+        {!fullScreen ? (
+          <p className="text-center text-sm text-[#4a5d94] mt-2">Cliquez sur les points pour plus d'informations sur chaque lieu.</p>
+        ) : null}
+        
+        {/* Location list - only shown in non-fullscreen mode */}
+        {!fullScreen && (
+          <div className="bg-white rounded-lg p-4 shadow-md border-0 mt-4">
+            <h3 className="font-medium text-[#4a5d94] mb-3">Lieux à visiter</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {mapLocations.map((location) => (
+                <Card 
+                  key={location.id}
+                  className={`cursor-pointer transition-all duration-200 border-0 ${activeLocation === location.id ? 'ring-2 ring-[#ff7a45]' : ''}`}
+                  onClick={() => handleLocationClick(location.id)}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-3 h-3 rounded-full ${location.visited ? 'bg-[#ff7a45]' : 'bg-[#4a5d94]'}`}></div>
+                      <p className="text-sm font-medium text-[#4a5d94] truncate">{location.name}</p>
+                    </div>
+                    <div className="mt-2 flex justify-between items-center">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-1 h-6 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          markLocationAsVisited(location.id, !location.visited);
+                        }}
                       >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-semibold text-[#1a2138] mb-1 transition-all duration-300 group-hover:text-[#4a5d94]">{event.title}</h3>
-                            <p className="text-xs text-[#4a5d94]">{event.artistName} • {event.time}</p>
-                            <p className="text-xs text-blue-600 mt-1">Voir les détails →</p>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="p-1 h-auto"
-                            onClick={(e) => handleSaveEvent(event, e)}
-                          >
-                            {savedEventIds.includes(event.id) ? (
-                              <BookmarkCheck className="h-5 w-5 text-[#ff7a45]" />
-                            ) : (
-                              <Bookmark className="h-5 w-5 text-[#8c9db5]" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex flex-col space-y-4 mt-4">
-                {/* Mark as visited button - only show if not already visited */}
-                {activeLocation && !mapLocations.find(l => l.id === activeLocation)?.visited && (
-                  <Button 
-                    className="w-full bg-[#ff7a45] hover:bg-[#ff9d6e] text-white"
-                    onClick={() => {
-                      const location = mapLocations.find(l => l.id === activeLocation);
-                      if (location) {
-                        markLocationAsVisited(location.id, true);
-                      }
-                    }}
-                  >
-                    <span className="inline-block w-4 h-4 mr-2 rounded-full border border-white flex items-center justify-center"></span>
-                    Marquer comme visité
-                  </Button>
-                )}
-                
-                <div className="flex justify-between">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="text-xs border-[#4a5d94] text-[#4a5d94] hover:bg-[#e0ebff] hover:text-[#4a5d94]" 
-                    onClick={() => navigate("/program")}
-                  >
-                    <Calendar className="h-4 w-4 mr-1" />
-                    Programme complet
-                  </Button>
-                  
-                  <ShareButton 
-                    title={`${mapLocations.find(l => l.id === activeLocation)?.name} - Île Feydeau`}
-                    text={`Découvrez ${mapLocations.find(l => l.id === activeLocation)?.name} sur l'Île Feydeau à Nantes!`}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                        {location.visited ? 'Visité ✓' : 'Marquer'}
+                      </Button>
+                      
+                      {getLocationEvents(location.id).length > 0 && (
+                        <span className="text-xs text-[#8c9db5]">{getLocationEvents(location.id).length} événement(s)</span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         )}
       </div>
       
@@ -552,7 +411,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
       )}
       
       {/* Event details dialog */}
-      <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
+      <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
         {selectedEvent && (
           <DialogContent className="sm:max-w-[425px]">
             <div className={`h-1 ${selectedEvent.type === "exposition" ? "bg-[#4a5d94]" : "bg-[#ff7a45]"}`} />

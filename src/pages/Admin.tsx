@@ -8,6 +8,7 @@ import { locations, Location } from "@/data/locations";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { createLogger } from "@/utils/logger";
+import { MapComponent, MAP_WIDTH, MAP_HEIGHT } from "@/components/MapComponent";
 
 // Créer un logger pour le composant Admin
 const logger = createLogger('Admin');
@@ -16,8 +17,7 @@ export default function Admin() {
   logger.info('Initialisation du composant Admin');
   
   const navigate = useNavigate();
-  const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Authentification désactivée temporairement
   const [mapLocations, setMapLocations] = useState<Location[]>([]);
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -30,17 +30,7 @@ export default function Admin() {
     setMapLocations(locations);
   }, []);
 
-  const handleLogin = () => {
-    logger.info('Tentative de connexion');
-    // Simple authentication for demo purposes
-    if (password === "admin123") {
-      logger.info('Authentification réussie');
-      setIsAuthenticated(true);
-    } else {
-      logger.warn('Authentification échouée - mot de passe incorrect');
-      alert("Mot de passe incorrect");
-    }
-  };
+  // Authentification temporairement désactivée
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     logger.info('Clic sur la carte détecté');
@@ -52,13 +42,38 @@ export default function Admin() {
     }
     
     try {
-      // Get click coordinates relative to the map container
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = Math.round(e.clientX - rect.left);
-      const y = Math.round(e.clientY - rect.top);
+      // Obtenir l'élément cible du clic
+      const target = e.target as HTMLElement;
+      const mapContainer = target.closest('.relative') as HTMLElement;
       
-      logger.info(`Nouvelles coordonnées: x=${x}, y=${y}`);
-      logger.debug('Détails du clic', { x, y, activeLocation });
+      if (!mapContainer) {
+        logger.warn('Conteneur de carte non trouvé');
+        return;
+      }
+      
+      // Calculer les coordonnées relatives au conteneur de la carte avec dimensions fixes
+      const rect = mapContainer.getBoundingClientRect();
+      
+      // Calculer les coordonnées en tenant compte des dimensions fixes de la carte
+      const scaleX = MAP_WIDTH / rect.width;
+      const scaleY = MAP_HEIGHT / rect.height;
+      
+      const rawX = e.clientX - rect.left;
+      const rawY = e.clientY - rect.top;
+      
+      // Appliquer l'échelle pour obtenir les coordonnées dans les dimensions fixes
+      const x = Math.round(rawX * scaleX);
+      const y = Math.round(rawY * scaleY);
+      
+      logger.info(`Nouvelles coordonnées: x=${x}, y=${y} (dimensions fixes ${MAP_WIDTH}x${MAP_HEIGHT})`);
+      logger.debug('Détails du clic', { rawX, rawY, scaleX, scaleY, x, y, activeLocation });
+      
+      // Vérifier que les coordonnées sont dans les limites
+      if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) {
+        logger.warn(`Coordonnées hors limites: x=${x}, y=${y}`);
+        alert(`Coordonnées hors limites: x=${x}, y=${y}\nLes coordonnées doivent être comprises entre (0,0) et (${MAP_WIDTH},${MAP_HEIGHT})`);
+        return;
+      }
       
       setCoordinates({ x, y });
       setMapClicked(true);
@@ -237,31 +252,7 @@ export default function Admin() {
     linkElement.click();
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <Card className="w-[350px]">
-          <CardHeader>
-            <CardTitle>Administration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="password">Mot de passe</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleLogin}>Connexion</Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Authentification temporairement désactivée - accès direct à l'interface d'administration
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -360,39 +351,12 @@ export default function Admin() {
           <p className="text-sm text-gray-500 mb-2">Cliquez sur la carte pour définir la position du lieu sélectionné</p>
           
           <div className="bg-white rounded-lg mb-4 border-0 transition-all duration-300 hover:shadow-lg w-full">
-            <div className="relative border border-[#d8e3ff] rounded-lg h-[calc(100vh-450px)] bg-[#f0f5ff] mb-4 overflow-hidden">
-              {/* Map background with image */}
-              <div 
-                className="absolute inset-0 bg-white flex items-center justify-center"
-                onClick={handleMapClick}
-              >
-                <img 
-                  src="/Plan Île Feydeau.png" 
-                  alt="Plan de l'Île Feydeau" 
-                  className="max-w-full max-h-full object-contain"
-                  style={{ opacity: 0.9 }}
-                />
-              </div>
-              
-              {/* Map locations overlay */}
-              <div className="absolute inset-0 pointer-events-none">
-                <div className="relative w-full h-full">
-                  {mapLocations.map((location) => (
-                    <div 
-                      key={location.id}
-                      className={`absolute w-10 h-10 transform -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg border-2 border-white
-                        ${activeLocation === location.id ? 'bg-[#ff7a45]' : 'bg-[#4a5d94]'}
-                      `}
-                      style={{ 
-                        position: 'absolute',
-                        left: `${location.x}px`, 
-                        top: `${location.y}px`,
-                        zIndex: 20
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
+            <div className="flex justify-center">
+              <MapComponent 
+                locations={mapLocations} 
+                activeLocation={activeLocation} 
+                onClick={handleMapClick} 
+              />
             </div>
           </div>
           
