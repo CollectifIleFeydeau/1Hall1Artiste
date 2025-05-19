@@ -299,8 +299,20 @@ const Map = ({ fullScreen = false }: MapProps) => {
                 locations={mapLocations} 
                 activeLocation={activeLocation} 
                 onClick={(e) => {
+                  // Trouver l'élément avec l'ID de location
                   const target = e.target as HTMLElement;
-                  const locationId = target.id?.replace('location-', '');
+                  let element = target;
+                  
+                  // Remonter dans l'arbre DOM pour trouver l'élément parent avec un ID de location
+                  while (element && !element.id?.startsWith('location-')) {
+                    element = element.parentElement as HTMLElement;
+                    if (!element) break;
+                  }
+                  
+                  // Extraire l'ID de location
+                  const locationId = element?.id?.replace('location-', '');
+                  
+                  console.log('Clic sur élément:', { targetId: target.id, elementId: element?.id, locationId });
                   
                   if (locationId && mapLocations.some(loc => loc.id === locationId)) {
                     handleLocationClick(locationId);

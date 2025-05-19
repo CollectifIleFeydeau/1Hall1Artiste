@@ -6,6 +6,21 @@
     <title>Collectif Feydeau</title>
     <meta name="description" content="Lovable Generated Project" />
     <meta name="author" content="Lovable" />
+    
+    <!-- Script pour gérer le routage SPA sur GitHub Pages -->
+    <script type="text/javascript">
+      // Script de redirection pour les routes SPA sur GitHub Pages
+      (function(l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
 
     <meta property="og:title" content="Collectif Feydeau" />
     <meta property="og:description" content="Lovable Generated Project" />

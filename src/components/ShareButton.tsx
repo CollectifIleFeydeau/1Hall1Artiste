@@ -20,47 +20,114 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
   const handleShare = async (platform: string) => {
     // Track share event
     trackFeatureUsage.shareContent(platform, title);
+    
+    // S'assurer que l'URL est absolue
+    const absoluteUrl = shareUrl.startsWith('http') ? shareUrl : window.location.origin + shareUrl;
+    
     switch (platform) {
       case "native":
+        // Vérifier si l'API Web Share est disponible
         if (navigator.share) {
           try {
             await navigator.share({
               title,
               text,
-              url: shareUrl,
+              url: absoluteUrl,
             });
           } catch (error) {
             console.error("Error sharing:", error);
+            // Fallback en cas d'erreur
+            copyToClipboard(absoluteUrl);
           }
         } else {
-          copyToClipboard(shareUrl);
+          // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
+          copyToClipboard(absoluteUrl);
         }
         break;
       case "facebook":
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, "_blank");
+        try {
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(absoluteUrl)}`, "_blank");
+        } catch (error) {
+          console.error("Error opening Facebook share:", error);
+          copyToClipboard(absoluteUrl);
+        }
         break;
       case "x":
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, "_blank");
+        try {
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(absoluteUrl)}`, "_blank");
+        } catch (error) {
+          console.error("Error opening Twitter share:", error);
+          copyToClipboard(absoluteUrl);
+        }
         break;
       case "instagram":
-        // Instagram doesn't have a direct share URL like other platforms
-        // We'll open Instagram and let users share manually
-        // For mobile, we can try to open the app
-        window.open(`instagram://`, "_blank");
-        // Fallback to website if app doesn't open
-        setTimeout(() => {
-          window.open(`https://www.instagram.com/`, "_blank");
-        }, 500);
+        try {
+          // Instagram n'a pas d'API de partage directe comme les autres plateformes
+          // Nous allons essayer d'ouvrir l'application, puis rediriger vers le site web
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+          const isAndroid = /Android/.test(navigator.userAgent);
+          
+          if (isIOS || isAndroid) {
+            // Essayer d'ouvrir l'application Instagram
+            window.location.href = `instagram://`;
+            
+            // Rediriger vers le site web si l'application ne s'ouvre pas
+            setTimeout(() => {
+              window.location.href = `https://www.instagram.com/`;
+            }, 2000);
+          } else {
+            // Sur desktop, ouvrir simplement le site web
+            window.open(`https://www.instagram.com/`, "_blank");
+          }
+        } catch (error) {
+          console.error("Error opening Instagram:", error);
+          copyToClipboard(absoluteUrl);
+        }
         break;
       case "copy":
-        copyToClipboard(shareUrl);
+        copyToClipboard(absoluteUrl);
         break;
     }
   };
   
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    // You could add a toast notification here
+    // Vérifier si l'API Clipboard est disponible
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          alert('Lien copié dans le presse-papier');
+        })
+        .catch(err => {
+          console.error('Erreur lors de la copie :', err);
+          fallbackCopyToClipboard(text);
+        });
+    } else {
+      fallbackCopyToClipboard(text);
+    }
+  };
+  
+  // Méthode alternative pour les navigateurs qui ne supportent pas l'API Clipboard
+  const fallbackCopyToClipboard = (text: string) => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (successful) {
+        alert('Lien copié dans le presse-papier');
+      } else {
+        alert('Impossible de copier le lien. Veuillez le copier manuellement : ' + text);
+      }
+    } catch (err) {
+      console.error('Erreur lors de la copie fallback :', err);
+      alert('Impossible de copier le lien. Veuillez le copier manuellement : ' + text);
+    }
   };
   
   return (

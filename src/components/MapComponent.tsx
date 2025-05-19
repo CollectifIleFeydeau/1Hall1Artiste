@@ -105,25 +105,19 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       </div>
       
       {/* Points sur la carte */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0">
         {locations.map((location) => (
           <div 
             key={location.id}
             id={`location-${location.id}`}
-            className={`absolute w-6 h-6 rounded-full shadow-lg border-2 border-white
-              ${activeLocation === location.id 
-                ? 'bg-[#ff7a45] ring-2 ring-[#ff7a45] ring-opacity-70 scale-110' 
-                : location.visited 
-                  ? 'bg-[#4CAF50]' // Couleur verte pour les lieux visités
-                  : 'bg-[#4a5d94]'}
-            `}
+            className="absolute"  
             style={{ 
               position: 'absolute',
               left: `${location.x}px`, 
               top: `${location.y}px`,
               zIndex: 20,
-              width: '24px',
-              height: '24px',
+              width: '60px', // Zone de clic beaucoup plus large
+              height: '60px',
               transform: 'translate(-50%, -50%)', // Centrer le point sur les coordonnées
               pointerEvents: !readOnly ? 'auto' : 'none'
             }}
@@ -131,7 +125,23 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               e.stopPropagation();
               if (onClick) onClick(e);
             } : undefined}
-          />
+          >
+            {/* Point visible */}
+            <div
+              className={`absolute top-1/2 left-1/2 w-8 h-8 rounded-full shadow-lg border-2 border-white
+                ${activeLocation === location.id 
+                  ? 'bg-[#ff7a45] ring-2 ring-[#ff7a45] ring-opacity-70 scale-110' 
+                  : location.visited 
+                    ? 'bg-[#4CAF50]' // Couleur verte pour les lieux visités
+                    : 'bg-[#4a5d94]'}
+              `}
+              style={{
+                transform: 'translate(-50%, -50%)', // Centrer le point dans la zone de clic
+                width: '32px',
+                height: '32px'
+              }}
+            />
+          </div>
         ))}
       </div>
     </div>

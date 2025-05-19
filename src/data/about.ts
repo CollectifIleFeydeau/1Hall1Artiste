@@ -8,7 +8,7 @@ export type AboutInfo = {
 };
 
 export const aboutInfo: AboutInfo = {
-  history: "Notre association est née de la volonté commune des habitants de ce quartier historique de Nantes, situé sur ce qui était autrefois une île. Fondée en 2010, elle regroupe 20 passionnés déterminés à préserver et partager le patrimoine unique de ce lieu.",
+  history: "Notre association est née de la volonté commune des habitants de ce quartier historique de Nantes, situé sur ce qui était autrefois une île. Fondée en 2017, elle regroupe 20 passionnés déterminés à préserver et partager le patrimoine unique de ce lieu.",
   
   mission: "Nous œuvrons pour la préservation de notre patrimoine architectural et culturel, tout en favorisant l'accès à l'art et à la culture pour tous. Chaque année, le troisième week-end de septembre, nous ouvrons nos portes au public pour partager ce lieu exceptionnel à travers des expositions et concerts.",
   

@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, PanInfo, useAnimation } from "framer-motion";
 
 export default function Onboarding() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const controls = useAnimation();
   
   const slides = [
     {
@@ -25,14 +26,6 @@ export default function Onboarding() {
     }
   ];
 
-  useEffect(() => {
-    // Vérifier si l'utilisateur a déjà vu l'onboarding
-    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-    if (hasSeenOnboarding) {
-      navigate('/');
-    }
-  }, [navigate]);
-
   const handleFinish = () => {
     // Marquer l'onboarding comme vu
     localStorage.setItem('hasSeenOnboarding', 'true');
@@ -41,9 +34,32 @@ export default function Onboarding() {
 
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
-      setCurrentSlide(currentSlide + 1);
+      controls.start({ opacity: 0, x: -100 }).then(() => {
+        setCurrentSlide(currentSlide + 1);
+        controls.start({ opacity: 1, x: 0 });
+      });
     } else {
       handleFinish();
+    }
+  };
+
+  const prevSlide = () => {
+    if (currentSlide > 0) {
+      controls.start({ opacity: 0, x: 100 }).then(() => {
+        setCurrentSlide(currentSlide - 1);
+        controls.start({ opacity: 1, x: 0 });
+      });
+    }
+  };
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // Si le swipe est assez long vers la gauche, passer à la diapositive suivante
+    if (info.offset.x < -50) {
+      nextSlide();
+    }
+    // Si le swipe est assez long vers la droite, revenir à la diapositive précédente
+    else if (info.offset.x > 50) {
+      prevSlide();
     }
   };
 
@@ -51,17 +67,25 @@ export default function Onboarding() {
     <div className="min-h-screen bg-white flex flex-col">
       <div className="flex-1 flex flex-col">
         <div className="relative flex-1 overflow-hidden">
-          {slides.map((slide, index) => (
-            <motion.div
-              key={index}
-              className="absolute inset-0 flex flex-col"
-              initial={{ opacity: 0, x: index > currentSlide ? 100 : -100 }}
-              animate={{ 
-                opacity: index === currentSlide ? 1 : 0,
-                x: index === currentSlide ? 0 : (index > currentSlide ? 100 : -100)
-              }}
-              transition={{ duration: 0.5 }}
-            >
+          <motion.div
+            className="absolute inset-0 flex flex-col"
+            animate={controls}
+            initial={{ opacity: 1, x: 0 }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+          >
+            {slides.map((slide, index) => (
+              <motion.div
+                key={index}
+                className={`absolute inset-0 flex flex-col ${index === currentSlide ? 'z-10' : 'z-0'}`}
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: index === currentSlide ? 1 : 0,
+                }}
+                transition={{ duration: 0.5 }}
+              >
               <div className="relative h-2/3 overflow-hidden">
                 <div className="absolute inset-0 bg-black/30 z-10"></div>
                 <img 
@@ -79,8 +103,9 @@ export default function Onboarding() {
               <div className="flex-1 flex flex-col justify-between p-6">
                 <p className="text-center text-gray-600">{slide.description}</p>
               </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
         
         <div className="p-6">

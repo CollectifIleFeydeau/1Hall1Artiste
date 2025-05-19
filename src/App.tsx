@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { HashRouter } from "react-router-dom/dist/index";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import { useEffect, useState } from "react";
@@ -50,8 +51,12 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Rediriger directement vers la carte */}
-        <Route path="/" element={<Navigate to="/map" replace />} />
+        {/* Rediriger vers l'onboarding lors de la première visite, sinon vers la carte */}
+        <Route path="/" element={
+          !hasSeenOnboarding 
+            ? <Navigate to="/onboarding" replace /> 
+            : <Navigate to="/map" replace />
+        } />
         <Route path="/map" element={<PageTransition><Map fullScreen={true} /></PageTransition>} />
         <Route path="/program" element={<PageTransition><Program /></PageTransition>} />
         <Route path="/about" element={<PageTransition><About /></PageTransition>} />
@@ -78,9 +83,9 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <HashRouter>
           <AppContent />
-        </BrowserRouter>
+        </HashRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );
