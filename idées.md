@@ -1,46 +1,76 @@
+--------------------------
+Liste de choses à faire plus tard
 
-Remettre le mot de passe plus tard
-
-
+- Remettre le mot de passe plus tard
 
 --------------------------
-Potential Improvements
+# Priorités actuelles (phase de saisie d'événements et de contenus)
 
-User Experience
+## Priorités immédiates
 
-Loading States: Add loading indicators when fetching data or during transitions to provide visual feedback to users.
-Error Handling: Implement more robust error handling for network requests, especially for the HelloAsso integration.
-Accessibility: Improve accessibility by adding proper ARIA attributes, ensuring sufficient color contrast, and making interactive elements keyboard navigable.
-Responsive Design: Ensure the app works well on various screen sizes, particularly on tablets and larger screens.
-Offline Support: Add basic offline functionality to allow users to view cached content when not connected.
+1. **Structure des données**
+   - Centraliser les données dans un service unique pour faciliter les mises à jour
+   - Utiliser des hooks personnalisés pour la gestion des données (ex: `useLocations`, `useEvents`)
 
-Functionality
+   *Justification* : Établir une bonne structure de données dès le début facilitera grandement l'ajout et la modification des événements et contenus.
 
-Map Interaction: Enhance the map functionality with more interactive features, possibly using a mapping library for a more realistic experience.
-Event Filtering: Add more advanced filtering options for events, such as by time or location.
-User Preferences: Implement a settings page to allow users to customize their experience.
-Calendar Integration: Add the ability to add events to the user's calendar.
-Notifications: Implement push notifications for upcoming events or important updates.
+2. **Gestion des événements**
+   - Ajouter un système de validation des données pour éviter les erreurs
 
-Code Structure
+   *Justification* : Pendant la phase de saisie, un système de validation évitera de devoir corriger des erreurs plus tard et garantira la cohérence des données.
 
-State Management: Consider using a more robust state management solution like React Context or Redux for managing application state.
-Code Splitting: Implement code splitting to reduce the initial bundle size and improve load times.
-TypeScript Enhancements: Strengthen type definitions and interfaces for better type safety.
-Testing: Add unit and integration tests to ensure code reliability.
-API Layer: Create a dedicated API layer for handling external data fetching and manipulation.
+3. **Automatisation**
+   - Mettre en place un système d'importation/exportation des données (JSON, CSV)
 
-Performance
+   *Justification* : Si vous avez beaucoup d'événements à saisir, pouvoir les importer en masse vous fera gagner un temps considérable.
 
-Image Optimization: Optimize images further for faster loading, possibly implementing lazy loading.
-Caching Strategy: Implement a more sophisticated caching strategy for frequently accessed data.
-Component Memoization: Use React.memo and useCallback/useMemo to prevent unnecessary re-renders.
-Bundle Size: Analyze and reduce the bundle size by removing unused dependencies.
+## Priorités secondaires (après la saisie initiale)
 
-Design
+1. **Documentation**
+   - Documenter les composants principaux et leur utilisation
+   - Ajouter des commentaires explicatifs aux parties complexes du code
 
-Design System: Formalize the design system with consistent spacing, typography, and color usage.
-Animations: Add subtle animations for transitions to enhance the user experience.
-Dark Mode: Implement a dark mode option for users who prefer it.
-Visual Hierarchy: Improve visual hierarchy to better guide users through the content.
-Would you like me to focus on implementing any of these specific improvements? I can prioritize based on what would provide the most value for your users.
+2. **Performance**
+   - Optimiser les rendus avec React.memo pour les composants qui ne changent pas souvent
+
+--------------------------
+# Améliorations Potentielles (long terme)
+
+## Améliorations Techniques
+
+1. **Structure des données**
+   - Implémenter un système de cache pour éviter de recharger les données inutilement
+
+2. **Performance**
+   - Implémenter le lazy loading pour les images de la carte
+   - Utiliser l'API Intersection Observer pour charger les contenus uniquement lorsqu'ils sont visibles
+   - Implémenter le code splitting pour réduire la taille initiale du bundle et améliorer les temps de chargement
+   - Analyser et réduire la taille du bundle en supprimant les dépendances inutilisées
+
+3. **Architecture**
+   - Adopter une architecture modulaire avec des composants réutilisables
+   - Séparer clairement la logique métier (services) de l'interface utilisateur (composants)
+   - Créer un système de thèmes pour faciliter les changements d'apparence
+   - Envisager une solution de gestion d'état plus robuste comme React Context ou Redux
+
+## Expérience Utilisateur
+
+1. **Interface**
+   - Améliorer la navigation entre les différentes sections
+   - Optimiser l'interface pour les appareils mobiles et tablettes
+
+3. **Support hors ligne**
+   - Ajouter une fonctionnalité hors ligne basique pour permettre aux utilisateurs de consulter le contenu en cache
+   - Mettre en place une gestion des erreurs plus robuste, notamment pour l'intégration HelloAsso
+
+## Fonctionnalités
+
+1. **Carte interactive**
+   - Améliorer la fonctionnalité de la carte avec des fonctionnalités plus interactives
+   - Envisager l'utilisation d'une bibliothèque de cartographie pour une expérience plus réaliste
+
+2. **Sécurité et robustesse**
+   - Renforcer les définitions de types et les interfaces pour une meilleure sécurité de type
+   - Créer une couche API dédiée pour gérer la récupération et la manipulation des données externes
+   - Mettre en place des tests unitaires et d'intégration pour assurer la fiabilité du code
+
