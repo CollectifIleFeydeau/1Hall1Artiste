@@ -36,5 +36,8 @@ export const trackFeatureUsage = {
   },
   shareContent: (platform: string, contentType: string) => {
     trackEvent('Share', 'Share Content', `${contentType} via ${platform}`);
+  },
+  userLocation: () => {
+    trackEvent('Map', 'Use Location Feature');
   }
 };

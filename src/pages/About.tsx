@@ -52,6 +52,13 @@ const About = () => {
               <p className="text-gray-700 mb-4">
                 {aboutInfo.neighborhood}
               </p>
+              <Button 
+                variant="outline" 
+                className="w-full border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white"
+                onClick={() => navigate("/location-history")}
+              >
+                Découvrir l'histoire des lieux
+              </Button>
               
               <h2 className="text-lg font-semibold mb-3">Événement annuel</h2>
               <p className="text-gray-700 mb-4">

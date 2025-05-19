@@ -8,7 +8,7 @@ export type Event = {
   artistBio: string;
   contact: string;
   time: string;
-  day: "samedi" | "dimanche";
+  days: ("samedi" | "dimanche")[];
   // Location information
   locationName: string;
   locationDescription: string;
@@ -19,70 +19,70 @@ export type Event = {
 
 export const events: Event[] = [
   {
-    id: "expo1",
-    title: "Photographie Urbaine",
-    artistName: "Marie Dupont",
+    id: "expo3",
+    title: "Illustrations et Carnets",
+    artistName: "Emmanuelle Boisson (Manoukidessine)",
     type: "exposition",
-    description: "Une exploration visuelle de l'architecture urbaine de Nantes au fil du temps.",
-    artistBio: "Photographe nantaise spécialisée dans l'architecture urbaine.",
-    contact: "marie.dupont@example.com",
-    time: "14h00 - 18h00",
-    day: "samedi",
-    locationName: "Hall Principal",
-    locationDescription: "Notre hall principal accueille les plus grandes expositions et sert de point d'accueil pour les visiteurs.",
-    x: 30,
-    y: 40
+    description: "Découvrez un univers tendre et poétique à travers dessins, carnets et albums jeunesse.",
+    artistBio: "Portée par le désir de raconter des histoires en images, Manoukidessine explore avec tendresse les émotions, le quotidien et l'imaginaire. Elle partage son univers à travers dessins, carnets et albums jeunesse.",
+    contact: "emmanuelle.boisson1@gmail.com",
+    time: "10h00 - 18h00, samedi et dimanche",
+    days: ["samedi", "dimanche"],
+    locationName: "8 quai Turenne",
+    locationDescription: "Bâtiment historique du XVIIIe siècle situé au 8 allée Turenne/9 rue Kervégan. Construit en 1753 pour Jacques Berouette, négociant et actionnaire d'origine du lotissement de l'Île Feydeau. L'immeuble présente des façades richement décorées avec des mascarons à thèmes marins. Les façades et la cage d'escalier sont inscrites aux monuments historiques depuis 1984.",
+    x: 350,
+    y: 250
   },
   {
-    id: "concert1",
-    title: "Jazz Manouche",
-    artistName: "Trio Rivière",
-    type: "concert",
-    description: "Un concert de jazz manouche inspiré par Django Reinhardt.",
-    artistBio: "Groupe local de jazz formé en 2018.",
-    contact: "trioriviere@example.com",
-    time: "16h00 - 17h00",
-    day: "samedi",
-    locationName: "Cour Intérieure",
-    locationDescription: "Cet espace à ciel ouvert est idéal pour les concerts et performances. Datant du XVIIIe siècle, la cour est entourée d'architecture historique.",
-    x: 60,
-    y: 55
-  },
-  {
-    id: "expo2",
-    title: "Sculptures Contemporaines",
-    artistName: "Jean Mercier",
+    id: "expo5",
+    title: "Peintures en Miniature",
+    artistName: "Catherine Clément (Kat Klementi)",
     type: "exposition",
-    description: "Des créations contemporaines réalisées à partir de matériaux recyclés.",
-    artistBio: "Sculpteur autodidacte travaillant principalement avec des matériaux recyclés.",
-    contact: "jean.m@example.com",
-    time: "10h00 - 19h00",
-    day: "dimanche",
-    locationName: "Galerie Est",
-    locationDescription: "Ancienne écurie reconvertie en galerie d'art, cet espace conserve ses poutres et pierres d'origine.",
-    x: 75,
-    y: 30
+    description: "Des créations délicates et contemporaines présentées dans de petits cadres anciens.",
+    artistBio: "Dans de petits cadres anciens, l'intimité du format rencontre le charme du passé pour accueillir des créations délicates et contemporaines. Kat Klementi y déploie une peinture sensible, empreinte de douceur et de poésie.",
+    contact: "katclement@orange.fr",
+    time: "10h00 - 18h00, samedi et dimanche",
+    days: ["samedi", "dimanche"],
+    locationName: "8 quai Turenne",
+    locationDescription: "Bâtiment historique du XVIIIe siècle situé au 8 allée Turenne/9 rue Kervégan. Construit en 1753 pour Jacques Berouette, négociant et actionnaire d'origine du lotissement de l'Île Feydeau. L'immeuble présente des façades richement décorées avec des mascarons à thèmes marins. Les façades et la cage d'escalier sont inscrites aux monuments historiques depuis 1984.",
+    x: 350,
+    y: 250
   },
   {
-    id: "concert2",
-    title: "Folk Acoustique",
-    artistName: "Luna & Les Étoiles",
-    type: "concert",
-    description: "Un concert acoustique aux influences folk et celtiques.",
-    artistBio: "Groupe formé à Nantes en 2020, spécialisé dans la musique folk.",
-    contact: "luna.etoiles@example.com",
-    time: "18h30 - 19h30",
-    day: "dimanche",
-    locationName: "Jardin",
-    locationDescription: "Notre jardin paysager offre un cadre naturel apaisant pour les concerts acoustiques et les installations artistiques en plein air.",
-    x: 45,
-    y: 75
+    id: "expo7",
+    title: "Entre Bretagne et Maroc",
+    artistName: "Mostapha Rouine",
+    type: "exposition",
+    description: "Aquarelles, brou de noix et huiles inspirés par la Bretagne et le Maroc.",
+    artistBio: "Puisant son inspiration entre la Bretagne et le Maroc, entre pêche à pied et scènes de vie quotidienne, Mostapha Rouine crée avec aquarelles, brou de noix et huiles. L'artiste peintre autodidacte fait vibrer la lumière, l'ambiance et les couleurs de ces deux mondes.",
+    contact: "rouinemostapha@gmail.com",
+    time: "10h00 - 18h00, samedi et dimanche",
+    days: ["samedi", "dimanche"],
+    locationName: "8 quai Turenne",
+    locationDescription: "Bâtiment historique du XVIIIe siècle situé au 8 allée Turenne/9 rue Kervégan. Construit en 1753 pour Jacques Berouette, négociant et actionnaire d'origine du lotissement de l'Île Feydeau. L'immeuble présente des façades richement décorées avec des mascarons à thèmes marins. Les façades et la cage d'escalier sont inscrites aux monuments historiques depuis 1984.",
+    x: 350,
+    y: 250
+  },
+  {
+    id: "expo9",
+    title: "Carnets Nantais",
+    artistName: "Jocelyn Prouff (Joss Proof)",
+    type: "exposition",
+    description: "Croquis urbains où la nature reprend ses droits, avec une attention particulière à la lumière et aux détails.",
+    artistBio: "Croquant in situ des lieux urbains où la nature reprend ses droits, avec une attention particulière à la lumière et aux détails, Joss Proof invite à un autre regard sur la ville à travers ses carnets sensibles. Il partage cet univers dans son livre \"Carnets Nantais\".",
+    contact: "joss.proof@gmail.com",
+    time: "10h00 - 18h00, samedi et dimanche",
+    days: ["samedi", "dimanche"],
+    locationName: "8 quai Turenne",
+    locationDescription: "Bâtiment historique du XVIIIe siècle situé au 8 allée Turenne/9 rue Kervégan. Construit en 1753 pour Jacques Berouette, négociant et actionnaire d'origine du lotissement de l'Île Feydeau. L'immeuble présente des façades richement décorées avec des mascarons à thèmes marins. Les façades et la cage d'escalier sont inscrites aux monuments historiques depuis 1984.",
+    x: 350,
+    y: 250
   }
 ];
 
 // Helper functions to get events in different formats
 export function getEventsByDay(day: "samedi" | "dimanche") {
-  return events.filter(event => event.day === day);
+  return events.filter(event => event.days.includes(day));
 }
 
 export function getEventById(id: string) {

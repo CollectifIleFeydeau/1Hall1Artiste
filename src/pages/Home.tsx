@@ -52,24 +52,7 @@ function Home() {
       </div>
       
       <div className="container mx-auto px-4 py-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <Card className="bg-white shadow-md rounded-lg overflow-hidden border-0 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-            <CardContent className="p-0">
-              <Link to="/map" className="block">
-                <div className="h-2 bg-[#4a5d94]" />
-                <div className="p-4 flex items-center space-x-4">
-                  <div className="bg-[#e0ebff] p-3 rounded-full">
-                    <MapPin className="h-6 w-6 text-[#4a5d94]" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-medium">Carte & Parcours</h2>
-                    <p className="text-sm text-gray-500">Explorez l'île Feydeau à travers notre parcours interactif</p>
-                  </div>
-                </div>
-              </Link>
-            </CardContent>
-          </Card>
-          
+        <div className="grid grid-cols-1 gap-4 mb-6">
           <Card className="bg-white shadow-md rounded-lg overflow-hidden border-0 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
             <CardContent className="p-0">
               <Link to="/program" className="block">
