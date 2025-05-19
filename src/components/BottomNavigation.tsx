@@ -4,7 +4,7 @@ import Info from "lucide-react/dist/esm/icons/info";
 import Heart from "lucide-react/dist/esm/icons/heart";
 import Home from "lucide-react/dist/esm/icons/home";
 import Bookmark from "lucide-react/dist/esm/icons/bookmark";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Gift from "lucide-react/dist/esm/icons/gift";
 import { Link, useLocation } from "react-router-dom";
 
 export function BottomNavigation() {
@@ -19,13 +19,13 @@ export function BottomNavigation() {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center h-16 z-50">
       <div className="w-full grid grid-cols-5 gap-0">
         <Link
-          to="/"
+          to="/map"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/") || isActive("/home") ? "text-[#ff7a45]" : "text-gray-500"
+            isActive("/") || isActive("/map") ? "text-[#ff7a45]" : "text-gray-500"
           }`}
         >
-          <Home className="h-6 w-6" />
-          <span className="text-xs mt-1">Accueil</span>
+          <MapPin className="h-6 w-6" />
+          <span className="text-xs mt-1">Carte</span>
         </Link>
         
         <Link
@@ -54,7 +54,7 @@ export function BottomNavigation() {
             isActive("/donate") ? "text-[#ff7a45]" : "text-gray-500"
           }`}
         >
-          <DollarSign className="h-6 w-6" />
+          <Gift className="h-6 w-6" />
           <span className="text-xs mt-1">Dons</span>
         </Link>
         

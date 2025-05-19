@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createLogger } from "@/utils/logger";
 
 // Créer un logger pour le composant Map
@@ -14,12 +14,20 @@ interface MapComponentProps {
     name: string;
     x: number;
     y: number;
+    visited?: boolean;
   }>;
   activeLocation?: string | null;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   readOnly?: boolean;
 }
 
+/**
+ * Composant de carte
+ * 
+ * Affiche une carte interactive avec des points représentant les lieux.
+ * Les dimensions de la carte sont fixes pour assurer la cohérence des coordonnées.
+ * Les coordonnées des points sont définies directement dans le fichier de données.
+ */
 export const MapComponent: React.FC<MapComponentProps> = ({
   locations,
   activeLocation,
@@ -28,16 +36,16 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
+  // Effet pour appliquer des dimensions fixes au conteneur principal
   useEffect(() => {
     logger.info('MapComponent monté avec les dimensions fixes', { width: MAP_WIDTH, height: MAP_HEIGHT });
     
     // Empêcher le redimensionnement de la fenêtre de modifier les dimensions
     const handleResize = () => {
       if (containerRef.current) {
-        // Forcer les dimensions fixes même en cas de redimensionnement
+        // Forcer des dimensions absolues pour garantir la cohérence entre les sessions
         containerRef.current.style.width = `${MAP_WIDTH}px`;
         containerRef.current.style.height = `${MAP_HEIGHT}px`;
-        logger.info('Dimensions forcées après redimensionnement', { width: MAP_WIDTH, height: MAP_HEIGHT });
       }
     };
     
@@ -49,28 +57,37 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       window.removeEventListener('resize', handleResize);
     };
   }, []);
-
+  
+  // Log des coordonnées des points au chargement
+  useEffect(() => {
+    if (locations && locations.length > 0) {
+      logger.info('Coordonnées des points sur la carte', {
+        activeLocationId: activeLocation || 'aucun',
+        points: locations.map(loc => ({
+          id: loc.id,
+          name: loc.name,
+          x: loc.x,
+          y: loc.y
+        }))
+      });
+    }
+  }, [locations, activeLocation]);
+  
   return (
     <div 
       ref={containerRef}
       className="relative border border-[#d8e3ff] rounded-lg bg-[#f0f5ff] mb-4 overflow-hidden"
       style={{ 
-        width: MAP_WIDTH, 
-        height: MAP_HEIGHT,
-        minWidth: MAP_WIDTH,
-        minHeight: MAP_HEIGHT,
-        maxWidth: MAP_WIDTH,
-        maxHeight: MAP_HEIGHT
+        width: `${MAP_WIDTH}px`, 
+        height: `${MAP_HEIGHT}px`
       }}
     >
-      {/* Map background with image */}
+      {/* Fond de carte avec image */}
       <div 
         className="absolute inset-0 bg-white flex items-center justify-center"
         onClick={!readOnly ? onClick : undefined}
         style={{ 
-          cursor: !readOnly ? 'pointer' : 'default',
-          width: MAP_WIDTH,
-          height: MAP_HEIGHT
+          cursor: !readOnly ? 'pointer' : 'default'
         }}
       >
         <img 
@@ -84,56 +101,38 @@ export const MapComponent: React.FC<MapComponentProps> = ({
             objectFit: 'contain',
             pointerEvents: 'none' // Empêcher l'interaction avec l'image
           }}
-          onLoad={(e) => {
-            // Log des dimensions réelles de l'image
-            logger.info('Dimensions de l\'image dans MapComponent', {
-              width: e.currentTarget.width,
-              height: e.currentTarget.height,
-              naturalWidth: e.currentTarget.naturalWidth,
-              naturalHeight: e.currentTarget.naturalHeight,
-              containerWidth: MAP_WIDTH,
-              containerHeight: MAP_HEIGHT
-            });
-          }}
         />
       </div>
       
-      {/* Map locations overlay */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ 
-          width: MAP_WIDTH,
-          height: MAP_HEIGHT
-        }}
-      >
-        <div 
-          className="relative"
-          style={{ 
-            width: MAP_WIDTH,
-            height: MAP_HEIGHT
-          }}
-        >
-          {locations.map((location) => (
-            <div 
-              key={location.id}
-              id={`location-${location.id}`}
-              className={`absolute w-10 h-10 transform -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg border-2 border-white
-                ${activeLocation === location.id ? 'bg-[#ff7a45] ring-2 ring-[#ff7a45] ring-opacity-70 scale-110' : 'bg-[#4a5d94]'}
-              `}
-              style={{ 
-                position: 'absolute',
-                left: `${location.x}px`, 
-                top: `${location.y}px`,
-                zIndex: 20,
-                pointerEvents: !readOnly ? 'auto' : 'none' // Permettre l'interaction avec les points si non readOnly
-              }}
-              onClick={!readOnly ? (e) => {
-                e.stopPropagation();
-                if (onClick) onClick(e);
-              } : undefined}
-            />
-          ))}
-        </div>
+      {/* Points sur la carte */}
+      <div className="absolute inset-0 pointer-events-none">
+        {locations.map((location) => (
+          <div 
+            key={location.id}
+            id={`location-${location.id}`}
+            className={`absolute w-6 h-6 rounded-full shadow-lg border-2 border-white
+              ${activeLocation === location.id 
+                ? 'bg-[#ff7a45] ring-2 ring-[#ff7a45] ring-opacity-70 scale-110' 
+                : location.visited 
+                  ? 'bg-[#4CAF50]' // Couleur verte pour les lieux visités
+                  : 'bg-[#4a5d94]'}
+            `}
+            style={{ 
+              position: 'absolute',
+              left: `${location.x}px`, 
+              top: `${location.y}px`,
+              zIndex: 20,
+              width: '24px',
+              height: '24px',
+              transform: 'translate(-50%, -50%)', // Centrer le point sur les coordonnées
+              pointerEvents: !readOnly ? 'auto' : 'none'
+            }}
+            onClick={!readOnly ? (e) => {
+              e.stopPropagation();
+              if (onClick) onClick(e);
+            } : undefined}
+          />
+        ))}
       </div>
     </div>
   );

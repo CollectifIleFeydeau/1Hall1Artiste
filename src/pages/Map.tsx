@@ -6,22 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { trackFeatureUsage } from "../services/analytics";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
 import X from "lucide-react/dist/esm/icons/x";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Info from "lucide-react/dist/esm/icons/info";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
 import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
-import Info from "lucide-react/dist/esm/icons/info";
 import { VisitProgress } from "@/components/VisitProgress";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { saveEvent, getSavedEvents, removeSavedEvent } from "@/services/savedEvents";
-import { useToast } from "@/components/ui/use-toast";
+import { EventDetails } from "@/components/EventDetails";
 import { type Event } from "@/data/events";
 import { useData, useEvents, useLocations } from "@/hooks/useData";
 import { getLocationIdForEvent } from "@/services/dataService";
+import { toast } from "@/components/ui/use-toast";
 
 // Créer un logger pour le composant Map
 const logger = createLogger('Map');
@@ -40,12 +40,79 @@ const Map = ({ fullScreen = false }: MapProps) => {
   
   // Utiliser directement les emplacements du service de données
   const [mapLocations, setMapLocations] = useState(locations);
+  const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  
+  // Initialiser les données des lieux en incluant l'état de visite
+  useEffect(() => {
+    // Essayer de charger les lieux avec leur état de visite depuis le localStorage
+    const savedLocations = localStorage.getItem("mapLocations");
+    if (savedLocations) {
+      try {
+        const parsedLocations = JSON.parse(savedLocations);
+        // Fusionner les données sauvegardées avec les données actuelles
+        const mergedLocations = locations.map(loc => {
+          const savedLoc = parsedLocations.find((saved: any) => saved.id === loc.id);
+          return savedLoc ? { ...loc, visited: savedLoc.visited } : loc;
+        });
+        setMapLocations(mergedLocations);
+      } catch (error) {
+        logger.error('Erreur lors du chargement des lieux visités', { error });
+      }
+    }
+  }, [locations]);
+  
+  // Charger les événements sauvegardés depuis le localStorage
+  useEffect(() => {
+    const savedEvents = localStorage.getItem("savedEvents");
+    if (savedEvents) {
+      setSavedEventIds(JSON.parse(savedEvents));
+    }
+  }, []);
+  
+  // Recharger les événements sauvegardés lorsqu'on ferme la vue détaillée d'un événement
+  useEffect(() => {
+    if (!selectedEvent) {
+      // Quand on ferme la vue détaillée, on recharge les événements sauvegardés
+      const savedEvents = localStorage.getItem("savedEvents");
+      if (savedEvents) {
+        setSavedEventIds(JSON.parse(savedEvents));
+      }
+    }
+  }, [selectedEvent]);
   
   // Mettre à jour les emplacements lorsque les données changent
   useEffect(() => {
     logger.info('Mise à jour des emplacements sur la carte depuis le service de données');
     setMapLocations(locations);
   }, [locations]);
+  
+  // Fonction pour sauvegarder/retirer un événement des favoris
+  const handleSaveEvent = (event: Event, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const savedEvents = [...savedEventIds];
+    const eventIndex = savedEvents.indexOf(event.id);
+    
+    if (eventIndex === -1) {
+      // Ajouter l'événement aux favoris
+      savedEvents.push(event.id);
+      toast({
+        title: "Événement sauvegardé",
+        description: `${event.title} a été ajouté à vos favoris.`,
+      });
+    } else {
+      // Retirer l'événement des favoris
+      savedEvents.splice(eventIndex, 1);
+      toast({
+        title: "Événement retiré",
+        description: `${event.title} a été retiré de vos favoris.`,
+      });
+    }
+    
+    setSavedEventIds(savedEvents);
+    localStorage.setItem("savedEvents", JSON.stringify(savedEvents));
+  };
   
   const [activeLocation, setActiveLocation] = useState<string | null>(() => {
     // Si on arrive depuis l'histoire complète, on active le lieu correspondant
@@ -85,44 +152,49 @@ const Map = ({ fullScreen = false }: MapProps) => {
         logger.warn(`Lieu avec ID ${locationIdToHighlight} non trouvé dans mapLocations`);
       }
     } else {
-      logger.info('Aucun lieu à mettre en évidence');
-    }
-  }, [location, mapLocations]);
-  
-  // Effet pour vérifier que les coordonnées sont dans les limites
-  useEffect(() => {
-    logger.info('Vérification des coordonnées des emplacements');
-    logger.debug('Dimensions du conteneur de la carte', {
-      mapWidth: MAP_WIDTH,
-      mapHeight: MAP_HEIGHT
-    });
-    
-    // Vérifier que les coordonnées sont dans les limites
-    mapLocations.forEach(loc => {
-      if (loc.x < 0 || loc.x > MAP_WIDTH || loc.y < 0 || loc.y > MAP_HEIGHT) {
-        logger.warn(`Coordonnées hors limites pour ${loc.name}`, {
-          id: loc.id,
-          x: loc.x,
-          y: loc.y,
-          mapWidth: MAP_WIDTH,
-          mapHeight: MAP_HEIGHT
-        });
+      // Vérifier si on a un ID d'événement à mettre en évidence dans les paramètres d'URL
+      const eventParam = searchParams.get('event');
+      if (eventParam) {
+        logger.info(`Recherche du lieu pour l'événement avec ID: ${eventParam}`);
+        // Trouver l'événement et son lieu associé
+        const event = getEventById(eventParam);
+        if (event) {
+          logger.debug('Événement trouvé', { event });
+          setSelectedEvent(event);
+          setActiveLocation(event.locationId);
+        } else {
+          logger.warn(`Événement avec ID ${eventParam} non trouvé`);
+        }
       }
-    });
-  }, [mapLocations]);
+      
+      // Vérifier si on a un ID de lieu associé à un événement
+      const locationParam = searchParams.get('location');
+      if (locationParam) {
+        logger.info(`Recherche du lieu pour l'ID: ${locationParam}`);
+        
+        // Vérifier si l'ID est celui d'un événement
+        const event = getEventById(locationParam);
+        if (event) {
+          logger.debug('Événement trouvé, activation du lieu associé', { 
+            eventId: event.id, 
+            locationId: event.locationId 
+          });
+          setActiveLocation(event.locationId);
+        } else {
+          // Sinon, c'est directement l'ID d'un lieu
+          const locationId = locationParam;
+          logger.debug('Activation du lieu', { locationId });
+          // Assurons-nous que locationId est une chaîne de caractères valide
+          if (typeof locationId === 'string') {
+            setActiveLocation(locationId);
+          } else {
+            logger.error('locationId n\'est pas une chaîne de caractères valide', { locationId });
+          }
+        }
+      }
+    }
+  }, [location, mapLocations, getEventById]);
   
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
-  const { toast } = useToast();
-  
-  // Charger les événements sauvegardés
-  useEffect(() => {
-    // Extraire uniquement les IDs des événements sauvegardés
-    const savedEvents = getSavedEvents();
-    const savedIds = savedEvents.map(event => event.id);
-    setSavedEventIds(savedIds);
-  }, []);
-
   const handleLocationClick = (locationId: string) => {
     logger.info(`Clic sur l'emplacement ${locationId}`);
     setActiveLocation(locationId);
@@ -132,14 +204,8 @@ const Map = ({ fullScreen = false }: MapProps) => {
     const eventsData = locationEvents.map(eventId => getEventById(eventId)).filter(Boolean) as Event[];
     logger.debug(`Événements trouvés pour ${locationId}`, eventsData);
     
-    if (eventsData.length === 1) {
-      // S'il n'y a qu'un seul événement, l'afficher directement
-      setSelectedEvent(eventsData[0]);
-    } else if (eventsData.length > 1) {
-      // S'il y a plusieurs événements, afficher une liste
-      setSelectedEvent(null);
-      // Afficher la liste des événements (à implémenter)
-    }
+    // Toujours afficher d'abord les informations du lieu, jamais directement l'événement
+    setSelectedEvent(null);
   };
 
   const markLocationAsVisited = (locationId: string, visited: boolean) => {
@@ -156,38 +222,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
     });
   };
 
-  const handleSaveEvent = (event: Event, e: React.MouseEvent) => {
-    e.stopPropagation(); // Empêcher l'ouverture du dialogue
-    
-    if (savedEventIds.includes(event.id)) {
-      // Supprimer l'événement des sauvegardés
-      removeSavedEvent(event.id);
-      setSavedEventIds(savedEventIds.filter(id => id !== event.id));
-      
-      toast({
-        title: "Événement retiré",
-        description: `${event.title} a été retiré de vos événements sauvegardés.`,
-      });
-    } else {
-      // Sauvegarder l'événement
-      saveEvent(event);
-      setSavedEventIds([...savedEventIds, event.id]);
-      
-      toast({
-        title: "Événement sauvegardé",
-        description: `${event.title} a été ajouté à vos événements sauvegardés.`,
-        action: (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => navigate("/saved-events")}
-          >
-            Voir
-          </Button>
-        ),
-      });
-    }
-  };
+  // Cette fonction n'est plus nécessaire car elle est gérée par le composant EventDetails
 
   const getLocationEvents = (locationId: string) => {
     const location = mapLocations.find(l => l.id === locationId);
@@ -220,7 +255,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
         <div className="flex items-center justify-center mb-4 text-sm text-[#4a5d94] fade-in">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <div className="flex items-center justify-center w-5 h-5 bg-[#ff7a45] rounded-full mr-1 text-white text-xs font-medium">
+              <div className="flex items-center justify-center w-5 h-5 bg-[#4CAF50] rounded-full mr-1 text-white text-xs font-medium">
                 {visitedCount}
               </div>
               <span className="text-xs">{visitedCount > 1 ? 'Visités' : 'Visité'}</span>
@@ -363,14 +398,16 @@ const Map = ({ fullScreen = false }: MapProps) => {
               Voir l'histoire complète
             </Button>
             
+            <div className="mb-6"></div>
+            
             {getLocationEvents(activeLocation).length > 0 && (
               <div className="mb-4">
                 <h3 className="font-medium text-[#1a2138] mb-2">Événements à cet endroit:</h3>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                   {getLocationEvents(activeLocation).map((event) => (
                     <div 
                       key={event.id} 
-                      className="bg-[#f0f5ff] p-3 rounded-lg cursor-pointer hover:bg-[#e0ebff] transition-colors"
+                      className={`bg-[#f0f5ff] p-3 rounded-lg cursor-pointer hover:bg-[#e0ebff] transition-colors ${savedEventIds.includes(event.id) ? 'border-l-4 border-l-[#ff7a45]' : ''}`}
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1" onClick={() => setSelectedEvent(event)}>
@@ -420,113 +457,13 @@ const Map = ({ fullScreen = false }: MapProps) => {
         </div>
       )}
       
-      {/* Event details dialog */}
-      <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
-        {selectedEvent && (
-          <DialogContent className="sm:max-w-[425px]">
-            <div className={`h-1 ${selectedEvent.type === "exposition" ? "bg-[#4a5d94]" : "bg-[#ff7a45]"}`} />
-            <DialogHeader>
-              <DialogTitle className="text-[#1a2138]">{selectedEvent.title}</DialogTitle>
-            </DialogHeader>
-            <div className="py-4">
-              <p className="text-sm font-medium text-[#4a5d94]">Par {selectedEvent.artistName}</p>
-              <div className="flex items-center mb-4">
-                <MapPin className="h-3 w-3 mr-1 text-[#8c9db5]" />
-                <p className="text-xs text-[#8c9db5]">{selectedEvent.locationName} • {selectedEvent.time}</p>
-              </div>
-              
-              <div className="bg-[#f0f5ff] p-3 rounded-lg mb-4">
-                <p className="text-sm text-[#4a5d94]">{selectedEvent.description}</p>
-              </div>
-              
-              <div className="border-t border-[#d8e3ff] pt-4 mt-4">
-                <h4 className="text-sm font-medium mb-1 text-[#4a5d94] flex items-center">
-                  <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
-                  À propos de l'artiste
-                </h4>
-                <p className="text-sm text-[#4a5d94] mb-4 ml-4">{selectedEvent.artistBio}</p>
-                
-                <h4 className="text-sm font-medium mb-1 text-[#4a5d94] flex items-center">
-                  <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
-                  Le lieu
-                </h4>
-                <p className="text-sm text-[#4a5d94] mb-2 ml-4">
-                  {locations.find(loc => loc.id === selectedEvent.locationId)?.description || ''}
-                </p>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="ml-4 text-xs border-[#4a5d94] text-[#4a5d94]"
-                  onClick={() => {
-                    navigate('/location-history', { state: { selectedLocationId: selectedEvent.locationId } });
-                  }}
-                >
-                  <Info className="h-3 w-3 mr-1" />
-                  Voir l'histoire complète
-                </Button>
-                
-                <h4 className="text-sm font-medium mb-1 mt-4 text-[#4a5d94] flex items-center">
-                  <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
-                  Contact
-                </h4>
-                <p className="text-sm text-[#4a5d94] ml-4">
-                  <a href={`mailto:${selectedEvent.contact}`} className="text-blue-600 hover:underline">
-                    {selectedEvent.contact}
-                  </a>
-                </p>
-              </div>
-              
-              <div className="flex flex-col space-y-3 mt-4">
-                <Button 
-                  className="bg-[#ff7a45] hover:bg-[#ff9d6e] w-full"
-                  onClick={() => {
-                    setSelectedEvent(null);
-                    setActiveLocation(null);
-                  }}
-                >
-                  Retour à la carte
-                </Button>
-                
-                <div className="flex justify-between">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="border-[#4a5d94] text-[#4a5d94]"
-                    onClick={() => navigate("/program")}
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Voir le programme
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className={savedEventIds.includes(selectedEvent.id) ? "border-[#ff7a45] text-[#ff7a45]" : "border-[#8c9db5] text-[#8c9db5]"}
-                    onClick={(e) => handleSaveEvent(selectedEvent, e)}
-                  >
-                    {savedEventIds.includes(selectedEvent.id) ? (
-                      <>
-                        <BookmarkCheck className="h-4 w-4 mr-2" />
-                        Sauvegardé
-                      </>
-                    ) : (
-                      <>
-                        <Bookmark className="h-4 w-4 mr-2" />
-                        Sauvegarder
-                      </>
-                    )}
-                  </Button>
-                  
-                  <ShareButton 
-                    title={`${selectedEvent.title} - Île Feydeau`}
-                    text={`Découvrez ${selectedEvent.title} par ${selectedEvent.artistName} sur l'Île Feydeau à Nantes!`}
-                  />
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        )}
-      </Dialog>
+      {/* Event details using the unified component */}
+      <EventDetails 
+        event={selectedEvent}
+        isOpen={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        source="map"
+      />
       
       {/* Boîte de dialogue de consentement de localisation retirée */}
       

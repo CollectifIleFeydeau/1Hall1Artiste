@@ -228,8 +228,38 @@ class DataService {
     logger.info('Sauvegarde des données dans le localStorage');
     
     try {
+      // Log détaillé des données avant sauvegarde
+      logger.debug('Détails des données à sauvegarder', {
+        eventsCount: this.state.events.length,
+        locationsCount: this.state.locations.length,
+        firstLocation: this.state.locations[0] ? {
+          id: this.state.locations[0].id,
+          name: this.state.locations[0].name,
+          x: this.state.locations[0].x,
+          y: this.state.locations[0].y
+        } : 'Aucun lieu'
+      });
+      
+      // Sauvegarde des données
       localStorage.setItem('events', JSON.stringify(this.state.events));
       localStorage.setItem('locations', JSON.stringify(this.state.locations));
+      
+      // Vérification de la sauvegarde
+      const savedLocations = localStorage.getItem('locations');
+      if (savedLocations) {
+        const parsedLocations = JSON.parse(savedLocations);
+        logger.debug('Vérification de la sauvegarde', {
+          savedLocationsCount: parsedLocations.length,
+          firstSavedLocation: parsedLocations[0] ? {
+            id: parsedLocations[0].id,
+            name: parsedLocations[0].name,
+            x: parsedLocations[0].x,
+            y: parsedLocations[0].y
+          } : 'Aucun lieu'
+        });
+      }
+      
+      logger.info('Données sauvegardées avec succès dans le localStorage');
     } catch (error) {
       logger.error('Erreur lors de la sauvegarde des données', error);
       this.setState({
@@ -243,17 +273,44 @@ class DataService {
     logger.info('Chargement des données depuis le localStorage');
     
     try {
+      // Récupérer les données du localStorage
       const eventsData = localStorage.getItem('events');
       const locationsData = localStorage.getItem('locations');
+      
+      // Log des données récupérées
+      logger.debug('Données récupérées du localStorage', {
+        eventsDataExists: !!eventsData,
+        locationsDataExists: !!locationsData,
+        eventsDataLength: eventsData ? eventsData.length : 0,
+        locationsDataLength: locationsData ? locationsData.length : 0
+      });
       
       if (!eventsData || !locationsData) {
         logger.info('Aucune donnée trouvée dans le localStorage');
         return null;
       }
       
+      // Parser les données
+      const parsedEvents = JSON.parse(eventsData);
+      const parsedLocations = JSON.parse(locationsData);
+      
+      // Log des données parsées
+      logger.debug('Données parsées du localStorage', {
+        eventsCount: parsedEvents.length,
+        locationsCount: parsedLocations.length,
+        firstLocation: parsedLocations[0] ? {
+          id: parsedLocations[0].id,
+          name: parsedLocations[0].name,
+          x: parsedLocations[0].x,
+          y: parsedLocations[0].y
+        } : 'Aucun lieu'
+      });
+      
+      logger.info('Données chargées avec succès depuis le localStorage');
+      
       return {
-        events: JSON.parse(eventsData),
-        locations: JSON.parse(locationsData),
+        events: parsedEvents,
+        locations: parsedLocations,
         isLoading: false,
         error: null
       };

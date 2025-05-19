@@ -115,7 +115,7 @@ const Program = () => {
             {filterEvents(getEventsByDay("samedi"), currentFilter).map((event) => (
                 <Card 
                   key={event.id}
-                  className="shadow-md border-0 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  className={`shadow-md border-0 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${savedEventIds.includes(event.id) ? 'border-l-4 border-l-[#ff7a45]' : ''}`}
                   onClick={() => {
                     setSelectedEvent(event);
                     trackFeatureUsage.eventView(event.id, event.title);
@@ -169,7 +169,7 @@ const Program = () => {
             {filterEvents(getEventsByDay("dimanche"), currentFilter).map((event) => (
                 <Card 
                   key={event.id}
-                  className="shadow-md border-0 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  className={`shadow-md border-0 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${savedEventIds.includes(event.id) ? 'border-l-4 border-l-[#ff7a45]' : ''}`}
                   onClick={() => {
                     setSelectedEvent(event);
                     trackFeatureUsage.eventView(event.id, event.title);

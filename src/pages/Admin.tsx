@@ -48,32 +48,22 @@ export default function Admin() {
   };
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    logger.info('Clic sur la carte détecté');
-    
-    if (!activeLocation) {
-      logger.warn('Aucun lieu sélectionné lors du clic sur la carte');
-      alert("Veuillez d'abord sélectionner un lieu");
-      return;
-    }
+    logger.info('Clic sur la carte');
     
     try {
-      // Obtenir l'élément cible du clic
-      const target = e.target as HTMLElement;
-      const mapContainer = target.closest('.relative') as HTMLElement;
+      // Obtenir les coordonnées du clic
+      const x = Math.round(e.nativeEvent.offsetX);
+      const y = Math.round(e.nativeEvent.offsetY);
       
-      if (!mapContainer) {
-        logger.warn('Conteneur de carte non trouvé');
-        return;
-      }
+      // Log des coordonnées pour référence
+      logger.info(`Coordonnées du clic: x=${x}, y=${y}`);
       
-      // Calculer les coordonnées relatives au conteneur de la carte avec dimensions fixes
-      const rect = mapContainer.getBoundingClientRect();
-      const x = Math.round(e.clientX - rect.left);
-      const y = Math.round(e.clientY - rect.top);
-      
-      logger.info(`Nouvelles coordonnées: x=${x}, y=${y}`);
+      // Définir les coordonnées pour le point sélectionné
       setCoordinates({ x, y });
       setMapClicked(true);
+      
+      // Tester immédiatement les nouvelles coordonnées
+      testCoordinatesOnMap();
     } catch (error) {
       logger.error('Erreur lors du clic sur la carte', error);
     }
@@ -208,14 +198,24 @@ export default function Admin() {
     // Créer une copie temporaire des lieux avec les nouvelles coordonnées pour le lieu actif
     const testLocations = mapLocations.map(location => {
       if (location.id === activeLocation) {
-        return { ...location, x: coordinates.x, y: coordinates.y };
+        // Utiliser les coordonnées actuelles du formulaire
+        const newLocation = { ...location, x: coordinates.x, y: coordinates.y };
+        logger.debug('Mise à jour temporaire des coordonnées pour le test', {
+          id: location.id,
+          name: location.name,
+          oldX: location.x,
+          oldY: location.y,
+          newX: coordinates.x,
+          newY: coordinates.y
+        });
+        return newLocation;
       }
       return location;
     });
     
     // Mettre à jour l'état local pour afficher les nouvelles coordonnées sur la carte
     setMapLocations(testLocations);
-    logger.info('Coordonnées de test appliquées temporairement');
+    logger.info('Coordonnées de test appliquées temporairement', coordinates);
   };
 
   const exportLocations = () => {

@@ -9,7 +9,6 @@ import { PageTransition } from "@/components/PageTransition";
 import { useEffect, useState } from "react";
 import { initGA, trackPageView } from "./services/analytics";
 import Index from "./pages/Index";
-import Home from "./pages/Home";
 import Map from "./pages/Map";
 import Program from "./pages/Program";
 import About from "./pages/About";
@@ -21,7 +20,7 @@ import Admin from "./pages/Admin";
 import SavedEvents from "./pages/SavedEvents";
 import Onboarding from "./pages/Onboarding";
 import { LocationHistory } from "./pages/LocationHistory";
-import { NotificationsProvider } from "./components/NotificationsProvider";
+// import { NotificationsProvider } from "./components/NotificationsProvider";
 
 const queryClient = new QueryClient();
 
@@ -51,16 +50,8 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Rediriger vers l'onboarding si c'est la première visite */}
-        <Route path="/" element={
-          !hasSeenOnboarding
-            ? <PageTransition><Onboarding /></PageTransition>
-            : (mapFirstExperience 
-                ? <PageTransition><Map fullScreen={true} /></PageTransition>
-                : <PageTransition><Home /></PageTransition>)
-        } />
-        
-        <Route path="/home" element={<PageTransition><Home /></PageTransition>} />
+        {/* Rediriger directement vers la carte */}
+        <Route path="/" element={<Navigate to="/map" replace />} />
         <Route path="/map" element={<PageTransition><Map fullScreen={true} /></PageTransition>} />
         <Route path="/program" element={<PageTransition><Program /></PageTransition>} />
         <Route path="/about" element={<PageTransition><About /></PageTransition>} />
@@ -78,11 +69,7 @@ const AnimatedRoutes = () => {
 };
 
 const AppContent = () => {
-  return (
-    <NotificationsProvider>
-      <AnimatedRoutes />
-    </NotificationsProvider>
-  );
+  return <AnimatedRoutes />;
 };
 
 const App = () => {

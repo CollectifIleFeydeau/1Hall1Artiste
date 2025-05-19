@@ -66,26 +66,30 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:bg-gray-100 hover:scale-110">
-          <Share2 className="h-4 w-4" />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 p-0 flex items-center justify-center bg-white border border-gray-200 rounded-md hover:bg-gray-50 shadow-sm transition-all duration-200 hover:shadow"
+        >
+          <Share2 className="h-4 w-4 text-[#4a5d94]" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="min-w-[150px]">
         {navigator.share && (
-          <DropdownMenuItem onClick={() => handleShare("native")}>
+          <DropdownMenuItem onClick={() => handleShare("native")} className="cursor-pointer">
             Partager
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => handleShare("facebook")}>
+        <DropdownMenuItem onClick={() => handleShare("facebook")} className="cursor-pointer">
           Facebook
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("x")}>
+        <DropdownMenuItem onClick={() => handleShare("x")} className="cursor-pointer">
           X
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("instagram")}>
+        <DropdownMenuItem onClick={() => handleShare("instagram")} className="cursor-pointer">
           Instagram
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("copy")}>
+        <DropdownMenuItem onClick={() => handleShare("copy")} className="cursor-pointer">
           Copier le lien
         </DropdownMenuItem>
       </DropdownMenuContent>

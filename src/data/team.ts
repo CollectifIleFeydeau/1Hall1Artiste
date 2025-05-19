@@ -11,32 +11,20 @@ export type TeamMember = {
 export const teamMembers: TeamMember[] = [
   {
     id: "member1",
-    name: "Claire Martin",
-    role: "Présidente",
-    description: "Fondatrice de l'association et passionnée d'histoire locale."
+    name: "Julien Fritsch",
+    role: "Président",
+    description: "Organisateur du projet."
   },
   {
     id: "member2",
-    name: "Thomas Rivière",
+    name: "Philippe Châtel",
     role: "Trésorier",
-    description: "En charge des finances et de la logistique des événements."
+    description: "Foundation de l'association et coordonne les communications et les partenariats artistiques."
   },
   {
     id: "member3",
-    name: "Sophie Laurent",
+    name: "Edwige Filleux",
     role: "Secrétaire",
-    description: "Coordonne les communications et les partenariats artistiques."
-  },
-  {
-    id: "member4",
-    name: "Marc Dubois",
-    role: "Programmation artistique",
-    description: "Sélectionne les artistes et organise les expositions."
-  },
-  {
-    id: "member5",
-    name: "Émilie Blanc",
-    role: "Communication",
-    description: "Gère la présence en ligne et les relations avec la presse."
+    description: "Foundation de l'association."
   }
 ];

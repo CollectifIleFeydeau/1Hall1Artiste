@@ -1,6 +1,6 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getLocationHistoryById } from "@/data/locationHistory";
+import { locations } from "@/data/locations";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface LocationHistoryModalProps {
@@ -14,9 +14,9 @@ export function LocationHistoryModal({
   isOpen,
   onClose,
 }: LocationHistoryModalProps) {
-  const locationHistory = locationId ? getLocationHistoryById(locationId) : undefined;
+  const location = locationId ? locations.find(loc => loc.id === locationId) : undefined;
 
-  if (!locationHistory) {
+  if (!location || !location.history) {
     return null;
   }
 
@@ -24,11 +24,11 @@ export function LocationHistoryModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">{locationHistory.name}</DialogTitle>
+          <DialogTitle className="text-xl font-bold">{location.name}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
           <div className="space-y-4 whitespace-pre-line">
-            {locationHistory.fullHistory}
+            {location.history}
           </div>
         </ScrollArea>
       </DialogContent>

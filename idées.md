@@ -1,45 +1,56 @@
-
 --------------------------
-# Priorités actuelles (phase de saisie d'événements et de contenus)
+# Priorités actuelles (phase de test et optimisation)
 
-## Priorités immédiates à faire
+## Priorités immédiates à faire 
 
-0. **Correction de bug**
-   - J'ai testé sur 2 navigateurs et le point n'est pas à la même place.
+0. **Accès**
+   - Solution pour l'héberger sur mon PC gratuitement pour le public
 
-1. **Formulaire de saisie d'événements**
-   - Créer un formulaire de saisie d'événements qui utilise le système de validation
-   - Intégrer le formulaire à la page Admin
+1. **Test sur mobile**
+   - ▶️ Tester l'application sur différents appareils mobiles 
 
-2. **Documentation**
+2. **Correction des bugs restants**
+
+3. **Optimisations pour mobile**
+   - Améliorer les temps de chargement pour les connexions lentes
+   - Optimiser la taille des images pour le mobile
+   - Implémenter des gestes tactiles intuitifs pour la navigation
+   - Adapter les tailles de police et d'éléments pour les petits écrans
+
+4. **Documentation**
    - Documenter les composants principaux et leur utilisation
    - Ajouter des commentaires explicatifs aux parties complexes du code
 
-4. **Performance**
-   - Optimiser les rendus avec React.memo pour les composants qui ne changent pas souvent
+5. **Interface**
+   - ✅ Icone pour les évènements sauvegardés
+   - ✅ 3 icones pour partager, sauvegarder et fermer côté à côté et au dessue de la ligne de couleur
 
-5. **Petits changements**
-   - Changer le title de l'application en "Collectif Feydeau" au lieu de "island-f"
 
 --------------------------
 # Améliorations Potentielles (long terme)
 
 ## Améliorations Techniques
 
-1. **Structure des données**
-   - Implémenter un système de cache pour éviter de recharger les données inutilement
+1. **Structure des données et synchronisation**
+   - Options de synchronisation :
+     - Polling périodique (simple mais moins efficace)
+     - WebSockets pour une mise à jour instantanée (plus complexe mais plus réactif)
+     - Service Worker pour gérer les mises à jour en arrière-plan
+   - Ajouter un indicateur visuel lorsque des mises à jour sont disponibles
 
 2. **Performance**
    - Implémenter le lazy loading pour les images de la carte
    - Utiliser l'API Intersection Observer pour charger les contenus uniquement lorsqu'ils sont visibles
    - Implémenter le code splitting pour réduire la taille initiale du bundle et améliorer les temps de chargement
    - Analyser et réduire la taille du bundle en supprimant les dépendances inutilisées
+   - Optimiser le stockage local pour éviter les problèmes de quota et améliorer les performances
 
 3. **Architecture**
    - Adopter une architecture modulaire avec des composants réutilisables
    - Séparer clairement la logique métier (services) de l'interface utilisateur (composants)
    - Créer un système de thèmes pour faciliter les changements d'apparence
    - Envisager une solution de gestion d'état plus robuste comme React Context ou Redux
+   - Implémenter un système de versionnement des données pour faciliter la résolution des conflits
 
 ## Expérience Utilisateur
 
