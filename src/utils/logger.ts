@@ -246,15 +246,27 @@ export function createLogViewer() {
   const toggleButton = document.createElement('button');
   toggleButton.textContent = 'Logs';
   toggleButton.style.position = 'fixed';
-  toggleButton.style.bottom = '10px';
-  toggleButton.style.right = '10px';
-  toggleButton.style.zIndex = '10000';
-  toggleButton.style.padding = '5px 10px';
-  toggleButton.style.backgroundColor = '#4a5d94';
+  toggleButton.style.left = '5px';
+  toggleButton.style.bottom = '80px';
+  toggleButton.style.zIndex = '9000';
+  toggleButton.style.padding = '3px 6px';
+  toggleButton.style.backgroundColor = 'rgba(74, 93, 148, 0.8)';
   toggleButton.style.color = 'white';
   toggleButton.style.border = 'none';
   toggleButton.style.borderRadius = '4px';
   toggleButton.style.cursor = 'pointer';
+  toggleButton.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+  toggleButton.style.fontSize = '10px';
+  toggleButton.style.opacity = '0.8';
+  toggleButton.style.transition = 'opacity 0.3s ease';
+  
+  // Ajouter un effet de survol pour rendre le bouton plus visible
+  toggleButton.onmouseover = () => {
+    toggleButton.style.opacity = '1';
+  };
+  toggleButton.onmouseout = () => {
+    toggleButton.style.opacity = '0.8';
+  };
   
   // Ajouter les éléments au DOM
   document.body.appendChild(container);

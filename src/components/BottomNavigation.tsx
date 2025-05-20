@@ -16,8 +16,8 @@ export function BottomNavigation() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center h-16 z-50">
-      <div className="w-full grid grid-cols-5 gap-0">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-center h-16 z-[9999] shadow-lg">
+      <div className="w-full max-w-screen-lg grid grid-cols-5 gap-0 px-2 mx-auto">
         <Link
           to="/map"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${

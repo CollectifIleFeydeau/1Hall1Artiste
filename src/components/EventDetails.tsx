@@ -100,7 +100,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px] pt-12">
+      <DialogContent className="sm:max-w-[425px] pt-12 max-w-[95vw] overflow-x-hidden max-h-[85vh] overflow-y-auto">
         {/* Barre d'icônes en haut */}
         <div className="absolute top-0 left-0 right-0 flex justify-end items-center p-3 bg-white z-10">
           <div className="flex space-x-4">
@@ -157,7 +157,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           <DialogTitle className="text-[#1a2138] pr-16">{event.title}</DialogTitle>
         </DialogHeader>
         
-        <div className="py-4">
+        <div className="py-2 px-1">
           <p className="text-sm font-medium text-[#4a5d94]">Par {event.artistName}</p>
           <div className="flex items-center mb-4">
             <MapPin className="h-3 w-3 mr-1 text-[#8c9db5]" />
@@ -186,7 +186,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             </p>
           </div>
           
-          <div className="flex justify-between space-x-2 mt-6">
+          <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-4">
             {source === "program" ? (
               <Button 
                 className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"

@@ -238,8 +238,8 @@ const Map = ({ fullScreen = false }: MapProps) => {
   const totalCount = mapLocations.length;
 
   return (
-    <div className="min-h-screen bg-white pb-20">
-      <div className="max-w-md mx-auto px-4 pt-4">
+    <div className="min-h-screen bg-white pb-20 overflow-x-hidden">
+      <div className="max-w-screen-lg mx-auto px-4 pt-4">
         <header className="mb-2 flex items-center justify-between">
           <div className="w-1/4"></div>
           <h1 className="text-xl font-bold text-[#4a5d94] text-center">Carte & Parcours</h1>
@@ -294,7 +294,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
         <div className="relative">
           {/* Map container */}
           <div className="bg-white rounded-lg mb-4 border-0 transition-all duration-300 hover:shadow-lg w-full">
-            <div className="flex justify-center" style={{ minWidth: MAP_WIDTH, minHeight: MAP_HEIGHT }}>
+            <div className="flex justify-center">
               <MapComponent 
                 locations={mapLocations} 
                 activeLocation={activeLocation}
@@ -380,7 +380,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
       {/* Fullscreen location details overlay */}
       {fullScreen && activeLocation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setActiveLocation(null)}>
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold text-[#4a5d94]">
                 {mapLocations.find(l => l.id === activeLocation)?.name}
@@ -416,7 +416,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
             {getLocationEvents(activeLocation).length > 0 && (
               <div className="mb-4">
                 <h3 className="font-medium text-[#1a2138] mb-2">Événements à cet endroit:</h3>
-                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-2 -mr-2">
                   {getLocationEvents(activeLocation).map((event) => (
                     <div 
                       key={event.id} 

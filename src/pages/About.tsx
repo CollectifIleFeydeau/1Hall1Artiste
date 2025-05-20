@@ -15,8 +15,8 @@ const About = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen app-gradient pb-20  px-4 pt-4">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen app-gradient pb-20 px-4 pt-4 overflow-x-hidden">
+      <div className="max-w-screen-lg mx-auto">
         <header className="mb-2 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -115,15 +115,15 @@ const About = () => {
                 <Card key={member.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span className="text-purple-600 font-semibold">
+                      <div className="min-w-[48px] w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center overflow-hidden">
+                        <span className="text-purple-600 font-semibold text-center">
                           {member.name.split(' ').map(n => n[0]).join('')}
                         </span>
                       </div>
-                      <div>
-                        <h3 className="font-medium">{member.name}</h3>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium truncate">{member.name}</h3>
                         <p className="text-sm text-purple-600">{member.role}</p>
-                        <p className="text-sm text-gray-500 mt-1">{member.description}</p>
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{member.description}</p>
                       </div>
                     </div>
                   </CardContent>

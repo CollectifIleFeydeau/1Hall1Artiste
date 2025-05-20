@@ -4,18 +4,19 @@
 ## Priorités immédiates à faire 
 
 1. **Test sur mobile**
-   - ▶️ Tester l'application sur différents appareils mobiles 
+   - DONE Tester l'application sur différents appareils mobiles 
+   - Demander à l'équipe de tester l'application sur leurs téléphones 
 
 2. **Correction des bugs restants**
-   - Système de journalisation et détection des erreurs mis en place
-   - Interface visuelle pour consulter les logs en développement (bouton "Logs")
-   - Capture automatique des erreurs non gérées
+   - DONE Corriger le problème de menu du bas qui disparaît lors du défilement
+   - DONE Rendre l'interface dynamique en largeur pour s'adapter aux différents écrans
+   - Vérifier les problèmes d'affichage sur les appareils iOS
 
-3. **Optimisations pour mobile**
-   - Améliorer les temps de chargement pour les connexions lentes
-   - Optimiser la taille des images pour le mobile
-   - Implémenter des gestes tactiles intuitifs pour la navigation
+3. **Optimisations pour mobile (Urgent)**
    - Adapter les tailles de police et d'éléments pour les petits écrans
+   - Optimiser la taille des images pour le mobile (convertir en WebP)
+   - Ajouter un indicateur de chargement pour les connexions lentes
+   - Améliorer l'accessibilité (contraste, taille des zones cliquables)
 
 4. **Documentation**
    - Documenter les composants principaux et leur utilisation
@@ -40,7 +41,21 @@
    - Analyser et réduire la taille du bundle en supprimant les dépendances inutilisées
    - Optimiser le stockage local pour éviter les problèmes de quota et améliorer les performances
 
-3. **Architecture**
+3. **Structure des données et synchronisation**
+   - Options de synchronisation :
+     - Polling périodique (simple mais moins efficace)
+     - WebSockets pour une mise à jour instantanée (plus complexe mais plus réactif)
+     - Service Worker pour gérer les mises à jour en arrière-plan
+   - Ajouter un indicateur visuel lorsque des mises à jour sont disponibles
+
+4. **Performance**
+   - Implémenter le lazy loading pour les images de la carte
+   - Utiliser l'API Intersection Observer pour charger les contenus uniquement lorsqu'ils sont visibles
+   - Implémenter le code splitting pour réduire la taille initiale du bundle et améliorer les temps de chargement
+   - Analyser et réduire la taille du bundle en supprimant les dépendances inutilisées
+   - Optimiser le stockage local pour éviter les problèmes de quota et améliorer les performances
+
+5. **Architecture**
    - Adopter une architecture modulaire avec des composants réutilisables
    - Séparer clairement la logique métier (services) de l'interface utilisateur (composants)
    - Créer un système de thèmes pour faciliter les changements d'apparence

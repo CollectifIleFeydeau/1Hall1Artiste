@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AppImage } from "@/components/AppImage";
 import { createLogger } from "@/utils/logger";
 
 // Créer un logger pour le composant Map
 const logger = createLogger('MapComponent');
 
-// Dimensions fixes pour la carte
+// Dimensions de référence pour la carte (utilisées pour calculer les ratios)
 export const MAP_WIDTH = 400;
 export const MAP_HEIGHT = 600;
 
@@ -40,26 +40,39 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   readOnly = false
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1); // Facteur d'échelle pour les coordonnées
   
-  // Effet pour appliquer des dimensions fixes au conteneur principal
+  // Effet pour appliquer des dimensions responsives au conteneur principal
   useEffect(() => {
-    logger.info('MapComponent monté avec les dimensions fixes', { width: MAP_WIDTH, height: MAP_HEIGHT });
-    
-    // Empêcher le redimensionnement de la fenêtre de modifier les dimensions
-    const handleResize = () => {
+    const calculateScale = () => {
       if (containerRef.current) {
-        // Forcer des dimensions absolues pour garantir la cohérence entre les sessions
-        containerRef.current.style.width = `${MAP_WIDTH}px`;
-        containerRef.current.style.height = `${MAP_HEIGHT}px`;
+        // Obtenir la largeur du conteneur parent
+        const parentWidth = containerRef.current.parentElement?.clientWidth || window.innerWidth;
+        // Calculer le facteur d'échelle basé sur la largeur disponible
+        const maxWidth = Math.min(parentWidth, MAP_WIDTH);
+        const newScale = maxWidth / MAP_WIDTH;
+        setScale(newScale);
+        
+        // Appliquer les dimensions mises à l'échelle
+        containerRef.current.style.width = `${MAP_WIDTH * newScale}px`;
+        containerRef.current.style.height = `${MAP_HEIGHT * newScale}px`;
+        
+        logger.info('MapComponent redimensionné', { 
+          parentWidth, 
+          maxWidth, 
+          scale: newScale, 
+          newWidth: MAP_WIDTH * newScale, 
+          newHeight: MAP_HEIGHT * newScale 
+        });
       }
     };
     
     // Appliquer immédiatement et écouter les redimensionnements
-    handleResize();
-    window.addEventListener('resize', handleResize);
+    calculateScale();
+    window.addEventListener('resize', calculateScale);
     
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', calculateScale);
     };
   }, []);
   
@@ -81,10 +94,10 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   return (
     <div 
       ref={containerRef}
-      className="relative border border-[#d8e3ff] rounded-lg bg-[#f0f5ff] mb-4 overflow-hidden"
+      className="relative border border-[#d8e3ff] rounded-lg bg-[#f0f5ff] mb-4 overflow-hidden mx-auto"
       style={{ 
-        width: `${MAP_WIDTH}px`, 
-        height: `${MAP_HEIGHT}px`
+        width: `${MAP_WIDTH * scale}px`, 
+        height: `${MAP_HEIGHT * scale}px`
       }}
     >
       {/* Fond de carte avec image */}
@@ -118,11 +131,11 @@ export const MapComponent: React.FC<MapComponentProps> = ({
             className="absolute"  
             style={{ 
               position: 'absolute',
-              left: `${location.x}px`, 
-              top: `${location.y}px`,
+              left: `${location.x * scale}px`, 
+              top: `${location.y * scale}px`,
               zIndex: 20,
-              width: '60px', // Zone de clic beaucoup plus large
-              height: '60px',
+              width: `${60 * scale}px`, // Zone de clic mise à l'échelle
+              height: `${60 * scale}px`,
               transform: 'translate(-50%, -50%)', // Centrer le point sur les coordonnées
               pointerEvents: !readOnly ? 'auto' : 'none'
             }}
@@ -137,15 +150,15 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 ${activeLocation === location.id 
                   ? 'bg-[#ff7a45] ring-2 ring-[#ff7a45] ring-opacity-70 scale-110' 
                   : highlightedLocation === location.id
-                    ? 'bg-[#ff7a45] ring-4 ring-yellow-400 ring-opacity-80' // Mise en évidence permanente sans animation
+                    ? 'bg-[#ff7a45] ring-4 ring-yellow-400 ring-opacity-80' 
                     : location.visited 
-                      ? 'bg-[#4CAF50]' // Couleur verte pour les lieux visités
-                      : 'bg-[#4a5d94]'}
-              `}
+                      ? 'bg-[#4CAF50]' 
+                      : 'bg-[#4a5d94]'
+                }`}
               style={{
-                transform: 'translate(-50%, -50%)', // Centrer le point dans la zone de clic
-                width: '32px',
-                height: '32px'
+                transform: 'translate(-50%, -50%)',
+                width: `${32 * scale}px`,
+                height: `${32 * scale}px`
               }}
             />
           </div>

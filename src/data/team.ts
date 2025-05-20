@@ -19,7 +19,7 @@ export const teamMembers: TeamMember[] = [
     id: "member2",
     name: "Philippe Châtel",
     role: "Trésorier",
-    description: "Foundation de l'association et coordonne les communications et les partenariats artistiques."
+    description: "Coordonne les communications et partenariats artistiques."
   },
   {
     id: "member3",
