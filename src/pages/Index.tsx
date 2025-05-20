@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import { useNavigate } from "react-router-dom";
 import AssociationIntro from "@/components/AssociationIntro";
 
@@ -12,7 +12,7 @@ const Index = () => {
 
   const handleGetStarted = () => {
     setShowWelcome(false);
-    setTimeout(() => navigate("/home"), 300);
+    setTimeout(() => navigate("/map"), 300);
   };
 
   return (

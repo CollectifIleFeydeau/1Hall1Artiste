@@ -12,10 +12,10 @@ export function Toaster() {
   const { toasts } = useToast()
 
   return (
-    <ToastProvider swipeDirection="right" swipeThreshold={10}>
+    <ToastProvider data-swipe-direction="right" swipeThreshold={10}>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
-          <Toast key={id} {...props} swipeDirection="right">
+          <Toast key={id} {...props} data-swipe-direction="right">
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (

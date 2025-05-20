@@ -4,10 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trackFeatureUsage } from "../services/analytics";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Bookmark from "lucide-react/dist/esm/icons/bookmark";
-import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
 import { useNavigate } from "react-router-dom";
 import { events, getEventsByDay, type Event } from "@/data/events";
 import { EventFilter } from "@/components/EventFilter";
@@ -15,6 +12,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { EventDetails } from "@/components/EventDetails";
 import { toast } from "@/components/ui/use-toast";
+import { EventCard } from "@/components/EventCard";
 
 const Program = () => {
   const navigate = useNavigate();
@@ -112,51 +110,22 @@ const Program = () => {
           </TabsList>
           
           <TabsContent value="samedi" className="space-y-4">
-            {filterEvents(getEventsByDay("samedi"), currentFilter).map((event, index) => (
-                <Card 
-                  key={`samedi-${event.id}-${index}`}
-                  className="shadow-md border-0 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-                  onClick={() => {
-                    setSelectedEvent(event);
-                    trackFeatureUsage.eventView(event.id, event.title);
-                  }}
-                >
-                  <div className={`h-1 ${event.type === "exposition" ? "bg-[#4a5d94]" : "bg-[#ff7a45]"}`} />
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-[#1a2138]">{event.title}</h3>
-                        <p className="text-sm text-[#4a5d94]">{event.artistName}</p>
-                        <div className="flex items-center mt-1">
-                          <MapPin className="h-3 w-3 mr-1 text-[#8c9db5]" />
-                          <p className="text-xs text-[#8c9db5]">{event.locationName} • {event.time}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end space-y-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="p-1 h-auto"
-                          onClick={(e) => handleSaveEvent(event, e)}
-                        >
-                          {savedEventIds.includes(event.id) ? (
-                            <BookmarkCheck className="h-5 w-5 text-[#ff7a45]" />
-                          ) : (
-                            <Bookmark className="h-5 w-5 text-[#8c9db5]" />
-                          )}
-                        </Button>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          event.type === "exposition" 
-                            ? "bg-[#e0ebff] text-[#4a5d94]" 
-                            : "bg-[#fff2ee] text-[#ff7a45]"
-                        }`}>
-                          {event.type === "exposition" ? "Exposition" : "Concert"}
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            {filterEvents(getEventsByDay("samedi"), currentFilter).map((event, index) => {
+                const eventKey = `samedi-${event.id}-${index}`;
+                return (
+                  <div key={eventKey}>
+                    <EventCard
+                      event={event}
+                      isSaved={savedEventIds.includes(event.id)}
+                      onEventClick={() => {
+                        setSelectedEvent(event);
+                        trackFeatureUsage.eventView(event.id, event.title);
+                      }}
+                      onSaveClick={(e) => handleSaveEvent(event, e)}
+                    />
+                  </div>
+                );
+              })}
               
             {filterEvents(getEventsByDay("samedi"), currentFilter).length === 0 && (
               <div className="text-center py-8 text-[#8c9db5]">
@@ -166,51 +135,22 @@ const Program = () => {
           </TabsContent>
           
           <TabsContent value="dimanche" className="space-y-4">
-            {filterEvents(getEventsByDay("dimanche"), currentFilter).map((event, index) => (
-                <Card 
-                  key={`dimanche-${event.id}-${index}`}
-                  className="shadow-md border-0 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-                  onClick={() => {
-                    setSelectedEvent(event);
-                    trackFeatureUsage.eventView(event.id, event.title);
-                  }}
-                >
-                  <div className={`h-1 ${event.type === "exposition" ? "bg-[#4a5d94]" : "bg-[#ff7a45]"}`} />
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-[#1a2138]">{event.title}</h3>
-                        <p className="text-sm text-[#4a5d94]">{event.artistName}</p>
-                        <div className="flex items-center mt-1">
-                          <MapPin className="h-3 w-3 mr-1 text-[#8c9db5]" />
-                          <p className="text-xs text-[#8c9db5]">{event.locationName} • {event.time}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end space-y-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="p-1 h-auto"
-                          onClick={(e) => handleSaveEvent(event, e)}
-                        >
-                          {savedEventIds.includes(event.id) ? (
-                            <BookmarkCheck className="h-5 w-5 text-[#ff7a45]" />
-                          ) : (
-                            <Bookmark className="h-5 w-5 text-[#8c9db5]" />
-                          )}
-                        </Button>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          event.type === "exposition" 
-                            ? "bg-[#e0ebff] text-[#4a5d94]" 
-                            : "bg-[#fff2ee] text-[#ff7a45]"
-                        }`}>
-                          {event.type === "exposition" ? "Exposition" : "Concert"}
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            {filterEvents(getEventsByDay("dimanche"), currentFilter).map((event, index) => {
+                const eventKey = `dimanche-${event.id}-${index}`;
+                return (
+                  <div key={eventKey}>
+                    <EventCard
+                      event={event}
+                      isSaved={savedEventIds.includes(event.id)}
+                      onEventClick={() => {
+                        setSelectedEvent(event);
+                        trackFeatureUsage.eventView(event.id, event.title);
+                      }}
+                      onSaveClick={(e) => handleSaveEvent(event, e)}
+                    />
+                  </div>
+                );
+              })}
               
             {filterEvents(getEventsByDay("dimanche"), currentFilter).length === 0 && (
               <div className="text-center py-8 text-[#8c9db5]">

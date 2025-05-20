@@ -26,7 +26,7 @@ export function SettingsToggle() {
   const toggleMapFirstExperience = () => {
     setMapFirstExperience(prev => !prev);
     // Reload the page to apply the new setting
-    setTimeout(() => window.location.href = mapFirstExperience ? '/home' : '/', 300);
+    setTimeout(() => window.location.href = mapFirstExperience ? '/map' : '/', 300);
   };
 
   return (

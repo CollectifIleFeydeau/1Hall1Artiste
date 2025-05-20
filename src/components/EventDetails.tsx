@@ -100,7 +100,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px] pt-12 max-w-[95vw] overflow-x-hidden max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto pt-14">
         {/* Barre d'icônes en haut */}
         <div className="absolute top-0 left-0 right-0 flex justify-end items-center p-3 bg-white z-10">
           <div className="flex space-x-4">
@@ -153,12 +153,24 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
         </div>
         
         <div className={`h-1 ${event.type === "exposition" ? "bg-[#4a5d94]" : "bg-[#ff7a45]"}`} />
-        <DialogHeader>
-          <DialogTitle className="text-[#1a2138] pr-16">{event.title}</DialogTitle>
+        
+        <DialogHeader className="sr-only">
+          <DialogTitle>{event.title}</DialogTitle>
         </DialogHeader>
         
         <div className="py-2 px-1">
-          <p className="text-sm font-medium text-[#4a5d94]">Par {event.artistName}</p>
+          {event.type === "exposition" ? (
+            <>
+              <div className="bg-[#e0ebff] p-3 rounded-lg mb-2">
+                <h3 className="text-lg font-medium text-[#1a2138] break-words">{event.title}</h3>
+              </div>
+              <p className="text-sm text-[#4a5d94] mb-2">{event.artistName}</p>
+            </>
+          ) : (
+            <div className="bg-[#f9f2ee] p-3 rounded-lg mb-3">
+              <h3 className="text-lg font-medium text-[#1a2138] break-words">{event.title}</h3>
+            </div>
+          )}
           <div className="flex items-center mb-4">
             <MapPin className="h-3 w-3 mr-1 text-[#8c9db5]" />
             <p className="text-xs text-[#8c9db5]">{event.locationName} • {event.time}</p>
@@ -169,12 +181,6 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           </div>
           
           <div className="border-t border-[#d8e3ff] pt-4 mt-4">
-            <h4 className="text-sm font-medium mb-1 text-[#4a5d94] flex items-center">
-              <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
-              À propos de l'artiste
-            </h4>
-            <p className="text-sm text-[#4a5d94] mb-4 ml-4">{event.artistBio}</p>
-            
             <h4 className="text-sm font-medium mb-1 text-[#4a5d94] flex items-center">
               <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
               Contact

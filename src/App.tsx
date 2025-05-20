@@ -9,6 +9,8 @@ import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import { useEffect, useState } from "react";
 import { initGA, trackPageView } from "./services/analytics";
+import { LoadingProvider } from "@/contexts/LoadingContext";
+import { cacheManager } from "@/utils/cacheManager";
 import Index from "./pages/Index";
 import Map from "./pages/Map";
 import Program from "./pages/Program";
@@ -38,6 +40,15 @@ const AnimatedRoutes = () => {
   // Initialize Google Analytics when the app loads
   useEffect(() => {
     initGA();
+    
+    // Nettoyer le cache périodiquement (toutes les 5 minutes)
+    const cacheCleanupInterval = setInterval(() => {
+      cacheManager.cleanup();
+    }, 5 * 60 * 1000);
+    
+    return () => {
+      clearInterval(cacheCleanupInterval);
+    };
   }, []);
   
   // Track page views when the route changes
@@ -80,13 +91,15 @@ const AppContent = () => {
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <HashRouter>
-          <AppContent />
-        </HashRouter>
-      </TooltipProvider>
+      <LoadingProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <HashRouter>
+            <AppContent />
+          </HashRouter>
+        </TooltipProvider>
+      </LoadingProvider>
     </QueryClientProvider>
   );
 };

@@ -4,26 +4,25 @@
 ## Priorités immédiates à faire 
 
 1. **Test sur mobile**
-   - DONE Tester l'application sur différents appareils mobiles 
    - Demander à l'équipe de tester l'application sur leurs téléphones 
 
-2. **Correction des bugs restants**
-   - DONE Corriger le problème de menu du bas qui disparaît lors du défilement
-   - DONE Rendre l'interface dynamique en largeur pour s'adapter aux différents écrans
-   - Vérifier les problèmes d'affichage sur les appareils iOS
+2. **Performance**
+   - Analyser et réduire la taille du bundle en supprimant les dépendances inutilisées
+   - Implémenter le lazy loading pour les images de la carte
 
-3. **Optimisations pour mobile (Urgent)**
-   - Adapter les tailles de police et d'éléments pour les petits écrans
-   - Optimiser la taille des images pour le mobile (convertir en WebP)
-   - Ajouter un indicateur de chargement pour les connexions lentes
-   - Améliorer l'accessibilité (contraste, taille des zones cliquables)
+## Expérience Utilisateur
 
-4. **Documentation**
-   - Documenter les composants principaux et leur utilisation
-   - Ajouter des commentaires explicatifs aux parties complexes du code
+1. **Interface et Navigation**
+   - Améliorer la navigation entre les différentes sections :
+     - Implémenter un système de navigation par gestes (swipe) entre les pages principales
+     - Créer des transitions animées plus fluides entre les pages
+     - Mettre en place un historique de navigation personnalisé pour faciliter les retours en arrière
+   - Remettre le mot de passe plus tard
+   - Optimiser l'affichage des titres longs dans toutes les vues (cartes, détails, etc.)
+   - Améliorer la cohérence visuelle entre les différentes pages
 
 --------------------------
-# Améliorations Potentielles (long terme)
+# Améliorations Potentielles 
 
 ## Améliorations Techniques
 
@@ -32,30 +31,14 @@
      - Polling périodique (simple mais moins efficace)
      - WebSockets pour une mise à jour instantanée (plus complexe mais plus réactif)
      - Service Worker pour gérer les mises à jour en arrière-plan
-   - Ajouter un indicateur visuel lorsque des mises à jour sont disponibles
+   - Ajouter un indicateur visuel lorsque des mises à jour sont disponibless
 
 2. **Performance**
-   - Implémenter le lazy loading pour les images de la carte
    - Utiliser l'API Intersection Observer pour charger les contenus uniquement lorsqu'ils sont visibles
    - Implémenter le code splitting pour réduire la taille initiale du bundle et améliorer les temps de chargement
-   - Analyser et réduire la taille du bundle en supprimant les dépendances inutilisées
    - Optimiser le stockage local pour éviter les problèmes de quota et améliorer les performances
 
-3. **Structure des données et synchronisation**
-   - Options de synchronisation :
-     - Polling périodique (simple mais moins efficace)
-     - WebSockets pour une mise à jour instantanée (plus complexe mais plus réactif)
-     - Service Worker pour gérer les mises à jour en arrière-plan
-   - Ajouter un indicateur visuel lorsque des mises à jour sont disponibles
-
-4. **Performance**
-   - Implémenter le lazy loading pour les images de la carte
-   - Utiliser l'API Intersection Observer pour charger les contenus uniquement lorsqu'ils sont visibles
-   - Implémenter le code splitting pour réduire la taille initiale du bundle et améliorer les temps de chargement
-   - Analyser et réduire la taille du bundle en supprimant les dépendances inutilisées
-   - Optimiser le stockage local pour éviter les problèmes de quota et améliorer les performances
-
-5. **Architecture**
+3. **Architecture**
    - Adopter une architecture modulaire avec des composants réutilisables
    - Séparer clairement la logique métier (services) de l'interface utilisateur (composants)
    - Créer un système de thèmes pour faciliter les changements d'apparence
@@ -64,20 +47,13 @@
 
 ## Expérience Utilisateur
 
-1. **Interface**
-   - Améliorer la navigation entre les différentes sections
-   - Optimiser l'interface pour les appareils mobiles et tablettes
-   - Remettre le mot de passe plus tard
-
-3. **Support hors ligne**
-   - Ajouter une fonctionnalité hors ligne basique pour permettre aux utilisateurs de consulter le contenu en cache
+1. **Support hors ligne**
    - Mettre en place une gestion des erreurs plus robuste, notamment pour l'intégration HelloAsso
 
 ## Fonctionnalités
 
 1. **Carte interactive**
    - Améliorer la fonctionnalité de la carte avec des fonctionnalités plus interactives
-   - Envisager l'utilisation d'une bibliothèque de cartographie pour une expérience plus réaliste
 
 2. **Sécurité et robustesse**
    - Renforcer les définitions de types et les interfaces pour une meilleure sécurité de type

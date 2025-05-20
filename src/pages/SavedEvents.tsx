@@ -69,89 +69,92 @@ export default function SavedEvents() {
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {savedEvents.map((event) => (
               <Card key={event.id} className="border-[#e0ebff]">
-                <CardHeader className="pb-2">
+                <CardHeader className="py-1 px-3">
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg font-medium">{event.title}</CardTitle>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-red-500 h-8 w-8 p-0"
-                      onClick={() => handleRemoveEvent(event.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <CardTitle className="text-base font-medium">{event.title}</CardTitle>
+                    <div className="flex items-center">
+                      {!event.notificationTime && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-[#4a5d94] h-7 w-7 p-0 mr-1"
+                          onClick={() => setActiveEvent(event.id)}
+                        >
+                          <Bell className="h-3 w-3" />
+                        </Button>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-red-500 h-7 w-7 p-0"
+                        onClick={() => handleRemoveEvent(event.id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
+                <CardContent className="py-1 px-3 pt-0">
+                  <div className="space-y-1 text-xs">
                     <div className="flex items-center text-gray-600">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      <span>{event.days.map(day => day === "samedi" ? "Samedi" : "Dimanche").join(" et ")}, {event.time}</span>
+                      <Calendar className="h-3 w-3 mr-1" />
+                      <span>{event.days.map(day => day === "samedi" ? "Sa" : "Di").join("/")}, {event.time}</span>
                     </div>
                     <div className="flex items-center text-gray-600">
-                      <MapPin className="h-4 w-4 mr-2" />
+                      <MapPin className="h-3 w-3 mr-1" />
                       <span>{event.locationName}</span>
                     </div>
                     {event.notificationTime && (
                       <div className="flex items-center text-[#4a5d94]">
-                        <Bell className="h-4 w-4 mr-2" />
-                        <span>Rappel prévu le {formatEventDate(event.notificationTime)}</span>
+                        <Bell className="h-3 w-3 mr-1" />
+                        <span>Rappel: {formatEventDate(event.notificationTime)}</span>
                       </div>
                     )}
                     
                     {activeEvent === event.id ? (
-                      <div className="mt-4 p-3 bg-[#f0f5ff] rounded-md">
-                        <h3 className="font-medium mb-2">Définir un rappel</h3>
-                        <div className="grid grid-cols-2 gap-2 mb-2">
+                      <div className="mt-2 p-2 bg-[#f0f5ff] rounded-md">
+                        <div className="grid grid-cols-2 gap-2 mb-1">
                           <div>
-                            <Label htmlFor={`date-${event.id}`}>Date</Label>
+                            <Label htmlFor={`date-${event.id}`} className="text-xs mb-1">Date</Label>
                             <Input 
                               id={`date-${event.id}`}
                               type="date" 
+                              className="h-8 text-sm"
                               value={notificationDate}
                               onChange={(e) => setNotificationDate(e.target.value)}
                             />
                           </div>
                           <div>
-                            <Label htmlFor={`time-${event.id}`}>Heure</Label>
+                            <Label htmlFor={`time-${event.id}`} className="text-xs mb-1">Heure</Label>
                             <Input 
                               id={`time-${event.id}`}
                               type="time" 
+                              className="h-8 text-sm"
                               value={notificationTime}
                               onChange={(e) => setNotificationTime(e.target.value)}
                             />
                           </div>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 mt-1">
                           <Button 
-                            className="flex-1 bg-[#4a5d94]"
+                            className="flex-1 bg-[#4a5d94] h-8 text-xs"
                             onClick={() => handleSetNotification(event.id)}
                           >
                             Définir
                           </Button>
                           <Button 
                             variant="outline" 
-                            className="flex-1"
+                            className="flex-1 h-8 text-xs"
                             onClick={() => setActiveEvent(null)}
                           >
                             Annuler
                           </Button>
                         </div>
                       </div>
-                    ) : (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="mt-2 text-[#4a5d94] border-[#4a5d94]"
-                        onClick={() => setActiveEvent(event.id)}
-                      >
-                        <Bell className="h-4 w-4 mr-2" />
-                        {event.notificationTime ? "Modifier le rappel" : "Définir un rappel"}
-                      </Button>
-                    )}
+                    ) : null}
                   </div>
                 </CardContent>
               </Card>

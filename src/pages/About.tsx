@@ -18,7 +18,7 @@ const About = () => {
     <div className="min-h-screen app-gradient pb-20 px-4 pt-4 overflow-x-hidden">
       <div className="max-w-screen-lg mx-auto">
         <header className="mb-2 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/map")}> 
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>

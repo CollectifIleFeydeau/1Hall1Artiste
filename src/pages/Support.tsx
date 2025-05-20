@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Heart, Users, Mail } from "lucide-react";
+import { ArrowLeft, Heart, Users } from "lucide-react";
+import Mail from "lucide-react/dist/esm/icons/mail";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/use-toast";
@@ -47,7 +48,7 @@ const Support = () => {
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 p-4">
       <div className="max-w-md mx-auto pb-10">
         <header className="mb-4 flex items-center">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/home")}>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/map")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
