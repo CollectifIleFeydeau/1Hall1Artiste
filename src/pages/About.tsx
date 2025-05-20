@@ -18,7 +18,7 @@ const About = () => {
     <div className="min-h-screen app-gradient pb-20  px-4 pt-4">
       <div className="max-w-md mx-auto">
         <header className="mb-2 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/home")}>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -30,11 +30,47 @@ const About = () => {
         </header>
         
         <Tabs defaultValue="association" className="w-full mb-6">
-          <TabsList className="grid grid-cols-3 mb-4">
+          <TabsList className="grid grid-cols-4 mb-4">
             <TabsTrigger value="association">Association</TabsTrigger>
+            <TabsTrigger value="history">Histoire</TabsTrigger>
             <TabsTrigger value="team">Notre équipe</TabsTrigger>
             <TabsTrigger value="support">Nous aider</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="history" className="space-y-4">
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <h2 className="text-lg font-semibold mb-3">Histoire de l'Île Feydeau</h2>
+              <p className="text-gray-700 mb-4">
+                L'Île Feydeau est un quartier historique de Nantes, construit au XVIIIe siècle sur une île de la Loire. 
+                Ce lotissement, conçu par l'architecte Jean-Baptiste Ceineray, est un exemple remarquable 
+                d'architecture néoclassique et témoigne de la prospérité des armateurs et négociants nantais de l'époque.
+              </p>
+              
+              <h2 className="text-lg font-semibold mb-3">Architecture unique</h2>
+              <p className="text-gray-700 mb-4">
+                Les immeubles de l'Île Feydeau se caractérisent par leurs façades ornées de mascarons, 
+                leurs balcons en fer forgé et leurs escaliers monumentaux. Ces bâtiments témoignent du savoir-faire 
+                des artisans de l'époque et de l'influence du commerce maritime sur l'architecture nantaise.
+              </p>
+              
+              <h2 className="text-lg font-semibold mb-3">Patrimoine préservé</h2>
+              <p className="text-gray-700 mb-4">
+                Aujourd'hui, l'Île Feydeau n'est plus une île suite aux travaux de comblement de la Loire, 
+                mais son patrimoine architectural est préservé et valorisé. De nombreux immeubles sont classés 
+                ou inscrits aux Monuments Historiques, témoignant de l'importance de ce quartier dans l'histoire de Nantes.
+              </p>
+              
+              <div className="mt-4 flex justify-center">
+                <Button 
+                  variant="outline" 
+                  className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white"
+                  onClick={() => navigate("/location-history")}
+                >
+                  Voir l'histoire détaillée des lieux 
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
           
           <TabsContent value="association" className="space-y-4">
             <div className="bg-white rounded-lg p-6 shadow-md">
@@ -52,13 +88,6 @@ const About = () => {
               <p className="text-gray-700 mb-4">
                 {aboutInfo.neighborhood}
               </p>
-              <Button 
-                variant="outline" 
-                className="w-full border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white"
-                onClick={() => navigate("/location-history")}
-              >
-                Découvrir l'histoire des lieux 
-              </Button>
               
               <h2 className="text-lg font-semibold mb-3">Événement annuel</h2>
               <p className="text-gray-700 mb-4">

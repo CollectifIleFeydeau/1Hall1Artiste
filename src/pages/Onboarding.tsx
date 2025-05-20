@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { motion, PanInfo, useAnimation } from "framer-motion";
+import { AppImage } from "@/components/AppImage";
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ export default function Onboarding() {
               >
               <div className="relative h-2/3 overflow-hidden">
                 <div className="absolute inset-0 bg-black/30 z-10"></div>
-                <img 
+                <AppImage 
                   src={slide.image} 
                   alt={slide.title} 
                   className="w-full h-full object-cover"

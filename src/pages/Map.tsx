@@ -18,9 +18,8 @@ import { VisitProgress } from "@/components/VisitProgress";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { EventDetails } from "@/components/EventDetails";
-import { type Event } from "@/data/events";
+import { type Event, events, getLocationIdForEvent } from "@/data/events";
 import { useData, useEvents, useLocations } from "@/hooks/useData";
-import { getLocationIdForEvent } from "@/services/dataService";
 import { toast } from "@/components/ui/use-toast";
 
 // Créer un logger pour le composant Map
@@ -42,6 +41,8 @@ const Map = ({ fullScreen = false }: MapProps) => {
   const [mapLocations, setMapLocations] = useState(locations);
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [activeLocation, setActiveLocation] = useState<string | null>(null);
+  const [highlightedLocation, setHighlightedLocation] = useState<string | null>(null);
   
   // Initialiser les données des lieux en incluant l'état de visite
   useEffect(() => {
@@ -114,89 +115,84 @@ const Map = ({ fullScreen = false }: MapProps) => {
     localStorage.setItem("savedEvents", JSON.stringify(savedEvents));
   };
   
-  const [activeLocation, setActiveLocation] = useState<string | null>(() => {
-    // Si on arrive depuis l'histoire complète, on active le lieu correspondant
-    return location.state?.highlightLocationId || null;
-  });
-  
   // Effet pour mettre en évidence le lieu lorsqu'on arrive depuis l'histoire complète ou l'admin
   useEffect(() => {
-    logger.info('Vérification des paramètres pour mise en évidence d\'un lieu');
-    
     // Vérifier si on a un ID de lieu à mettre en évidence dans l'état de location
     const highlightId = location.state?.highlightLocationId;
-    logger.debug('ID de lieu dans l\'objet location.state', { highlightId });
+    const fromEvent = location.state?.fromEvent === true;
+    const fromHistory = location.state?.fromHistory === true;
     
     // Vérifier si on a un ID de lieu à mettre en évidence dans les paramètres d'URL
     const searchParams = new URLSearchParams(window.location.search);
     const highlightParam = searchParams.get('highlight');
-    logger.debug('ID de lieu dans les paramètres URL', { highlightParam });
+    const locationParam = searchParams.get('location');
+    const eventParam = searchParams.get('event');
     
     // Utiliser l'ID du paramètre d'URL ou de l'état de location
-    const locationIdToHighlight = highlightParam || highlightId;
+    const locationIdToHighlight = highlightParam || locationParam || highlightId || eventParam;
     
-    if (locationIdToHighlight) {
-      logger.info(`Mise en évidence du lieu avec ID: ${locationIdToHighlight}`);
-      setActiveLocation(locationIdToHighlight);
-      
-      // Trouver l'emplacement correspondant
-      const locationToHighlight = mapLocations.find(loc => loc.id === locationIdToHighlight);
-      if (locationToHighlight) {
-        logger.debug('Lieu trouvé pour mise en évidence', { 
-          id: locationToHighlight.id, 
-          name: locationToHighlight.name,
-          x: locationToHighlight.x,
-          y: locationToHighlight.y
-        });
-      } else {
-        logger.warn(`Lieu avec ID ${locationIdToHighlight} non trouvé dans mapLocations`);
-      }
-    } else {
-      // Vérifier si on a un ID d'événement à mettre en évidence dans les paramètres d'URL
-      const eventParam = searchParams.get('event');
-      if (eventParam) {
-        logger.info(`Recherche du lieu pour l'événement avec ID: ${eventParam}`);
-        // Trouver l'événement et son lieu associé
-        const event = getEventById(eventParam);
-        if (event) {
-          logger.debug('Événement trouvé', { event });
-          setSelectedEvent(event);
-          setActiveLocation(event.locationId);
-        } else {
-          logger.warn(`Événement avec ID ${eventParam} non trouvé`);
-        }
-      }
-      
-      // Vérifier si on a un ID de lieu associé à un événement
-      const locationParam = searchParams.get('location');
-      if (locationParam) {
-        logger.info(`Recherche du lieu pour l'ID: ${locationParam}`);
-        
-        // Vérifier si l'ID est celui d'un événement
-        const event = getEventById(locationParam);
-        if (event) {
-          logger.debug('Événement trouvé, activation du lieu associé', { 
-            eventId: event.id, 
-            locationId: event.locationId 
-          });
-          setActiveLocation(event.locationId);
-        } else {
-          // Sinon, c'est directement l'ID d'un lieu
-          const locationId = locationParam;
-          logger.debug('Activation du lieu', { locationId });
-          // Assurons-nous que locationId est une chaîne de caractères valide
-          if (typeof locationId === 'string') {
-            setActiveLocation(locationId);
-          } else {
-            logger.error('locationId n\'est pas une chaîne de caractères valide', { locationId });
-          }
-        }
+    // Si aucun lieu à mettre en évidence, ne rien faire
+    if (!locationIdToHighlight) {
+      return;
+    }
+    
+    logger.info(`Mise en évidence du lieu avec ID: ${locationIdToHighlight}`);
+    
+    // Convertir l'ID d'événement en ID de lieu si nécessaire
+    let locationIdToUse = locationIdToHighlight;
+    
+    // Si c'est un ID d'événement, le convertir en ID de lieu
+    if (eventParam && locationIdToHighlight === eventParam) {
+      const event = events.find(e => e.id === eventParam);
+      if (event) {
+        locationIdToUse = event.locationId;
+        logger.debug(`Conversion de l'ID d'événement ${eventParam} en ID de lieu ${locationIdToUse}`);
       }
     }
-  }, [location, mapLocations, getEventById]);
+    
+    // Trouver l'emplacement correspondant
+    let locationToHighlight = mapLocations.find(loc => loc.id === locationIdToUse);
+    
+    // Si le lieu n'est pas trouvé directement, essayer de trouver un lieu dont l'ID commence par locationIdToUse
+    // Cela permet de gérer les cas où on passe un ID partiel comme "quai-turenne" au lieu de "quai-turenne-8"
+    if (!locationToHighlight && locationIdToUse) {
+      locationToHighlight = mapLocations.find(loc => loc.id.startsWith(locationIdToUse));
+      if (locationToHighlight) {
+        logger.info(`Lieu avec ID exact ${locationIdToUse} non trouvé, mais un lieu correspondant a été trouvé: ${locationToHighlight.id}`);
+        locationIdToUse = locationToHighlight.id; // Mettre à jour l'ID avec celui qui a été trouvé
+      }
+    }
+    
+    if (locationToHighlight) {
+      logger.debug('Lieu trouvé pour mise en évidence', { 
+        id: locationToHighlight.id, 
+        name: locationToHighlight.name,
+        x: locationToHighlight.x,
+        y: locationToHighlight.y
+      });
+      
+      // Mettre en évidence le lieu (maintenant sans limite de temps)
+      // La mise en évidence restera active jusqu'à ce que l'utilisateur interagisse avec la carte
+      setHighlightedLocation(locationIdToUse);
+      
+      // N'ouvrir la programmation que si nous ne venons pas de l'historique ou des détails d'événement
+      if (!fromHistory && !fromEvent) {
+        setActiveLocation(locationIdToUse);
+      }
+      
+      logger.debug(`Mise en évidence permanente du lieu ${locationIdToUse} jusqu'à la prochaine action utilisateur`);
+    } else {
+      logger.warn(`Lieu avec ID ${locationIdToHighlight} non trouvé dans mapLocations`);
+    }
+  }, [location, mapLocations, events]);
   
   const handleLocationClick = (locationId: string) => {
     logger.info(`Clic sur l'emplacement ${locationId}`);
+    
+    // Stocker l'ID du lieu actif pour la mise en évidence
+    setHighlightedLocation(locationId);
+    
+    // Définir le lieu comme actif pour afficher ses détails
     setActiveLocation(locationId);
     
     // Trouver les événements associés à ce lieu en utilisant le hook useEvents
@@ -215,6 +211,10 @@ const Map = ({ fullScreen = false }: MapProps) => {
     
     setMapLocations(updatedLocations);
     localStorage.setItem('mapLocations', JSON.stringify(updatedLocations));
+    
+    // Réinitialiser la mise en évidence lorsque l'utilisateur marque un lieu comme visité
+    // Cela permet de désactiver la mise en évidence permanente lors d'une action utilisateur
+    setHighlightedLocation(null);
     
     toast({
       title: visited ? "Lieu marqué comme visité" : "Lieu marqué comme non visité",
@@ -297,7 +297,8 @@ const Map = ({ fullScreen = false }: MapProps) => {
             <div className="flex justify-center" style={{ minWidth: MAP_WIDTH, minHeight: MAP_HEIGHT }}>
               <MapComponent 
                 locations={mapLocations} 
-                activeLocation={activeLocation} 
+                activeLocation={activeLocation}
+                highlightedLocation={highlightedLocation} 
                 onClick={(e) => {
                   // Trouver l'élément avec l'ID de location
                   const target = e.target as HTMLElement;
@@ -352,10 +353,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
                     <div className="mt-2 flex justify-between items-center">
                       <Button 
                         variant="ghost" 
-                        size="sm" 
-                        className="p-1 h-6 text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        size="sm"
+                        className="p-1 h-auto"
+                        onClick={() => {
                           markLocationAsVisited(location.id, !location.visited);
                         }}
                       >
@@ -365,6 +365,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
                       {getLocationEvents(location.id).length > 0 && (
                         <span className="text-xs text-[#8c9db5]">{getLocationEvents(location.id).length} événement(s)</span>
                       )}
+// ...
                     </div>
                   </CardContent>
                 </Card>
@@ -460,7 +461,11 @@ const Map = ({ fullScreen = false }: MapProps) => {
               
               <Button 
                 className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"
-                onClick={() => setActiveLocation(null)}
+                onClick={() => {
+                  // Fermer la vue détaillée mais conserver la mise en évidence du lieu
+                  // Le lieu reste en surbrillance grâce à highlightedLocation qui n'est pas réinitialisé
+                  setActiveLocation(null);
+                }}
               >
                 Retour à la carte
               </Button>
@@ -473,7 +478,10 @@ const Map = ({ fullScreen = false }: MapProps) => {
       <EventDetails 
         event={selectedEvent}
         isOpen={!!selectedEvent}
-        onClose={() => setSelectedEvent(null)}
+        onClose={() => {
+          setSelectedEvent(null);
+          setHighlightedLocation(null); // Réinitialiser la mise en évidence
+        }}
         source="map"
       />
       

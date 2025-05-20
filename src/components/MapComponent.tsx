@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { AppImage } from "@/components/AppImage";
 import { createLogger } from "@/utils/logger";
 
 // Créer un logger pour le composant Map
@@ -8,18 +9,21 @@ const logger = createLogger('MapComponent');
 export const MAP_WIDTH = 400;
 export const MAP_HEIGHT = 600;
 
-interface MapComponentProps {
-  locations: Array<{
-    id: string;
-    name: string;
-    x: number;
-    y: number;
-    visited?: boolean;
-  }>;
-  activeLocation?: string | null;
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
-  readOnly?: boolean;
+export type Location = {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  visited?: boolean;
 }
+
+export type MapComponentProps = {
+  locations: Location[];
+  activeLocation: string | null;
+  highlightedLocation?: string | null; // Emplacement à mettre en évidence temporairement
+  onClick?: (e: React.MouseEvent) => void;
+  readOnly?: boolean;
+};
 
 /**
  * Composant de carte
@@ -31,6 +35,7 @@ interface MapComponentProps {
 export const MapComponent: React.FC<MapComponentProps> = ({
   locations,
   activeLocation,
+  highlightedLocation = null,
   onClick,
   readOnly = false
 }) => {
@@ -90,7 +95,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           cursor: !readOnly ? 'pointer' : 'default'
         }}
       >
-        <img 
+        <AppImage 
           src="/Plan Île Feydeau.png" 
           alt="Plan de l'Île Feydeau" 
           className="object-contain"
@@ -131,9 +136,11 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               className={`absolute top-1/2 left-1/2 w-8 h-8 rounded-full shadow-lg border-2 border-white
                 ${activeLocation === location.id 
                   ? 'bg-[#ff7a45] ring-2 ring-[#ff7a45] ring-opacity-70 scale-110' 
-                  : location.visited 
-                    ? 'bg-[#4CAF50]' // Couleur verte pour les lieux visités
-                    : 'bg-[#4a5d94]'}
+                  : highlightedLocation === location.id
+                    ? 'bg-[#ff7a45] ring-4 ring-yellow-400 ring-opacity-80' // Mise en évidence permanente sans animation
+                    : location.visited 
+                      ? 'bg-[#4CAF50]' // Couleur verte pour les lieux visités
+                      : 'bg-[#4a5d94]'}
               `}
               style={{
                 transform: 'translate(-50%, -50%)', // Centrer le point dans la zone de clic

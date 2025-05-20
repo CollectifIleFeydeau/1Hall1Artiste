@@ -112,9 +112,9 @@ const Program = () => {
           </TabsList>
           
           <TabsContent value="samedi" className="space-y-4">
-            {filterEvents(getEventsByDay("samedi"), currentFilter).map((event) => (
+            {filterEvents(getEventsByDay("samedi"), currentFilter).map((event, index) => (
                 <Card 
-                  key={event.id}
+                  key={`samedi-${event.id}-${index}`}
                   className="shadow-md border-0 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                   onClick={() => {
                     setSelectedEvent(event);
@@ -166,9 +166,9 @@ const Program = () => {
           </TabsContent>
           
           <TabsContent value="dimanche" className="space-y-4">
-            {filterEvents(getEventsByDay("dimanche"), currentFilter).map((event) => (
+            {filterEvents(getEventsByDay("dimanche"), currentFilter).map((event, index) => (
                 <Card 
-                  key={event.id}
+                  key={`dimanche-${event.id}-${index}`}
                   className="shadow-md border-0 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                   onClick={() => {
                     setSelectedEvent(event);

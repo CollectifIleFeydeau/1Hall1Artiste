@@ -23,23 +23,55 @@ interface EventDetailsProps {
 }
 
 export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsProps) => {
-  // Si pas d'événement ou si le dialogue n'est pas ouvert, ne rien afficher
-  if (!event || !isOpen) return null;
   const navigate = useNavigate();
   const { toast } = useToast();
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
   
   useEffect(() => {
-    // Charger les événements sauvegardés
-    const savedEvents = getSavedEvents();
-    setSavedEventIds(savedEvents.map(event => event.id));
-  }, []);
+    // Charger les événements sauvegardés seulement quand le dialogue est ouvert
+    if (isOpen && event) {
+      const savedEvents = getSavedEvents();
+      setSavedEventIds(savedEvents.map(e => e.id));
+    }
+  }, [isOpen, event]);
   
-  const handleSaveEvent = (e: React.MouseEvent) => {
+  // Fonction pour naviguer vers la carte
+  const navigateToMap = () => {
+    if (!event) return;
+    
+    // Ajouter des logs pour déboguer
+    console.log(`[EventDetails] Navigation vers la carte pour l'événement ${event.id} au lieu ${event.locationId}`);
+    console.log(`[EventDetails] Source de navigation: ${source}`);
+    
+    // Track event view in analytics
+    trackFeatureUsage.eventView(event.id, event.title);
+    
+    // Fermer d'abord le dialogue pour éviter les problèmes de navigation
+    onClose();
+    
+    // Utiliser setTimeout pour s'assurer que le dialogue est fermé avant la navigation
+    setTimeout(() => {
+      // Naviguer vers la carte avec un paramètre fromEvent pour indiquer que nous venons des détails d'un événement
+      console.log(`[EventDetails] Redirection vers /map avec highlightLocationId=${event.locationId}`);
+      
+      navigate(`/map`, { 
+        state: { 
+          highlightLocationId: event.locationId,
+          fromEvent: true,
+          timestamp: new Date().getTime() // Ajouter un timestamp pour garantir que l'état est considéré comme nouveau
+        } 
+      });
+    }, 100);
+  };
+  
+  // Fonction pour gérer la sauvegarde/suppression d'un événement
+  const toggleSaveEvent = (e: React.MouseEvent) => {
     if (!event) return;
     e.stopPropagation();
     
-    if (savedEventIds.includes(event.id)) {
+    const isSaved = savedEventIds.includes(event.id);
+    
+    if (isSaved) {
       // Supprimer l'événement des sauvegardés
       removeSavedEvent(event.id);
       setSavedEventIds(savedEventIds.filter(id => id !== event.id));
@@ -60,21 +92,10 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     }
   };
   
-  const handleViewOnMap = () => {
-    if (!event) return;
-    // Track event view in analytics
-    trackFeatureUsage.eventView(event.id, event.title);
-    // Naviguer vers la carte avec l'ID de l'événement
-    // Fermer d'abord le dialogue pour éviter les problèmes de navigation
-    onClose();
-    // Utiliser setTimeout pour s'assurer que le dialogue est fermé avant la navigation
-    setTimeout(() => {
-      navigate(`/map?event=${event.id}`);
-    }, 100);
-  };
+  // Si pas d'événement ou si le dialogue n'est pas ouvert, ne rien afficher
+  if (!event || !isOpen) return null;
   
-  // La vérification est déjà faite au début du composant
-  
+  // Déterminer si l'événement est sauvegardé
   const isEventSaved = savedEventIds.includes(event.id);
   
   return (
@@ -85,7 +106,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           <div className="flex space-x-4">
             <button
               className={`flex items-center justify-center h-10 w-10 rounded-full border ${isEventSaved ? "border-[#ff7a45] text-[#ff7a45]" : "border-gray-300 text-gray-500"} transition-all duration-200 hover:shadow-sm`}
-              onClick={handleSaveEvent}
+              onClick={toggleSaveEvent}
               title={isEventSaved ? "Retirer des favoris" : "Ajouter aux favoris"}
               type="button"
             >
@@ -169,7 +190,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             {source === "program" ? (
               <Button 
                 className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"
-                onClick={handleViewOnMap}
+                onClick={navigateToMap}
               >
                 <MapPin className="h-4 w-4 mr-2" />
                 Voir sur la carte

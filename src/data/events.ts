@@ -166,7 +166,7 @@ export const events: Event[] = [
     contact: "emmanuelle.boisson1@gmail.com",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "quai-turenne",
+    locationId: "quai-turenne-8",
     locationName: "8 quai Turenne",
     x: 350,
     y: 250
@@ -181,7 +181,7 @@ export const events: Event[] = [
     contact: "katclement@orange.fr",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "quai-turenne",
+    locationId: "quai-turenne-8",
     locationName: "8 quai Turenne",
     x: 350,
     y: 250
@@ -196,7 +196,7 @@ export const events: Event[] = [
     contact: "rouinemostapha@gmail.com",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "quai-turenne",
+    locationId: "quai-turenne-8",
     locationName: "8 quai Turenne",
     x: 350,
     y: 250
@@ -211,7 +211,7 @@ export const events: Event[] = [
     contact: "joss.proof@gmail.com",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "quai-turenne",
+    locationId: "quai-turenne-8",
     locationName: "8 quai Turenne",
     x: 350,
     y: 250

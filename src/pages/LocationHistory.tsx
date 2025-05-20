@@ -18,8 +18,19 @@ export function LocationHistory() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Filtrer uniquement les lieux qui ont un historique
-  const locationsWithHistory = locations.filter(loc => loc.history);
+  // Filtrer uniquement les lieux qui ont un historique et éliminer les doublons
+  const locationsWithHistory = locations
+    .filter(loc => loc.history) // Garder uniquement les lieux avec historique
+    .filter((loc, index, self) => {
+      // Éliminer les doublons basés sur le nom
+      return index === self.findIndex(l => l.name === loc.name);
+    });
+    
+  // Ajouter le 8 quai Turenne s'il n'est pas déjà inclus
+  const quai8 = locations.find(loc => loc.id === "quai-turenne-8");
+  if (quai8 && !locationsWithHistory.some(loc => loc.id === "quai-turenne-8")) {
+    locationsWithHistory.push(quai8);
+  }
   
   const [selectedLocation, setSelectedLocation] = useState(() => {
     // Récupérer le locationId depuis l'état de navigation s'il existe
@@ -81,7 +92,13 @@ export function LocationHistory() {
                 size="sm"
                 className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white"
                 onClick={() => {
-                  navigate('/map', { state: { highlightLocationId: selectedLocationData.id } });
+                  // Rediriger vers la carte avec le point mis en évidence
+                  navigate('/map', { 
+                    state: { 
+                      highlightLocationId: selectedLocationData.id,
+                      fromHistory: true // Indiquer que la navigation vient de l'historique
+                    } 
+                  });
                 }}
               >
                 <MapPin className="h-4 w-4 mr-1" />

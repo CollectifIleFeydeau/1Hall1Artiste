@@ -3,13 +3,13 @@
 
 ## Priorités immédiates à faire 
 
-0. **Accès**
-   - Solution pour l'héberger sur mon PC gratuitement pour le public
-
 1. **Test sur mobile**
    - ▶️ Tester l'application sur différents appareils mobiles 
 
 2. **Correction des bugs restants**
+   - Système de journalisation et détection des erreurs mis en place
+   - Interface visuelle pour consulter les logs en développement (bouton "Logs")
+   - Capture automatique des erreurs non gérées
 
 3. **Optimisations pour mobile**
    - Améliorer les temps de chargement pour les connexions lentes
@@ -20,11 +20,6 @@
 4. **Documentation**
    - Documenter les composants principaux et leur utilisation
    - Ajouter des commentaires explicatifs aux parties complexes du code
-
-5. **Interface**
-   - ✅ Icone pour les évènements sauvegardés
-   - ✅ 3 icones pour partager, sauvegarder et fermer côté à côté et au dessue de la ligne de couleur
-
 
 --------------------------
 # Améliorations Potentielles (long terme)
