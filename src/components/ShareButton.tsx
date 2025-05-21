@@ -148,9 +148,9 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-8 w-8 p-0 flex items-center justify-center bg-white border border-gray-200 rounded-md hover:bg-gray-50 shadow-sm transition-all duration-200 hover:shadow"
+          className="flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-[#4a5d94] transition-all duration-200 hover:shadow-sm"
         >
-          <Share2 className="h-4 w-4 text-[#4a5d94]" />
+          <Share2 className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[150px]">
