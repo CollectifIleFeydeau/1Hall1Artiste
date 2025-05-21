@@ -1,0 +1,20 @@
+# Navigateurs supportés par l'application
+# Cette configuration est utilisée par les outils comme Autoprefixer, Babel, etc.
+
+# Navigateurs modernes (>0.5% de part de marché, pas de navigateurs morts)
+>0.5%
+not dead
+not ie 11
+
+# Inclure les 2 dernières versions des navigateurs principaux
+last 2 Chrome versions
+last 2 Firefox versions
+last 2 Safari versions
+last 2 Edge versions
+
+# Support pour les appareils mobiles
+last 2 iOS versions
+last 2 Android versions
+
+# Support pour les fonctionnalités modernes
+not op_mini all

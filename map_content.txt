@@ -254,7 +254,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
       <div className="max-w-screen-lg mx-auto px-4 pt-4">
         <header className="mb-2 flex items-center justify-between">
           <div className="w-1/4"></div>
-          <h1 className="text-xl font-bold text-[#4a5d94] text-center">Carte</h1>
+          <h1 className="text-xl font-bold text-[#4a5d94] text-center">Carte & Parcours</h1>
           <div className="flex items-center space-x-2 w-1/4 justify-end">
             <ShareButton 
               title="Parcours Île Feydeau" 
@@ -281,7 +281,25 @@ const Map = ({ fullScreen = false }: MapProps) => {
           </div>
         </div>
         
-
+        {!fullScreen && (
+            
+            {/* Légende sous le titre */}
+            <div className="flex items-center justify-center mt-2 space-x-4">
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-5 h-5 bg-[#ff7a45] rounded-full mr-1 text-white text-xs font-medium">
+                  {visitedCount}
+                </div>
+                <span className="text-xs">{visitedCount > 1 ? 'Visités' : 'Visité'}</span>
+              </div>
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-5 h-5 bg-[#4a5d94] rounded-full mr-1 text-white text-xs font-medium">
+                  {totalCount - visitedCount}
+                </div>
+                <span className="text-xs">À découvrir</span>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="relative">
           {/* Map container */}
@@ -321,15 +339,56 @@ const Map = ({ fullScreen = false }: MapProps) => {
           {/* La légende a été déplacée sous le titre */}
         </div>
         
-
+        {/* Bottom text instruction */}
+        {!fullScreen ? (
+          <p className="text-center text-sm text-[#4a5d94] mt-2">Cliquez sur les points pour plus d'informations sur chaque lieu.</p>
+        ) : null}
         
-      
+        {/* Location list - only shown in non-fullscreen mode */}
+        {!fullScreen && (
+          <div className="bg-white rounded-lg p-4 shadow-md border-0 mt-4">
+            <h3 className="font-medium text-[#4a5d94] mb-3">Lieux à visiter</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {mapLocations.map((location) => (
+                <Card 
+                  key={location.id}
+                  className={`cursor-pointer transition-all duration-200 border-0 ${activeLocation === location.id ? 'ring-2 ring-[#ff7a45]' : ''}`}
+                  onClick={() => handleLocationClick(location.id)}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-3 h-3 rounded-full ${location.visited ? 'bg-[#ff7a45]' : 'bg-[#4a5d94]'}`}></div>
+                      <p className="text-sm font-medium text-[#4a5d94] truncate">{location.name}</p>
+                    </div>
+                    <div className="mt-2 flex justify-between items-center">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="p-1 h-auto"
+                        onClick={() => {
+                          markLocationAsVisited(location.id, !location.visited);
+                        }}
+                      >
+                        {location.visited ? 'Visité ✓' : 'Marquer'}
+                      </Button>
+                      
+                      {getLocationEvents(location.id).length > 0 && (
+                        <span className="text-xs text-[#8c9db5]">{getLocationEvents(location.id).length} événement(s)</span>
+                      )}
+// ...
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Removed visit confirmation dialog */}
       
-      {/* Location details overlay */}
-      {activeLocation && (
+      {/* Fullscreen location details overlay */}
+      {fullScreen && activeLocation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setActiveLocation(null)}>
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-4">

@@ -16,6 +16,7 @@ import { type Event, getEventsByLocation } from "@/data/events";
 import { locations } from "@/data/locations";
 import { trackFeatureUsage } from "@/services/analytics";
 import { InstagramCarousel } from "@/components/InstagramCarousel";
+import { TruncatedText } from "@/components/TruncatedText";
 
 interface EventDetailsProps {
   event: Event | null;
@@ -164,22 +165,43 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           {event.type === "exposition" ? (
             <>
               <div className="bg-[#e0ebff] p-3 rounded-lg mb-2">
-                <h3 className="text-lg font-medium text-[#1a2138] break-words">{event.title}</h3>
+                <h3 className="text-lg font-medium text-[#1a2138] break-words">
+                  {/* Pas de troncature pour le titre principal, mais utilisation de break-words */}
+                  {event.title}
+                </h3>
               </div>
-              <p className="text-sm text-[#4a5d94] mb-2">{event.artistName}</p>
+              <p className="text-sm text-[#4a5d94] mb-2">
+                <TruncatedText 
+                  text={event.artistName} 
+                  maxLength={40} 
+                  className="text-sm text-[#4a5d94]"
+                />
+              </p>
             </>
           ) : (
             <div className="bg-[#f9f2ee] p-3 rounded-lg mb-3">
-              <h3 className="text-lg font-medium text-[#1a2138] break-words">{event.title}</h3>
+              <h3 className="text-lg font-medium text-[#1a2138] break-words">
+                {/* Pas de troncature pour le titre principal, mais utilisation de break-words */}
+                {event.title}
+              </h3>
             </div>
           )}
           <div className="flex items-center mb-4">
             <MapPin className="h-3 w-3 mr-1 text-[#8c9db5]" />
-            <p className="text-xs text-[#8c9db5]">{event.locationName} • {event.time}</p>
+            <p className="text-xs text-[#8c9db5]">
+              <TruncatedText 
+                text={`${event.locationName} • ${event.time}`} 
+                maxLength={40} 
+                className="text-xs text-[#8c9db5]"
+              />
+            </p>
           </div>
           
           <div className="bg-[#f0f5ff] p-3 rounded-lg mb-4">
-            <p className="text-sm text-[#4a5d94]">{event.description}</p>
+            <p className="text-sm text-[#4a5d94]">
+              {/* Pas de troncature pour la description, car c'est un élément important */}
+              {event.description}
+            </p>
           </div>
           
           {/* Nous ne montrons plus l'adresse Instagram car le widget l'affiche déjà */}
@@ -187,20 +209,31 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           {/* Instagram Embed - Show actual Instagram feed */}
           {event.contact && event.contact.includes('instagram') && (
             <div className="border-t border-[#d8e3ff] pt-4 mt-4">
-              <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
+              {/* <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
                 <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
                 Photos Instagram de l'artiste
-              </h4>
-              <div className="instagram-embed-container overflow-hidden rounded-lg">
+              </h4> */}
+              <div 
+                className="instagram-embed-container overflow-hidden rounded-lg" 
+                style={{
+                  maxHeight: '240px',
+                  overflow: 'hidden'
+                }}
+              >
                 <iframe
                   title={`Instagram feed de ${event.artistName}`}
-                  src={`https://www.instagram.com/${event.contact.split('/').pop()}/embed`}
+                  src={`https://www.instagram.com/${event.contact.split('/').pop()}/embed?hidecaption=1&header=0`}
                   width="100%"
-                  height="450"
+                  height="275"
                   frameBorder="0"
                   scrolling="no"
-                  allowTransparency={true}
-                  className="instagram-embed"
+                  allowTransparency="true"
+                  loading="lazy"
+                  style={{
+                    transform: 'scale(0.99)',
+                    transformOrigin: 'top center',
+                    marginTop: '-40px' // Réduit le décalage vers le haut pour éviter que le contenu soit coupé
+                  }}
                 ></iframe>
               </div>
             </div>

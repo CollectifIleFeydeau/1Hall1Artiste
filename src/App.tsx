@@ -1,82 +1,152 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate, useNavigate } from "react-router-dom";
 import { HashRouter } from "react-router-dom/dist/index";
 import { AnimatePresence } from "framer-motion";
-import { PageTransition } from "@/components/PageTransition";
-import { useEffect, useState } from "react";
-import { initGA, trackPageView } from "./services/analytics";
-import { LoadingProvider } from "@/contexts/LoadingContext";
-import { cacheManager } from "@/utils/cacheManager";
-import Index from "./pages/Index";
+
+// Contextes
+import { NavigationProvider } from "./contexts/NavigationContext";
+import { LoadingProvider } from "./contexts/LoadingContext";
+
+// Composants
+import { PageTransition } from "./components/PageTransition";
+import { SwipeNavigation } from "./components/SwipeNavigation";
+
+// Pages
 import Map from "./pages/Map";
 import Program from "./pages/Program";
 import About from "./pages/About";
-import Team from "./pages/Team";
-import Support from "./pages/Support";
 import Donate from "./pages/Donate";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import SavedEvents from "./pages/SavedEvents";
 import Onboarding from "./pages/Onboarding";
 import { LocationHistory } from "./pages/LocationHistory";
-// import { NotificationsProvider } from "./components/NotificationsProvider";
 
 const queryClient = new QueryClient();
 
-// Animated routes component with location-based transitions
+/**
+ * Composant qui gère les transitions entre les routes
+ */
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   
-  // Get map-first experience preference from localStorage
-  const [mapFirstExperience, setMapFirstExperience] = useState<boolean>(() => {
-    const saved = localStorage.getItem('mapFirstExperience');
-    return saved ? JSON.parse(saved) : true; // Par défaut, utiliser la carte comme page d'accueil
+  // État pour suivre si l'utilisateur a déjà vu l'onboarding
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(() => {
+    const storedValue = localStorage.getItem('hasSeenOnboarding');
+    return storedValue === 'true';
   });
   
-  // Initialize Google Analytics when the app loads
+  // Vérifier si c'est la première visite
   useEffect(() => {
-    initGA();
-    
-    // Nettoyer le cache périodiquement (toutes les 5 minutes)
-    const cacheCleanupInterval = setInterval(() => {
-      cacheManager.cleanup();
-    }, 5 * 60 * 1000);
-    
-    return () => {
-      clearInterval(cacheCleanupInterval);
-    };
-  }, []);
+    // Si c'est la première visite et que l'utilisateur n'est pas déjà sur la page d'onboarding
+    if (!hasSeenOnboarding && location.pathname !== '/onboarding') {
+      navigate('/onboarding');
+    }
+  }, [hasSeenOnboarding, location.pathname, navigate]);
   
-  // Track page views when the route changes
-  useEffect(() => {
-    trackPageView(location.pathname);
-  }, [location]);
+  // Marquer l'onboarding comme vu
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
+    setHasSeenOnboarding(true);
+    navigate('/map');
+  };
   
-  // Vérifier si l'utilisateur a déjà vu l'onboarding
-  const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-
+  // Routes qui supportent la navigation par gestes
+  const swipeableRoutes = [
+    '/',
+    '/map',
+    '/program',
+    '/saved',
+    '/about',
+    '/donate'
+  ];
+  
+  // Vérifier si la page actuelle supporte la navigation par gestes
+  const isSwipeablePage = swipeableRoutes.includes(location.pathname);
+  
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Rediriger vers l'onboarding lors de la première visite, sinon vers la carte */}
         <Route path="/" element={
-          !hasSeenOnboarding 
-            ? <Navigate to="/onboarding" replace /> 
-            : <Navigate to="/map" replace />
+          hasSeenOnboarding ? (
+            <Navigate to="/map" replace />
+          ) : (
+            <Navigate to="/onboarding" replace />
+          )
         } />
-        <Route path="/map" element={<PageTransition><Map fullScreen={true} /></PageTransition>} />
-        <Route path="/program" element={<PageTransition><Program /></PageTransition>} />
-        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+        
+        {/* Routes principales avec navigation par gestes */}
+        <Route path="/map" element={
+          <PageTransition>
+            {isSwipeablePage ? (
+              <SwipeNavigation>
+                <Map />
+              </SwipeNavigation>
+            ) : (
+              <Map />
+            )}
+          </PageTransition>
+        } />
+        
+        <Route path="/program" element={
+          <PageTransition>
+            {isSwipeablePage ? (
+              <SwipeNavigation>
+                <Program />
+              </SwipeNavigation>
+            ) : (
+              <Program />
+            )}
+          </PageTransition>
+        } />
+        
+        <Route path="/saved" element={
+          <PageTransition>
+            {isSwipeablePage ? (
+              <SwipeNavigation>
+                <SavedEvents />
+              </SwipeNavigation>
+            ) : (
+              <SavedEvents />
+            )}
+          </PageTransition>
+        } />
+        
+        <Route path="/about" element={
+          <PageTransition>
+            {isSwipeablePage ? (
+              <SwipeNavigation>
+                <About />
+              </SwipeNavigation>
+            ) : (
+              <About />
+            )}
+          </PageTransition>
+        } />
+        
+        <Route path="/donate" element={
+          <PageTransition>
+            {isSwipeablePage ? (
+              <SwipeNavigation>
+                <Donate />
+              </SwipeNavigation>
+            ) : (
+              <Donate />
+            )}
+          </PageTransition>
+        } />
+        
+        {/* Routes sans navigation par gestes */}
         <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
-        <Route path="/saved-events" element={<PageTransition><SavedEvents /></PageTransition>} />
         <Route path="/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
-        {/* Team and Support pages are now integrated into the About page */}
-        <Route path="/donate" element={<PageTransition><Donate /></PageTransition>} />
         <Route path="/location-history" element={<PageTransition><LocationHistory /></PageTransition>} />
+        
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
@@ -96,7 +166,9 @@ const App = () => {
           <Toaster />
           <Sonner />
           <HashRouter>
-            <AppContent />
+            <NavigationProvider>
+              <AppContent />
+            </NavigationProvider>
           </HashRouter>
         </TooltipProvider>
       </LoadingProvider>

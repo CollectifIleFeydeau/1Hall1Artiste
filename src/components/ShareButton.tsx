@@ -15,14 +15,16 @@ interface ShareButtonProps {
 }
 
 export function ShareButton({ title, text, url }: ShareButtonProps) {
-  const shareUrl = url || window.location.href;
+  // Utiliser une référence pour s'assurer que l'URL est disponible après le rendu
+  const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
   
   const handleShare = async (platform: string) => {
-    // Track share event
-    trackFeatureUsage.shareContent(platform, title);
+    try {
+      // Track share event
+      trackFeatureUsage.shareContent(platform, title);
     
     // S'assurer que l'URL est absolue
-    const absoluteUrl = shareUrl.startsWith('http') ? shareUrl : window.location.origin + shareUrl;
+    const absoluteUrl = shareUrl.startsWith('http') ? shareUrl : (typeof window !== 'undefined' ? window.location.origin + shareUrl : shareUrl);
     
     switch (platform) {
       case "native":
@@ -88,6 +90,16 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
         copyToClipboard(absoluteUrl);
         break;
     }
+    } catch (error) {
+      console.error("Error in handleShare:", error);
+      // Fallback en cas d'erreur générale
+      try {
+        copyToClipboard(shareUrl);
+      } catch (e) {
+        console.error("Error in fallback copy:", e);
+        alert('Impossible de partager. Veuillez copier manuellement : ' + shareUrl);
+      }
+    }
   };
   
   const copyToClipboard = (text: string) => {
@@ -142,7 +154,7 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[150px]">
-        {navigator.share && (
+        {typeof navigator !== 'undefined' && navigator.share && (
           <DropdownMenuItem onClick={() => handleShare("native")} className="cursor-pointer">
             Partager
           </DropdownMenuItem>

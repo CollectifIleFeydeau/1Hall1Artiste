@@ -185,18 +185,7 @@ const eventScheduleData: EventDetails[] = [
     x: 350,
     y: 250
   },
-  {
-    id: "expo-jocelyn-prouff", // Changed ID (was expo9)
-    artistId: "jocelyn-prouff",
-    title: "Carnets Nantais",
-    description: "Croquant in situ des lieux urbains où la nature reprend ses droits, avec une attention particulière à la lumière et aux détails, Joss Proof invite à un autre regard sur la ville à travers ses carnets sensibles. Il partage cet univers dans son livre \"Carnets Nantais\".",
-    time: "10h00 - 18h00, samedi et dimanche",
-    days: ["samedi", "dimanche"],
-    locationId: "quai-turenne-8",
-    locationName: "8 quai Turenne",
-    x: 350,
-    y: 250
-  },
+
   {
     id: "expo-bruno-barbier", // Changed ID (was bruno-barbier)
     artistId: "bruno-barbier",
@@ -228,8 +217,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Associant couleurs, mouvements et lumière pour susciter l'émotion, l'artiste peintre abstrait Alain Gremillet explore librement la matière avec acrylique, spatules et objets du quotidien, donnant naissance à des œuvres uniques et lumineuses.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "rue-kervegan-11",
-    locationName: "11 rue Kervégan",
+    locationId: "quai-turenne-10",
+    locationName: "10 quai Turenne / 13 rue Kervégan",
     x: 280,
     y: 200
   },
@@ -240,8 +229,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Mêlant photographie, intervention in-situ et peinture acrylique, Jérôme Gourdon se définit comme un photo-émographe. Son travail explore les frontières entre image captée et image transformée, pour créer des œuvres à la croisée des médiums.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "rue-kervegan-11",
-    locationName: "11 rue Kervégan",
+    locationId: "quai-turenne-10",
+    locationName: "10 quai Turenne / 13 rue Kervégan",
     x: 280,
     y: 200
   },
@@ -252,8 +241,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Des mondes imaginaires prennent forme au marqueur acrylique, dans un style mêlant pointillisme, précision et rêverie. Autodidacte, Nadhame.artiste, alias Nadège Hameau, cultive une démarche empreinte de patience et de poésie visuelle.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "rue-kervegan-13",
-    locationName: "13 rue Kervégan",
+    locationId: "quai-turenne-10",
+    locationName: "10 quai Turenne / 13 rue Kervégan",
     x: 290,
     y: 210
   },
@@ -264,8 +253,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Revisitant les cartes postales du vieux Nantes avec un style unique et détaillé, Pauline Crusson sous le nom de PaoaNaoned, redonne vie à ces images anciennes. Elle capture ainsi l'essence de la ville à travers ses dessins.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "rue-dugueslin",
-    locationName: "Rue Dugueslin",
+    locationId: "quai-turenne-10",
+    locationName: "10 quai Turenne / 13 rue Kervégan",
     x: 320,
     y: 230
   },
@@ -276,8 +265,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Explorant des instants d'intimité à la lisière du visible, Marie Husson archive ses découvertes sous forme de dessins et peintures mêlant aquarelle, encre, broderie ou huile. Sa pratique, expérimentale et sensible, donne naissance à des images profondes, fragiles et puissamment poétiques.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "quai-turenne-10",
-    locationName: "10 quai Turenne",
+    locationId: "rue-kervegan-17",
+    locationName: "17 rue Kervégan / 11 quai Turenne",
     x: 340,
     y: 240
   },
@@ -288,8 +277,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Inspirée par l'histoire et le patrimoine local, notamment celui d'Anne de Bretagne, Clotilde Debar-Zablocki crée un univers poétique et sensible. Avec David, elle forme le duo apolline.design, spécialisé en fresques décoratives et patines.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "quai-turenne-12",
-    locationName: "12 quai Turenne",
+    locationId: "allee-duguay-trouin-11",
+    locationName: "11 allée Duguay Trouin / 20 rue Kervégan",
     x: 360,
     y: 260
   },
@@ -300,8 +289,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Artiste peintre et sculptrice sur bois, Malou Tual crée des œuvres uniques autour de masques ethniques et de mandalas émotionnels. Ses sculptures, façonnées à la main, allient sensibilité et tradition dans une démarche artisanale profonde.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "quai-turenne-14",
-    locationName: "14 quai Turenne",
+    locationId: "allee-duguay-trouin-11",
+    locationName: "11 allée Duguay Trouin / 20 rue Kervégan",
     x: 370,
     y: 270
   },
@@ -312,8 +301,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Vastes cartographies de territoires imaginaires, riches en détails et en narration, Gaël Caudoux les réalise à la main depuis l'enfance. Ses grands formats, en constante évolution, invitent à la découverte d'un univers unique et fascinant.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "rue-kervegan-15",
-    locationName: "15 rue Kervégan",
+    locationId: "allee-duguay-trouin-11",
+    locationName: "11 allée Duguay Trouin / 20 rue Kervégan",
     x: 300,
     y: 220
   },
@@ -324,8 +313,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Norg est un plasticien basé à Nantes dont le travail navigue entre peinture, sculpture et dessin, avec une énergie brute et expressive. Son univers visuel est direct et instinctif.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "rue-kervegan-17",
-    locationName: "17 rue Kervégan",
+    locationId: "allee-duguay-trouin-16",
+    locationName: "16 allée Duguay Trouin",
     x: 310,
     y: 225
   },
@@ -336,10 +325,22 @@ const eventScheduleData: EventDetails[] = [
     description: "Chun Yong Ho, artiste peintre originaire de Corée du Sud, explore l'abstraction à travers des jeux de couleurs et de lignes évoquant des paysages mentaux. Son travail invite à un voyage intérieur, entre sensations et émotions.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "rue-kervegan-19",
-    locationName: "19 rue Kervégan",
+    locationId: "allee-duguay-trouin-16",
+    locationName: "16 allée Duguay Trouin",
     x: 315,
     y: 228
+  },
+  {
+    id: "expo-jocelyn-prouff", // Changed ID (was expo9)
+    artistId: "jocelyn-prouff",
+    title: "Carnets Nantais",
+    description: "Croquant in situ des lieux urbains où la nature reprend ses droits, avec une attention particulière à la lumière et aux détails, Joss Proof invite à un autre regard sur la ville à travers ses carnets sensibles. Il partage cet univers dans son livre \"Carnets Nantais\".",
+    time: "10h00 - 18h00, samedi et dimanche",
+    days: ["samedi", "dimanche"],
+    locationId: "allee-duguay-trouin-16",
+    locationName: "16 allée Duguay Trouin",
+    x: 350,
+    y: 250
   }
 
 ];

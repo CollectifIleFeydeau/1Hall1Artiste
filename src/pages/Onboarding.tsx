@@ -30,7 +30,8 @@ export default function Onboarding() {
   const handleFinish = () => {
     // Marquer l'onboarding comme vu
     localStorage.setItem('hasSeenOnboarding', 'true');
-    navigate('/');
+    // Utiliser window.location.href pour assurer la navigation
+    window.location.href = '/';
   };
 
   const nextSlide = () => {
@@ -40,7 +41,9 @@ export default function Onboarding() {
         controls.start({ opacity: 1, x: 0 });
       });
     } else {
-      handleFinish();
+      // Appeler directement la redirection pour le dernier slide
+      localStorage.setItem('hasSeenOnboarding', 'true');
+      window.location.href = '/';
     }
   };
 

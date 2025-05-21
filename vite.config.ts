@@ -15,6 +15,28 @@ export default defineConfig(({ mode }) => ({
       clientPort: 8080
     },
   },
+  build: {
+    // Configuration du code splitting
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Regrouper React et les dépendances liées dans un chunk
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Regrouper les composants UI dans un chunk séparé
+          'vendor-ui': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-select',
+            '@radix-ui/react-toast',
+            'lucide-react',
+            'framer-motion',
+          ],
+        },
+      },
+    },
+    // Réduire la taille des chunks générés
+    chunkSizeWarningLimit: 600,
+  },
   plugins: [
     react(),
     mode === 'development' &&

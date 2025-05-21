@@ -40,9 +40,9 @@ export function BottomNavigation() {
         </Link>
         
         <Link
-          to="/saved-events"
+          to="/saved"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/saved-events") ? "text-[#ff7a45]" : "text-gray-500"
+            isActive("/saved") ? "text-[#ff7a45]" : "text-gray-500"
           }`}
         >
           <Bookmark className="h-6 w-6" />

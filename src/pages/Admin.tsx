@@ -12,6 +12,7 @@ import { MapComponent, MAP_WIDTH, MAP_HEIGHT } from "@/components/MapComponent";
 import { useData, useEvents, useLocations } from "@/hooks/useData";
 import { ImportExportPanel } from "@/components/ImportExportPanel";
 import { EventForm } from "@/components/EventForm";
+import { AdminLogin } from "@/components/AdminLogin";
 
 // Créer un logger pour le composant Admin
 const logger = createLogger('Admin');
@@ -29,6 +30,15 @@ export default function Admin() {
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [mapClicked, setMapClicked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  
+  // Vérifier si l'utilisateur est déjà authentifié (session storage)
+  useEffect(() => {
+    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated');
+    if (adminAuthenticated === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
   
   useEffect(() => {
     // Utiliser les lieux au lieu des événements pour éviter les doublons
@@ -241,24 +251,48 @@ export default function Admin() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-md mx-auto px-4 pt-4">
-        <header className="mb-4 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center">
+          <Button
+            variant="ghost"
+            className="mr-2 p-0 h-auto"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-6 w-6" />
           </Button>
-          <h1 className="text-xl font-bold text-[#4a5d94] text-center">Administration</h1>
-          <div className="w-20"></div>
-        </header>
+          <h1 className="text-2xl font-bold text-[#4a5d94]">Administration</h1>
+        </div>
         
-        {/* Système d'onglets */}
-        <Tabs defaultValue="coordinates" className="mb-4">
-          <TabsList className="grid w-full grid-cols-3">
+        <AdminLogin onLogin={handleLogin} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
+      <div className="mb-6 flex items-center">
+        <Button
+          variant="ghost"
+          className="mr-2 p-0 h-auto"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </Button>
+        <h1 className="text-2xl font-bold text-[#4a5d94]">Administration</h1>
+      </div>
+      
+      <div className="space-y-6">
+        <Tabs defaultValue="coordinates" className="w-full">
+          <TabsList className="grid grid-cols-3 mb-4">
             <TabsTrigger value="coordinates">Coordonnées</TabsTrigger>
             <TabsTrigger value="events">Événements</TabsTrigger>
-            <TabsTrigger value="import-export">Import / Export</TabsTrigger>
+            <TabsTrigger value="import-export">Import/Export</TabsTrigger>
           </TabsList>
           
           {/* Onglet de gestion des coordonnées */}

@@ -4,6 +4,7 @@ import { Event } from "@/data/events";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
+import { TruncatedText } from "@/components/TruncatedText";
 
 import React from "react";
 
@@ -24,14 +25,32 @@ export const EventCard = ({ event, isSaved, onEventClick, onSaveClick }: EventCa
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-medium text-[#1a2138]">{event.title}</h3>
+            <h3 className="font-medium text-[#1a2138]">
+              <TruncatedText 
+                text={event.title} 
+                maxLength={25} 
+                className="font-medium text-[#1a2138]"
+              />
+            </h3>
             {/* N'afficher le nom de l'artiste que pour les expositions */}
             {event.type === "exposition" && (
-              <p className="text-sm text-[#4a5d94]">{event.artistName}</p>
+              <p className="text-sm text-[#4a5d94]">
+                <TruncatedText 
+                  text={event.artistName} 
+                  maxLength={20} 
+                  className="text-sm text-[#4a5d94]"
+                />
+              </p>
             )}
             <div className="flex items-center mt-1">
               <MapPin className="h-3 w-3 mr-1 text-[#8c9db5]" />
-              <p className="text-xs text-[#8c9db5]">{event.locationName} • {event.time}</p>
+              <p className="text-xs text-[#8c9db5]">
+                <TruncatedText 
+                  text={`${event.locationName} • ${event.time}`} 
+                  maxLength={30} 
+                  className="text-xs text-[#8c9db5]"
+                />
+              </p>
             </div>
           </div>
           <div className="flex flex-col items-end space-y-1">
