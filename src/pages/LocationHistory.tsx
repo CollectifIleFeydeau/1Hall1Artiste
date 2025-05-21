@@ -110,6 +110,18 @@ export function LocationHistory() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {selectedLocationData.image && (
+              <div className="mb-4">
+                <img 
+                  src={selectedLocationData.image} 
+                  alt={`Photo historique de ${selectedLocationData.name}`} 
+                  className="w-full h-auto rounded-md object-cover shadow-md border border-[#d8e3ff]"
+                  loading="lazy"
+                />
+                <p className="text-xs text-center text-gray-500 mt-1">Photo de {selectedLocationData.name}</p>
+              </div>
+            )}
+            
             <h3 className="text-base font-bold text-[#4a5d94] mb-3 pb-1 border-b border-[#d8e3ff]">
               Histoire complète
             </h3>

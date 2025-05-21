@@ -225,12 +225,24 @@ const Map = ({ fullScreen = false }: MapProps) => {
   // Cette fonction n'est plus nécessaire car elle est gérée par le composant EventDetails
 
   const getLocationEvents = (locationId: string) => {
+    // 1. Récupérer les événements à partir des IDs stockés dans le lieu
     const location = mapLocations.find(l => l.id === locationId);
     if (!location) return [];
     
-    return location.events.map(eventId => 
-      getEventById(eventId)
-    ).filter(Boolean) as Event[];
+    // 2. Récupérer également tous les événements qui ont ce locationId
+    // Cela permet de trouver les événements qui ne sont pas explicitement listés dans location.events
+    const eventsFromLocation = location.events.map(eventId => getEventById(eventId)).filter(Boolean) as Event[];
+    
+    // 3. Rechercher tous les événements qui ont ce locationId
+    const eventsWithThisLocation = events.filter(event => event.locationId === locationId);
+    
+    // 4. Fusionner les deux listes et éliminer les doublons
+    const allEvents = [...eventsFromLocation, ...eventsWithThisLocation];
+    const uniqueEvents = allEvents.filter((event, index, self) => 
+      index === self.findIndex(e => e.id === event.id)
+    );
+    
+    return uniqueEvents;
   };
 
   // Calculate visited locations count

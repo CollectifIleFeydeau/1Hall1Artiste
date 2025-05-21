@@ -9,11 +9,13 @@ import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
 import Info from "lucide-react/dist/esm/icons/info";
 import X from "lucide-react/dist/esm/icons/x";
+import Instagram from "lucide-react/dist/esm/icons/instagram";
 import { ShareButton } from "@/components/ShareButton";
 import { saveEvent, getSavedEvents, removeSavedEvent } from "@/services/savedEvents";
-import { type Event } from "@/data/events";
+import { type Event, getEventsByLocation } from "@/data/events";
 import { locations } from "@/data/locations";
 import { trackFeatureUsage } from "@/services/analytics";
+import { InstagramCarousel } from "@/components/InstagramCarousel";
 
 interface EventDetailsProps {
   event: Event | null;
@@ -180,19 +182,31 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             <p className="text-sm text-[#4a5d94]">{event.description}</p>
           </div>
           
-          <div className="border-t border-[#d8e3ff] pt-4 mt-4">
-            <h4 className="text-sm font-medium mb-1 text-[#4a5d94] flex items-center">
-              <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
-              Contact
-            </h4>
-            <p className="text-sm text-[#4a5d94] ml-4">
-              <a href={`mailto:${event.contact}`} className="text-blue-600 hover:underline">
-                {event.contact}
-              </a>
-            </p>
-          </div>
+          {/* Nous ne montrons plus l'adresse Instagram car le widget l'affiche déjà */}
           
-          <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-4">
+          {/* Instagram Embed - Show actual Instagram feed */}
+          {event.contact && event.contact.includes('instagram') && (
+            <div className="border-t border-[#d8e3ff] pt-4 mt-4">
+              <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
+                <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
+                Photos Instagram de l'artiste
+              </h4>
+              <div className="instagram-embed-container overflow-hidden rounded-lg">
+                <iframe
+                  title={`Instagram feed de ${event.artistName}`}
+                  src={`https://www.instagram.com/${event.contact.split('/').pop()}/embed`}
+                  width="100%"
+                  height="450"
+                  frameBorder="0"
+                  scrolling="no"
+                  allowTransparency={true}
+                  className="instagram-embed"
+                ></iframe>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-6 border-t border-[#d8e3ff] pt-4">
             {source === "program" ? (
               <Button 
                 className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"

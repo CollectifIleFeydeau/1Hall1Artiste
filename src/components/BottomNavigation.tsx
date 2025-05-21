@@ -5,6 +5,7 @@ import Heart from "lucide-react/dist/esm/icons/heart";
 import Home from "lucide-react/dist/esm/icons/home";
 import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import Gift from "lucide-react/dist/esm/icons/gift";
+import Instagram from "lucide-react/dist/esm/icons/instagram";
 import { Link, useLocation } from "react-router-dom";
 
 export function BottomNavigation() {
@@ -48,15 +49,6 @@ export function BottomNavigation() {
           <span className="text-xs mt-1">Sauvegardés</span>
         </Link>
         
-        <Link
-          to="/donate"
-          className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/donate") ? "text-[#ff7a45]" : "text-gray-500"
-          }`}
-        >
-          <Gift className="h-6 w-6" />
-          <span className="text-xs mt-1">Dons</span>
-        </Link>
         
         <Link
           to="/about"
@@ -66,6 +58,16 @@ export function BottomNavigation() {
         >
           <Info className="h-6 w-6" />
           <span className="text-xs mt-1">À propos</span>
+        </Link>
+        
+        <Link
+          to="/donate"
+          className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
+            isActive("/donate") ? "text-[#ff7a45]" : "text-gray-500"
+          }`}
+        >
+          <Gift className="h-6 w-6" />
+          <span className="text-xs mt-1">Dons</span>
         </Link>
       </div>
     </div>

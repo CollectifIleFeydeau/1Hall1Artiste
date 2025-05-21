@@ -3,12 +3,21 @@
 
 ## Priorités immédiates à faire 
 
+Demande
+* la carte ne sont montre pas les expos présentes dans le programme
+
 1. **Test sur mobile**
    - Demander à l'équipe de tester l'application sur leurs téléphones 
+   - Demander à Mathias si les artistes préfèrent leur email ou insta ou autre en contact
 
 2. **Performance**
    - Analyser et réduire la taille du bundle en supprimant les dépendances inutilisées
+       - Taille du bundle : Le fichier JavaScript principal fait environ 672 KB (210 KB gzippé), ce qui est assez conséquent. 
+       - Avertissement sur la taille des chunks : Vite recommande d'utiliser l'import dynamique ou de configurer manuellement les chunks pour améliorer les performances. C'est également aligné avec vos priorités de performance.
    - Implémenter le lazy loading pour les images de la carte
+
+3. **Browserslist**
+   - Avertissement sur Browserslist : Les données de compatibilité des navigateurs (caniuse-lite) sont un peu anciennes (7 mois). Ce n'est pas critique mais pourrait être mis à jour ultérieurement.
 
 ## Expérience Utilisateur
 

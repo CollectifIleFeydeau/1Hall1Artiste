@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -49,9 +48,12 @@ const About = () => {
               <h2 className="text-lg font-semibold mb-3">Architecture unique</h2>
               <p className="text-gray-700 mb-4">
                 Les immeubles de l'Île Feydeau se caractérisent par leurs façades ornées de mascarons, 
-                leurs balcons en fer forgé et leurs escaliers monumentaux. Ces bâtiments témoignent du savoir-faire 
-                des artisans de l'époque et de l'influence du commerce maritime sur l'architecture nantaise.
+                leurs balcons en fer forgé et leur soubassement en granit. L'affaissement des bâtiments, 
+                dû à la nature marécageuse du sol, confère à l'ensemble une silhouette légèrement penchée, 
+                caractéristique de ce quartier.
               </p>
+              
+
               
               <h2 className="text-lg font-semibold mb-3">Patrimoine préservé</h2>
               <p className="text-gray-700 mb-4">
@@ -74,6 +76,11 @@ const About = () => {
           
           <TabsContent value="association" className="space-y-4">
             <div className="bg-white rounded-lg p-6 shadow-md">
+              <div className="mb-4 pb-4 border-b">
+                <p>Contact : <a href={`mailto:${associationInfo.contactEmail}`} className="text-blue-600 hover:underline">{associationInfo.contactEmail}</a></p>
+                <p>Instagram : <a href={associationInfo.instagram} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{associationInfo.instagram.replace("https://www.", "@")}</a></p>
+              </div>
+              
               <h2 className="text-lg font-semibold mb-3">Notre histoire</h2>
               <p className="text-gray-700 mb-4">
                 {aboutInfo.history}
@@ -93,12 +100,6 @@ const About = () => {
               <p className="text-gray-700 mb-4">
                 {aboutInfo.event}
               </p>
-              
-              <div className="text-sm text-gray-600 mt-4 border-t pt-4">
-                <p>Association : {associationInfo.name}</p>
-                <p>Fondée en {associationInfo.yearFounded}</p>
-                <p>Contact : <a href={`mailto:${associationInfo.contactEmail}`} className="text-blue-600 hover:underline">{associationInfo.contactEmail}</a></p>
-              </div>
             </div>
           </TabsContent>
           
