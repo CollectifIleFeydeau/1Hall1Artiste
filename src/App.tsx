@@ -83,63 +83,63 @@ const AnimatedRoutes = () => {
         
         {/* Routes principales avec navigation par gestes */}
         <Route path="/map" element={
-          <PageTransition>
-            {isSwipeablePage ? (
-              <SwipeNavigation>
-                <Map />
-              </SwipeNavigation>
-            ) : (
+          isSwipeablePage ? (
+            <SwipeNavigation>
               <Map />
-            )}
-          </PageTransition>
+            </SwipeNavigation>
+          ) : (
+            <PageTransition>
+              <Map />
+            </PageTransition>
+          )
         } />
         
         <Route path="/program" element={
-          <PageTransition>
-            {isSwipeablePage ? (
-              <SwipeNavigation>
-                <Program />
-              </SwipeNavigation>
-            ) : (
+          isSwipeablePage ? (
+            <SwipeNavigation>
               <Program />
-            )}
-          </PageTransition>
+            </SwipeNavigation>
+          ) : (
+            <PageTransition>
+              <Program />
+            </PageTransition>
+          )
         } />
         
         <Route path="/saved" element={
-          <PageTransition>
-            {isSwipeablePage ? (
-              <SwipeNavigation>
-                <SavedEvents />
-              </SwipeNavigation>
-            ) : (
+          isSwipeablePage ? (
+            <SwipeNavigation>
               <SavedEvents />
-            )}
-          </PageTransition>
+            </SwipeNavigation>
+          ) : (
+            <PageTransition>
+              <SavedEvents />
+            </PageTransition>
+          )
         } />
         
         <Route path="/about" element={
-          <PageTransition>
-            {isSwipeablePage ? (
-              <SwipeNavigation>
-                <About />
-              </SwipeNavigation>
-            ) : (
+          isSwipeablePage ? (
+            <SwipeNavigation>
               <About />
-            )}
-          </PageTransition>
+            </SwipeNavigation>
+          ) : (
+            <PageTransition>
+              <About />
+            </PageTransition>
+          )
         } />
         
         <Route path="/donate" element={
-          <PageTransition>
-            {isSwipeablePage ? (
-              <SwipeNavigation>
-                <Donate />
-              </SwipeNavigation>
-            ) : (
+          isSwipeablePage ? (
+            <SwipeNavigation>
               <Donate />
-            )}
-          </PageTransition>
+            </SwipeNavigation>
+          ) : (
+            <PageTransition>
+              <Donate />
+            </PageTransition>
+          )
         } />
         
         {/* Routes sans navigation par gestes */}

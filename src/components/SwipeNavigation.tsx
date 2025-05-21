@@ -3,13 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import React from 'react';
 
-// Définir les routes principales de l'application
+// Définir les routes principales de l'application dans le même ordre que la barre de navigation
 const mainRoutes = [
-  '/',          // Accueil
+  '/map',       // Carte
   '/program',   // Programme
-  '/saved-events', // Sauvegardés
-  '/donate',    // Dons
+  '/saved',     // Sauvegardés
   '/about',     // À propos
+  '/donate',    // Dons
 ];
 
 // Propriétés du composant
@@ -26,7 +26,9 @@ export const SwipeNavigation = ({ children }: SwipeNavigationProps): React.React
 
   // Déterminer l'index de la route actuelle
   useEffect(() => {
-    const index = mainRoutes.indexOf(location.pathname);
+    // Gérer la redirection de la route racine vers /map
+    const path = location.pathname === '/' ? '/map' : location.pathname;
+    const index = mainRoutes.indexOf(path);
     if (index !== -1) {
       setCurrentRouteIndex(index);
     }
@@ -61,8 +63,13 @@ export const SwipeNavigation = ({ children }: SwipeNavigationProps): React.React
   };
 
   // Variantes d'animation pour les transitions
+  // Logique simplifiée : lorsqu'on swipe vers la droite (page précédente), 
+  // la page actuelle sort vers la droite et la nouvelle page entre depuis la gauche
+  // lorsqu'on swipe vers la gauche (page suivante),
+  // la page actuelle sort vers la gauche et la nouvelle page entre depuis la droite
   const pageVariants = {
     initial: (direction: 'left' | 'right' | null) => ({
+      // Direction d'entrée : opposée à la direction du swipe
       x: direction === 'right' ? '-100%' : direction === 'left' ? '100%' : 0,
       opacity: 0,
     }),
@@ -75,6 +82,7 @@ export const SwipeNavigation = ({ children }: SwipeNavigationProps): React.React
       },
     },
     exit: (direction: 'left' | 'right' | null) => ({
+      // Direction de sortie : même que la direction du swipe
       x: direction === 'left' ? '-100%' : direction === 'right' ? '100%' : 0,
       opacity: 0,
       transition: {

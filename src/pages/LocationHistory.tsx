@@ -83,40 +83,57 @@ export function LocationHistory() {
       {selectedLocationData ? (
         <Card className="shadow-md border-[#d8e3ff] mb-6">
           <CardHeader className="pb-2">
-            <div className="flex justify-between items-start mb-2">
-              <CardTitle className="text-xl font-bold text-[#4a5d94]">
-                {selectedLocationData.name}
-              </CardTitle>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white"
-                onClick={() => {
-                  // Rediriger vers la carte avec le point mis en évidence
-                  navigate('/map', { 
-                    state: { 
-                      highlightLocationId: selectedLocationData.id,
-                      fromHistory: true // Indiquer que la navigation vient de l'historique
-                    } 
-                  });
-                }}
-              >
-                <MapPin className="h-4 w-4 mr-1" />
-                Voir sur la carte
-              </Button>
+            <div className="flex flex-col mb-2">
+              <div className="flex justify-between items-center w-full">
+                <CardTitle className="text-xl font-bold text-[#4a5d94] mr-2">
+                  {selectedLocationData.name}
+                </CardTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white whitespace-nowrap px-2 py-1 text-xs flex-shrink-0"
+                  onClick={() => {
+                    // Rediriger vers la carte avec le point mis en évidence
+                    navigate('/map', { 
+                      state: { 
+                        highlightLocationId: selectedLocationData.id,
+                        fromHistory: true // Indiquer que la navigation vient de l'historique
+                      } 
+                    });
+                  }}
+                >
+                  <MapPin className="h-3 w-3 mr-1" />
+                  Voir sur la carte
+                </Button>
+              </div>
+              <CardDescription className="text-sm text-slate-600 mt-2 mb-2">
+                {selectedLocationData.description}
+              </CardDescription>
             </div>
-            <CardDescription className="text-sm text-slate-600 mb-2">
-              {selectedLocationData.description}
-            </CardDescription>
           </CardHeader>
           <CardContent>
             {selectedLocationData.image && (
               <div className="mb-4">
                 <img 
+                  // Utiliser le chemin d'accès direct pour le développement local
                   src={selectedLocationData.image} 
                   alt={`Photo historique de ${selectedLocationData.name}`} 
                   className="w-full h-auto rounded-md object-cover shadow-md border border-[#d8e3ff]"
                   loading="lazy"
+                  onError={(e) => {
+                    // Essayer avec le préfixe de base URL pour GitHub Pages en cas d'erreur
+                    console.log(`Tentative avec chemin alternatif pour: ${selectedLocationData.image}`);
+                    const baseUrl = import.meta.env.BASE_URL || '';
+                    const altPath = `${baseUrl}${selectedLocationData.image}`;
+                    
+                    // Éviter les boucles infinies si l'image alternative échoue aussi
+                    if (e.currentTarget.src !== altPath) {
+                      e.currentTarget.src = altPath;
+                    } else {
+                      // Fallback final vers une image par défaut
+                      e.currentTarget.src = '/placeholder-image.jpg';
+                    }
+                  }}
                 />
                 <p className="text-xs text-center text-gray-500 mt-1">Photo de {selectedLocationData.name}</p>
               </div>

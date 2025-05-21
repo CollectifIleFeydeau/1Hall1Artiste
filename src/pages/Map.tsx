@@ -212,9 +212,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
     setMapLocations(updatedLocations);
     localStorage.setItem('mapLocations', JSON.stringify(updatedLocations));
     
-    // Réinitialiser la mise en évidence lorsque l'utilisateur marque un lieu comme visité
-    // Cela permet de désactiver la mise en évidence permanente lors d'une action utilisateur
-    setHighlightedLocation(null);
+    // Conserver la mise en évidence du lieu même après l'avoir marqué comme visité
+    // Cela permet à l'utilisateur de voir le lieu mis en évidence lorsqu'il revient à la carte
+    setHighlightedLocation(locationId);
     
     toast({
       title: visited ? "Lieu marqué comme visité" : "Lieu marqué comme non visité",
@@ -401,17 +401,17 @@ const Map = ({ fullScreen = false }: MapProps) => {
               </div>
             )}
             
-            <div className="flex gap-4 justify-between">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-between">
               <Button
                 variant="outline"
-                className="border-[#4a5d94] text-[#4a5d94] flex-1"
+                className="border-[#4a5d94] text-[#4a5d94] text-xs sm:text-sm px-1 sm:px-2 min-h-[44px]"
                 onClick={() => activeLocation && markLocationAsVisited(activeLocation, !mapLocations.find(l => l.id === activeLocation)?.visited)}
               >
-                {mapLocations.find(l => l.id === activeLocation)?.visited ? 'Marquer comme non visité' : 'Marquer comme visité'}
+                {mapLocations.find(l => l.id === activeLocation)?.visited ? 'Non visité' : 'Marquer visité'}
               </Button>
               
               <Button 
-                className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"
+                className="bg-[#ff7a45] hover:bg-[#ff9d6e] text-sm min-h-[44px]"
                 onClick={() => {
                   // Fermer la vue détaillée mais conserver la mise en évidence du lieu
                   // Le lieu reste en surbrillance grâce à highlightedLocation qui n'est pas réinitialisé

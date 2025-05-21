@@ -45,6 +45,17 @@ const About = () => {
                 d'architecture néoclassique et témoigne de la prospérité des armateurs et négociants nantais de l'époque.
               </p>
               
+              <div className="mt-4 flex justify-center">
+                <Button 
+                  variant="outline" 
+                  className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white"
+                  onClick={() => navigate("/location-history")}
+                >
+                  Voir l'histoire détaillée des lieux 
+                </Button>
+              </div>
+
+              
               <h2 className="text-lg font-semibold mb-3">Architecture unique</h2>
               <p className="text-gray-700 mb-4">
                 Les immeubles de l'Île Feydeau se caractérisent par leurs façades ornées de mascarons, 
@@ -62,15 +73,7 @@ const About = () => {
                 ou inscrits aux Monuments Historiques, témoignant de l'importance de ce quartier dans l'histoire de Nantes.
               </p>
               
-              <div className="mt-4 flex justify-center">
-                <Button 
-                  variant="outline" 
-                  className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white"
-                  onClick={() => navigate("/location-history")}
-                >
-                  Voir l'histoire détaillée des lieux 
-                </Button>
-              </div>
+
             </div>
           </TabsContent>
           
