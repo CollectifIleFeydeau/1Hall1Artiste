@@ -30,8 +30,10 @@ export default function Onboarding() {
   const handleFinish = () => {
     // Marquer l'onboarding comme vu
     localStorage.setItem('hasSeenOnboarding', 'true');
+    // Utiliser le chemin de base de l'application pour la redirection
+    const basePath = import.meta.env.BASE_URL || '/';
     // Utiliser window.location.href pour assurer la navigation
-    window.location.href = '/';
+    window.location.href = basePath;
   };
 
   const nextSlide = () => {
@@ -43,7 +45,9 @@ export default function Onboarding() {
     } else {
       // Appeler directement la redirection pour le dernier slide
       localStorage.setItem('hasSeenOnboarding', 'true');
-      window.location.href = '/';
+      // Utiliser le chemin de base de l'application pour la redirection
+      const basePath = import.meta.env.BASE_URL || '/';
+      window.location.href = basePath;
     }
   };
 

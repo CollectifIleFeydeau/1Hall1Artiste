@@ -401,7 +401,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
               </div>
             )}
             
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-between">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-between mb-16">
               <Button
                 variant="outline"
                 className="border-[#4a5d94] text-[#4a5d94] text-xs sm:text-sm px-1 sm:px-2 min-h-[44px]"

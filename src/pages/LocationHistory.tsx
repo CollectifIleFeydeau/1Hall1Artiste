@@ -82,9 +82,9 @@ export function LocationHistory() {
       {/* Détails du lieu sélectionné */}
       {selectedLocationData ? (
         <Card className="shadow-md border-[#d8e3ff] mb-6">
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-6">
             <div className="flex flex-col mb-2">
-              <div className="flex justify-between items-center w-full">
+              <div className="flex justify-between items-center w-full mb-4">
                 <CardTitle className="text-xl font-bold text-[#4a5d94] mr-2">
                   {selectedLocationData.name}
                 </CardTitle>
@@ -170,7 +170,20 @@ export function LocationHistory() {
         </div>
       )}
 
+      {/* Bouton fixe Retour à la carte */}
+      <div className="fixed bottom-20 left-0 right-0 mx-auto max-w-md px-4 z-10">
+        <Button 
+          className="w-full bg-[#ff7a45] hover:bg-[#ff9d6e] text-white text-sm min-h-[44px]"
+          onClick={() => {
+            // Rediriger vers la carte sans paramètres spécifiques
+            navigate('/map');
+          }}
+        >
+          Retour à la carte
+        </Button>
+      </div>
+
       <BottomNavigation />
     </div>
   );
-}
+};
