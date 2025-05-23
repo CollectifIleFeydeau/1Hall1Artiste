@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-
-// Préfixe pour les chemins d'images en production (GitHub Pages)
-const BASE_PATH = import.meta.env.PROD ? '/Collectif-Feydeau---app' : '';
+import React from 'react';
+import OptimizedImage from './OptimizedImage';
 
 interface AppImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -16,6 +14,7 @@ interface AppImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
  * - Le lazy loading des images pour améliorer les performances
  * - Un placeholder pendant le chargement
  * - La gestion des erreurs de chargement
+ * - Optimisation automatique des images (WebP, responsive)
  */
 export const AppImage: React.FC<AppImageProps> = ({ 
   src, 
@@ -24,32 +23,14 @@ export const AppImage: React.FC<AppImageProps> = ({
   placeholderSrc = '/placeholder.svg',
   ...props 
 }) => {
-  // Ajouter le préfixe uniquement si le chemin commence par "/"
-  const imageSrc = src.startsWith('/') ? `${BASE_PATH}${src}` : src;
-  const placeholderImage = placeholderSrc.startsWith('/') ? `${BASE_PATH}${placeholderSrc}` : placeholderSrc;
-  
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
-  
-  // Réinitialiser l'état quand la source change
-  useEffect(() => {
-    setLoaded(false);
-    setError(false);
-  }, [src]);
-  
+  // Utiliser le composant OptimizedImage pour bénéficier de toutes les optimisations
   return (
-    <img 
-      src={error ? placeholderImage : imageSrc} 
+    <OptimizedImage
+      src={src}
       alt={alt}
-      loading={lazyLoad ? "lazy" : "eager"}
-      onLoad={() => setLoaded(true)}
-      onError={() => setError(true)}
-      style={{
-        ...props.style,
-        transition: 'opacity 0.3s ease-in-out',
-        opacity: loaded ? 1 : 0.6,
-      }}
-      {...props} 
+      priority={!lazyLoad}
+      placeholderSrc={placeholderSrc}
+      {...props}
     />
   );
 };

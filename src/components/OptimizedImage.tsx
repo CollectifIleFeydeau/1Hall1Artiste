@@ -1,96 +1,104 @@
 import React, { useState, useEffect } from 'react';
-import { getResponsiveImageProps } from '@/utils/imageOptimizer';
-import { LoadingIndicator } from './LoadingIndicator';
+import { isWebPSupported, getOptimizedImageUrl } from '@/utils/imageOptimizer';
 
-interface OptimizedImageProps {
+// Préfixe pour les chemins d'images en production (GitHub Pages)
+const BASE_PATH = import.meta.env.PROD ? '/Collectif-Feydeau---app' : '';
+
+interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
-  className?: string;
   sizes?: string;
-  width?: number;
-  height?: number;
+  quality?: number;
   priority?: boolean;
-  objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
+  placeholderSrc?: string;
+  widths?: number[];
 }
 
+/**
+ * Composant d'image optimisé qui combine:
+ * - Gestion des chemins selon l'environnement (dev/prod)
+ * - Conversion automatique en WebP si supporté
+ * - Images responsives avec srcSet
+ * - Lazy loading intelligent
+ * - États de chargement et gestion des erreurs
+ */
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt,
-  className = '',
   sizes = '100vw',
-  width,
-  height,
+  quality = 80,
   priority = false,
-  objectFit = 'cover'
+  placeholderSrc = '/placeholder.svg',
+  widths = [320, 640, 768, 1024, 1280],
+  className = '',
+  ...props
 }) => {
-  const [imageProps, setImageProps] = useState<any>({
-    src,
-    alt,
-    className: `${className} ${objectFit ? `object-${objectFit}` : ''}`,
-    width,
-    height,
-    loading: priority ? 'eager' : 'lazy',
-    decoding: 'async'
-  });
+  // Ajouter le préfixe uniquement si le chemin commence par "/"
+  const baseSrc = src.startsWith('/') ? `${BASE_PATH}${src}` : src;
+  const placeholderImage = placeholderSrc.startsWith('/') ? `${BASE_PATH}${placeholderSrc}` : placeholderSrc;
   
-  const [isLoading, setIsLoading] = useState(!priority);
+  const [imageSrc, setImageSrc] = useState<string>(baseSrc);
+  const [srcSet, setSrcSet] = useState<string>('');
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-
+  const [webpSupported, setWebpSupported] = useState<boolean | null>(null);
+  
+  // Vérifier le support WebP et optimiser l'image
   useEffect(() => {
-    // Ne pas optimiser si l'image est prioritaire (au-dessus de la ligne de flottaison)
-    if (priority) return;
-    
     const optimizeImage = async () => {
       try {
-        const optimizedProps = await getResponsiveImageProps(src, alt, sizes, className);
-        setImageProps({
-          ...optimizedProps,
-          width,
-          height,
-          style: { objectFit }
-        });
+        // Vérifier le support WebP
+        const supportsWebP = await isWebPSupported();
+        setWebpSupported(supportsWebP);
+        
+        // Optimiser l'image principale
+        const optimizedSrc = await getOptimizedImageUrl(baseSrc);
+        setImageSrc(optimizedSrc);
+        
+        // Générer le srcSet pour les différentes tailles
+        if (!src.startsWith('http') && !src.startsWith('data:')) {
+          const srcSetArray = await Promise.all(
+            widths.map(async (width) => {
+              const optimizedUrl = await getOptimizedImageUrl(baseSrc, width);
+              return `${optimizedUrl} ${width}w`;
+            })
+          );
+          setSrcSet(srcSetArray.join(', '));
+        }
       } catch (err) {
         console.error('Erreur lors de l\'optimisation de l\'image:', err);
-        setError(true);
+        setImageSrc(baseSrc); // Fallback à l'image originale
       }
     };
     
     optimizeImage();
-  }, [src, alt, className, sizes, width, height, priority, objectFit]);
-
-  const handleLoad = () => {
-    setIsLoading(false);
-  };
-
-  const handleError = () => {
-    setIsLoading(false);
-    setError(true);
-  };
-
+  }, [baseSrc, widths]);
+  
+  // Réinitialiser l'état quand la source change
+  useEffect(() => {
+    setLoaded(false);
+    setError(false);
+  }, [src]);
+  
   return (
-    <div className="relative" style={{ width, height }}>
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50">
-          <LoadingIndicator size="small" text="" />
-        </div>
-      )}
-      
-      {error ? (
-        <div className="flex items-center justify-center bg-gray-100 text-gray-500 rounded" 
-             style={{ width: width || '100%', height: height || 200 }}>
-          <span className="text-sm">Image non disponible</span>
-        </div>
-      ) : (
-        <img
-          {...imageProps}
-          onLoad={handleLoad}
-          onError={handleError}
-          style={{ 
-            ...imageProps.style,
-            display: isLoading ? 'none' : 'block' 
-          }}
-        />
-      )}
-    </div>
+    <img 
+      src={error ? placeholderImage : imageSrc}
+      srcSet={!error && srcSet ? srcSet : undefined}
+      sizes={!error && srcSet ? sizes : undefined}
+      alt={alt}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+      onLoad={() => setLoaded(true)}
+      onError={() => setError(true)}
+      className={className}
+      style={{
+        ...props.style,
+        transition: 'opacity 0.3s ease-in-out',
+        opacity: loaded ? 1 : 0.6,
+      }}
+      {...props}
+    />
   );
 };
+
+export default OptimizedImage;

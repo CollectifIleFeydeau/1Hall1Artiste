@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AppImage } from "@/components/AppImage";
 import { createLogger } from "@/utils/logger";
+
+// Préfixe pour les chemins d'images en production (GitHub Pages)
+const BASE_PATH = import.meta.env.PROD ? '/Collectif-Feydeau---app' : '';
 
 // Créer un logger pour le composant Map
 const logger = createLogger('MapComponent');
@@ -108,10 +110,11 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           cursor: !readOnly ? 'pointer' : 'default'
         }}
       >
-        <AppImage 
-          src="/Plan Île Feydeau.png" 
+        <img 
+          src={`${BASE_PATH}/map-feydeau.png`} 
           alt="Plan de l'Île Feydeau" 
           className="object-contain"
+          loading="eager"
           style={{ 
             opacity: 0.9,
             width: '100%',

@@ -12,8 +12,11 @@ import { NavigationProvider } from "./contexts/NavigationContext";
 import { LoadingProvider } from "./contexts/LoadingContext";
 
 // Composants
-import { PageTransition } from "./components/PageTransition";
-import { SwipeNavigation } from "./components/SwipeNavigation";
+import { AnimatedPageTransition, isSwipeableRoute } from "./components/AnimatedPageTransition";
+import OfflineIndicator from "./components/OfflineIndicator";
+
+// Utilitaires
+import { registerServiceWorker } from "./utils/serviceWorkerRegistration";
 
 // Pages
 import Map from "./pages/Map";
@@ -28,6 +31,13 @@ import { LocationHistory } from "./pages/LocationHistory";
 
 const queryClient = new QueryClient();
 
+// Type définition pour la configuration des routes
+interface RouteConfig {
+  path: string;
+  component: React.ComponentType;
+  swipeable?: boolean;
+}
+
 /**
  * Composant qui gère les transitions entre les routes
  */
@@ -35,19 +45,13 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // État pour suivre si l'utilisateur a déjà vu l'onboarding
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(() => {
-    const storedValue = localStorage.getItem('hasSeenOnboarding');
-    return storedValue === 'true';
-  });
+  // État pour suivre si l'utilisateur a déjà vu l'onboarding - toujours considérer comme vu
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(true);
   
-  // Vérifier si c'est la première visite
+  // Marquer automatiquement l'onboarding comme vu
   useEffect(() => {
-    // Si c'est la première visite et que l'utilisateur n'est pas déjà sur la page d'onboarding
-    if (!hasSeenOnboarding && location.pathname !== '/onboarding') {
-      navigate('/onboarding');
-    }
-  }, [hasSeenOnboarding, location.pathname, navigate]);
+    localStorage.setItem('hasSeenOnboarding', 'true');
+  }, []);
   
   // Marquer l'onboarding comme vu
   const handleOnboardingComplete = () => {
@@ -56,18 +60,31 @@ const AnimatedRoutes = () => {
     navigate('/map');
   };
   
-  // Routes qui supportent la navigation par gestes
-  const swipeableRoutes = [
-    '/',
-    '/map',
-    '/program',
-    '/saved',
-    '/about',
-    '/donate'
+  // Configuration des routes principales
+  const mainRoutes: RouteConfig[] = [
+    { path: '/map', component: Map, swipeable: true },
+    { path: '/program', component: Program, swipeable: true },
+    { path: '/saved', component: SavedEvents, swipeable: true },
+    { path: '/about', component: About, swipeable: true },
+    { path: '/donate', component: Donate, swipeable: true },
+  ];
+  
+  // Configuration des routes secondaires
+  const secondaryRoutes: RouteConfig[] = [
+    { path: '/admin', component: Admin },
+    { path: '/onboarding', component: Onboarding },
+    { path: '/location-history', component: LocationHistory },
   ];
   
   // Vérifier si la page actuelle supporte la navigation par gestes
-  const isSwipeablePage = swipeableRoutes.includes(location.pathname);
+  const isSwipeablePage = isSwipeableRoute(location.pathname);
+  
+  // Fonction pour rendre une route avec le bon wrapper
+  const renderRouteElement = (Component: React.ComponentType, enableSwipe: boolean = false): React.ReactElement => (
+    <AnimatedPageTransition enableSwipe={enableSwipe}>
+      <Component />
+    </AnimatedPageTransition>
+  );
   
   return (
     <AnimatePresence mode="wait">
@@ -82,73 +99,25 @@ const AnimatedRoutes = () => {
         } />
         
         {/* Routes principales avec navigation par gestes */}
-        <Route path="/map" element={
-          isSwipeablePage ? (
-            <SwipeNavigation>
-              <Map />
-            </SwipeNavigation>
-          ) : (
-            <PageTransition>
-              <Map />
-            </PageTransition>
-          )
-        } />
+        {mainRoutes.map(route => (
+          <Route 
+            key={route.path}
+            path={route.path} 
+            element={renderRouteElement(route.component, isSwipeablePage && route.swipeable)}
+          />
+        ))}
         
-        <Route path="/program" element={
-          isSwipeablePage ? (
-            <SwipeNavigation>
-              <Program />
-            </SwipeNavigation>
-          ) : (
-            <PageTransition>
-              <Program />
-            </PageTransition>
-          )
-        } />
+        {/* Routes secondaires sans navigation par gestes */}
+        {secondaryRoutes.map(route => (
+          <Route 
+            key={route.path}
+            path={route.path} 
+            element={renderRouteElement(route.component)}
+          />
+        ))}
         
-        <Route path="/saved" element={
-          isSwipeablePage ? (
-            <SwipeNavigation>
-              <SavedEvents />
-            </SwipeNavigation>
-          ) : (
-            <PageTransition>
-              <SavedEvents />
-            </PageTransition>
-          )
-        } />
-        
-        <Route path="/about" element={
-          isSwipeablePage ? (
-            <SwipeNavigation>
-              <About />
-            </SwipeNavigation>
-          ) : (
-            <PageTransition>
-              <About />
-            </PageTransition>
-          )
-        } />
-        
-        <Route path="/donate" element={
-          isSwipeablePage ? (
-            <SwipeNavigation>
-              <Donate />
-            </SwipeNavigation>
-          ) : (
-            <PageTransition>
-              <Donate />
-            </PageTransition>
-          )
-        } />
-        
-        {/* Routes sans navigation par gestes */}
-        <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
-        <Route path="/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
-        <Route path="/location-history" element={<PageTransition><LocationHistory /></PageTransition>} />
-        
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+        {/* Route 404 */}
+        <Route path="*" element={renderRouteElement(NotFound)} />
       </Routes>
     </AnimatePresence>
   );
@@ -159,6 +128,11 @@ const AppContent = () => {
 };
 
 const App = () => {
+  // Register service worker for offline support
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <LoadingProvider>
@@ -168,6 +142,7 @@ const App = () => {
           <HashRouter>
             <NavigationProvider>
               <AppContent />
+              <OfflineIndicator />
             </NavigationProvider>
           </HashRouter>
         </TooltipProvider>
