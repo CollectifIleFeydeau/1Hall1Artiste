@@ -1,4 +1,5 @@
 import { Event, events as allEvents } from "@/data/events";
+import { AchievementType, unlockAchievement } from "./achievements";
 
 // Type pour les événements sauvegardés
 export interface SavedEvent extends Event {
@@ -54,12 +55,34 @@ export const saveEvent = (event: Event): SavedEvent[] => {
       savedEventIds = [];
     }
     
+    console.log(`[savedEvents] Événements déjà sauvegardés: ${savedEventIds.length}`, savedEventIds);
+    
     // Vérifier si l'événement est déjà sauvegardé
     const eventExists = savedEventIds.includes(event.id);
+    console.log(`[savedEvents] Événement déjà sauvegardé: ${eventExists}`);
     
     if (!eventExists) {
       const updatedIds = [...savedEventIds, event.id];
       localStorage.setItem('savedEvents', JSON.stringify(updatedIds));
+      console.log(`[savedEvents] Événement sauvegardé, nouveau total: ${updatedIds.length}`);
+      
+      // Débloquer des réalisations avec un délai pour assurer que l'interface est prête
+      console.log(`[savedEvents] Planification du déclenchement des achievements dans 500ms`);
+      setTimeout(() => {
+        // Premier événement sauvegardé
+        if (updatedIds.length === 1) {
+          console.log(`[savedEvents] Déclenchement de l'achievement FIRST_EVENT_SAVED (premier événement)`);
+          unlockAchievement(AchievementType.FIRST_EVENT_SAVED);
+        }
+        
+        // 5 événements ou plus sauvegardés
+        if (updatedIds.length >= 5) {
+          console.log(`[savedEvents] Déclenchement de l'achievement MULTIPLE_EVENTS_SAVED (${updatedIds.length} événements)`);
+          unlockAchievement(AchievementType.MULTIPLE_EVENTS_SAVED);
+        }
+      }, 500); // Délai de 500ms pour assurer que l'interface est prête
+    } else {
+      console.log(`[savedEvents] Événement déjà sauvegardé, aucune action nécessaire`);
     }
     
     return getSavedEvents();
@@ -119,9 +142,17 @@ export const setEventNotification = (eventId: string, notificationTime: string):
       notifications = {};
     }
     
+    // Vérifier si c'est la première notification configurée
+    const isFirstNotification = Object.keys(notifications).length === 0;
+    
     // Mettre à jour la notification pour cet événement
     notifications[eventId] = notificationTime;
     localStorage.setItem('eventNotifications', JSON.stringify(notifications));
+    
+    // Débloquer la réalisation si c'est la première notification
+    if (isFirstNotification) {
+      unlockAchievement(AchievementType.NOTIFICATION_SET);
+    }
     
     // Récupérer les événements sauvegardés avec les notifications mises à jour
     const events = getSavedEvents();

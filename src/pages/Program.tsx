@@ -13,6 +13,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { EventDetails } from "@/components/EventDetails";
 import { toast } from "@/components/ui/use-toast";
 import { EventCard } from "@/components/EventCard";
+import { getSavedEvents, saveEvent, removeSavedEvent } from "../services/savedEvents";
 
 const Program = () => {
   const navigate = useNavigate();
@@ -21,37 +22,44 @@ const Program = () => {
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
   
   useEffect(() => {
-    // Charger les événements sauvegardés depuis le localStorage
-    const savedEvents = localStorage.getItem("savedEvents");
-    if (savedEvents) {
-      setSavedEventIds(JSON.parse(savedEvents));
-    }
+    // Charger les événements sauvegardés depuis le service
+    const savedEvents = getSavedEvents();
+    // Extraire les IDs des événements sauvegardés
+    const savedIds = savedEvents.map(event => event.id);
+    setSavedEventIds(savedIds);
   }, []);
 
   const handleSaveEvent = (event: Event, e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log(`[Program] Tentative de sauvegarde de l'événement: ${event.id}`);
     
-    const savedEvents = [...savedEventIds];
-    const eventIndex = savedEvents.indexOf(event.id);
+    const isEventSaved = savedEventIds.includes(event.id);
     
-    if (eventIndex === -1) {
-      // Ajouter l'événement aux favoris
-      savedEvents.push(event.id);
+    if (!isEventSaved) {
+      // Ajouter l'événement aux favoris en utilisant le service
+      saveEvent(event);
+      // Mettre à jour l'état local
+      setSavedEventIds([...savedEventIds, event.id]);
+      
       toast({
         title: "Événement sauvegardé",
         description: `${event.title} a été ajouté à vos favoris.`,
       });
+      
+      console.log(`[Program] Événement ${event.id} sauvegardé avec succès`);
     } else {
-      // Retirer l'événement des favoris
-      savedEvents.splice(eventIndex, 1);
+      // Retirer l'événement des favoris en utilisant le service
+      removeSavedEvent(event.id);
+      // Mettre à jour l'état local
+      setSavedEventIds(savedEventIds.filter(id => id !== event.id));
+      
       toast({
         title: "Événement retiré",
         description: `${event.title} a été retiré de vos favoris.`,
       });
+      
+      console.log(`[Program] Événement ${event.id} retiré avec succès`);
     }
-    
-    setSavedEventIds(savedEvents);
-    localStorage.setItem("savedEvents", JSON.stringify(savedEvents));
   };
   
   const handleViewOnMap = (event: Event) => {

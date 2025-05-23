@@ -21,6 +21,7 @@ import { EventDetails } from "@/components/EventDetails";
 import { type Event, events, getLocationIdForEvent } from "@/data/events";
 import { useData, useEvents, useLocations } from "@/hooks/useData";
 import { toast } from "@/components/ui/use-toast";
+import { saveEvent, removeSavedEvent, getSavedEvents } from "../services/savedEvents";
 
 // Créer un logger pour le composant Map
 const logger = createLogger('Map');
@@ -63,22 +64,20 @@ const Map = ({ fullScreen = false }: MapProps) => {
     }
   }, [locations]);
   
-  // Charger les événements sauvegardés depuis le localStorage
+  // Charger les événements sauvegardés depuis le service
   useEffect(() => {
-    const savedEvents = localStorage.getItem("savedEvents");
-    if (savedEvents) {
-      setSavedEventIds(JSON.parse(savedEvents));
-    }
+    const savedEventsData = getSavedEvents();
+    const savedIds = savedEventsData.map(event => event.id);
+    setSavedEventIds(savedIds);
   }, []);
   
   // Recharger les événements sauvegardés lorsqu'on ferme la vue détaillée d'un événement
   useEffect(() => {
     if (!selectedEvent) {
       // Quand on ferme la vue détaillée, on recharge les événements sauvegardés
-      const savedEvents = localStorage.getItem("savedEvents");
-      if (savedEvents) {
-        setSavedEventIds(JSON.parse(savedEvents));
-      }
+      const savedEventsData = getSavedEvents();
+      const savedIds = savedEventsData.map(event => event.id);
+      setSavedEventIds(savedIds);
     }
   }, [selectedEvent]);
   
@@ -91,28 +90,35 @@ const Map = ({ fullScreen = false }: MapProps) => {
   // Fonction pour sauvegarder/retirer un événement des favoris
   const handleSaveEvent = (event: Event, e: React.MouseEvent) => {
     e.stopPropagation();
+    logger.info(`Tentative de sauvegarde de l'événement: ${event.id} depuis la carte`);
     
-    const savedEvents = [...savedEventIds];
-    const eventIndex = savedEvents.indexOf(event.id);
+    const isEventSaved = savedEventIds.includes(event.id);
     
-    if (eventIndex === -1) {
-      // Ajouter l'événement aux favoris
-      savedEvents.push(event.id);
+    if (!isEventSaved) {
+      // Ajouter l'événement aux favoris en utilisant le service
+      saveEvent(event);
+      // Mettre à jour l'état local
+      setSavedEventIds([...savedEventIds, event.id]);
+      
       toast({
         title: "Événement sauvegardé",
         description: `${event.title} a été ajouté à vos favoris.`,
       });
+      
+      logger.info(`Événement ${event.id} sauvegardé avec succès depuis la carte`);
     } else {
-      // Retirer l'événement des favoris
-      savedEvents.splice(eventIndex, 1);
+      // Retirer l'événement des favoris en utilisant le service
+      removeSavedEvent(event.id);
+      // Mettre à jour l'état local
+      setSavedEventIds(savedEventIds.filter(id => id !== event.id));
+      
       toast({
         title: "Événement retiré",
         description: `${event.title} a été retiré de vos favoris.`,
       });
+      
+      logger.info(`Événement ${event.id} retiré avec succès depuis la carte`);
     }
-    
-    setSavedEventIds(savedEvents);
-    localStorage.setItem("savedEvents", JSON.stringify(savedEvents));
   };
   
   // Effet pour mettre en évidence le lieu lorsqu'on arrive depuis l'histoire complète ou l'admin

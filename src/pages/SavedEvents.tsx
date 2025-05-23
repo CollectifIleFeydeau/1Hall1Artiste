@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import Celebration from "@/components/Celebration";
+import { AchievementType, getAchievementCelebrationMessage, isAchievementUnlocked } from "@/services/achievements";
 
 export default function SavedEvents() {
   const navigate = useNavigate();
@@ -19,10 +21,28 @@ export default function SavedEvents() {
   const [notificationDate, setNotificationDate] = useState<string>("");
   const [notificationTime, setNotificationTime] = useState<string>("");
   const [activeEvent, setActiveEvent] = useState<string | null>(null);
+  
+  // États pour les célébrations
+  const [showFirstSavedCelebration, setShowFirstSavedCelebration] = useState<boolean>(false);
+  const [showMultipleSavedCelebration, setShowMultipleSavedCelebration] = useState<boolean>(false);
+  const [showNotificationCelebration, setShowNotificationCelebration] = useState<boolean>(false);
 
   useEffect(() => {
     // Charger les événements sauvegardés
     setSavedEvents(getSavedEvents());
+    
+    // Vérifier si des réalisations ont été débloquées récemment
+    if (isAchievementUnlocked(AchievementType.FIRST_EVENT_SAVED)) {
+      setShowFirstSavedCelebration(true);
+    }
+    
+    if (isAchievementUnlocked(AchievementType.MULTIPLE_EVENTS_SAVED)) {
+      setShowMultipleSavedCelebration(true);
+    }
+    
+    if (isAchievementUnlocked(AchievementType.NOTIFICATION_SET)) {
+      setShowNotificationCelebration(true);
+    }
   }, []);
 
   const handleRemoveEvent = (eventId: string) => {
@@ -48,6 +68,23 @@ export default function SavedEvents() {
 
   return (
     <div className="min-h-screen bg-white pb-20">
+      {/* Composants de célébration */}
+      <Celebration 
+        trigger={showFirstSavedCelebration} 
+        message={getAchievementCelebrationMessage(AchievementType.FIRST_EVENT_SAVED)} 
+        onComplete={() => setShowFirstSavedCelebration(false)}
+      />
+      <Celebration 
+        trigger={showMultipleSavedCelebration} 
+        message={getAchievementCelebrationMessage(AchievementType.MULTIPLE_EVENTS_SAVED)} 
+        onComplete={() => setShowMultipleSavedCelebration(false)}
+      />
+      <Celebration 
+        trigger={showNotificationCelebration} 
+        message={getAchievementCelebrationMessage(AchievementType.NOTIFICATION_SET)} 
+        onComplete={() => setShowNotificationCelebration(false)}
+      />
+      
       <div className="max-w-md mx-auto px-4 pt-4">
         <header className="mb-4 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
