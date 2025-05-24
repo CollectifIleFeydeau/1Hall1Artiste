@@ -18,7 +18,7 @@ export function BottomNavigation() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-center h-16 z-[9999] shadow-lg">
-      <div className="w-full max-w-screen-lg grid grid-cols-5 gap-0 px-2 mx-auto">
+      <div className="w-full max-w-screen-lg grid grid-cols-5 gap-0 px-1 mx-auto">
         <Link
           to="/map"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
@@ -26,7 +26,7 @@ export function BottomNavigation() {
           }`}
         >
           <MapPin className="h-6 w-6" />
-          <span className="text-xs mt-1">Carte</span>
+          <span className="text-[10px] mt-1 leading-tight">Carte</span>
         </Link>
         
         <Link
@@ -36,7 +36,7 @@ export function BottomNavigation() {
           }`}
         >
           <Calendar className="h-6 w-6" />
-          <span className="text-xs mt-1">Programme</span>
+          <span className="text-[10px] mt-1 leading-tight">Programme</span>
         </Link>
         
         <Link
@@ -46,7 +46,7 @@ export function BottomNavigation() {
           }`}
         >
           <Bookmark className="h-6 w-6" />
-          <span className="text-xs mt-1">Sauvegardés</span>
+          <span className="text-[10px] mt-1 leading-tight">Enregistrés</span>
         </Link>
         
         
@@ -57,7 +57,7 @@ export function BottomNavigation() {
           }`}
         >
           <Info className="h-6 w-6" />
-          <span className="text-xs mt-1">À propos</span>
+          <span className="text-[10px] mt-1 leading-tight">À propos</span>
         </Link>
         
         <Link
@@ -67,7 +67,7 @@ export function BottomNavigation() {
           }`}
         >
           <Gift className="h-6 w-6" />
-          <span className="text-xs mt-1">Dons</span>
+          <span className="text-[10px] mt-1 leading-tight">Dons</span>
         </Link>
       </div>
     </div>

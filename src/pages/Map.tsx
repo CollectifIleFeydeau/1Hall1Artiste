@@ -22,6 +22,7 @@ import { type Event, events, getLocationIdForEvent } from "@/data/events";
 import { useData, useEvents, useLocations } from "@/hooks/useData";
 import { toast } from "@/components/ui/use-toast";
 import { saveEvent, removeSavedEvent, getSavedEvents } from "../services/savedEvents";
+import { unlockAchievement, AchievementType } from "../services/achievements";
 
 // Créer un logger pour le composant Map
 const logger = createLogger('Map');
@@ -226,6 +227,18 @@ const Map = ({ fullScreen = false }: MapProps) => {
       title: visited ? "Lieu marqué comme visité" : "Lieu marqué comme non visité",
       description: `${mapLocations.find(l => l.id === locationId)?.name} a été mis à jour.`,
     });
+    
+    // Si le lieu est marqué comme visité, déclencher les achievements appropriés
+    if (visited) {
+      logger.info(`Lieu ${locationId} marqué comme visité, vérification des achievements`);
+      
+      // Vérifier si tous les lieux ont été visités
+      const allVisited = updatedLocations.every(loc => loc.visited);
+      if (allVisited) {
+        logger.info('Tous les lieux ont été visités, déblocage de l\'achievement ALL_LOCATIONS_VISITED');
+        unlockAchievement(AchievementType.ALL_LOCATIONS_VISITED);
+      }
+    }
   };
 
   // Cette fonction n'est plus nécessaire car elle est gérée par le composant EventDetails
