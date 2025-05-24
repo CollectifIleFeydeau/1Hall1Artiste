@@ -3,6 +3,8 @@
 
 # Priorités actuelles (phase de test et optimisation)
 
+Équipes plutôt que notre équipe 
+Revoir les dons 
 
 ## Priorités immédiates à faire 
 
