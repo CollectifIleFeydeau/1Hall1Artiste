@@ -14,8 +14,6 @@ import { ImportExportPanel } from "@/components/ImportExportPanel";
 import { EventForm } from "@/components/EventForm";
 import { AdminLogin } from "@/components/AdminLogin";
 import { toast } from "@/components/ui/use-toast";
-import { AchievementType } from "@/types/achievements";
-import Celebration from "@/components/Celebration";
 
 // Créer un logger pour le composant Admin
 const logger = createLogger('Admin');
@@ -34,8 +32,6 @@ export default function Admin() {
   const [coordinates, setCoordinates] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [mapClicked, setMapClicked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [celebrationMessage, setCelebrationMessage] = useState("");
   
   // Vérifier si l'utilisateur est déjà authentifié (session storage)
   useEffect(() => {
@@ -260,44 +256,25 @@ export default function Admin() {
     setIsAuthenticated(true);
     sessionStorage.setItem('adminAuthenticated', 'true');
   };
-
-  const resetOnboarding = () => {
-    localStorage.removeItem('onboardingCompleted');
-    toast({
-      title: "Onboarding réinitialisé",
-      description: "L'onboarding s'affichera au prochain chargement de l'application.",
-    });
-  };
-
+  
   const clearLocalStorage = () => {
     localStorage.clear();
     toast({
       title: "LocalStorage vidé",
       description: "Toutes les données locales ont été effacées.",
+      variant: "destructive"
     });
+    logger.info('LocalStorage vidé par l\'administrateur');
+    setTimeout(() => window.location.reload(), 1500);
   };
-
-  const testConfetti = () => {
-    setCelebrationMessage("Félicitations !");
-    setShowCelebration(true);
-  };
-
-  const testAchievement = (achievementType: AchievementType) => {
-    // Simuler le déclenchement d'un achievement
-    let message = "";
-    switch (achievementType) {
-      case AchievementType.FIRST_EVENT_SAVED:
-        message = "Premier événement sauvegardé !";
-        break;
-      case AchievementType.FIVE_EVENTS_SAVED:
-        message = "5 événements sauvegardés !";
-        break;
-      default:
-        message = "Achievement débloqué !";
-    }
-    
-    setCelebrationMessage(message);
-    setShowCelebration(true);
+  
+  const resetOnboarding = () => {
+    localStorage.removeItem('hasSeenOnboarding');
+    toast({
+      title: "Onboarding réinitialisé",
+      description: "L'onboarding s'affichera au prochain chargement de l'application.",
+    });
+    logger.info('Onboarding réinitialisé par l\'administrateur');
   };
 
   if (!isAuthenticated) {
@@ -338,11 +315,11 @@ export default function Admin() {
             <TabsTrigger value="locations">Lieux</TabsTrigger>
             <TabsTrigger value="events">Événements</TabsTrigger>
             <TabsTrigger value="import-export">Import/Export</TabsTrigger>
-            <TabsTrigger value="tests">Tests</TabsTrigger>
+            <TabsTrigger value="reset">Réinitialisation</TabsTrigger>
           </TabsList>
           
           {/* Onglet de gestion des coordonnées */}
-          <TabsContent value="coordinates">
+          <TabsContent value="locations">
             <Card>
               <CardHeader>
                 <CardTitle className="text-[#4a5d94]">Gestion des coordonnées</CardTitle>
@@ -465,75 +442,44 @@ export default function Admin() {
             </Card>
           </TabsContent>
           
-          {/* Onglet de tests */}
-          <TabsContent value="tests">
+          {/* Onglet de réinitialisation */}
+          <TabsContent value="reset">
             <Card>
               <CardHeader>
-                <CardTitle className="text-[#4a5d94]">Outils de test</CardTitle>
+                <CardTitle className="text-[#4a5d94]">Réinitialisation des données</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <h2 className="text-lg font-semibold mb-2">Tests d'interface</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button
-                        onClick={resetOnboarding}
-                        className="bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg text-sm flex items-center space-x-2 w-full"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        <span>Réinitialiser Onboarding</span>
-                      </Button>
-                      
-                      <Button
-                        onClick={clearLocalStorage}
-                        className="bg-red-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm flex items-center space-x-2 w-full"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        <span>Vider localStorage</span>
-                      </Button>
-                    </div>
+                    <h2 className="text-lg font-semibold mb-2">Réinitialisation du localStorage</h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Attention : cette action effacera toutes les données locales de l'application, y compris les événements sauvegardés, les lieux visités et les préférences utilisateur.                      
+                    </p>
+                    <Button 
+                      onClick={clearLocalStorage}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      Vider le localStorage
+                    </Button>
                   </div>
                   
                   <div>
-                    <h2 className="text-lg font-semibold mb-2">Tests de gamification</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button
-                        onClick={testConfetti}
-                        className="bg-purple-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm flex items-center space-x-2 w-full"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <span>Tester Confettis</span>
-                      </Button>
-                      
-                      <Button
-                        onClick={() => testAchievement(AchievementType.FIRST_EVENT_SAVED)}
-                        className="bg-green-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm flex items-center space-x-2 w-full"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span>Tester Achievement</span>
-                      </Button>
-                    </div>
+                    <h2 className="text-lg font-semibold mb-2">Réinitialisation de l'onboarding</h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Cette action réinitialisera uniquement l'onboarding. L'écran d'accueil s'affichera au prochain chargement de l'application.
+                    </p>
+                    <Button 
+                      onClick={resetOnboarding}
+                      className="w-full bg-gray-800 hover:bg-gray-900 text-white"
+                    >
+                      Réinitialiser l'onboarding
+                    </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-        
-        {/* Composant de célébration pour les tests */}
-        <Celebration 
-          trigger={showCelebration}
-          message={celebrationMessage}
-          onComplete={() => setShowCelebration(false)}
-        />
       </div>
     </div>
   );

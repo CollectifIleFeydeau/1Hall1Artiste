@@ -97,7 +97,7 @@ export default function Onboarding() {
         </div>
       </div>
       
-      {/* Contenu principal */}
+      {/* Contenu principal - hauteur limitée pour garantir que les boutons restent visibles */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <motion.div 
           className="flex-1 flex flex-col overflow-hidden"
@@ -105,8 +105,8 @@ export default function Onboarding() {
           dragConstraints={{ left: 0, right: 0 }}
           onDragEnd={handleDragEnd}
         >
-          {/* Section image - hauteur adaptative */}
-          <div className="relative h-2/5 md:h-1/2 overflow-hidden bg-gray-200">
+          {/* Section image - hauteur fixe pour garantir de l'espace pour le contenu et les boutons */}
+          <div className="relative h-[30vh] md:h-[40vh] overflow-hidden bg-gray-200">
             <div 
               className="absolute inset-0 bg-center bg-no-repeat bg-contain" 
               style={{ backgroundImage: `url(${BASE_PATH}${slides[currentSlide].image})` }}
@@ -120,8 +120,8 @@ export default function Onboarding() {
             </div>
           </div>
           
-          {/* Section texte - hauteur adaptative avec scroll si nécessaire */}
-          <div className="flex-1 p-4 overflow-y-auto">
+          {/* Section texte - hauteur limitée avec scroll si nécessaire */}
+          <div className="flex-1 p-4 overflow-y-auto pb-[80px]">
             {Array.isArray(slides[currentSlide].description) ? (
               <div className="space-y-3">
                 {slides[currentSlide].description.map((desc, i) => (
@@ -136,7 +136,7 @@ export default function Onboarding() {
       </div>
       
       {/* Boutons de navigation - position fixe en bas */}
-      <div className="p-4 flex space-x-4 border-t border-gray-100">
+      <div className="fixed bottom-0 left-0 right-0 p-4 flex space-x-4 border-t border-gray-100 bg-white z-50">
         {currentSlide > 0 && (
           <Button 
             onClick={prevSlide}
