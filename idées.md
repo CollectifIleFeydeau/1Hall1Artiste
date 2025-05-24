@@ -6,6 +6,8 @@
 
 ## Priorités immédiates à faire 
 
+0. **Horaire par défaut d'abord et précis à la demande 
+
 1. **Test sur mobile** ⭐ (Priorité actuelle)
    - Tester l'application sur mobile pour vérifier le fonctionnement du mode hors ligne
    - Vérifier la réactivité et l'ergonomie sur différents appareils
