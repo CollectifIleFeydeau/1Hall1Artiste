@@ -24,6 +24,10 @@ export const Celebration: React.FC<CelebrationProps> = ({
 }) => {
   const [isActive, setIsActive] = useState(false);
   const { width, height } = useWindowSize();
+  
+  // Utiliser les dimensions de la fenêtre ou des valeurs par défaut pour mobile
+  const confettiWidth = width || window.innerWidth || document.documentElement.clientWidth || 375;
+  const confettiHeight = height || window.innerHeight || document.documentElement.clientHeight || 667;
 
   useEffect(() => {
     if (trigger) {
@@ -45,11 +49,12 @@ export const Celebration: React.FC<CelebrationProps> = ({
   return (
     <div className="fixed inset-0 z-[9999] pointer-events-none">
       <Confetti
-        width={width}
-        height={height}
+        width={confettiWidth}
+        height={confettiHeight}
         recycle={false}
         numberOfPieces={200}
         gravity={0.2}
+        tweenDuration={5000}
       />
       
       {message && (
