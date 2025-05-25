@@ -108,7 +108,7 @@ const EMAIL_TEMPLATE_ID = 'template_q7nh8h2';
  */
 export const initEmailJS = async (): Promise<void> => {
   try {
-    const emailjs = await import('emailjs-com');
+    const emailjs = await import('@emailjs/browser');
     // Vous n'avez pas besoin de spécifier le USER_ID ici
     // EmailJS le récupérera depuis le script chargé dans index.html
   } catch (error) {
@@ -146,7 +146,7 @@ export const sendErrorsToTrackingService = async (): Promise<boolean> => {
       console.log(`Envoi de ${errors.length} erreurs par email`);
       
       // Importer EmailJS dynamiquement
-      const emailjs = await import('emailjs-com');
+      const emailjs = await import('@emailjs/browser');
       
       // Préparer les données pour le modèle d'email
       const templateParams = {

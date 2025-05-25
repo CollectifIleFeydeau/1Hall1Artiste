@@ -282,7 +282,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                   height="275"
                   frameBorder="0"
                   scrolling="no"
-                  allowTransparency="true"
+                  allowtransparency="true"
                   loading="lazy"
                   style={{
                     transform: 'scale(0.99)',

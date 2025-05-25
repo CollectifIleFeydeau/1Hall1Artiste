@@ -1,4 +1,4 @@
-import emailjs from 'emailjs-com';
+import emailjs from '@emailjs/browser';
 import { getStoredErrors, clearStoredErrors } from './errorTracking';
 
 // Configuration EmailJS
