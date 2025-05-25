@@ -37,7 +37,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
   
   // Utiliser les hooks pour accéder aux données centralisées
   const { locations } = useLocations();
-  const { getEventById } = useEvents();
+  const { getEventById, getEventsByLocationId } = useEvents();
   
   // Utiliser directement les emplacements du service de données
   const [mapLocations, setMapLocations] = useState(locations);
@@ -154,6 +154,12 @@ const Map = ({ fullScreen = false }: MapProps) => {
       if (event) {
         locationIdToUse = event.locationId;
         logger.debug(`Conversion de l'ID d'événement ${eventParam} en ID de lieu ${locationIdToUse}`);
+        
+        // Ouvrir automatiquement les détails de l'événement
+        setTimeout(() => {
+          setSelectedEvent(event);
+          logger.info(`Ouverture automatique des détails de l'événement ${event.id}`);
+        }, 500); // Petit délai pour permettre à la carte de se charger d'abord
       }
     }
     
@@ -202,9 +208,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
     // Définir le lieu comme actif pour afficher ses détails
     setActiveLocation(locationId);
     
-    // Trouver les événements associés à ce lieu en utilisant le hook useEvents
-    const locationEvents = mapLocations.find(l => l.id === locationId)?.events || [];
-    const eventsData = locationEvents.map(eventId => getEventById(eventId)).filter(Boolean) as Event[];
+    // Trouver les événements associés à ce lieu en utilisant la propriété locationId des événements
+    const eventsData = getEventsByLocationId(locationId);
+    logger.debug(`Récupération des événements pour le lieu ${locationId} via getEventsByLocationId`, eventsData);
     logger.debug(`Événements trouvés pour ${locationId}`, eventsData);
     
     // Toujours afficher d'abord les informations du lieu, jamais directement l'événement
@@ -244,24 +250,13 @@ const Map = ({ fullScreen = false }: MapProps) => {
   // Cette fonction n'est plus nécessaire car elle est gérée par le composant EventDetails
 
   const getLocationEvents = (locationId: string) => {
-    // 1. Récupérer les événements à partir des IDs stockés dans le lieu
-    const location = mapLocations.find(l => l.id === locationId);
-    if (!location) return [];
+    // Utiliser la fonction getEventsByLocationId du hook useEvents
+    // qui a été mise à jour pour fonctionner avec la nouvelle structure de données
+    const eventsWithThisLocation = getEventsByLocationId(locationId);
     
-    // 2. Récupérer également tous les événements qui ont ce locationId
-    // Cela permet de trouver les événements qui ne sont pas explicitement listés dans location.events
-    const eventsFromLocation = location.events.map(eventId => getEventById(eventId)).filter(Boolean) as Event[];
+    logger.debug(`Événements trouvés pour ${locationId} via getEventsByLocationId`, eventsWithThisLocation);
     
-    // 3. Rechercher tous les événements qui ont ce locationId
-    const eventsWithThisLocation = events.filter(event => event.locationId === locationId);
-    
-    // 4. Fusionner les deux listes et éliminer les doublons
-    const allEvents = [...eventsFromLocation, ...eventsWithThisLocation];
-    const uniqueEvents = allEvents.filter((event, index, self) => 
-      index === self.findIndex(e => e.id === event.id)
-    );
-    
-    return uniqueEvents;
+    return eventsWithThisLocation;
   };
 
   // Calculate visited locations count
@@ -374,11 +369,19 @@ const Map = ({ fullScreen = false }: MapProps) => {
               variant="outline" 
               className="text-xs border-[#4a5d94] text-[#4a5d94]"
               onClick={() => {
-                navigate('/location-history', { state: { selectedLocationId: activeLocation } });
+                // S'assurer que activeLocation est défini avant de naviguer
+                if (activeLocation) {
+                  logger.info(`Navigation vers l'histoire du lieu: ${activeLocation}`);
+                  navigate('/location-history', { 
+                    state: { selectedLocationId: activeLocation }
+                  });
+                } else {
+                  logger.warn('Tentative de navigation vers l\'histoire d\'un lieu non sélectionné');
+                }
               }}
             >
               <Info className="h-3 w-3 mr-1" />
-              Voir l'histoire complète
+              Histoire du lieu
             </Button>
             
             <div className="mb-6"></div>

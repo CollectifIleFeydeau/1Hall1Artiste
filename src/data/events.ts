@@ -1,4 +1,5 @@
 import { getArtistById, Artist } from './artists';
+import { getLocationNameById } from './locations';
 
 // Type for event-specific details, linking to an artist via artistId
 export type EventDetails = {
@@ -8,10 +9,7 @@ export type EventDetails = {
   description: string; // Event's own description
   time: string;
   days: ("samedi" | "dimanche")[];
-  locationId: string;
-  locationName: string;
-  x: number;
-  y: number;
+  locationId: string; // Référence à l'ID du lieu dans locations.ts
 };
 
 // Combined Event type that components will use
@@ -26,8 +24,6 @@ export type Event = {
   days: ("samedi" | "dimanche")[];
   locationId: string;
   locationName: string;
-  x: number;
-  y: number;
 
   // Fields from Artist
   artistName: Artist['name'];
@@ -35,6 +31,13 @@ export type Event = {
   artistBio: Artist['bio'];
   contact: Artist['contact'];
   image?: Artist['image'];
+  
+  // Propriétés supplémentaires des artistes
+  email?: Artist['email'];
+  photos?: Artist['photos'];
+  presentation?: Artist['presentation'];
+  link?: Artist['link'];
+  instagram?: Artist['instagram'];
 };
 
 // Raw schedule data: list of event-specific details
@@ -48,9 +51,7 @@ const eventScheduleData: EventDetails[] = [
     time: "14h45 - 15h15",
     days: ["samedi"],
     locationId: "quai-turenne-9-concert",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   {
     id: "concert-conteurs-samedi",
@@ -60,9 +61,7 @@ const eventScheduleData: EventDetails[] = [
     time: "16h00 - 16h45",
     days: ["samedi"],
     locationId: "quai-turenne-9-concert",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   {
     id: "concert-scarabees",
@@ -72,9 +71,7 @@ const eventScheduleData: EventDetails[] = [
     time: "17h45 - 18h15",
     days: ["samedi"],
     locationId: "quai-turenne-9-concert",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   {
     id: "concert-aperto",
@@ -84,9 +81,7 @@ const eventScheduleData: EventDetails[] = [
     time: "18h30 - 19h00",
     days: ["samedi"],
     locationId: "quai-turenne-9-concert",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   {
     id: "concert-quatuor-liger",
@@ -96,9 +91,7 @@ const eventScheduleData: EventDetails[] = [
     time: "14h00 - 14h30",
     days: ["dimanche"],
     locationId: "quai-turenne-9-concert",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   {
     id: "concert-eva",
@@ -108,9 +101,7 @@ const eventScheduleData: EventDetails[] = [
     time: "15h30 - 16h00",
     days: ["dimanche"],
     locationId: "quai-turenne-9-concert",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   {
     id: "concert-conteurs-dimanche",
@@ -120,9 +111,7 @@ const eventScheduleData: EventDetails[] = [
     time: "16h00 - 16h45",
     days: ["dimanche"],
     locationId: "quai-turenne-9-concert",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   {
     id: "concert-swing-it",
@@ -132,9 +121,7 @@ const eventScheduleData: EventDetails[] = [
     time: "17h00 - 17h30",
     days: ["dimanche"],
     locationId: "quai-turenne-9-concert",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   {
     id: "concert-variabilis",
@@ -144,9 +131,7 @@ const eventScheduleData: EventDetails[] = [
     time: "17h45 - 18h15",
     days: ["dimanche"],
     locationId: "quai-turenne-9-concert",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   // Expositions
   {
@@ -157,9 +142,7 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-8",
-    locationName: "8 quai Turenne",
-    x: 350,
-    y: 250
+
   },
   {
     id: "expo-catherine-clement", // Changed ID
@@ -169,9 +152,7 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-8",
-    locationName: "8 quai Turenne",
-    x: 350,
-    y: 250
+
   },
   {
     id: "expo-mostapha-rouine", // Changed ID
@@ -181,22 +162,18 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-8",
-    locationName: "8 quai Turenne",
-    x: 350,
-    y: 250
+
   },
 
   {
-    id: "expo-bruno-barbier", // Changed ID (was bruno-barbier)
+    id: "expo-bruno-barbier", 
     artistId: "bruno-barbier",
     title: "Peintures et dessins",
     description: "Explorant les thèmes du souvenir et de la nostalgie, Bruno Barbier, artiste peintre et dessinateur installé à Nantes, évoque des fragments de mémoire, entre émotions passées et traces du temps.",
     time: "10h00 - 18h00",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-9",
-    locationName: "09 quai Turenne / 11 rue Kervégan",
-    x: 260,
-    y: 175
+
   },
   {
     id: "expo-pauline-crusson", // Changed ID (was pauline-crusson)
@@ -206,9 +183,7 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00",
     days: ["samedi", "dimanche"],
     locationId: "rue-duguesclin",
-    locationName: "Rue Duguesclin",
-    x: 130,
-    y: 460
+
   },
   {
     id: "expo-alain-gremillet",
@@ -218,9 +193,7 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
-    locationName: "10 quai Turenne / 13 rue Kervégan",
-    x: 280,
-    y: 200
+
   },
   {
     id: "expo-jerome-gourdon",
@@ -230,9 +203,7 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
-    locationName: "10 quai Turenne / 13 rue Kervégan",
-    x: 280,
-    y: 200
+
   },
   {
     id: "expo-nadege-hameau",
@@ -242,9 +213,7 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
-    locationName: "10 quai Turenne / 13 rue Kervégan",
-    x: 290,
-    y: 210
+
   },
   {
     id: "expo-pauline-crusson",
@@ -254,9 +223,7 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
-    locationName: "10 quai Turenne / 13 rue Kervégan",
-    x: 320,
-    y: 230
+
   },
   {
     id: "expo-marie-husson",
@@ -266,9 +233,7 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "rue-kervegan-17",
-    locationName: "17 rue Kervégan / 11 quai Turenne",
-    x: 340,
-    y: 240
+
   },
   {
     id: "expo-clotilde-debar-zablocki",
@@ -277,10 +242,8 @@ const eventScheduleData: EventDetails[] = [
     description: "Inspirée par l'histoire et le patrimoine local, notamment celui d'Anne de Bretagne, Clotilde Debar-Zablocki crée un univers poétique et sensible. Avec David, elle forme le duo apolline.design, spécialisé en fresques décoratives et patines.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "allee-duguay-trouin-11",
-    locationName: "11 allée Duguay Trouin / 20 rue Kervégan",
-    x: 360,
-    y: 260
+    locationId: "allee-duguay-trouin-15",
+
   },
   {
     id: "expo-malou-tual",
@@ -290,9 +253,7 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-11",
-    locationName: "11 allée Duguay Trouin / 20 rue Kervégan",
-    x: 370,
-    y: 270
+
   },
   {
     id: "expo-gael-caudoux",
@@ -302,21 +263,17 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-11",
-    locationName: "11 allée Duguay Trouin / 20 rue Kervégan",
-    x: 300,
-    y: 220
+
   },
   {
-    id: "expo-atelier-norg",
-    artistId: "atelier-norg",
-    title: "Peinture, sculpture et dessin",
-    description: "Norg est un plasticien basé à Nantes dont le travail navigue entre peinture, sculpture et dessin, avec une énergie brute et expressive. Son univers visuel est direct et instinctif.",
+    id: "expo-andry-shango-rajoelina",
+    artistId: "andry-shango-rajoelina",
+    title: "Art multidisciplinaire",
+    description: "Artiste multidisciplinaire mêlant peinture, design et art textile, Andry \"Shango\" Rajoelina explore les identités africaines à travers une esthétique vibrante et contemporaine. Son univers visuel, riche en symboles et en couleurs, reflète un profond engagement culturel et narratif.",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
-    locationName: "16 allée Duguay Trouin",
-    x: 310,
-    y: 225
+
   },
   {
     id: "expo-jerome-luneau",
@@ -326,21 +283,17 @@ const eventScheduleData: EventDetails[] = [
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
-    locationName: "16 allée Duguay Trouin",
-    x: 315,
-    y: 228
+
   },
   {
     id: "expo-jocelyn-prouff", // Changed ID (was expo9)
-    artistId: "jocelyn-prouff",
+    artistId: "expo9",
     title: "Carnets Nantais",
     description: "Croquant in situ des lieux urbains où la nature reprend ses droits, avec une attention particulière à la lumière et aux détails, Joss Proof invite à un autre regard sur la ville à travers ses carnets sensibles. Il partage cet univers dans son livre \"Carnets Nantais\".",
     time: "10h00 - 18h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
-    locationName: "16 allée Duguay Trouin",
-    x: 350,
-    y: 250
+
   }
 
 ];
@@ -367,9 +320,7 @@ export const events: Event[] = eventScheduleData.map(eventDetail => {
     time: eventDetail.time,
     days: eventDetail.days,
     locationId: eventDetail.locationId,
-    locationName: eventDetail.locationName,
-    x: eventDetail.x,
-    y: eventDetail.y,
+    locationName: getLocationNameById(eventDetail.locationId),
 
     // From Artist
     artistName: artist.name,
@@ -377,6 +328,13 @@ export const events: Event[] = eventScheduleData.map(eventDetail => {
     artistBio: artist.bio,
     contact: artist.contact,
     image: artist.image,
+    
+    // Propriétés supplémentaires des artistes
+    email: artist.email,
+    photos: artist.photos,
+    presentation: artist.presentation,
+    link: artist.link,
+    instagram: artist.instagram
   };
 }).filter(event => event !== null) as Event[]; // Filter out any nulls if artists weren't found
 
@@ -390,71 +348,87 @@ export function getEventById(id: string) {
 }
 
 export function getEventsByLocation(locationName: string) {
-  return events.filter(event => event.locationName === locationName);
+  // Récupérer le lieu par son nom
+  const locations = getLocations();
+  const location = locations.find(loc => loc.name === locationName);
+  
+  if (location) {
+    // Si on a trouvé le lieu, récupérer les événements qui ont ce locationId
+    return events.filter(event => event.locationId === location.id);
+  }
+  
+  // Si on ne trouve pas le lieu, retourner un tableau vide
+  return [];
 }
 
 // Get unique locations from events
 export function getLocations() {
   const uniqueLocations = new Map<string, { id: string, name: string, description: string, x: number, y: number, events: string[], visited: boolean }>();
   
-  // Attempt to load full descriptions asynchronously
-  // The try-catch is to handle cases where dynamic import might not be supported (e.g. certain test environments or older bundlers)
+  // Import locations data and use it as the primary source for location information
   try {
     import('../data/locations').then(locationsModule => {
       const locationsData = locationsModule.locations;
-      // This part repopulates or updates descriptions if async load succeeds.
-      // It might run after the initial synchronous population.
+      
+      // Create a map of events by locationId
+      const eventsByLocation = new Map<string, string[]>();
       events.forEach(event => {
-        if (!uniqueLocations.has(event.locationName)) {
-          const locationData = locationsData.find(loc => loc.id === event.locationId);
-          const description = locationData ? locationData.description : '';
-          uniqueLocations.set(event.locationName, {
-            id: event.locationId,
-            name: event.locationName,
-            description: description, // Use fetched description
-            x: event.x,
-            y: event.y,
-            events: [event.id],
-            visited: false
-          });
+        if (!eventsByLocation.has(event.locationId)) {
+          eventsByLocation.set(event.locationId, [event.id]);
         } else {
-          const location = uniqueLocations.get(event.locationName);
-          if (location && !location.description) { // Update description if not already set by a more specific source
-             const locationData = locationsData.find(loc => loc.id === event.locationId);
-             if (locationData && locationData.description) {
-                location.description = locationData.description;
-             }
-          }
-          location?.events.push(event.id);
+          eventsByLocation.get(event.locationId)?.push(event.id);
         }
       });
+      
+      // Use locations data as the primary source
+      locationsData.forEach(location => {
+        const eventIds = eventsByLocation.get(location.id) || [];
+        uniqueLocations.set(location.name, {
+          id: location.id,
+          name: location.name,
+          description: location.description,
+          x: location.x,
+          y: location.y,
+          events: eventIds,
+          visited: location.visited || false
+        });
+      });
     }).catch(error => {
-      console.warn('Optional module ../data/locations could not be loaded for descriptions:', error);
-      // Proceed with synchronous population if import fails
+      console.warn('Could not load locations data:', error);
+      // Fallback to using event data if locations cannot be loaded
       populateSynchronously();
     });
   } catch (error) {
-     console.warn('Dynamic import for ../data/locations not available, using synchronous fallback for locations:', error);
-     populateSynchronously();
+    console.warn('Dynamic import not available, using fallback for locations:', error);
+    populateSynchronously();
   }
 
-  // Synchronous population (fallback or initial population)
-  // This ensures uniqueLocations is populated immediately.
-  // If async load succeeds later, descriptions might be updated.
+  // Fallback function that uses event data to populate locations
   function populateSynchronously() {
+    // Group events by location
+    const eventsByLocation = new Map<string, string[]>();
+    events.forEach(event => {
+      if (!eventsByLocation.has(event.locationId)) {
+        eventsByLocation.set(event.locationId, [event.id]);
+      } else {
+        eventsByLocation.get(event.locationId)?.push(event.id);
+      }
+    });
+    
+    // Create location entries with default coordinates
+    // Note: In this fallback mode, we don't have actual coordinates
+    // so we use a default value that will be corrected when locations.ts is loaded
     events.forEach(event => {
       if (!uniqueLocations.has(event.locationName)) {
         uniqueLocations.set(event.locationName, {
           id: event.locationId,
           name: event.locationName,
           description: '', // Default empty description
-          x: event.x,
-          y: event.y,
-          events: [event.id],
+          x: 0, // Default coordinate, will be updated from locations.ts when available
+          y: 0, // Default coordinate, will be updated from locations.ts when available
+          events: eventsByLocation.get(event.locationId) || [],
           visited: false
         });
-      } else {
-        uniqueLocations.get(event.locationName)?.events.push(event.id);
       }
     });
   }

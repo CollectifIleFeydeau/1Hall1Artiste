@@ -39,12 +39,10 @@ export const useData = () => {
     state.locations.find(location => location.id === id);
   
   const getEventsByLocationId = (locationId: string): Event[] => {
-    const location = getLocationById(locationId);
-    if (!location) return [];
+    if (!locationId) return [];
     
-    return state.events.filter(event => 
-      location.events.includes(event.id)
-    );
+    // Filtrer les événements qui ont ce locationId
+    return state.events.filter(event => event.locationId === locationId);
   };
 
   // Fonctions pour mettre à jour les données
@@ -126,6 +124,7 @@ export const useEvents = () => {
     isLoading, 
     error, 
     getEventById, 
+    getEventsByLocationId,
     addEvent, 
     updateEvent, 
     removeEvent 
@@ -136,6 +135,7 @@ export const useEvents = () => {
     isLoading,
     error,
     getEventById,
+    getEventsByLocationId,
     addEvent,
     updateEvent,
     removeEvent

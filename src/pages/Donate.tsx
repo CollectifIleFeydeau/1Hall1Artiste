@@ -41,9 +41,6 @@ const Donate = () => {
             <div className="flex flex-col items-center text-center mb-6">
               <Heart className="h-12 w-12 text-red-500 mb-4" />
               <h2 className="text-xl font-bold mb-2">Soutenez notre association</h2>
-              <p className="text-gray-600">
-                Votre don nous aide à préserver et mettre en valeur le patrimoine historique de l'Île Feydeau.
-              </p>
             </div>
             
             <div className="space-y-4">
@@ -51,9 +48,9 @@ const Donate = () => {
                 <h3 className="font-medium mb-2">Pourquoi faire un don ?</h3>
                 <ul className="text-sm space-y-2">
                   <li>• Organisation d'événements culturels</li>
-                  <li>• Restauration et préservation du patrimoine</li>
                   <li>• Création de contenus pédagogiques</li>
                   <li>• Développement de projets communautaires</li>
+                  <li>• 66% de votre don est déductible de votre impôt sur le revenu</li>
                 </ul>
               </div>
               
@@ -68,13 +65,6 @@ const Donate = () => {
               <p className="text-xs text-center text-gray-500 mt-2">
                 Vous serez redirigé vers notre page HelloAsso pour finaliser votre don en toute sécurité.
               </p>
-              
-              <div className="bg-green-50 p-4 rounded-lg mt-4">
-                <h3 className="font-medium mb-2 text-green-700">Avantage fiscal</h3>
-                <p className="text-sm text-gray-700">
-                  Vos dons au Collectif Feydeau sont déductibles des impôts à hauteur de 66% de leur montant, dans la limite de 20% de votre revenu imposable. Un reçu fiscal vous sera délivré automatiquement.
-                </p>
-              </div>
             </div>
           </CardContent>
         </Card>

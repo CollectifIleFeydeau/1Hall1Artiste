@@ -68,14 +68,6 @@ export const validateEvent = (event: Event): ValidationResult => {
     errors.push({ field: 'locationName', message: 'Le nom du lieu est obligatoire' });
   }
   
-  // Validation des coordonnées
-  if (typeof event.x !== 'number') {
-    errors.push({ field: 'x', message: 'La coordonnée X doit être un nombre' });
-  }
-  
-  if (typeof event.y !== 'number') {
-    errors.push({ field: 'y', message: 'La coordonnée Y doit être un nombre' });
-  }
   
   // Journalisation des résultats de validation
   if (errors.length > 0) {
@@ -109,9 +101,8 @@ export const validateLocation = (location: Location): ValidationResult => {
     errors.push({ field: 'description', message: 'La description est obligatoire' });
   }
   
-  if (!location.events || !Array.isArray(location.events)) {
-    errors.push({ field: 'events', message: 'La liste des événements doit être un tableau' });
-  }
+  // La propriété events a été supprimée suite à la refactorisation
+  // Les événements sont maintenant liés aux lieux via leur propriété locationId
   
   // Validation des coordonnées
   if (typeof location.x !== 'number') {

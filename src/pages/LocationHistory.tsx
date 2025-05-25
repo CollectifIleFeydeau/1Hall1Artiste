@@ -18,24 +18,31 @@ export function LocationHistory() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Filtrer uniquement les lieux qui ont un historique et éliminer les doublons
-  const locationsWithHistory = locations
+  // Récupérer le locationId depuis l'état de navigation s'il existe
+  const locationIdFromState = location.state?.selectedLocationId;
+  console.log("ID du lieu reçu en paramètre:", locationIdFromState);
+  
+  // Vérifier d'abord si l'ID reçu correspond à un lieu existant
+  const locationFromState = locationIdFromState ? locations.find(loc => loc.id === locationIdFromState) : null;
+  console.log("Lieu trouvé avec cet ID:", locationFromState?.name || "Aucun");
+  
+  // Filtrer uniquement les lieux qui ont un historique
+  let locationsWithHistory = locations
     .filter(loc => loc.history) // Garder uniquement les lieux avec historique
     .filter((loc, index, self) => {
       // Éliminer les doublons basés sur le nom
       return index === self.findIndex(l => l.name === loc.name);
     });
-    
-  // Ajouter le 8 quai Turenne s'il n'est pas déjà inclus
-  const quai8 = locations.find(loc => loc.id === "quai-turenne-8");
-  if (quai8 && !locationsWithHistory.some(loc => loc.id === "quai-turenne-8")) {
-    locationsWithHistory.push(quai8);
+  
+  // Si le lieu reçu en paramètre a un historique mais n'est pas dans la liste, l'ajouter
+  if (locationFromState?.history && !locationsWithHistory.some(loc => loc.id === locationIdFromState)) {
+    locationsWithHistory.push(locationFromState);
+    console.log("Ajout du lieu reçu en paramètre à la liste des lieux avec historique");
   }
   
   const [selectedLocation, setSelectedLocation] = useState(() => {
-    // Récupérer le locationId depuis l'état de navigation s'il existe
-    const locationIdFromState = location.state?.selectedLocationId;
-    if (locationIdFromState && locationsWithHistory.some(loc => loc.id === locationIdFromState)) {
+    // Si on a reçu un ID valide, l'utiliser
+    if (locationIdFromState && locations.find(loc => loc.id === locationIdFromState)?.history) {
       return locationIdFromState;
     }
     // Sinon, utiliser le premier emplacement disponible

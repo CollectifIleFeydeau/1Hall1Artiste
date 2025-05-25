@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const mainRoutes = [
   '/map',       // Carte
   '/program',   // Programme
-  '/saved',     // Sauvegardés
+  '/saved',     // Enregistrés
   '/about',     // À propos
   '/donate',    // Dons
 ];

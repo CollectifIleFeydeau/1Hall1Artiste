@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SavedEvent, getSavedEvents, removeSavedEvent, setEventNotification } from "@/services/savedEvents";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Info } from "lucide-react";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import Bell from "lucide-react/dist/esm/icons/bell";
@@ -14,6 +14,8 @@ import { fr } from "date-fns/locale";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import Celebration from "@/components/Celebration";
 import { AchievementType, getAchievementCelebrationMessage, isAchievementUnlocked } from "@/services/achievements";
+import { EventDetails } from "@/components/EventDetails";
+import { Event } from "@/data/events";
 
 export default function SavedEvents() {
   const navigate = useNavigate();
@@ -21,6 +23,10 @@ export default function SavedEvents() {
   const [notificationDate, setNotificationDate] = useState<string>("");
   const [notificationTime, setNotificationTime] = useState<string>("");
   const [activeEvent, setActiveEvent] = useState<string | null>(null);
+  
+  // États pour les détails d'événement
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [eventDetailsOpen, setEventDetailsOpen] = useState<boolean>(false);
   
   // États pour les célébrations
   const [showFirstSavedCelebration, setShowFirstSavedCelebration] = useState<boolean>(false);
@@ -32,17 +38,30 @@ export default function SavedEvents() {
     setSavedEvents(getSavedEvents());
     
     // Vérifier si des réalisations ont été débloquées récemment
-    if (isAchievementUnlocked(AchievementType.FIRST_EVENT_SAVED)) {
+    // et si la célébration n'a pas encore été montrée
+    const celebrationsShown = localStorage.getItem('celebrationsShown');
+    const shownCelebrations = celebrationsShown ? JSON.parse(celebrationsShown) : {};
+    
+    if (isAchievementUnlocked(AchievementType.FIRST_EVENT_SAVED) && !shownCelebrations[AchievementType.FIRST_EVENT_SAVED]) {
       setShowFirstSavedCelebration(true);
+      // Marquer cette célébration comme montrée
+      shownCelebrations[AchievementType.FIRST_EVENT_SAVED] = true;
     }
     
-    if (isAchievementUnlocked(AchievementType.MULTIPLE_EVENTS_SAVED)) {
+    if (isAchievementUnlocked(AchievementType.MULTIPLE_EVENTS_SAVED) && !shownCelebrations[AchievementType.MULTIPLE_EVENTS_SAVED]) {
       setShowMultipleSavedCelebration(true);
+      // Marquer cette célébration comme montrée
+      shownCelebrations[AchievementType.MULTIPLE_EVENTS_SAVED] = true;
     }
     
-    if (isAchievementUnlocked(AchievementType.NOTIFICATION_SET)) {
+    if (isAchievementUnlocked(AchievementType.NOTIFICATION_SET) && !shownCelebrations[AchievementType.NOTIFICATION_SET]) {
       setShowNotificationCelebration(true);
+      // Marquer cette célébration comme montrée
+      shownCelebrations[AchievementType.NOTIFICATION_SET] = true;
     }
+    
+    // Sauvegarder l'état des célébrations montrées
+    localStorage.setItem('celebrationsShown', JSON.stringify(shownCelebrations));
   }, []);
 
   const handleRemoveEvent = (eventId: string) => {
@@ -91,7 +110,7 @@ export default function SavedEvents() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
-          <h1 className="text-xl font-bold text-[#4a5d94] text-center">Événements sauvegardés</h1>
+          <h1 className="text-xl font-bold text-[#4a5d94]">Événements enregistrés</h1>
           <div className="w-20"></div>
         </header>
 
@@ -140,10 +159,28 @@ export default function SavedEvents() {
                       <Calendar className="h-3 w-3 mr-1" />
                       <span>{event.days.map(day => day === "samedi" ? "Sa" : "Di").join("/")}, {event.time}</span>
                     </div>
-                    <div className="flex items-center text-gray-600">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      <span>{event.locationName}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-gray-600">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span>{event.locationName}</span>
+                      </div>
+                      
+                      {/* Bouton pour voir les détails de l'événement (plus petit, sur le côté) */}
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 px-2 text-[#4a5d94] hover:bg-[#e0ebff] text-xs flex items-center justify-center transition-all duration-200"
+                        onClick={() => {
+                          // Ouvrir directement les détails de l'événement
+                          setEventDetailsOpen(true);
+                          setSelectedEvent(event);
+                        }}
+                      >
+                        <Info className="h-3 w-3 mr-1" />
+                        Détails
+                      </Button>
                     </div>
+                    
                     {event.notificationTime && (
                       <div className="flex items-center text-[#4a5d94]">
                         <Bell className="h-3 w-3 mr-1" />
@@ -153,6 +190,102 @@ export default function SavedEvents() {
                     
                     {activeEvent === event.id ? (
                       <div className="mt-2 p-2 bg-[#f0f5ff] rounded-md">
+                        <div className="mb-2">
+                          <Label className="text-xs mb-1 block">Choisir un rappel</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-8 text-xs w-full"
+                              onClick={() => {
+                                // 1 jour avant l'événement
+                                // Utiliser le premier jour de l'événement
+                                const eventDay = event.days[0]; // samedi ou dimanche
+                                const eventDate = new Date();
+                                // Trouver le prochain samedi ou dimanche
+                                const dayIndex = eventDay === 'samedi' ? 6 : 0; // 6 pour samedi, 0 pour dimanche
+                                while (eventDate.getDay() !== dayIndex) {
+                                  eventDate.setDate(eventDate.getDate() + 1);
+                                }
+                                const reminderDate = new Date(eventDate);
+                                reminderDate.setDate(reminderDate.getDate() - 1);
+                                setNotificationDate(reminderDate.toISOString().split('T')[0]);
+                                setNotificationTime('10:00');
+                                handleSetNotification(event.id);
+                              }}
+                            >
+                              1 jour avant
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-8 text-xs w-full"
+                              onClick={() => {
+                                // 3 heures avant l'événement
+                                // Utiliser le premier jour de l'événement
+                                const eventDay = event.days[0]; // samedi ou dimanche
+                                const eventDate = new Date();
+                                // Trouver le prochain samedi ou dimanche
+                                const dayIndex = eventDay === 'samedi' ? 6 : 0; // 6 pour samedi, 0 pour dimanche
+                                while (eventDate.getDay() !== dayIndex) {
+                                  eventDate.setDate(eventDate.getDate() + 1);
+                                }
+                                const eventTime = event.time.split('h');
+                                eventDate.setHours(parseInt(eventTime[0]), parseInt(eventTime[1] || '0'), 0);
+                                const reminderDate = new Date(eventDate);
+                                reminderDate.setHours(reminderDate.getHours() - 3);
+                                setNotificationDate(reminderDate.toISOString().split('T')[0]);
+                                setNotificationTime(`${reminderDate.getHours().toString().padStart(2, '0')}:${reminderDate.getMinutes().toString().padStart(2, '0')}`);
+                                handleSetNotification(event.id);
+                              }}
+                            >
+                              3 heures avant
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-8 text-xs w-full"
+                              onClick={() => {
+                                // Le matin même
+                                // Utiliser le premier jour de l'événement
+                                const eventDay = event.days[0]; // samedi ou dimanche
+                                const eventDate = new Date();
+                                // Trouver le prochain samedi ou dimanche
+                                const dayIndex = eventDay === 'samedi' ? 6 : 0; // 6 pour samedi, 0 pour dimanche
+                                while (eventDate.getDay() !== dayIndex) {
+                                  eventDate.setDate(eventDate.getDate() + 1);
+                                }
+                                setNotificationDate(eventDate.toISOString().split('T')[0]);
+                                setNotificationTime('08:00');
+                                handleSetNotification(event.id);
+                              }}
+                            >
+                              Le matin même
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-8 text-xs w-full"
+                              onClick={() => {
+                                // Afficher les champs de sélection précise
+                                // Utiliser le premier jour de l'événement
+                                const eventDay = event.days[0]; // samedi ou dimanche
+                                const eventDate = new Date();
+                                // Trouver le prochain samedi ou dimanche
+                                const dayIndex = eventDay === 'samedi' ? 6 : 0; // 6 pour samedi, 0 pour dimanche
+                                while (eventDate.getDay() !== dayIndex) {
+                                  eventDate.setDate(eventDate.getDate() + 1);
+                                }
+                                setNotificationDate(eventDate.toISOString().split('T')[0]);
+                                setNotificationTime('10:00');
+                              }}
+                            >
+                              Choix précis
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {/* Sélection précise */}
                         <div className="grid grid-cols-2 gap-2 mb-1">
                           <div>
                             <Label htmlFor={`date-${event.id}`} className="text-xs mb-1">Date</Label>
@@ -198,8 +331,21 @@ export default function SavedEvents() {
             ))}
           </div>
         )}
+        
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+        
+        {/* Composant EventDetails pour afficher les détails d'un événement */}
+        <EventDetails 
+          event={selectedEvent}
+          isOpen={eventDetailsOpen}
+          onClose={() => {
+            setEventDetailsOpen(false);
+            setSelectedEvent(null);
+          }}
+          source="saved"
+        />
       </div>
-      <BottomNavigation />
     </div>
   );
 }

@@ -15,35 +15,35 @@ export default function Onboarding() {
     {
       title: "Bienvenue sur l'application Collectif Île Feydeau",
       description: [
-        "Découvrez le patrimoine unique de l'Île Feydeau à travers notre parcours interactif.",
-        "Explorez les expositions et concerts organisés par les artistes du collectif."
+        "Découvrez le <strong>patrimoine unique</strong> de l'Île Feydeau à travers notre <strong>parcours interactif</strong>.",
+        "Explorez les <strong>expositions</strong> et <strong>concerts</strong> organisés par les artistes du collectif."
       ],
       image: "/onboarding-image.webp"
     },
     {
       title: "Programme et horaires",
       description: [
-        "Consultez le programme complet des événements par jour.",
-        "Les horaires sont clairement indiqués pour chaque événement.",
-        "Filtrez par type d'événement : expositions ou concerts."
+        "Consultez le <strong>programme complet</strong> des événements par jour.",
+        "Les <strong>horaires</strong> sont clairement indiqués pour chaque événement.",
+        "<strong>Filtrez</strong> par type d'événement : expositions ou concerts."
       ],
       image: "/onboarding-image.webp"
     },
     {
       title: "Carte interactive",
       description: [
-        "Localisez tous les événements sur la carte de l'Île Feydeau.",
-        "Naviguez facilement entre les différents lieux.",
-        "Marquez les lieux que vous avez visités."
+        "<strong>Localisez</strong> tous les événements sur la <strong>carte</strong> de l'Île Feydeau.",
+        "<strong>Naviguez</strong> facilement entre les différents lieux.",
+        "<strong>Marquez</strong> les lieux que vous avez visités."
       ],
       image: "/onboarding-image.webp"
     },
     {
       title: "Fonctionnalités pratiques",
       description: [
-        "Sauvegardez vos événements favoris pour y accéder rapidement.",
-        "Configurez des notifications pour ne manquer aucun événement.",
-        "L'application fonctionne hors-ligne pour consulter le programme sans connexion."
+        "<strong>Enregistrez</strong> vos événements favoris pour y accéder rapidement.",
+        "Configurez des <strong>rappels</strong> pour ne manquer aucun événement.",
+        "L'application fonctionne <strong>hors-ligne</strong> pour consulter le programme sans connexion."
       ],
       image: "/onboarding-image.webp"
     }
@@ -125,11 +125,11 @@ export default function Onboarding() {
             {Array.isArray(slides[currentSlide].description) ? (
               <div className="space-y-3">
                 {slides[currentSlide].description.map((desc, i) => (
-                  <p key={i} className="text-center text-gray-600 text-sm md:text-base">{desc}</p>
+                  <p key={i} className="text-center text-gray-600 text-sm md:text-base" dangerouslySetInnerHTML={{ __html: desc }}></p>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-gray-600 text-sm md:text-base">{slides[currentSlide].description}</p>
+              <p className="text-center text-gray-600 text-sm md:text-base" dangerouslySetInnerHTML={{ __html: slides[currentSlide].description }}></p>
             )}
           </div>
         </motion.div>

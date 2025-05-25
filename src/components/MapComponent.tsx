@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createLogger } from "@/utils/logger";
+import { Location } from "@/data/locations";
 
 // Préfixe pour les chemins d'images en production (GitHub Pages)
 const BASE_PATH = import.meta.env.PROD ? '/Collectif-Feydeau---app' : '';
@@ -11,13 +12,7 @@ const logger = createLogger('MapComponent');
 export const MAP_WIDTH = 400;
 export const MAP_HEIGHT = 600;
 
-export type Location = {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  visited?: boolean;
-}
+// Utilisation du type Location importé depuis data/locations.ts
 
 export type MapComponentProps = {
   locations: Location[];

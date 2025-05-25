@@ -13,7 +13,7 @@ import Instagram from "lucide-react/dist/esm/icons/instagram";
 import { ShareButton } from "@/components/ShareButton";
 import { saveEvent, getSavedEvents, removeSavedEvent } from "@/services/savedEvents";
 import { type Event, getEventsByLocation } from "@/data/events";
-import { locations } from "@/data/locations";
+import { getLocationNameById } from "@/data/locations";
 import { trackFeatureUsage } from "@/services/analytics";
 import { InstagramCarousel } from "@/components/InstagramCarousel";
 import { TruncatedText } from "@/components/TruncatedText";
@@ -22,7 +22,7 @@ interface EventDetailsProps {
   event: Event | null;
   isOpen: boolean;
   onClose: () => void;
-  source: "map" | "program"; // Pour savoir d'où vient l'utilisateur
+  source: "map" | "program" | "saved"; // Pour savoir d'où vient l'utilisateur
 }
 
 export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsProps) => {
@@ -172,7 +172,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             <MapPin className="h-3 w-3 mr-1 text-[#8c9db5]" />
             <p className="text-xs text-[#8c9db5]">
               <TruncatedText 
-                text={`${event.locationName} • ${event.time}`} 
+                text={`${getLocationNameById(event.locationId)} • ${event.time}`} 
                 maxLength={40} 
                 className="text-xs text-[#8c9db5]"
               />
@@ -184,7 +184,80 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
               {/* Pas de troncature pour la description, car c'est un élément important */}
               {event.description}
             </p>
+            
+            {/* Afficher le texte de présentation pour les concerts si disponible */}
+            {event.type === "concert" && event.presentation && (
+              <div className="mt-3 pt-3 border-t border-[#d8e3ff]">
+                {event.presentation.split('\n').map((paragraph, index) => (
+                  <p key={index} className="text-sm text-[#4a5d94] mb-2">{paragraph}</p>
+                ))}
+              </div>
+            )}
           </div>
+          
+          {/* Afficher l'email pour les concerts si disponible */}
+          {event.type === "concert" && event.email && (
+            <div className="mb-4">
+              <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Contact email:</h4>
+              <a 
+                href={`mailto:${event.email}`} 
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {event.email}
+              </a>
+            </div>
+          )}
+          
+          {/* Afficher le lien pour les concerts si disponible */}
+          {event.type === "concert" && event.link && (
+            <div className="mb-4">
+              {/* Si c'est un lien YouTube, afficher une vidéo intégrée */}
+              {event.link.includes('youtu') ? (
+                <div>
+                  <h4 className="text-xs font-medium mb-2 text-[#4a5d94]">Vidéo:</h4>
+                  <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
+                    <iframe
+                      src={event.link.replace('youtu.be/', 'youtube.com/embed/').replace('watch?v=', 'embed/')}
+                      title={`Vidéo de ${event.artistName}`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full"
+                    ></iframe>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Site web:</h4>
+                  <a 
+                    href={event.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    {event.link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Afficher les photos pour les concerts si disponibles */}
+          {event.type === "concert" && event.photos && event.photos.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-xs font-medium mb-2 text-[#4a5d94]">Photos:</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {event.photos.map((photo, index) => (
+                  <div key={index} className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
+                    <img 
+                      src={photo} 
+                      alt={`${event.artistName} - Photo ${index + 1}`} 
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           
           {/* Nous ne montrons plus l'adresse Instagram car le widget l'affiche déjà */}
           

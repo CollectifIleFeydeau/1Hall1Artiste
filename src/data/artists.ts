@@ -9,6 +9,11 @@ export type Artist = {
   contact: string;
   instagram?: string;
   image?: string;
+  // Nouveaux champs pour les concerts
+  email?: string;
+  photos?: string[];
+  presentation?: string;
+  link?: string;
 };
 
 export const artists: Artist[] = [
@@ -124,6 +129,17 @@ export const artists: Artist[] = [
     instagram: "https://www.instagram.com/yonghochun"
   },
   {
+    id: "andry-shango-rajoelina",
+    name: "Andry Shango Rajoelina",
+    type: "exposition",
+    title: "Art multidisciplinaire",
+    description: "Artiste multidisciplinaire mêlant peinture, design et art textile, Andry \"Shango\" Rajoelina explore les identités africaines à travers une esthétique vibrante et contemporaine. Son univers visuel, riche en symboles et en couleurs, reflète un profond engagement culturel et narratif.",
+    bio: "Artiste multidisciplinaire",
+    contact: "https://www.instagram.com/andryshango",
+    instagram: "https://www.instagram.com/andryshango",
+    email: "rajoelina.a@gmail.com"
+  },
+  {
     id: "expo9", // This was 'Jocelyn Prouff (Joss Proof)' in events.ts but ID was 'expo9' in artistsData
     name: "Jocelyn Prouff (Joss Proof)",
     type: "exposition",
@@ -200,10 +216,16 @@ export const artists: Artist[] = [
     name: "Aperto !",
     type: "concert",
     title: "Aperto !",
-    description: "Concert du groupe Aperto !",
-    bio: "Aperto !",
+    description: "Flûtes traversières du Conservatoire de Nantes",
+    bio: "Direction : Gilles de Talhouët",
     contact: "contact@aperto.fr",
-    instagram: ""
+    instagram: "",
+    presentation: "Allegro aperto est le titre du premier mouvement d'un concerto pour flûte de Mozart.\n\nLe mot Aperto signifie « ouvert » en italien.\n\nL'ensemble est ouvert à tou.te.s les flûtistes : élèves du conservatoire, anciens élèves, amateurs et musiciens professionnels.\n\nIl est également ouvert à toutes les musiques :\n\n- musique classique : de Bach à Bartok\n- musiques du monde : Irlande (reels et jigs), Europe centrale (klezmer), Espagne (sardanes), Brésil (choros), Grèce (kalamatianos), etc.\n- chansons populaires : Beatles, Simon & Garfunkel, comédies musicales, films Disney, etc.",
+    link: "https://youtu.be/aKxyrWCofOI",
+    photos: [
+      "/concerts/Aperto/Aperto1.jpg",
+      "/concerts/Aperto/Aperto2.jpg"
+    ]
   },
   {
     id: "quatuor-liger",
@@ -213,7 +235,14 @@ export const artists: Artist[] = [
     description: "Concert du Quatuor Liger",
     bio: "Quatuor Liger",
     contact: "contact@quatuorliger.fr",
-    instagram: ""
+    instagram: "",
+    email: "quatuor.liger@gmail.com",
+    presentation: "Le Quatuor Liger est un ensemble de musique de chambre formé en 2018 à Nantes. Composé de quatre musiciens passionnés, le quatuor propose un répertoire varié allant de la musique classique aux arrangements contemporains. Leur interprétation sensible et dynamique offre une expérience musicale unique.",
+    link: "https://www.quatuorliger.fr",
+    photos: [
+      "/concerts/quatuor-liger-1.jpg",
+      "/concerts/quatuor-liger-2.jpg"
+    ]
   },
   {
     id: "eva",
@@ -223,7 +252,8 @@ export const artists: Artist[] = [
     description: "Concert du choeur de femmes EVA",
     bio: "EVA choeur de femmes",
     contact: "contact@eva-choeur.fr",
-    instagram: ""
+    instagram: "",
+    email: "chœur.nantes.eva@gmail.com"
   },
   {
     id: "swing-it",

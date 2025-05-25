@@ -62,12 +62,7 @@ class DataService {
   }
 
   public getEventsByLocationId(locationId: string): Event[] {
-    const location = this.getLocationById(locationId);
-    if (!location) return [];
-    
-    return this.state.events.filter(event => 
-      location.events.includes(event.id)
-    );
+    return this.state.events.filter(event => event.locationId === locationId);
   }
 
   // Méthodes pour mettre à jour les données
@@ -414,8 +409,6 @@ export const getLocationById = (id: string): Location | undefined => {
 };
 
 // Fonction utilitaire pour récupérer l'ID du lieu d'un événement
-export const getLocationIdForEvent = (event: Event): string | undefined => {
-  const locations = dataService.getLocations();
-  const location = locations.find(loc => loc.name === event.locationName);
-  return location?.id;
+export const getLocationIdForEvent = (event: Event): string => {
+  return event.locationId;
 };

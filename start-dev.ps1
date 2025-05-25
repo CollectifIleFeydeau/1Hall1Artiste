@@ -43,6 +43,41 @@ try {
 Write-Host "Attente de la libération des ports..." -ForegroundColor Yellow
 Start-Sleep -Seconds 3
 
+# Exécuter les tests unitaires
+Write-Host "Exécution des tests unitaires..." -ForegroundColor Cyan
+try {
+    # Changer de répertoire vers le dossier du projet
+    Set-Location -Path $PSScriptRoot
+    
+    # Exécuter les tests
+    npm test
+    
+    # Vérifier si les tests ont réussi
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Tous les tests ont réussi!" -ForegroundColor Green
+    } else {
+        Write-Host "Certains tests ont échoué. Vérifiez les erreurs ci-dessus." -ForegroundColor Yellow
+        Write-Host "Voulez-vous continuer le démarrage de l'application? (O/N)" -ForegroundColor Yellow
+        $response = Read-Host
+        if ($response -ne "O" -and $response -ne "o") {
+            Write-Host "Démarrage annulé par l'utilisateur." -ForegroundColor Red
+            Write-Host "Appuyez sur une touche pour fermer cette fenêtre..." -ForegroundColor Magenta
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+            return
+        }
+    }
+} catch {
+    Write-Host "Erreur lors de l'exécution des tests: $_" -ForegroundColor Red
+    Write-Host "Voulez-vous continuer le démarrage de l'application? (O/N)" -ForegroundColor Yellow
+    $response = Read-Host
+    if ($response -ne "O" -and $response -ne "o") {
+        Write-Host "Démarrage annulé par l'utilisateur." -ForegroundColor Red
+        Write-Host "Appuyez sur une touche pour fermer cette fenêtre..." -ForegroundColor Magenta
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        return
+    }
+}
+
 # Démarrer l'application
 Write-Host "Démarrage de l'application..." -ForegroundColor Cyan
 try {
