@@ -1,4 +1,5 @@
 // Utilitaire pour optimiser les images et les convertir en WebP
+import { getImagePath } from "./imagePaths";
 
 /**
  * Vérifie si le navigateur prend en charge le format WebP
@@ -44,17 +45,26 @@ export const getOptimizedImageUrl = async (
   // Si nous sommes dans un environnement sans window (SSR), retourner l'image originale
   if (typeof window === 'undefined') return imagePath;
   
-  // Si l'image est déjà au format WebP, la retourner telle quelle
-  if (imagePath.endsWith('.webp')) return imagePath;
+  // Si l'image est déjà au format WebP, la retourner telle quelle avec le bon chemin
+  if (imagePath.endsWith('.webp')) {
+    // Assurer que le chemin est correct pour GitHub Pages
+    return imagePath.startsWith('/') ? getImagePath(imagePath) : imagePath;
+  }
   
   // Vérifier si WebP est supporté
   const supportsWebP = await isWebPSupported();
   
   // Si WebP n'est pas supporté ou si l'image est externe (commence par http), retourner l'originale
-  if (!supportsWebP || imagePath.startsWith('http')) return imagePath;
+  if (!supportsWebP || imagePath.startsWith('http')) {
+    // Assurer que le chemin est correct pour GitHub Pages
+    return imagePath.startsWith('/') ? getImagePath(imagePath) : imagePath;
+  }
   
   // Construire le chemin vers la version WebP
-  const webpPath = imagePath.replace(/\.(jpe?g|png)$/i, '.webp');
+  let webpPath = imagePath.replace(/\.(jpe?g|png)$/i, '.webp');
+  
+  // Assurer que le chemin est correct pour GitHub Pages
+  webpPath = webpPath.startsWith('/') ? getImagePath(webpPath) : webpPath;
   
   // Si une largeur est spécifiée, ajouter un paramètre de redimensionnement
   // Note: Ceci est un exemple, l'implémentation réelle dépendrait de votre système de gestion d'images

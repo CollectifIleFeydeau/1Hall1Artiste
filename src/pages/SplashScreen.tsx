@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { getImagePath } from "@/utils/imagePaths";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -65,7 +66,7 @@ const SplashScreen = ({ onComplete, isFirstVisit }: SplashScreenProps) => {
         exit="exit"
       >
         <motion.img 
-          src="/Logo.png" 
+          src={getImagePath('/Logo.png')} 
           alt="Collectif Feydeau Logo" 
           className="w-48 h-48 object-contain mb-6"
         />

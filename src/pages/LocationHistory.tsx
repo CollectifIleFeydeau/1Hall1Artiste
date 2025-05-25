@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Info } from "lucide-react";
+import { getImagePath } from "@/utils/imagePaths";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -123,22 +124,22 @@ export function LocationHistory() {
               <div className="mb-4">
                 <img 
                   // Utiliser le chemin d'accès direct pour le développement local
-                  src={selectedLocationData.image} 
+                  src={getImagePath(selectedLocationData.image)} 
                   alt={`Photo historique de ${selectedLocationData.name}`} 
                   className="w-full h-auto rounded-md object-cover shadow-md border border-[#d8e3ff]"
                   loading="lazy"
                   onError={(e) => {
                     // Essayer avec le préfixe de base URL pour GitHub Pages en cas d'erreur
                     console.log(`Tentative avec chemin alternatif pour: ${selectedLocationData.image}`);
-                    const baseUrl = import.meta.env.BASE_URL || '';
-                    const altPath = `${baseUrl}${selectedLocationData.image}`;
+                    // Utiliser l'utilitaire getImagePath pour obtenir le chemin correct
+                    const altPath = getImagePath(selectedLocationData.image);
                     
                     // Éviter les boucles infinies si l'image alternative échoue aussi
                     if (e.currentTarget.src !== altPath) {
                       e.currentTarget.src = altPath;
                     } else {
                       // Fallback final vers une image par défaut
-                      e.currentTarget.src = '/placeholder-image.jpg';
+                      e.currentTarget.src = getImagePath('/placeholder-image.jpg');
                     }
                   }}
                 />

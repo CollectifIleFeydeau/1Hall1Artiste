@@ -3,9 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { motion, PanInfo } from "framer-motion";
 import { OptimizedImage } from "@/components/OptimizedImage";
-
-// Préfixe pour les chemins d'images en production (GitHub Pages)
-const BASE_PATH = import.meta.env.PROD ? '/Collectif-Feydeau---app' : '';
+import { getImagePath } from "@/utils/imagePaths";
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -109,7 +107,7 @@ export default function Onboarding() {
           <div className="relative h-[30vh] md:h-[40vh] overflow-hidden bg-gray-200">
             <div 
               className="absolute inset-0 bg-center bg-no-repeat bg-contain" 
-              style={{ backgroundImage: `url(${BASE_PATH}${slides[currentSlide].image})` }}
+              style={{ backgroundImage: `url(${getImagePath(slides[currentSlide].image)})` }}
               aria-label={slides[currentSlide].title}
             ></div>
             

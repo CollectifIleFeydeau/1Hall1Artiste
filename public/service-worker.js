@@ -2,18 +2,33 @@
 // Version 1.0.0
 
 const CACHE_NAME = 'collectif-feydeau-cache-v1';
-const OFFLINE_PAGE = '/offline.html';
+
+// Détecter si nous sommes en production (GitHub Pages) ou en développement
+const isProduction = self.location.hostname !== 'localhost' && !self.location.hostname.includes('127.0.0.1');
+
+// Préfixe pour les chemins en production (GitHub Pages)
+const BASE_PATH = isProduction ? '/Collectif-Feydeau---app' : '';
+
+// Fonction pour obtenir le chemin correct d'une ressource
+const getPath = (path) => {
+  // S'assurer que le chemin commence par un slash
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${BASE_PATH}${normalizedPath}`;
+};
+
+const OFFLINE_PAGE = getPath('/offline.html');
 
 // Assets to cache immediately on service worker installation
 const PRECACHE_ASSETS = [
-  '/',
-  '/index.html',
+  getPath('/'),
+  getPath('/index.html'),
   OFFLINE_PAGE,
-  '/favicon.ico',
-  '/placeholder.svg',
-  '/assets/feydeau-share.jpg',
-  '/map-feydeau.png',
-  '/onboarding-image.webp'
+  getPath('/favicon.ico'),
+  getPath('/placeholder.svg'),
+  getPath('/assets/feydeau-share.jpg'),
+  getPath('/map-feydeau.png'),
+  getPath('/onboarding-image.webp'),
+  getPath('/Logo.png')
 ];
 
 // Install event - precache key resources
@@ -103,7 +118,7 @@ self.addEventListener('fetch', event => {
           .catch(error => {
             // For image requests, return a placeholder
             if (event.request.url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/)) {
-              return caches.match('/placeholder.svg');
+              return caches.match(getPath('/placeholder.svg'));
             }
             throw error;
           });

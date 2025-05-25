@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { isWebPSupported, getOptimizedImageUrl } from '@/utils/imageOptimizer';
-
-// Préfixe pour les chemins d'images en production (GitHub Pages)
-const BASE_PATH = import.meta.env.PROD ? '/Collectif-Feydeau---app' : '';
+import { getImagePath } from '@/utils/imagePaths';
 
 interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -33,9 +31,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   className = '',
   ...props
 }) => {
-  // Ajouter le préfixe uniquement si le chemin commence par "/"
-  const baseSrc = src.startsWith('/') ? `${BASE_PATH}${src}` : src;
-  const placeholderImage = placeholderSrc.startsWith('/') ? `${BASE_PATH}${placeholderSrc}` : placeholderSrc;
+  // Utiliser l'utilitaire getImagePath pour gérer les chemins d'images
+  const baseSrc = src.startsWith('/') ? getImagePath(src) : src;
+  const placeholderImage = placeholderSrc.startsWith('/') ? getImagePath(placeholderSrc) : placeholderSrc;
   
   const [imageSrc, setImageSrc] = useState<string>(baseSrc);
   const [srcSet, setSrcSet] = useState<string>('');
