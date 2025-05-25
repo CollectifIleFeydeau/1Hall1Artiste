@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { getImagePath } from "@/utils/imagePaths";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
@@ -249,7 +250,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                 {event.photos.map((photo, index) => (
                   <div key={index} className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
                     <img 
-                      src={photo} 
+                      src={getImagePath(photo)} 
                       alt={`${event.artistName} - Photo ${index + 1}`} 
                       className="object-cover w-full h-full"
                     />
