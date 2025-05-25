@@ -3,16 +3,6 @@
 
 # Priorités actuelles (phase de test et optimisation)
 
-Équipes plutôt que notre équipe 
-
-Revoir les dons 
-
-Logo collectif en entrée 
-
-Explication déduction fiscale 
-
-Configuration fond 
-
 ## Priorités immédiates à faire 
 
 0. **Horaire par défaut d'abord et précis à la demande 

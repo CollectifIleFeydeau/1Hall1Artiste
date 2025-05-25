@@ -29,6 +29,7 @@ import Program from "./pages/Program";
 import About from "./pages/About";
 import Donate from "./pages/Donate";
 import NotFound from "./pages/NotFound";
+import SplashScreen from "./pages/SplashScreen";
 import Admin from "./pages/Admin";
 import SavedEvents from "./pages/SavedEvents";
 import Onboarding from "./pages/Onboarding";
@@ -56,13 +57,30 @@ const AnimatedRoutes = () => {
     return storedValue === 'true';
   });
   
+  // État pour l'écran d'accueil
+  const [showSplash, setShowSplash] = useState<boolean>(true);
+  
+  // Gérer la fin de l'écran d'accueil
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+    // Si c'est la première visite, aller à l'onboarding, sinon à la carte
+    if (!hasSeenOnboarding) {
+      navigate('/onboarding');
+    } else {
+      navigate('/map');
+    }
+  };
+  
   // Vérifier si c'est la première visite
   useEffect(() => {
+    // Ne rien faire si l'écran d'accueil est encore affiché
+    if (showSplash) return;
+    
     // Si c'est la première visite et que l'utilisateur n'est pas déjà sur la page d'onboarding
     if (!hasSeenOnboarding && location.pathname !== '/onboarding') {
       navigate('/onboarding');
     }
-  }, [hasSeenOnboarding, location.pathname, navigate]);
+  }, [hasSeenOnboarding, location.pathname, navigate, showSplash]);
   
   // Marquer l'onboarding comme vu
   const handleOnboardingComplete = () => {
@@ -96,6 +114,16 @@ const AnimatedRoutes = () => {
       <Component />
     </AnimatedPageTransition>
   );
+  
+  // Si l'écran d'accueil est actif, le montrer au lieu des routes
+  if (showSplash) {
+    return (
+      <SplashScreen 
+        onComplete={handleSplashComplete} 
+        isFirstVisit={!hasSeenOnboarding} 
+      />
+    );
+  }
   
   return (
     <AnimatePresence mode="wait">
@@ -237,6 +265,7 @@ const App = () => {
   const resetOnboarding = () => {
     localStorage.removeItem('hasSeenOnboarding');
     console.log('[App] Onboarding réinitialisé, rechargement de la page...');
+    // Forcer l'affichage de l'écran d'accueil avant l'onboarding
     window.location.reload();
   };
   

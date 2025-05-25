@@ -32,7 +32,7 @@ const About = () => {
           <TabsList className="grid grid-cols-4 mb-4">
             <TabsTrigger value="association">Association</TabsTrigger>
             <TabsTrigger value="history">Histoire</TabsTrigger>
-            <TabsTrigger value="team">Notre équipe</TabsTrigger>
+            <TabsTrigger value="team">Équipes</TabsTrigger>
             <TabsTrigger value="support">Nous aider</TabsTrigger>
           </TabsList>
           

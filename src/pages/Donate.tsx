@@ -68,6 +68,13 @@ const Donate = () => {
               <p className="text-xs text-center text-gray-500 mt-2">
                 Vous serez redirigé vers notre page HelloAsso pour finaliser votre don en toute sécurité.
               </p>
+              
+              <div className="bg-green-50 p-4 rounded-lg mt-4">
+                <h3 className="font-medium mb-2 text-green-700">Avantage fiscal</h3>
+                <p className="text-sm text-gray-700">
+                  Vos dons au Collectif Feydeau sont déductibles des impôts à hauteur de 66% de leur montant, dans la limite de 20% de votre revenu imposable. Un reçu fiscal vous sera délivré automatiquement.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
