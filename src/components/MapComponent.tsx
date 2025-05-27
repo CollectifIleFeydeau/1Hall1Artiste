@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createLogger } from "@/utils/logger";
 import { Location } from "@/data/locations";
 import { getImagePath } from "@/utils/imagePaths";
+import { isOnline } from "@/utils/serviceWorkerRegistration";
 
 // Créer un logger pour le composant Map
 const logger = createLogger('MapComponent');
@@ -103,19 +104,29 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           cursor: !readOnly ? 'pointer' : 'default'
         }}
       >
-        <img 
-          src={getImagePath('/map-feydeau.png')} 
-          alt="Plan de l'Île Feydeau" 
-          className="object-contain"
-          loading="eager"
-          style={{ 
+        {/* Utiliser une div avec background-image comme solution de secours */}
+        <div
+          className="w-full h-full"
+          style={{
+            backgroundImage: `url(${getImagePath('/map-feydeau.png')})`,
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'contain',
             opacity: 0.9,
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
             pointerEvents: 'none' // Empêcher l'interaction avec l'image
           }}
-        />
+        >
+          {/* Image cachée pour détecter les erreurs de chargement */}
+          <img 
+            src={getImagePath('/map-feydeau.png')} 
+            alt="Plan de l'Île Feydeau" 
+            className="hidden"
+            onError={(e) => {
+              logger.error('Erreur de chargement de l\'image de la carte', { online: isOnline() });
+              // L'image d'arrière-plan sera toujours visible même si cette image échoue
+            }}
+          />
+        </div>
       </div>
       
       {/* Points sur la carte */}

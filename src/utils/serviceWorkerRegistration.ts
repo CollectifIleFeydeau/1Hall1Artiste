@@ -12,9 +12,50 @@ const isServiceWorkerSupported = 'serviceWorker' in navigator;
  * Register the service worker
  */
 export const registerServiceWorker = () => {
-  // Temporairement désactivé pour éviter les erreurs dans la console
-  console.log('Service worker registration is temporarily disabled');
-  return;
+  if (!isServiceWorkerSupported) {
+    console.log('Service workers are not supported by this browser');
+    return;
+  }
+
+  const BASE_PATH = typeof import.meta.env !== 'undefined' ? import.meta.env.BASE_URL || '/' : '/';
+  const swUrl = `${BASE_PATH}service-worker.js`;
+
+  console.log(`Registering service worker from: ${swUrl}`);
+
+  try {
+    navigator.serviceWorker
+      .register(swUrl)
+      .then(registration => {
+        console.log('Service worker registered successfully:', registration.scope);
+        
+        // Vérifier si le service worker est actif
+        if (registration.active) {
+          console.log('Service worker is active');
+        }
+
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
+          if (!installingWorker) return;
+
+          installingWorker.onstatechange = () => {
+            if (installingWorker.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                // Une nouvelle version du service worker est disponible
+                console.log('New service worker available');
+              } else {
+                // Le service worker est installé pour la première fois
+                console.log('Service worker installed for the first time');
+              }
+            }
+          };
+        };
+      })
+      .catch(error => {
+        console.error('Error during service worker registration:', error);
+      });
+  } catch (error) {
+    console.error('Error during service worker registration:', error);
+  }
 };
 
 /**
@@ -54,8 +95,43 @@ export const addOnlineStatusListener = (callback: (online: boolean) => void): ((
   window.addEventListener('online', handleOnline);
   window.addEventListener('offline', handleOffline);
 
+  // Appeler le callback immédiatement avec l'état actuel
+  callback(isOnline());
+
   return () => {
     window.removeEventListener('online', handleOnline);
     window.removeEventListener('offline', handleOffline);
   };
+};
+
+/**
+ * Précharge les événements sauvegardés dans le service worker
+ * @param events Les événements à précharger
+ * @param locations Les lieux associés aux événements
+ */
+export const cacheEventsInServiceWorker = (events: any[], locations: any[]): void => {
+  if (!isServiceWorkerSupported || !navigator.serviceWorker.controller) {
+    console.log('Service worker not active, cannot cache events');
+    return;
+  }
+
+  navigator.serviceWorker.controller.postMessage({
+    type: 'CACHE_SAVED_EVENTS',
+    events,
+    locations
+  });
+};
+
+/**
+ * Précharge l'image de la carte dans le service worker
+ */
+export const cacheMapImageInServiceWorker = (): void => {
+  if (!isServiceWorkerSupported || !navigator.serviceWorker.controller) {
+    console.log('Service worker not active, cannot cache map image');
+    return;
+  }
+
+  navigator.serviceWorker.controller.postMessage({
+    type: 'CACHE_MAP_IMAGE'
+  });
 };

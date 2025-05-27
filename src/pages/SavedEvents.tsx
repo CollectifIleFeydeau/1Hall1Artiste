@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SavedEvent, getSavedEvents, removeSavedEvent, setEventNotification } from "@/services/savedEvents";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, MapPin, Info } from "lucide-react";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import Bell from "lucide-react/dist/esm/icons/bell";
@@ -16,6 +17,12 @@ import Celebration from "@/components/Celebration";
 import { AchievementType, getAchievementCelebrationMessage, isAchievementUnlocked } from "@/services/achievements";
 import { EventDetails } from "@/components/EventDetails";
 import { Event } from "@/data/events";
+import { addToCalendar, isCalendarSupported, CalendarErrorType } from "@/services/calendarService";
+import { createLogger } from "@/utils/logger";
+import { toast } from "@/components/ui/use-toast";
+
+// Créer un logger pour la page des événements sauvegardés
+const logger = createLogger('SavedEvents');
 
 export default function SavedEvents() {
   const navigate = useNavigate();
@@ -32,10 +39,16 @@ export default function SavedEvents() {
   const [showFirstSavedCelebration, setShowFirstSavedCelebration] = useState<boolean>(false);
   const [showMultipleSavedCelebration, setShowMultipleSavedCelebration] = useState<boolean>(false);
   const [showNotificationCelebration, setShowNotificationCelebration] = useState<boolean>(false);
+  
+  // État pour indiquer si le calendrier est supporté
+  const [calendarSupported, setCalendarSupported] = useState<boolean>(false);
 
   useEffect(() => {
     // Charger les événements sauvegardés
     setSavedEvents(getSavedEvents());
+    
+    // Vérifier si le calendrier est supporté
+    setCalendarSupported(isCalendarSupported());
     
     // Vérifier si des réalisations ont été débloquées récemment
     // et si la célébration n'a pas encore été montrée
@@ -78,6 +91,50 @@ export default function SavedEvents() {
     setActiveEvent(null);
     setNotificationDate("");
     setNotificationTime("");
+  };
+  
+  // Fonction pour ajouter un événement au calendrier
+  const handleAddToCalendar = async (event: SavedEvent) => {
+    try {
+      logger.info("Tentative d'ajout au calendrier", { eventId: event.id });
+      
+      const result = await addToCalendar(event);
+      
+      if (result.success) {
+        toast({
+          title: "Ajout au calendrier",
+          description: "L'événement a été ajouté à votre calendrier",
+          variant: "default"
+        });
+        logger.info("Ajout au calendrier réussi", { eventId: event.id });
+      } else {
+        let errorMessage = "Une erreur est survenue lors de l'ajout au calendrier";
+        
+        if (result.errorType === CalendarErrorType.NOT_SUPPORTED) {
+          errorMessage = "L'ajout au calendrier n'est pas supporté sur cet appareil";
+        } else if (result.errorType === CalendarErrorType.PERMISSION_DENIED) {
+          errorMessage = "Permission refusée pour accéder au calendrier";
+        }
+        
+        toast({
+          title: "Erreur",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        logger.error("Erreur lors de l'ajout au calendrier", { 
+          eventId: event.id, 
+          errorType: result.errorType,
+          errorMessage: result.errorMessage
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue est survenue",
+        variant: "destructive"
+      });
+      logger.error("Exception lors de l'ajout au calendrier", { error });
+    }
   };
 
   const formatEventDate = (dateString: string) => {
@@ -140,6 +197,17 @@ export default function SavedEvents() {
                           onClick={() => setActiveEvent(event.id)}
                         >
                           <Bell className="h-3 w-3" />
+                        </Button>
+                      )}
+                      {calendarSupported && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-[#4a5d94] h-7 w-7 p-0 mr-1"
+                          onClick={() => handleAddToCalendar(event)}
+                          title="Ajouter au calendrier"
+                        >
+                          <Share2 className="h-3 w-3" />
                         </Button>
                       )}
                       <Button 

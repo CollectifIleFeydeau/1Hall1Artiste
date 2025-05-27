@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { initEmailJS, checkAndSendErrors } from "./services/errorTracking";
-import { setupGlobalErrorHandler } from "./services/errorTracking";
+import { initEmailJS, checkAndSendErrors, setupGlobalErrorHandler } from "./services/errorTracking";
+import { initAnalytics, trackEvent, synchronizeWithEmailJS } from "./services/analyticsService";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
 import Celebration from "./components/Celebration";
@@ -22,6 +22,7 @@ import OfflineIndicator from "./components/OfflineIndicator";
 
 // Utilitaires
 import { registerServiceWorker } from "./utils/serviceWorkerRegistration";
+import { preloadAllOfflineData } from "./services/offlineService";
 
 // Pages
 import Map from "./pages/Map";
@@ -34,6 +35,7 @@ import Admin from "./pages/Admin";
 import SavedEvents from "./pages/SavedEvents";
 import Onboarding from "./pages/Onboarding";
 import { LocationHistory } from "./pages/LocationHistory";
+import Analytics from "./pages/Analytics";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +105,7 @@ const AnimatedRoutes = () => {
     { path: '/admin', component: Admin },
     { path: '/onboarding', component: Onboarding },
     { path: '/location-history', component: LocationHistory },
+    { path: '/analytics', component: Analytics },
   ];
   
   // Vérifier si la page actuelle supporte la navigation par gestes
@@ -245,9 +248,21 @@ const App = () => {
     setupGlobalErrorHandler();
     initEmailJS();
     
+    // Initialiser le service d'analyse
+    const metadata = initAnalytics();
+    console.log('[App] Service d\'analyse initialisé', metadata);
+    
+    // Suivre l'événement de démarrage de l'application
+    trackEvent('app_start', {
+      timestamp: new Date().toISOString(),
+      referrer: document.referrer || 'direct'
+    });
+    
     // Vérifier et envoyer les erreurs toutes les 30 minutes
+    // Synchroniser également les données d'analyse
     const errorCheckInterval = setInterval(() => {
       checkAndSendErrors();
+      synchronizeWithEmailJS();
     }, 30 * 60 * 1000);
     
     // Vérifier les erreurs lors de la fermeture de l'application
@@ -259,6 +274,18 @@ const App = () => {
     return () => {
       clearInterval(errorCheckInterval);
     };
+  }, []);
+  
+  // Initialiser le mode hors-ligne
+  useEffect(() => {
+    // Vérifier si l'utilisateur est en ligne
+    if (navigator.onLine) {
+      // Précharger les données pour le mode hors-ligne
+      console.log('[App] Initialisation du préchargement des données hors-ligne');
+      preloadAllOfflineData().catch(error => {
+        console.error('[App] Erreur lors du préchargement des données hors-ligne:', error);
+      });
+    }
   }, []);
 
   // Fonction pour réinitialiser l'onboarding

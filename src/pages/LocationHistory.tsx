@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Info } from "lucide-react";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import { getImagePath } from "@/utils/imagePaths";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { isOnline } from "@/utils/serviceWorkerRegistration";
+import { preloadSingleHistoryImage, isHistoryImageCached } from "@/services/offlineService";
+import { createLogger } from "@/utils/logger";
 import {
   Select,
   SelectContent,
@@ -15,17 +19,21 @@ import {
 } from "@/components/ui/select";
 import { locations } from "@/data/locations";
 
+// Créer un logger pour le composant LocationHistory
+const logger = createLogger('LocationHistory');
+
 export function LocationHistory() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [imagesLoading, setImagesLoading] = useState<Record<string, boolean>>({});
   
   // Récupérer le locationId depuis l'état de navigation s'il existe
   const locationIdFromState = location.state?.selectedLocationId;
-  console.log("ID du lieu reçu en paramètre:", locationIdFromState);
+  logger.info("ID du lieu reçu en paramètre:", { locationId: locationIdFromState });
   
   // Vérifier d'abord si l'ID reçu correspond à un lieu existant
   const locationFromState = locationIdFromState ? locations.find(loc => loc.id === locationIdFromState) : null;
-  console.log("Lieu trouvé avec cet ID:", locationFromState?.name || "Aucun");
+  logger.info("Lieu trouvé avec cet ID:", { locationName: locationFromState?.name || "Aucun" });
   
   // Filtrer uniquement les lieux qui ont un historique
   let locationsWithHistory = locations
@@ -52,6 +60,29 @@ export function LocationHistory() {
 
   // Trouver le lieu sélectionné
   const selectedLocationData = locationsWithHistory.find(loc => loc.id === selectedLocation);
+  
+  // Précharger l'image du lieu sélectionné pour le mode hors-ligne
+  useEffect(() => {
+    if (selectedLocationData?.image) {
+      const imagePath = getImagePath(selectedLocationData.image);
+      
+      // Vérifier si l'image est déjà en cache
+      if (!isHistoryImageCached(imagePath)) {
+        setImagesLoading(prev => ({ ...prev, [imagePath]: true }));
+        
+        // Précharger l'image
+        preloadSingleHistoryImage(imagePath)
+          .then(success => {
+            logger.info(`Préchargement de l'image ${success ? 'réussi' : 'échoué'}:`, { imagePath });
+            setImagesLoading(prev => ({ ...prev, [imagePath]: false }));
+          })
+          .catch(error => {
+            logger.error(`Erreur lors du préchargement de l'image:`, { imagePath, error });
+            setImagesLoading(prev => ({ ...prev, [imagePath]: false }));
+          });
+      }
+    }
+  }, [selectedLocationData]);
 
   return (
     <div className="container max-w-md mx-auto px-4 pb-20 pt-4">
@@ -122,27 +153,37 @@ export function LocationHistory() {
           <CardContent>
             {selectedLocationData.image && (
               <div className="mb-4">
-                <img 
-                  // Utiliser le chemin d'accès direct pour le développement local
-                  src={getImagePath(selectedLocationData.image)} 
-                  alt={`Photo historique de ${selectedLocationData.name}`} 
-                  className="w-full h-auto rounded-md object-cover shadow-md border border-[#d8e3ff]"
-                  loading="lazy"
-                  onError={(e) => {
-                    // Essayer avec le préfixe de base URL pour GitHub Pages en cas d'erreur
-                    console.log(`Tentative avec chemin alternatif pour: ${selectedLocationData.image}`);
-                    // Utiliser l'utilitaire getImagePath pour obtenir le chemin correct
-                    const altPath = getImagePath(selectedLocationData.image);
-                    
-                    // Éviter les boucles infinies si l'image alternative échoue aussi
-                    if (e.currentTarget.src !== altPath) {
-                      e.currentTarget.src = altPath;
-                    } else {
-                      // Fallback final vers une image par défaut
-                      e.currentTarget.src = getImagePath('/placeholder-image.jpg');
-                    }
+                {/* Utiliser une div avec background-image comme solution de secours */}
+                <div 
+                  className="w-full h-64 rounded-md shadow-md border border-[#d8e3ff] relative"
+                  style={{
+                    backgroundImage: `url(${getImagePath(selectedLocationData.image)})`,
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: 'cover',
                   }}
-                />
+                >
+                  {/* Indicateur de chargement */}
+                  {imagesLoading[getImagePath(selectedLocationData.image)] && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70">
+                      <Loader2 className="h-8 w-8 animate-spin text-[#4a5d94]" />
+                    </div>
+                  )}
+                  
+                  {/* Image cachée pour détecter les erreurs de chargement */}
+                  <img 
+                    src={getImagePath(selectedLocationData.image)} 
+                    alt={`Photo historique de ${selectedLocationData.name}`} 
+                    className="hidden"
+                    onError={(e) => {
+                      // Log l'erreur
+                      logger.error(`Erreur de chargement de l'image:`, { 
+                        image: selectedLocationData.image,
+                        online: isOnline()
+                      });
+                    }}
+                  />
+                </div>
                 <p className="text-xs text-center text-gray-500 mt-1">Photo de {selectedLocationData.name}</p>
               </div>
             )}

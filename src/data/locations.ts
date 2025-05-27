@@ -27,7 +27,7 @@ export const locations: Location[] = [
   {
     id: "quai-turenne-8",
     name: "8 quai Turenne",
-    x: 260,
+    x: 300, //260
     y: 108,
     description: "Bâtiment historique du XVIIIe siècle situé au 8 allée Turenne/9 rue Kervégan. Construit en 1753 pour Jacques Berouette, négociant et actionnaire d'origine du lotissement de l'Île Feydeau. L'immeuble présente des façades richement décorées avec des mascarons à thèmes marins. Les façades et la cage d'escalier sont inscrites aux monuments historiques depuis 1984.",
     image: "/8 quai Turenne.jpg",
@@ -67,7 +67,7 @@ export const locations: Location[] = [
   {
     id: "rue-kervegan-17",
     name: "17 rue Kervégan / 11 quai Turenne",
-    x: 260,
+    x: 220,
     y: 407,
     description: "Immeuble de la 'galaxie Pierre Rousseau' (après 1775). Construit pour Pierre Lassalle, gendre de Pierre Rousseau. Particularité: corps de bâtiments indépendants sur quai et rue, avec cour commune. Façade sobre typique de la fin du 18ème siècle, mais intérieurs richement décorés.",
     image: "/17 rue Kervégan.jpg",
@@ -87,7 +87,7 @@ export const locations: Location[] = [
   {
     id: "allee-duguay-trouin-15",
     name: "15 allée Duguay Trouin",
-    x: 150,
+    x: 105,
     y: 407,
     description: "Deux immeubles de rapport (1753) construits par les négociants Razeau et Geslin. Façade remarquable avec six travées et décor soigné: balcons sur consoles sculptées, chapiteaux ioniques, fronton et ferronneries. Habité par des négociants occupant un étage entier. Restauré en 1995. Monument Historique depuis 1984.",
     image: "/15 allée Duguay-Trouin.jpg",
@@ -97,7 +97,7 @@ export const locations: Location[] = [
   {
     id: "allee-duguay-trouin-16",
     name: "16 allée Duguay Trouin",
-    x: 150,
+    x: 105,
     y: 450,
     description: "Immeuble du XVIIIe siècle situé dans la partie sud de l'Île Feydeau. Cet immeuble présente une architecture typique du lotissement avec une cour intérieure et des espaces d'exposition. Il accueille aujourd'hui des artistes contemporains dans ses espaces rénovés.",
     image: "/16 allée Duguay-Trouin.jpg",
@@ -107,7 +107,7 @@ export const locations: Location[] = [
   {
     id: "rue-kervegan-32",
     name: "32 rue Kervégan",
-    x: 162,
+    x: 185,
     y: 507,
     description: "Immeuble construit entre 1747 et 1752 par Guillaume Grou, négociant-armateur. Façade modifiée au 19e siècle avec ajout d'un troisième étage. Organisation typique: appartement de l'armateur au premier, bureaux au rez-de-chaussée entresolé, appartements locatifs aux étages supérieurs. Monument Historique: façade et ferronneries (1932), cage d'escalier (1986).",
     image: "/32 rue Kervegan.jpg",

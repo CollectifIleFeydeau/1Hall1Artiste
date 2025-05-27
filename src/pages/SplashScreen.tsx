@@ -65,19 +65,28 @@ const SplashScreen = ({ onComplete, isFirstVisit }: SplashScreenProps) => {
         animate="visible"
         exit="exit"
       >
-        <motion.img 
-          src={getImagePath('/Logo.png')} 
-          alt="Collectif Feydeau Logo" 
-          className="w-48 h-48 object-contain mb-6"
-        />
         <motion.h1 
           className="text-2xl font-bold text-[#4a5d94] mb-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.5 }}
         >
-          Collectif Feydeau
+          1 Hall 1 Artiste 2025
         </motion.h1>
+        <motion.img 
+          src={getImagePath('/Logo.png')} 
+          alt="Collectif Feydeau Logo" 
+          className="w-48 h-48 object-contain mb-6"
+        />
+
+        <motion.h2
+          className="text-xl font-semibold text-[#4a5d94] mb-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
+          Collectif Feydeau
+        </motion.h2>
         <motion.p
           className="text-sm text-gray-600 text-center max-w-xs px-4"
           initial={{ opacity: 0 }}

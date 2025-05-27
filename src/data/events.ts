@@ -87,7 +87,8 @@ const eventScheduleData: EventDetails[] = [
     id: "concert-quatuor-liger",
     artistId: "quatuor-liger", // Matched with artists.ts id
     title: "Quatuor Liger",
-    description: "Concert du Quatuor Liger",
+    description: "",
+    // description: "Programme : Wolfgang Mozart - Quatuor n°17 'La chasse' ou Franz Schubert - Quatuor n°10. Le Quatuor Liger interprète ces compositeurs viennois sur des instruments historiques (cordes en boyaux, archets classiques).",
     time: "14h00 - 14h30",
     days: ["dimanche"],
     locationId: "quai-turenne-9-concert",

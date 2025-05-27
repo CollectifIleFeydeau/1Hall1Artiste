@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { getImagePath } from "@/utils/imagePaths";
+import ReactMarkdown from "react-markdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
@@ -189,9 +190,17 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             {/* Afficher le texte de présentation pour les concerts si disponible */}
             {event.type === "concert" && event.presentation && (
               <div className="mt-3 pt-3 border-t border-[#d8e3ff]">
-                {event.presentation.split('\n').map((paragraph, index) => (
-                  <p key={index} className="text-sm text-[#4a5d94] mb-2">{paragraph}</p>
-                ))}
+                <div className="text-sm text-[#4a5d94]">
+                  <ReactMarkdown components={{
+                    // Configurer les composants pour gérer correctement les sauts de ligne
+                    p: ({node, ...props}) => <p className="mb-3" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-lg font-bold mb-2" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-md font-semibold mb-2" {...props} />,
+                    hr: ({node, ...props}) => <hr className="my-4 border-t border-[#d8e3ff]" {...props} />
+                  }}>
+                    {event.presentation}
+                  </ReactMarkdown>
+                </div>
               </div>
             )}
           </div>

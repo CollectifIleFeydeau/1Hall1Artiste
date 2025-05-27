@@ -7,31 +7,12 @@
 
 0. **A faire en premier**
 
-0.1. **A faire par Julien**
-- Déplacer quelques lieux
-- URL github "Feydeau"?
-- Tester avec firefox
-- Rajouter Thomas et Matias et leur proposer
-- Rajouter les contenus des artistes
+* **Location et naviguation**
+   * Sur mobile, est-ce que les utilisateurs pourrait se localiser et si oui, pourrait t'on les aider se déplacer ? La carte est une image, comment faire ? Cela semble très , trop complexe peut être.
 
-1. **Test sur mobile** ⭐ (Priorité actuelle)
-   - Tester l'application sur mobile pour vérifier le fonctionnement du mode hors ligne
-   - Vérifier la réactivité et l'ergonomie sur différents appareils
 
-2. **Mode hors-ligne amélioré**
-   * Précharger automatiquement les détails des événements sauvegardés
-   * Les images des lieux si possible
-   * Télécharger les cartes pour une utilisation hors-ligne
+0. **A faire par Julien**
 
-3. **Intégration avec les calendriers natifs**
-   * Ajouter les événements sauvegardés directement au calendrier du téléphone
-   * Synchroniser les rappels avec le système de notification natif
-
-4. **Suivi et analyse**
-   * Métadonnées enrichies (version, appareil)
-   * Catégorisation des erreurs
-   * Déduplication des erreurs similaires
-   * Statistiques d'utilisation
 --------------------------
 ## Améliorations en réflexion 
 
@@ -40,23 +21,12 @@
 * **Contenus audio et visuels**
    * Guides audio pour les lieux importants
    * Ambiances sonores historiques (port au 18e siècle)
-   * Extraits musicaux des artistes participants
    * Galerie de photos historiques avec légendes explicatives
 
 * **Éléments éducatifs**
    * Quiz sur l'histoire de l'Île Feydeau
-   * Comparaisons avant/après des bâtiments
-   * Parcours thématiques (architecture, histoire maritime)
 
 ### 2. Fonctionnalités utilisateur
-
-* **Location et naviguation**
-   * Est-ce possible ? Tester
-
-* **Personnalisation**
-   * Notes privées sur les événements et lieux
-   * Exportation des notes en fin d'événement
-   * Parcours personnalisés selon les intérêts
 
 * **Interaction communautaire**
    * Partage de photos par les utilisateurs
@@ -142,7 +112,7 @@
    - Écran d'accueil pour les nouveaux utilisateurs
    - Affichage uniquement lors de la première visite
 
-6. **Système de gamification** ✅
+6. **Système de gamification** 
    - Achievements pour les premières actions (sauvegarder un événement, configurer une notification)
    - Animations de célébration (confettis) lors du déblocage d'achievements
    - Correction de l'affichage des confettis pour qu'ils apparaissent au-dessus des modales
@@ -160,7 +130,7 @@
 
 10. **Horaire par défaut d'abord et précis à la demande**
 
-11. **Mise à jour de la programmation** ✅
+11. **Mise à jour de la programmation** 
    - Mise à jour des emplacements des artistes selon la nouvelle programmation
    - Ajout d'Andry Shango Rajoelina à la liste des artistes
    - Déplacement de Clotilde Debar Zablocki au 15 allée Duguay Trouin
@@ -173,4 +143,28 @@
 14. **Commenter les toasts d'action**
 
 15. **Tous les retours sur la carte doivent mettre le lieux en exergue**
-   * si le lieux a été visités, le mettre en exergue en vert plutôt qu'en orange
+   - si le lieux a été visités, le mettre en exergue en vert plutôt qu'en orange
+
+16. **Test sur mobile** 
+   - Tester l'application sur mobile pour vérifier le fonctionnement du mode hors ligne
+   - Vérifier la réactivité et l'ergonomie sur différents appareils
+
+17. **Mode hors-ligne amélioré**
+   - Précharger automatiquement les détails des événements sauvegardés
+   - Les images des historiques des lieux
+   - Télécharger les cartes pour une utilisation hors-ligne
+
+18. **Intégration avec les calendriers natifs**
+   * Proposer d'ajouter les événements sauvegardés directement au calendrier du téléphone
+   * Synchroniser les rappels avec le système de notification natif
+
+2. **Suivi et analyse**
+   * Capture unifiée des erreurs :
+      * Quand une erreur se produit, elle est d'abord traitée par le nouveau système d'analyse (catégorisation, déduplication, métadonnées enrichies)
+      * Puis automatiquement transmise au système EmailJS existant pour l'envoi par email
+   * Synchronisation périodique :
+      * Les deux systèmes se synchronisent toutes les 30 minutes
+      * Cela garantit que toutes les erreurs sont correctement suivies et envoyées
+   * Métadonnées enrichies :
+      * Le système EmailJS reçoit maintenant des informations supplémentaires comme la catégorie d'erreur et l'empreinte digitale
+      * Ces données supplémentaires facilitent le débogage et l'analyse des problèmes

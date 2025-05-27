@@ -117,8 +117,8 @@ export function InstagramCarousel({ artists, events, title = "Découvrez les art
                     </div>
                   </div>
                 </div>
-                <h3 className="font-medium text-center">{profile.name}</h3>
-                <p className="text-sm text-blue-600 mt-1">@{extractUsername(profile.instagram)}</p>
+                <h3 className="font-medium text-center truncate w-full">{profile.name}</h3>
+                <p className="text-sm text-blue-600 mt-1 truncate w-full text-center">@{extractUsername(profile.instagram)}</p>
               </div>
             </div>
           ))}

@@ -233,15 +233,26 @@ export const artists: Artist[] = [
     type: "concert",
     title: "Quatuor Liger",
     description: "Concert du Quatuor Liger",
-    bio: "Quatuor Liger",
-    contact: "contact@quatuorliger.fr",
+    bio: "Quatuor à cordes formé en 1995 à Nantes",
+    contact: "Patrick Févai, Solenne Guilbert, Gwenola Morin, Cédric Forré",
     instagram: "",
-    email: "quatuor.liger@gmail.com",
-    presentation: "Le Quatuor Liger est un ensemble de musique de chambre formé en 2018 à Nantes. Composé de quatre musiciens passionnés, le quatuor propose un répertoire varié allant de la musique classique aux arrangements contemporains. Leur interprétation sensible et dynamique offre une expérience musicale unique.",
-    link: "https://www.quatuorliger.fr",
+    email: "solenne.guilbert@quatuorliger.fr",
+    presentation: "Le Quatuor Liger est un quatuor à cordes formé en 1995 à Nantes, et qui a évolué ces dernières années avec de nouveaux membres."
+    +"Composé de quatre musiciens passionnés (Patrick Févai, Solenne Guilbert, Gwenola Morin, Cédric Forré), le quatuor propose un répertoire varié"
+    +" allant de la musique classique aux arrangements contemporains. Leur interprétation sensible et dynamique offre une expérience musicale unique."
+    +"\n\n---\n\n## PROGRAMME\n\n### Wolfgang Mozart (1756-1791)\n**Quatuor n°17 \"La chasse\" - 25 min**\n\nLe quatuor n°17 en si bémol majeur, surnommé "
+    +"\"La Chasse\", fait partie des six quatuors dédiés à Haydn par Mozart. Composé en 1784, il doit son surnom à son premier mouvement, dont le caractère "
+    +"rythmé et léger rappelle une scène de chasse. L'œuvre est pleine de vitalité et de charme, témoignant de l'amitié et de l'admiration de Mozart pour Haydn."
+    +"\n\n### Franz Schubert (1797-1828)\n**Quatuor n°10 - 25 min**\n\nLe quatuor à cordes n°10 en mi bémol majeur de Schubert, également appelé \"Quatuor jeunesse\", "
+    +"a été écrit en 1813 alors que le compositeur n'avait que 16 ans. Malgré son jeune âge, cette œuvre révèle déjà une grande maîtrise de la forme et une sensibilité "
+    +"profonde. Moins dramatique que ses œuvres ultérieures, le quatuor se distingue par sa fraîcheur mélodique et son atmosphère paisible."
+    +"\n\n---\n\nMozart et Schubert ont été au cœur de l'évolution du quatuor à cordes, garants d'une transmission et créateurs de génie. Ces deux quatuors, de périodes"
+    +" et de styles différents, sont des témoignages brillants du génie de leurs compositeurs respectifs, et contiennent à la fois ce classicisme et cette révolution qui"
+    +" s'est opérée en 30 ans.\n\nLe Quatuor Liger interprète ces compositeurs viennois du tournant des XVIIIe et XIXe siècle sur des instruments historiques (cordes en boyaux, archets classiques).",
+    link: "",
     photos: [
-      "/concerts/quatuor-liger-1.jpg",
-      "/concerts/quatuor-liger-2.jpg"
+      "/concerts/QuatuorLiger/quatuor-liger-1.jpg",
+      "/concerts/QuatuorLiger/quatuor-liger-2.jpg"
     ]
   },
   {
