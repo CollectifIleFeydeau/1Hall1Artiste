@@ -101,10 +101,10 @@ const Map = ({ fullScreen = false }: MapProps) => {
       // Mettre à jour l'état local
       setSavedEventIds([...savedEventIds, event.id]);
       
-      toast({
-        title: "Événement sauvegardé",
-        description: `${event.title} a été ajouté à vos favoris.`,
-      });
+      // toast({
+      //   title: "Événement sauvegardé",
+      //   description: `${event.title} a été ajouté à vos favoris.`,
+      // });
       
       logger.info(`Événement ${event.id} sauvegardé avec succès depuis la carte`);
     } else {
@@ -113,10 +113,10 @@ const Map = ({ fullScreen = false }: MapProps) => {
       // Mettre à jour l'état local
       setSavedEventIds(savedEventIds.filter(id => id !== event.id));
       
-      toast({
-        title: "Événement retiré",
-        description: `${event.title} a été retiré de vos favoris.`,
-      });
+      // toast({
+      //   title: "Événement retiré",
+      //   description: `${event.title} a été retiré de vos favoris.`,
+      // });
       
       logger.info(`Événement ${event.id} retiré avec succès depuis la carte`);
     }
@@ -229,10 +229,10 @@ const Map = ({ fullScreen = false }: MapProps) => {
     // Cela permet à l'utilisateur de voir le lieu mis en évidence lorsqu'il revient à la carte
     setHighlightedLocation(locationId);
     
-    toast({
-      title: visited ? "Lieu marqué comme visité" : "Lieu marqué comme non visité",
-      description: `${mapLocations.find(l => l.id === locationId)?.name} a été mis à jour.`,
-    });
+    // toast({
+    //   title: visited ? "Lieu marqué comme visité" : "Lieu marqué comme non visité",
+    //   description: `${mapLocations.find(l => l.id === locationId)?.name} a été mis à jour.`,
+    // });
     
     // Si le lieu est marqué comme visité, déclencher les achievements appropriés
     if (visited) {

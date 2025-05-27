@@ -3,17 +3,16 @@
 
 # Priorités actuelles (phase de test et optimisation)
 
-- corriger faute orthographique (foundation =>  fondation)
-- tout les retours sur la carte doivent mettre le lieux en exergue
-   * si le lieux a été visités, le mettre en exergue en vert plutôt qu'en orange
-- rajouter Thomas et Matias et leur proposer
-- idée : localisation et naviguation
-- déplacer quelques lieux
-- oter les confirmations d'action
-- URL github "Feydeau"?
-- tester avec firefox
-
 ## Priorités immédiates à faire 
+
+0. **A faire en premier**
+
+0.1. **A faire par Julien**
+- Déplacer quelques lieux
+- URL github "Feydeau"?
+- Tester avec firefox
+- Rajouter Thomas et Matias et leur proposer
+- Rajouter les contenus des artistes
 
 1. **Test sur mobile** ⭐ (Priorité actuelle)
    - Tester l'application sur mobile pour vérifier le fonctionnement du mode hors ligne
@@ -21,6 +20,7 @@
 
 2. **Mode hors-ligne amélioré**
    * Précharger automatiquement les détails des événements sauvegardés
+   * Les images des lieux si possible
    * Télécharger les cartes pour une utilisation hors-ligne
 
 3. **Intégration avec les calendriers natifs**
@@ -49,6 +49,9 @@
    * Parcours thématiques (architecture, histoire maritime)
 
 ### 2. Fonctionnalités utilisateur
+
+* **Location et naviguation**
+   * Est-ce possible ? Tester
 
 * **Personnalisation**
    * Notes privées sur les événements et lieux
@@ -166,3 +169,8 @@
 12. **Factorisation du code : coordonnées dans location, events et artistes, etc....**
 
 13. **Depuis les enregistrements, on peux aller à l'évènement**
+
+14. **Commenter les toasts d'action**
+
+15. **Tous les retours sur la carte doivent mettre le lieux en exergue**
+   * si le lieux a été visités, le mettre en exergue en vert plutôt qu'en orange

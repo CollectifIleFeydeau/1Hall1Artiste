@@ -150,36 +150,11 @@ export default function Admin() {
           const locationEvents = events.filter(event => event.locationName === updatedLocation.name);
           logger.info(`Mise à jour de ${locationEvents.length} événements associés au lieu ${updatedLocation.name}`);
           
-          let updatedEventsCount = 0;
+          // Note: Les événements n'ont pas de coordonnées x,y directes
+          // Ils héritent des coordonnées de leur lieu via locationId
+          logger.info(`${locationEvents.length} événements associés au lieu ${updatedLocation.name} hériteront automatiquement des nouvelles coordonnées`);
           
-          locationEvents.forEach(event => {
-            // Créer une copie mise à jour de l'événement
-            const updatedEvent = { 
-              ...event, 
-              x: coordinates.x, 
-              y: coordinates.y 
-            };
-            
-            // Mettre à jour l'événement via le service de données
-            const eventUpdateResult = updateEvent(updatedEvent);
-            
-            if (eventUpdateResult.success) {
-              updatedEventsCount++;
-              
-              logger.debug('Événement mis à jour', {
-                id: updatedEvent.id,
-                title: updatedEvent.title,
-                oldX: event.x,
-                oldY: event.y,
-                newX: coordinates.x,
-                newY: coordinates.y
-              });
-            } else {
-              logger.error(`Erreur lors de la mise à jour de l'événement ${event.id}`, eventUpdateResult.error);
-            }
-          });
-          
-          logger.info(`Coordonnées mises à jour pour ${updatedLocation.name} et ${updatedEventsCount} événements associés`);
+          logger.info(`Coordonnées mises à jour pour ${updatedLocation.name} et ${locationEvents.length} événements associés`);
         } else {
           logger.error(`Erreur lors de la mise à jour du lieu ${locationToUpdate.id}`, updateResult.error);
         }

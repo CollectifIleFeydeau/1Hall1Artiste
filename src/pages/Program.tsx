@@ -41,10 +41,10 @@ const Program = () => {
       // Mettre à jour l'état local
       setSavedEventIds([...savedEventIds, event.id]);
       
-      toast({
-        title: "Événement sauvegardé",
-        description: `${event.title} a été ajouté à vos favoris.`,
-      });
+      // toast({
+      //   title: "Événement sauvegardé",
+      //   description: `${event.title} a été ajouté à vos favoris.`,
+      // });
       
       console.log(`[Program] Événement ${event.id} sauvegardé avec succès`);
     } else {
@@ -53,10 +53,10 @@ const Program = () => {
       // Mettre à jour l'état local
       setSavedEventIds(savedEventIds.filter(id => id !== event.id));
       
-      toast({
-        title: "Événement retiré",
-        description: `${event.title} a été retiré de vos favoris.`,
-      });
+      // toast({
+      //   title: "Événement retiré",
+      //   description: `${event.title} a été retiré de vos favoris.`,
+      // });
       
       console.log(`[Program] Événement ${event.id} retiré avec succès`);
     }

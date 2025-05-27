@@ -146,7 +146,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 ${activeLocation === location.id 
                   ? 'bg-[#ff7a45]/90 ring-2 ring-[#ff7a45] ring-opacity-70 scale-110' 
                   : highlightedLocation === location.id
-                    ? 'bg-[#ff7a45]/90 ring-4 ring-yellow-400 ring-opacity-80' 
+                    ? location.visited 
+                      ? 'bg-[#4CAF50]/90 ring-4 ring-green-400 ring-opacity-80' 
+                      : 'bg-[#ff7a45]/90 ring-4 ring-yellow-400 ring-opacity-80'
                     : location.visited 
                       ? 'bg-[#4CAF50]/90' 
                       : 'bg-[#4a5d94]/90'

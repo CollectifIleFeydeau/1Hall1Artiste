@@ -80,19 +80,19 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
       removeSavedEvent(event.id);
       setSavedEventIds(savedEventIds.filter(id => id !== event.id));
       
-      toast({
-        title: "Événement retiré",
-        description: `${event.title} a été retiré de vos événements sauvegardés.`,
-      });
+      // toast({
+      //   title: "Événement retiré",
+      //   description: `${event.title} a été retiré de vos événements sauvegardés.`,
+      // });
     } else {
       // Sauvegarder l'événement
       saveEvent(event);
       setSavedEventIds([...savedEventIds, event.id]);
       
-      toast({
-        title: "Événement sauvegardé",
-        description: `${event.title} a été ajouté à vos événements sauvegardés.`,
-      });
+      // toast({
+      //   title: "Événement sauvegardé",
+      //   description: `${event.title} a été ajouté à vos événements sauvegardés.`,
+      // });
     }
   };
   

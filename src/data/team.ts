@@ -1,4 +1,3 @@
-
 // Team members data
 export type TeamMember = {
   id: string;
@@ -25,6 +24,6 @@ export const teamMembers: TeamMember[] = [
     id: "member3",
     name: "Edwige Filleux",
     role: "Secrétaire",
-    description: "Foundation de l'association."
+    description: "Fondation de l'association."
   }
 ];
