@@ -3,6 +3,15 @@
 
 # Priorités actuelles (phase de test et optimisation)
 
+- corriger faute orthographique (foundation =>  fondation)
+- tout les retours sur la carte doivent mettre le lieux en exergue
+   * si le lieux a été visités, le mettre en exergue en vert plutôt qu'en orange
+- rajouter Thomas et Matias et leur proposer
+- idée : localisation et naviguation
+- déplacer quelques lieux
+- oter les confirmations d'action
+- URL github "Feydeau"?
+- tester avec firefox
 
 ## Priorités immédiates à faire 
 
