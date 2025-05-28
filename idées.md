@@ -1,6 +1,14 @@
 
 # Idées 
 
+## Améliorations en réflexion
+
+**Présentation de chaque artiste**
+Idée : 1 ligne ou 2 d'accroche se terminant par ... incitant au double tap.
+* En tapant sur cette phrase d'accroche le volet se déplie permettant une présentation plus complète de l'artiste.
+* Il faut éviter qu'un texte trop long apparaisse tout de suite pour permettre de voir le compte insta, des photos ou une vidéo YouTube.
+
+
 # Priorités actuelles (phase de test et optimisation)
 
 ## Priorités immédiates à faire 
@@ -8,10 +16,30 @@
 0. **A faire en premier**
 
 * **Location et naviguation**
-   * Sur mobile, est-ce que les utilisateurs pourrait se localiser et si oui, pourrait t'on les aider se déplacer ? La carte est une image, comment faire ? Cela semble très , trop complexe peut être.
+   * Localiser l'utilisateur.
+   * Guidage vers les points d'intérêt :
+      * Afficher une flèche directionnelle qui indique la direction vers le point sélectionné
+      * Montrer la distance en mètres jusqu'au point d'intérêt
+      * Mettre à jour ces informations en temps réel lorsque l'utilisateur se déplace
+   * Interface de navigation :
+      * Ajouter un bouton "Me guider" sur la carte ou dans les détails d'un lieu
+      * Lorsqu'un lieu est sélectionné, afficher un panneau de navigation en bas de l'écran
+      * Inclure des instructions textuelles simples comme "Dirigez-vous vers le nord sur 50 mètres"
+   * Indicateurs visuels :
+      * Tracer une ligne ou un chemin sur la carte entre la position de l'utilisateur et le point d'intérêt
+   * Indiquer gentiment si la personne est hors carte (ex: "Vous vous éloignez de l'Île Feydeau, dirigez-vous vers le sud-est pour y revenir").
+   
+1. **A faire par Julien**
 
+18. **Intégration avec les calendriers natifs**
+   * Proposer d'ajouter les événements sauvegardés directement au calendrier du téléphone
+   * Synchroniser les rappels avec le système de notification natif
+   * BUG - 31 mai ????
+      * Examiner plus en détail comment les dates sont calculées et formatées
+      * Tester différentes approches pour résoudre le problème
+      * Vérifier si d'autres parties du code influencent les dates
 
-0. **A faire par Julien**
+1. **A faire par Julien**
 
 --------------------------
 ## Améliorations en réflexion 
@@ -130,12 +158,6 @@
 
 10. **Horaire par défaut d'abord et précis à la demande**
 
-11. **Mise à jour de la programmation** 
-   - Mise à jour des emplacements des artistes selon la nouvelle programmation
-   - Ajout d'Andry Shango Rajoelina à la liste des artistes
-   - Déplacement de Clotilde Debar Zablocki au 15 allée Duguay Trouin
-   - Suppression de l'Atelier Norg de la programmation
-
 12. **Factorisation du code : coordonnées dans location, events et artistes, etc....**
 
 13. **Depuis les enregistrements, on peux aller à l'évènement**
@@ -153,10 +175,6 @@
    - Précharger automatiquement les détails des événements sauvegardés
    - Les images des historiques des lieux
    - Télécharger les cartes pour une utilisation hors-ligne
-
-18. **Intégration avec les calendriers natifs**
-   * Proposer d'ajouter les événements sauvegardés directement au calendrier du téléphone
-   * Synchroniser les rappels avec le système de notification natif
 
 2. **Suivi et analyse**
    * Capture unifiée des erreurs :
