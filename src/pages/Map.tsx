@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import UserLocation, { GeoPosition } from "@/components/UserLocation";
 import ProximityGuide from "@/components/ProximityGuide";
 import NavigationGuideSimple from "@/components/NavigationGuideSimple";
+import LocationActivator from "@/components/LocationActivator";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createLogger } from "@/utils/logger";
 import { MapComponent, MAP_WIDTH, MAP_HEIGHT } from "@/components/MapComponent";
@@ -61,11 +62,10 @@ const Map = ({ fullScreen = false }: MapProps) => {
   const [showLocationFeatures, setShowLocationFeatures] = useState(false);
   const [locationPermissionRequested, setLocationPermissionRequested] = useState(false);
   
-  // Détection de l'environnement de développement
+  // Détection de l'environnement de développement désactivée pour les tests sur le terrain
   const isDevelopmentEnvironment = useMemo(() => {
-    return window.location.hostname === 'localhost' || 
-           window.location.hostname.includes('192.168.') || 
-           window.location.protocol === 'http:';
+    // Force à false pour les tests sur le terrain
+    return false;
   }, []);
   
   // Initialiser les données des lieux en incluant l'état de visite
@@ -354,6 +354,23 @@ const Map = ({ fullScreen = false }: MapProps) => {
         </div>
         
 
+        
+        {/* Bouton d'activation de la localisation */}
+        <div className="flex justify-center my-2">
+          <LocationActivator 
+            onLocationEnabled={() => {
+              setPermissionDenied(false);
+              setShowLocationFeatures(true);
+              setLocationPermissionRequested(true);
+              logger.info('Localisation activée manuellement par l\'utilisateur');
+            }}
+            onLocationDenied={() => {
+              setPermissionDenied(true);
+              setShowLocationFeatures(false);
+              logger.warn('Localisation refusée par l\'utilisateur');
+            }}
+          />
+        </div>
         
         <div className="relative">
           {/* Map container */}

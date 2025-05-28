@@ -40,15 +40,15 @@ export default function SavedEvents() {
   const [showMultipleSavedCelebration, setShowMultipleSavedCelebration] = useState<boolean>(false);
   const [showNotificationCelebration, setShowNotificationCelebration] = useState<boolean>(false);
   
-  // État pour indiquer si le calendrier est supporté
-  const [calendarSupported, setCalendarSupported] = useState<boolean>(false);
+  // État pour indiquer si le calendrier est supporté - toujours activé maintenant
+  const [calendarSupported, setCalendarSupported] = useState<boolean>(true);
 
   useEffect(() => {
     // Charger les événements sauvegardés
     setSavedEvents(getSavedEvents());
     
-    // Vérifier si le calendrier est supporté
-    setCalendarSupported(isCalendarSupported());
+    // Toujours activer le support calendrier
+    setCalendarSupported(true);
     
     // Vérifier si des réalisations ont été débloquées récemment
     // et si la célébration n'a pas encore été montrée

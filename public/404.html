@@ -5,7 +5,9 @@
   <title>Collectif Feydeau</title>
   <script>
     // Solution simple pour SPA sur GitHub Pages
-    var pathSegmentsToKeep = 1;
+    // Pour un repo GitHub Pages de la forme username.github.io/repo-name
+    // nous devons conserver 2 segments de chemin
+    var pathSegmentsToKeep = 2;
 
     var l = window.location;
     l.replace(

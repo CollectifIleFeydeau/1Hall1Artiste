@@ -21,8 +21,32 @@
     <meta name="twitter:description" content="Découvrez les événements du Collectif Feydeau à Nantes : expositions, concerts et animations sur l'Île Feydeau" />
     <meta name="twitter:image" content="https://julienfritsch44.github.io/Collectif-Feydeau---app/assets/feydeau-share.jpg" />
     
-    <!-- Script pour gérer le routage SPA sur GitHub Pages -->
+    <!-- Script pour gérer le routage SPA sur GitHub Pages et détecter la base URL -->
     <script type="text/javascript">
+      // Détecter la base URL en fonction du déploiement
+      (function() {
+        window.APP_CONFIG = window.APP_CONFIG || {};
+        
+        // Détecter si nous sommes sur GitHub Pages
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        
+        // Déterminer la base URL
+        if (isGitHubPages) {
+          if (window.location.hostname === 'collectifilefeydeau.github.io') {
+            window.APP_CONFIG.BASE_URL = '/1Hall1Artiste/';
+          } else if (window.location.hostname === 'julienfritsch44.github.io') {
+            window.APP_CONFIG.BASE_URL = '/Collectif-Feydeau---app/';
+          } else {
+            // Fallback pour d'autres déploiements GitHub Pages
+            window.APP_CONFIG.BASE_URL = '/' + window.location.pathname.split('/')[1] + '/';
+          }
+        } else {
+          window.APP_CONFIG.BASE_URL = '/';
+        }
+        
+        console.log('Détection de la base URL:', window.APP_CONFIG.BASE_URL);
+      })();
+      
       // Script de redirection pour les routes SPA sur GitHub Pages
       (function(l) {
         if (l.search[1] === '/') {
@@ -59,6 +83,6 @@
     <div id="root"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>

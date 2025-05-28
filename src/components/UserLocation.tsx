@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createLogger } from "@/utils/logger";
 import { toast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Navigation from "lucide-react/dist/esm/icons/navigation";
 import { FEYDEAU_CENTER, FEYDEAU_DIMENSIONS, FEYDEAU_CORNERS } from "@/data/gpsCoordinates";
@@ -92,10 +93,112 @@ const UserLocation: React.FC<UserLocationProps> = ({
   // Demander et suivre la position de l'utilisateur
   useEffect(() => {
     // Détecter si nous sommes en environnement de développement local
-    const isLocalDevelopment = window.location.hostname === 'localhost' || 
-                           window.location.hostname.includes('192.168.') || 
-                           window.location.protocol === 'http:';
-    
+    // Pour les tests sur le terrain, on force cette valeur à false
+    const isLocalDevelopment = false;
+
+    // Fonction de succès pour la géolocalisation
+    const success = (pos: GeolocationPosition) => {
+      const newPosition = {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracy: pos.coords.accuracy
+      };
+      
+      setPosition(newPosition);
+      
+      // Vérifier si l'utilisateur est hors carte
+      const isWithinFeydeau = isPositionWithinFeydeau(newPosition);
+      if (!isWithinFeydeau) {
+        const direction = getDirectionToFeydeau(newPosition);
+        toast({
+          title: "Vous vous éloignez de l'Île Feydeau",
+          description: `Dirigez-vous vers le ${direction} pour revenir sur l'Île.`,
+          duration: 5000
+        });
+      }
+      
+      // Réinitialiser l'état de permission refusée puisque nous avons reçu une position
+      if (permissionDenied) {
+        setPermissionDenied(false);
+        if (onPermissionChange) {
+          onPermissionChange(false);
+        }
+      }
+      
+      // Convertir les coordonnées GPS en coordonnées de la carte
+      const mapPosition = gpsToMapCoordinates(newPosition.latitude, newPosition.longitude);
+      setMapCoords(mapPosition);
+      
+      // Notifier le composant parent avec les coordonnées de la carte et GPS
+      if (onLocationUpdate) {
+        onLocationUpdate(mapPosition.x, mapPosition.y, newPosition);
+      }
+      
+      logger.info('Position utilisateur mise à jour', { 
+        gps: newPosition, 
+        map: mapPosition 
+      });
+    };
+
+    // Fonction d'erreur pour la géolocalisation
+    const error = (err: GeolocationPositionError) => {
+      // En environnement de développement, ne jamais signaler d'erreur de permission
+      if (isLocalDevelopment) {
+        // Ne pas mettre à jour permissionDenied
+        logger.info('Erreur de géolocalisation ignorée en mode développement', { 
+          code: err.code,
+          message: err.message
+        });
+        return;
+      }
+      
+      // Vérifier si l'erreur est liée à une origine non sécurisée (HTTP vs HTTPS)
+      const isSecureOriginError = err.message && err.message.includes('secure origins');
+      
+      if (isSecureOriginError) {
+        // En production, afficher un message spécifique pour les origines non sécurisées
+        setPermissionDenied(true);
+        if (onPermissionChange) {
+          onPermissionChange(true);
+        }
+        
+        toast({
+          title: "Localisation non disponible",
+          description: "Pour utiliser la géolocalisation, veuillez accéder au site via HTTPS.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (err.code === 1) { // Permission refusée
+        setPermissionDenied(true);
+        if (onPermissionChange) {
+          onPermissionChange(true);
+        }
+        
+        toast({
+          title: "Localisation refusée",
+          description: "Veuillez autoriser l'accès à votre position pour utiliser cette fonctionnalité.",
+          variant: "destructive",
+          action: <ToastAction altText="Activer" onClick={() => {
+            // Tenter de redemander la permission
+            navigator.geolocation.getCurrentPosition(success, error, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+            });
+          }}>Activer</ToastAction>
+        });
+      } else {
+        // Autres erreurs
+        toast({
+          title: "Erreur de localisation",
+          description: `Impossible d'obtenir votre position: ${err.message}`,
+          variant: "destructive"
+        });
+      }
+    };
+
     // En développement local, simuler automatiquement une position
     if (isLocalDevelopment) {
       logger.info('Environnement de développement détecté, simulation de position activée');
@@ -103,7 +206,7 @@ const UserLocation: React.FC<UserLocationProps> = ({
       // Position fixe au 9 quai Turenne pour les tests
       // Coordonnées GPS précises du 9 quai Turenne
       const fixedPosition: GeoPosition = {
-        latitude: 47.2127569, // Latitude du 9 quai Turenne47.21230600,-1.55698600
+        latitude: 47.2127569, // Latitude du 9 quai Turenne
         longitude: -1.5551265, // Longitude du 9 quai Turenne (négative pour l'ouest)
         accuracy: 5
       };
@@ -155,6 +258,13 @@ const UserLocation: React.FC<UserLocationProps> = ({
       return;
     }
     
+    // Afficher un message pour encourager l'utilisateur à activer la géolocalisation
+    toast({
+      title: "Localisation nécessaire",
+      description: "Veuillez autoriser la géolocalisation pour profiter pleinement de l'expérience.",
+      duration: 5000
+    });
+    
     // Réinitialiser l'état de permission refusée au démarrage
     // Cela permet de réessayer après que l'utilisateur a cliqué sur "Activer"
     setPermissionDenied(false);
@@ -162,111 +272,15 @@ const UserLocation: React.FC<UserLocationProps> = ({
     // Notifier le composant parent que la permission n'est pas refusée
     if (onPermissionChange) {
       onPermissionChange(false);
-    };
-
-    // Fonction de succès pour la géolocalisation
-    const success = (pos: GeolocationPosition) => {
-      const newPosition = {
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude,
-        accuracy: pos.coords.accuracy
-      };
-      
-      setPosition(newPosition);
-      
-      // Vérifier si l'utilisateur est hors carte
-      const isWithinFeydeau = isPositionWithinFeydeau(newPosition);
-      if (!isWithinFeydeau) {
-        const direction = getDirectionToFeydeau(newPosition);
-        toast({
-          title: "Vous vous éloignez de l'Île Feydeau",
-          description: `Dirigez-vous vers le ${direction} pour revenir sur l'Île.`,
-          duration: 5000
-        });
-      }
-      
-      // Réinitialiser l'état de permission refusée puisque nous avons reçu une position
-      if (permissionDenied) {
-        setPermissionDenied(false);
-        if (onPermissionChange) {
-          onPermissionChange(false);
-        }
-      }
-      
-      // Convertir les coordonnées GPS en coordonnées de la carte
-      const mapPosition = gpsToMapCoordinates(newPosition.latitude, newPosition.longitude);
-      setMapCoords(mapPosition);
-      
-      // Notifier le composant parent avec les coordonnées de la carte et GPS
-      if (onLocationUpdate) {
-        onLocationUpdate(mapPosition.x, mapPosition.y, newPosition);
-      }
-      
-      logger.info('Position utilisateur mise à jour', { 
-        gps: newPosition, 
-        map: mapPosition 
-      });
-    };
-
-    // Fonction d'erreur pour la géolocalisation
-    const error = (err: GeolocationPositionError) => {
-      // Détecter si nous sommes en environnement de développement local
-      const isLocalDevelopment = window.location.hostname === 'localhost' || 
-                              window.location.hostname.includes('192.168.') || 
-                              window.location.protocol === 'http:';
-      
-      // En environnement de développement, ne jamais signaler d'erreur de permission
-      if (isLocalDevelopment) {
-        // Ne pas mettre à jour permissionDenied
-        // La simulation de position est déjà activée dans le bloc précédent
-        logger.info('Erreur de géolocalisation ignorée en mode développement', { 
-          code: err.code,
-          message: err.message
-        });
-        return;
-      }
-      
-      // Vérifier si l'erreur est liée à une origine non sécurisée (HTTP vs HTTPS)
-      const isSecureOriginError = err.message && err.message.includes('secure origins');
-      
-      if (isSecureOriginError) {
-        // En production, afficher un message spécifique pour les origines non sécurisées
-        setPermissionDenied(true);
-        if (onPermissionChange) {
-          onPermissionChange(true);
-        }
-        
-        toast({
-          title: "Localisation non disponible",
-          description: "Pour utiliser la géolocalisation, veuillez accéder au site via HTTPS.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (err.code === 1) { // Permission refusée
-        setPermissionDenied(true);
-        if (onPermissionChange) {
-          onPermissionChange(true);
-        }
-        
-        logger.warn('Accès à la localisation refusé', { errorCode: err.code });
-      } else {
-        // Autres erreurs de géolocalisation
-        logger.error('Erreur de géolocalisation', { 
-          code: err.code,
-          message: err.message
-        });
-        
-        toast({
-          title: "Erreur de localisation",
-          description: `Impossible de déterminer votre position: ${err.message}`,
-          variant: "destructive"
-        });
-      }
-      logger.error('Erreur de géolocalisation', { code: err.code, message: err.message });
-    };
-
+    }
+    
+    // Forcer une demande d'autorisation de géolocalisation immédiatement
+    navigator.geolocation.getCurrentPosition(success, error, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    });
+    
     // Options pour la géolocalisation
     const options = {
       enableHighAccuracy: true, // Haute précision pour une meilleure localisation

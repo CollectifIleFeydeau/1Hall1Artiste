@@ -17,7 +17,10 @@ export const registerServiceWorker = () => {
     return;
   }
 
-  const BASE_PATH = typeof import.meta.env !== 'undefined' ? import.meta.env.BASE_URL || '/' : '/';
+  // Utiliser la configuration globale définie dans index.html
+  const BASE_PATH = (window as any).APP_CONFIG?.BASE_URL || '/';
+  
+  console.log(`Service Worker: Using BASE_PATH from global config: ${BASE_PATH}`);
   const swUrl = `${BASE_PATH}service-worker.js`;
 
   console.log(`Registering service worker from: ${swUrl}`);

@@ -1,37 +1,12 @@
 
-# Idées 
-
-## Améliorations en réflexion
-
-**Présentation de chaque artiste**
-Idée : 1 ligne ou 2 d'accroche se terminant par ... incitant au double tap.
-* En tapant sur cette phrase d'accroche le volet se déplie permettant une présentation plus complète de l'artiste.
-* Il faut éviter qu'un texte trop long apparaisse tout de suite pour permettre de voir le compte insta, des photos ou une vidéo YouTube.
+# Toutes nouvelles idées 
 
 
 # Priorités actuelles (phase de test et optimisation)
 
 ## Priorités immédiates à faire 
 
-0. **A faire en premier**
-
-* **Location et naviguation**
-   * Localiser l'utilisateur.
-   * Guidage vers les points d'intérêt :
-      * Afficher une flèche directionnelle qui indique la direction vers le point sélectionné
-      * Montrer la distance en mètres jusqu'au point d'intérêt
-      * Mettre à jour ces informations en temps réel lorsque l'utilisateur se déplace
-   * Interface de navigation :
-      * Ajouter un bouton "Me guider" sur la carte ou dans les détails d'un lieu
-      * Lorsqu'un lieu est sélectionné, afficher un panneau de navigation en bas de l'écran
-      * Inclure des instructions textuelles simples comme "Dirigez-vous vers le nord sur 50 mètres"
-   * Indicateurs visuels :
-      * Tracer une ligne ou un chemin sur la carte entre la position de l'utilisateur et le point d'intérêt
-   * Indiquer gentiment si la personne est hors carte (ex: "Vous vous éloignez de l'Île Feydeau, dirigez-vous vers le sud-est pour y revenir").
-   
-1. **A faire par Julien**
-
-18. **Intégration avec les calendriers natifs**
+1. **Intégration avec les calendriers natifs**
    * Proposer d'ajouter les événements sauvegardés directement au calendrier du téléphone
    * Synchroniser les rappels avec le système de notification natif
    * BUG - 31 mai ????
@@ -39,15 +14,18 @@ Idée : 1 ligne ou 2 d'accroche se terminant par ... incitant au double tap.
       * Tester différentes approches pour résoudre le problème
       * Vérifier si d'autres parties du code influencent les dates
 
-1. **A faire par Julien**
-
 --------------------------
 ## Améliorations en réflexion 
 
 ### 1. Enrichissement des contenus
 
+* **Présentation de chaque artiste**
+  * Idée : 1 ligne ou 2 d'accroche se terminant par ... incitant au double tap.
+    * En tapant sur cette phrase d'accroche le volet se déplie permettant une présentation plus complète de l'artiste.
+    * Il faut éviter qu'un texte trop long apparaisse tout de suite pour permettre de voir le compte insta, des photos ou une vidéo YouTube.
+
 * **Contenus audio et visuels**
-   * Guides audio pour les lieux importants
+  * Guides audio pour les lieux importants
    * Ambiances sonores historiques (port au 18e siècle)
    * Galerie de photos historiques avec légendes explicatives
 
@@ -176,7 +154,7 @@ Idée : 1 ligne ou 2 d'accroche se terminant par ... incitant au double tap.
    - Les images des historiques des lieux
    - Télécharger les cartes pour une utilisation hors-ligne
 
-2. **Suivi et analyse**
+18. **Suivi et analyse**
    * Capture unifiée des erreurs :
       * Quand une erreur se produit, elle est d'abord traitée par le nouveau système d'analyse (catégorisation, déduplication, métadonnées enrichies)
       * Puis automatiquement transmise au système EmailJS existant pour l'envoi par email
@@ -186,3 +164,17 @@ Idée : 1 ligne ou 2 d'accroche se terminant par ... incitant au double tap.
    * Métadonnées enrichies :
       * Le système EmailJS reçoit maintenant des informations supplémentaires comme la catégorie d'erreur et l'empreinte digitale
       * Ces données supplémentaires facilitent le débogage et l'analyse des problèmes
+
+19. **Location et naviguation**
+   * Localiser l'utilisateur.
+   * Guidage vers les points d'intérêt :
+      * Afficher une flèche directionnelle qui indique la direction vers le point sélectionné
+      * Montrer la distance en mètres jusqu'au point d'intérêt
+      * Mettre à jour ces informations en temps réel lorsque l'utilisateur se déplace
+   * Interface de navigation :
+      * Ajouter un bouton "Me guider" sur la carte ou dans les détails d'un lieu
+      * Lorsqu'un lieu est sélectionné, afficher un panneau de navigation en bas de l'écran
+      * Inclure des instructions textuelles simples comme "Dirigez-vous vers le nord sur 50 mètres"
+   * Indicateurs visuels :
+      * Tracer une ligne ou un chemin sur la carte entre la position de l'utilisateur et le point d'intérêt
+   * Indiquer gentiment si la personne est hors carte (ex: "Vous vous éloignez de l'Île Feydeau, dirigez-vous vers le sud-est pour y revenir").

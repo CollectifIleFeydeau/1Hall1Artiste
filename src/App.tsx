@@ -140,6 +140,7 @@ const AnimatedRoutes = () => {
           )
         } />
         
+
         {/* Routes principales avec navigation par gestes */}
         {mainRoutes.map(route => (
           <Route 
@@ -241,6 +242,9 @@ const App = () => {
 
   // Register service worker and initialize error reporting
   useEffect(() => {
+    // Afficher la base URL détectée
+    console.log('[App] Base URL détectée:', (window as any).APP_CONFIG?.BASE_URL || '/');
+    
     // Initialiser le service worker
     registerServiceWorker();
     

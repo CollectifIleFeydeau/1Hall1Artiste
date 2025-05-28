@@ -6,16 +6,14 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({  
   // Utiliser une base vide en développement et la base GitHub Pages en production
-  base: mode === 'production' ? "/Collectif-Feydeau---app/" : "/",
-  server: {
-    host: "0.0.0.0",
-    port: 8080,
-    strictPort: false,
-    hmr: {
-      clientPort: 8080
-    },
-  },
+  // La base URL sera détectée dynamiquement en production
+  base: mode === 'production' ? "/" : "/",
+  // Assurer que les chemins d'assets sont correctement générés
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+    sourcemap: true,
     // Configuration du code splitting
     rollupOptions: {
       output: {
@@ -37,6 +35,16 @@ export default defineConfig(({ mode }) => ({
     // Réduire la taille des chunks générés
     chunkSizeWarningLimit: 600,
   },
+  server: {
+    host: "0.0.0.0",
+    port: 8080,
+    strictPort: false,
+    // Désactivation de HTTPS pour éviter les problèmes de certificat
+    hmr: {
+      clientPort: 8080
+    },
+  },
+
   plugins: [
     react(),
     mode === 'development' &&

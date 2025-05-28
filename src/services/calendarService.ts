@@ -35,14 +35,22 @@ export const isCalendarSupported = (): boolean => {
   // Sur iOS, nous pouvons utiliser des liens webcal://
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   
+  // Sur desktop, nous pouvons toujours proposer le téléchargement du fichier .ics
+  const isDesktop = !isMobile;
+  
   logger.info("Vérification du support calendrier", { 
     isMobile, 
     hasWebShare, 
     isIOS, 
+    isDesktop,
     userAgent: navigator.userAgent 
   });
   
-  return isMobile && (hasWebShare || isIOS);
+  // Retourner true pour tous les appareils
+  // - Sur mobile avec Web Share: utiliser l'API de partage
+  // - Sur iOS: utiliser les liens webcal://
+  // - Sur desktop: proposer le téléchargement du fichier .ics
+  return hasWebShare || isIOS || isDesktop;
 };
 
 /**
@@ -117,71 +125,103 @@ const formatEventForCalendar = (event: Event): string => {
  */
 export const addToCalendar = async (event: Event): Promise<CalendarResult> => {
   try {
-    if (!isCalendarSupported()) {
-      logger.warn("Calendrier non supporté sur cet appareil");
-      return {
-        success: false,
-        errorType: CalendarErrorType.NOT_SUPPORTED,
-        errorMessage: "L'ajout au calendrier n'est pas supporté sur cet appareil"
-      };
-    }
+    // Toujours retourner true pour la vérification de support
+    // Nous allons gérer les différentes plateformes directement
     
     // Formater l'événement au format iCalendar
     const icalEvent = formatEventForCalendar(event);
     
-    // Détecter iOS
+    // Détecter les plateformes
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isMobile = isIOS || isAndroid || /webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    if (isIOS) {
-      // Sur iOS, utiliser un lien webcal:// qui ouvrira l'application Calendrier
-      const blob = new Blob([icalEvent], { type: 'text/calendar;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      
-      // Créer un lien temporaire et le cliquer
-      const link = document.createElement('a');
-      link.href = url.replace('blob:', 'webcal:');
-      link.setAttribute('download', `${event.title.replace(/\s+/g, '_')}.ics`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Libérer l'URL
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-      
-      logger.info("Événement ajouté au calendrier iOS", { eventId: event.id });
-      return { success: true };
-    }
+    logger.info("Détection de plateforme", { isIOS, isAndroid, isMobile, userAgent: navigator.userAgent });
     
-    // Sur Android et autres plateformes, utiliser le partage de fichier
+    // Créer le blob pour toutes les plateformes
     const blob = new Blob([icalEvent], { type: 'text/calendar;charset=utf-8' });
-    const file = new File([blob], `${event.title.replace(/\s+/g, '_')}.ics`, { type: 'text/calendar' });
     
-    // Vérifier si le navigateur supporte le partage de fichiers
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: `Ajouter "${event.title}" à votre calendrier`,
-        text: `Événement: ${event.title} - ${event.days.join(' et ')} à ${event.time}`
-      });
-      
-      logger.info("Événement partagé pour ajout au calendrier", { eventId: event.id });
-      return { success: true };
-    } else {
-      // Fallback: télécharger le fichier .ics
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${event.title.replace(/\s+/g, '_')}.ics`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Libérer l'URL
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-      
-      logger.info("Fichier .ics téléchargé", { eventId: event.id });
-      return { success: true };
+    // Approche spécifique pour iOS
+    if (isIOS) {
+      try {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url.replace('blob:', 'webcal:');
+        link.setAttribute('download', `${event.title.replace(/\s+/g, '_')}.ics`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        
+        logger.info("Événement ajouté au calendrier iOS", { eventId: event.id });
+        return { success: true };
+      } catch (iosError) {
+        logger.warn("Erreur lors de l'ajout au calendrier iOS", { iosError });
+        // Continuer avec la méthode alternative
+      }
     }
+    
+    // Approche spécifique pour Android
+    if (isAndroid) {
+      try {
+        // Sur Android, essayer d'abord le partage simple
+        if (navigator.share) {
+          // Créer une URL temporaire pour le fichier .ics
+          const url = URL.createObjectURL(blob);
+          
+          // Partager un lien et des informations
+          await navigator.share({
+            title: `Ajouter "${event.title}" à votre calendrier`,
+            text: `Événement: ${event.title} - ${event.days.join(' et ')} à ${event.time}\nLieu: Île Feydeau, Nantes`,
+            url: window.location.href // Utiliser l'URL actuelle comme fallback
+          });
+          
+          setTimeout(() => URL.revokeObjectURL(url), 100);
+          logger.info("Informations partagées pour ajout au calendrier Android", { eventId: event.id });
+          return { success: true };
+        }
+      } catch (androidError) {
+        logger.warn("Erreur lors du partage sur Android", { androidError });
+        // Continuer avec la méthode alternative
+      }
+    }
+    
+    // Essayer le partage de fichier (pour les appareils mobiles qui le supportent)
+    if (isMobile && navigator.share) {
+      try {
+        // Créer un fichier à partir du blob
+        const file = new File([blob], `${event.title.replace(/\s+/g, '_')}.ics`, { type: 'text/calendar' });
+        
+        // Vérifier si le partage de fichier est supporté
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `Ajouter "${event.title}" à votre calendrier`,
+            text: `Événement: ${event.title} - ${event.days.join(' et ')} à ${event.time}`
+          });
+          
+          logger.info("Fichier partagé pour ajout au calendrier", { eventId: event.id });
+          return { success: true };
+        }
+      } catch (shareError) {
+        logger.warn("Erreur lors du partage de fichier", { shareError });
+        // Continuer avec le téléchargement direct
+      }
+    }
+    
+    // Méthode universelle : téléchargement direct du fichier .ics
+    // Cette méthode fonctionne sur la plupart des navigateurs desktop
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${event.title.replace(/\s+/g, '_')}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    
+    logger.info("Fichier .ics téléchargé", { eventId: event.id, platform: isAndroid ? 'Android' : isIOS ? 'iOS' : 'Desktop' });
+    return { success: true };
   } catch (error) {
     logger.error("Erreur lors de l'ajout au calendrier", { error });
     return {

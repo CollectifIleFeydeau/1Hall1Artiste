@@ -9,8 +9,18 @@ const NOTIFICATIONS_STORE = 'collectif-feydeau-notifications';
 // Détecter si nous sommes en production (GitHub Pages) ou en développement
 const isProduction = self.location.hostname !== 'localhost' && !self.location.hostname.includes('127.0.0.1');
 
-// Préfixe pour les chemins en production (GitHub Pages)
-const BASE_PATH = isProduction ? '/Collectif-Feydeau---app' : '';
+// Déterminer le bon chemin de base en fonction du déploiement
+let BASE_PATH = '';
+if (isProduction) {
+  // Vérifier quel déploiement est utilisé
+  if (self.location.hostname === 'collectifilefeydeau.github.io') {
+    BASE_PATH = '/1Hall1Artiste';
+  } else if (self.location.hostname === 'julienfritsch44.github.io') {
+    BASE_PATH = '/Collectif-Feydeau---app';
+  }
+}
+
+console.log(`Service Worker: Using BASE_PATH: ${BASE_PATH} on ${self.location.hostname}`);
 
 // Fonction pour obtenir le chemin correct d'une ressource
 const getPath = (path) => {

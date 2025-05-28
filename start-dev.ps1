@@ -78,14 +78,17 @@ try {
     }
 }
 
+# Note: Le test de conversion des coordonnées GPS a été intégré dans les tests unitaires
+
 # Démarrer l'application
 Write-Host "Démarrage de l'application..." -ForegroundColor Cyan
 try {
     # Changer de répertoire vers le dossier du projet
     Set-Location -Path $PSScriptRoot
     
-    # Démarrer l'application avec npm
+    # Démarrer l'application avec npm (sans HTTPS pour éviter les problèmes de certificat)
     npm run dev
+
 } catch {
     Write-Host "Erreur lors du démarrage de l'application: $_" -ForegroundColor Red
     Write-Host "Appuyez sur une touche pour fermer cette fenêtre..." -ForegroundColor Magenta
