@@ -3,7 +3,7 @@ import { createLogger } from "@/utils/logger";
 import { toast } from "@/components/ui/use-toast";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Navigation from "lucide-react/dist/esm/icons/navigation";
-import { FEYDEAU_CENTER, FEYDEAU_DIMENSIONS } from "@/data/gpsCoordinates";
+import { FEYDEAU_CENTER, FEYDEAU_DIMENSIONS, FEYDEAU_CORNERS } from "@/data/gpsCoordinates";
 import { gpsToMapCoordinates } from "@/utils/coordinateSystem";
 
 // Créer un logger pour le composant
@@ -25,6 +25,55 @@ export type GeoPosition = {
   longitude: number;
   accuracy: number;
 };
+
+/**
+ * Vérifie si une position GPS est à l'intérieur des limites de l'Île Feydeau
+ * @param position Position GPS à vérifier
+ * @returns true si la position est dans les limites, false sinon
+ */
+function isPositionWithinFeydeau(position: GeoPosition): boolean {
+  const { latitude, longitude } = position;
+  
+  // Vérification simplifiée: nous considérons l'Île comme un rectangle
+  const isWithinLatitude = 
+    latitude >= Math.min(FEYDEAU_CORNERS.bottomLeft.latitude, FEYDEAU_CORNERS.bottomRight.latitude) && 
+    latitude <= Math.max(FEYDEAU_CORNERS.topLeft.latitude, FEYDEAU_CORNERS.topRight.latitude);
+    
+  const isWithinLongitude = 
+    longitude >= Math.min(FEYDEAU_CORNERS.topLeft.longitude, FEYDEAU_CORNERS.bottomLeft.longitude) && 
+    longitude <= Math.max(FEYDEAU_CORNERS.topRight.longitude, FEYDEAU_CORNERS.bottomRight.longitude);
+    
+  return isWithinLatitude && isWithinLongitude;
+}
+
+/**
+ * Calcule la direction vers l'Île Feydeau depuis une position extérieure
+ * @param position Position GPS actuelle
+ * @returns Direction en texte (nord, sud-est, etc.)
+ */
+function getDirectionToFeydeau(position: GeoPosition): string {
+  const { latitude, longitude } = position;
+  
+  // Calcul de l'angle par rapport au centre de l'Île
+  const y = Math.sin(FEYDEAU_CENTER.longitude - longitude) * Math.cos(FEYDEAU_CENTER.latitude);
+  const x = Math.cos(latitude) * Math.sin(FEYDEAU_CENTER.latitude) - 
+            Math.sin(latitude) * Math.cos(FEYDEAU_CENTER.latitude) * 
+            Math.cos(FEYDEAU_CENTER.longitude - longitude);
+  let angle = Math.atan2(y, x) * 180 / Math.PI;
+  
+  // Convertir en angle positif (0-360°)
+  angle = (angle + 360) % 360;
+  
+  // Convertir l'angle en direction cardinale
+  if (angle >= 337.5 || angle < 22.5) return "nord";
+  if (angle >= 22.5 && angle < 67.5) return "nord-est";
+  if (angle >= 67.5 && angle < 112.5) return "est";
+  if (angle >= 112.5 && angle < 157.5) return "sud-est";
+  if (angle >= 157.5 && angle < 202.5) return "sud";
+  if (angle >= 202.5 && angle < 247.5) return "sud-ouest";
+  if (angle >= 247.5 && angle < 292.5) return "ouest";
+  return "nord-ouest";
+}
 
 /**
  * Composant pour gérer et afficher la localisation de l'utilisateur sur la carte
@@ -61,6 +110,17 @@ const UserLocation: React.FC<UserLocationProps> = ({
       
       // Mettre à jour la position
       setPosition(fixedPosition);
+      
+      // Vérifier si l'utilisateur est hors carte
+      const isWithinFeydeau = isPositionWithinFeydeau(fixedPosition);
+      if (!isWithinFeydeau) {
+        const direction = getDirectionToFeydeau(fixedPosition);
+        toast({
+          title: "Vous vous éloignez de l'Île Feydeau",
+          description: `Dirigez-vous vers le ${direction} pour revenir sur l'Île.`,
+          duration: 5000
+        });
+      }
       
       // Utiliser les coordonnées de carte précises du 9 quai Turenne
       // Coordonnées testées et vérifiées
@@ -113,6 +173,17 @@ const UserLocation: React.FC<UserLocationProps> = ({
       };
       
       setPosition(newPosition);
+      
+      // Vérifier si l'utilisateur est hors carte
+      const isWithinFeydeau = isPositionWithinFeydeau(newPosition);
+      if (!isWithinFeydeau) {
+        const direction = getDirectionToFeydeau(newPosition);
+        toast({
+          title: "Vous vous éloignez de l'Île Feydeau",
+          description: `Dirigez-vous vers le ${direction} pour revenir sur l'Île.`,
+          duration: 5000
+        });
+      }
       
       // Réinitialiser l'état de permission refusée puisque nous avons reçu une position
       if (permissionDenied) {
