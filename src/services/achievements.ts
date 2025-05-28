@@ -9,7 +9,10 @@ export enum AchievementType {
   FIRST_EVENT_SAVED = 'first_event_saved',
   ALL_LOCATIONS_VISITED = 'all_locations_visited',
   MULTIPLE_EVENTS_SAVED = 'multiple_events_saved',
-  NOTIFICATION_SET = 'notification_set'
+  NOTIFICATION_SET = 'notification_set',
+  FIRST_LOCATION_VISITED = 'first_location_visited',
+  THREE_LOCATIONS_VISITED = 'three_locations_visited',
+  FIVE_LOCATIONS_VISITED = 'five_locations_visited'
 }
 
 // Interface pour une réalisation
@@ -46,6 +49,24 @@ const achievementsList: Achievement[] = [
     title: "Toujours à l'heure",
     description: "Vous avez configuré votre première notification",
     celebrationMessage: "Super ! Vous ne manquerez plus aucun événement !"
+  },
+  {
+    id: AchievementType.FIRST_LOCATION_VISITED,
+    title: "Premier pas sur l'Île",
+    description: "Vous avez visité votre premier lieu sur l'Île Feydeau",
+    celebrationMessage: "Félicitations ! Vous avez fait votre premier pas sur l'Île Feydeau !"
+  },
+  {
+    id: AchievementType.THREE_LOCATIONS_VISITED,
+    title: "Explorateur en herbe",
+    description: "Vous avez visité 3 lieux sur l'Île Feydeau",
+    celebrationMessage: "Vous commencez à bien connaître l'Île Feydeau !"
+  },
+  {
+    id: AchievementType.FIVE_LOCATIONS_VISITED,
+    title: "Guide de l'Île",
+    description: "Vous avez visité 5 lieux sur l'Île Feydeau",
+    celebrationMessage: "Impressionnant ! Vous pourriez maintenant guider les visiteurs sur l'Île Feydeau !"
   }
 ];
 

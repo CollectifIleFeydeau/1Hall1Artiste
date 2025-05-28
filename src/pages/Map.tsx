@@ -1,4 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import UserLocation, { GeoPosition } from "@/components/UserLocation";
+import ProximityGuide from "@/components/ProximityGuide";
+import NavigationGuideSimple from "@/components/NavigationGuideSimple";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createLogger } from "@/utils/logger";
 import { MapComponent, MAP_WIDTH, MAP_HEIGHT } from "@/components/MapComponent";
@@ -14,6 +17,7 @@ import Info from "lucide-react/dist/esm/icons/info";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
+import Navigation from "lucide-react/dist/esm/icons/navigation";
 import { VisitProgress } from "@/components/VisitProgress";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -46,6 +50,24 @@ const Map = ({ fullScreen = false }: MapProps) => {
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
   const [highlightedLocation, setHighlightedLocation] = useState<string | null>(null);
   
+  // État pour la position de l'utilisateur sur la carte et GPS
+  const [userPosition, setUserPosition] = useState<{ x: number, y: number } | null>(null);
+  const [userGpsPosition, setUserGpsPosition] = useState<GeoPosition | null>(null);
+  const [mapScale, setMapScale] = useState<number>(1); // Stocker le facteur d'échelle de la carte
+  
+  // État pour la navigation
+  const [navigationTarget, setNavigationTarget] = useState<string | null>(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [showLocationFeatures, setShowLocationFeatures] = useState(false);
+  const [locationPermissionRequested, setLocationPermissionRequested] = useState(false);
+  
+  // Détection de l'environnement de développement
+  const isDevelopmentEnvironment = useMemo(() => {
+    return window.location.hostname === 'localhost' || 
+           window.location.hostname.includes('192.168.') || 
+           window.location.protocol === 'http:';
+  }, []);
+  
   // Initialiser les données des lieux en incluant l'état de visite
   useEffect(() => {
     // Essayer de charger les lieux avec leur état de visite depuis le localStorage
@@ -70,7 +92,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
     const savedEventsData = getSavedEvents();
     const savedIds = savedEventsData.map(event => event.id);
     setSavedEventIds(savedIds);
-  }, []);
+  }, [isDevelopmentEnvironment]);
   
   // Recharger les événements sauvegardés lorsqu'on ferme la vue détaillée d'un événement
   useEffect(() => {
@@ -263,6 +285,42 @@ const Map = ({ fullScreen = false }: MapProps) => {
   const visitedCount = mapLocations.filter(loc => loc.visited).length;
   const totalCount = mapLocations.length;
 
+  // Fonction pour réactiver la localisation si l'utilisateur a précédemment refusé
+  const reactivateLocation = () => {
+    localStorage.setItem('locationConsent', 'granted');
+    setShowLocationFeatures(true);
+    setLocationPermissionRequested(false); // Force la réinitialisation du processus de demande
+    setPermissionDenied(false); // Réinitialiser l'état de permission refusée
+  };
+
+  // Demander l'autorisation de localisation au chargement de la page
+  useEffect(() => {
+    // En environnement de développement, activer automatiquement la localisation sans demander
+    if (isDevelopmentEnvironment) {
+      setLocationPermissionRequested(true);
+      setPermissionDenied(false);
+      setShowLocationFeatures(true);
+      localStorage.setItem('locationConsent', 'granted');
+      logger.info('Environnement de développement détecté, localisation activée automatiquement');
+      return;
+    }
+    
+    // En production, réinitialiser les états pour forcer une nouvelle demande d'autorisation
+    localStorage.removeItem('locationConsent');
+    setLocationPermissionRequested(false);
+    setPermissionDenied(false);
+    setShowLocationFeatures(false);
+  }, []);
+
+  // Fonction pour mettre à jour la position de l'utilisateur
+  const handleLocationUpdate = (x: number, y: number, gpsPosition?: GeoPosition) => {
+    setUserPosition({ x, y });
+    if (gpsPosition) {
+      setUserGpsPosition(gpsPosition);
+    }
+    logger.info('Position utilisateur mise à jour sur la carte', { x, y, gps: gpsPosition });
+  };
+
   return (
     <div className="min-h-screen bg-white pb-20 overflow-x-hidden">
       <div className="max-w-screen-lg mx-auto px-4 pt-4">
@@ -300,35 +358,56 @@ const Map = ({ fullScreen = false }: MapProps) => {
         <div className="relative">
           {/* Map container */}
           <div className="bg-white rounded-lg mb-4 border-0 transition-all duration-300 hover:shadow-lg w-full">
-            <div className="flex justify-center">
+            <div className="relative h-full">
               <MapComponent 
-                locations={mapLocations} 
+                locations={mapLocations}
                 activeLocation={activeLocation}
-                highlightedLocation={highlightedLocation} 
+                highlightedLocation={highlightedLocation}
                 onClick={(e) => {
-                  // Trouver l'élément avec l'ID de location
-                  const target = e.target as HTMLElement;
-                  let element = target;
+                  // Récupérer l'ID du lieu cliqué
+                  const target = e.currentTarget as HTMLElement;
+                  const locationId = target.id?.replace('location-', '');
                   
-                  // Remonter dans l'arbre DOM pour trouver l'élément parent avec un ID de location
-                  while (element && !element.id?.startsWith('location-')) {
-                    element = element.parentElement as HTMLElement;
-                    if (!element) break;
+                  console.log('Clic sur élément:', { targetId: target.id, locationId });
+                  
+                  // Si un lieu est actif, le désactiver
+                  if (activeLocation) {
+                    setActiveLocation(null);
+                    setHighlightedLocation(null);
                   }
                   
-                  // Extraire l'ID de location
-                  const locationId = element?.id?.replace('location-', '');
-                  
-                  console.log('Clic sur élément:', { targetId: target.id, elementId: element?.id, locationId });
-                  
+                  // Si on a cliqué sur un lieu valide, l'activer
                   if (locationId && mapLocations.some(loc => loc.id === locationId)) {
                     handleLocationClick(locationId);
-                  } else if (activeLocation) {
-                    handleLocationClick(activeLocation);
                   }
                 }}
-                readOnly={false} 
+                readOnly={false}
+                onScaleChange={setMapScale}
+                userLocationProps={showLocationFeatures ? {
+                  onLocationUpdate: handleLocationUpdate,
+                  showNavigation: false,
+                  onPermissionChange: (denied) => setPermissionDenied(denied)
+                } : undefined}
+                navigationProps={navigationTarget && userPosition && userGpsPosition ? {
+                  userPosition: userGpsPosition,
+                  targetLocation: mapLocations.find(loc => loc.id === navigationTarget) || null,
+                  onClose: () => setNavigationTarget(null)
+                } : undefined}
               />
+              
+              {/* Message d'erreur et bouton pour réactiver la localisation - caché en mode développement */}
+              {permissionDenied && !isDevelopmentEnvironment && (
+                <div className="absolute top-0 left-0 right-0 z-50 bg-red-500 text-white p-2 text-center">
+                  <div className="mb-2">Accès refusé - Vous avez refusé l'accès à votre position.</div>
+                  <Button
+                    size="sm"
+                    onClick={reactivateLocation}
+                    className="bg-white text-red-500 hover:bg-gray-100 text-xs"
+                  >
+                    Activer la localisation
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           
@@ -423,7 +502,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
               </div>
             )}
             
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-between mb-16">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-between mb-4">
               <Button
                 variant="outline"
                 className="border-[#4a5d94] text-[#4a5d94] text-xs sm:text-sm px-1 sm:px-2 min-h-[44px]"
@@ -443,6 +522,26 @@ const Map = ({ fullScreen = false }: MapProps) => {
                 Retour à la carte
               </Button>
             </div>
+            
+            {/* Bouton de navigation - visible uniquement si la géolocalisation est active */}
+            {showLocationFeatures && (
+              <div className="mb-16">
+                <Button 
+                  variant="secondary" 
+                  className="w-full text-sm bg-[#f0f5ff] text-[#4a5d94] hover:bg-[#d8e3ff] min-h-[44px]"
+                  onClick={() => {
+                    // Utiliser l'ID du lieu actif
+                    if (activeLocation) {
+                      setNavigationTarget(activeLocation);
+                      setActiveLocation(null); // Fermer la vue détaillée
+                    }
+                  }}
+                >
+                  <Navigation className="h-4 w-4 mr-2" />
+                  Me guider vers ce lieu
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -462,6 +561,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
       
       {/* Bottom Navigation */}
       <BottomNavigation />
+      
+      {/* Guide de navigation (si un lieu est sélectionné pour la navigation) */}
+      {/* Le NavigationGuide est maintenant intégré dans le MapComponent */}
 
     </div>
   );

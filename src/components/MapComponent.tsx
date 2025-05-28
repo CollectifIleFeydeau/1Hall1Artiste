@@ -3,6 +3,7 @@ import { createLogger } from "@/utils/logger";
 import { Location } from "@/data/locations";
 import { getImagePath } from "@/utils/imagePaths";
 import { isOnline } from "@/utils/serviceWorkerRegistration";
+import UserLocation, { UserLocationProps } from "./UserLocation";
 
 // Créer un logger pour le composant Map
 const logger = createLogger('MapComponent');
@@ -13,12 +14,22 @@ export const MAP_HEIGHT = 600;
 
 // Utilisation du type Location importé depuis data/locations.ts
 
+import NavigationGuideSimple from "./NavigationGuideSimple";
+import { GeoPosition } from "./UserLocation";
+
 export type MapComponentProps = {
   locations: Location[];
-  activeLocation: string | null;
-  highlightedLocation?: string | null; // Emplacement à mettre en évidence temporairement
-  onClick?: (e: React.MouseEvent) => void;
+  activeLocation?: string | null;
+  highlightedLocation?: string | null;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   readOnly?: boolean;
+  onScaleChange?: (scale: number) => void;
+  userLocationProps?: Omit<UserLocationProps, 'scale'>;
+  navigationProps?: {
+    userPosition: GeoPosition | null;
+    targetLocation: Location | null;
+    onClose: () => void;
+  };
 };
 
 /**
@@ -33,11 +44,19 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   activeLocation,
   highlightedLocation = null,
   onClick,
-  readOnly = false
+  readOnly = false,
+  onScaleChange,
+  userLocationProps,
+  navigationProps
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1); // Facteur d'échelle pour les coordonnées
-  
+  const [isDragging, setIsDragging] = useState(false);
+  const [startDragPos, setStartDragPos] = useState({ x: 0, y: 0 });
+  const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
+  const [userMapCoords, setUserMapCoords] = useState<{ x: number, y: number } | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+
   // Effet pour appliquer des dimensions responsives au conteneur principal
   useEffect(() => {
     const calculateScale = () => {
@@ -47,11 +66,22 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         // Calculer le facteur d'échelle basé sur la largeur disponible
         const maxWidth = Math.min(parentWidth, MAP_WIDTH);
         const newScale = maxWidth / MAP_WIDTH;
+        
+        // Mettre à jour l'état local
         setScale(newScale);
+        
+        // Notifier le parent du changement d'échelle
+        if (onScaleChange) {
+          onScaleChange(newScale);
+        }
         
         // Appliquer les dimensions mises à l'échelle
         containerRef.current.style.width = `${MAP_WIDTH * newScale}px`;
         containerRef.current.style.height = `${MAP_HEIGHT * newScale}px`;
+        
+        // Appliquer une transformation d'échelle directe au conteneur
+        // containerRef.current.style.transform = `scale(${newScale})`;
+        // containerRef.current.style.transformOrigin = 'top left';
         
         logger.info('MapComponent redimensionné', { 
           parentWidth, 
@@ -65,12 +95,27 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     
     // Appliquer immédiatement et écouter les redimensionnements
     calculateScale();
-    window.addEventListener('resize', calculateScale);
+    
+    // Utiliser un délai pour s'assurer que le redimensionnement est terminé
+    const debouncedResize = debounce(calculateScale, 100);
+    window.addEventListener('resize', debouncedResize);
+    
+    // Fonction de debounce pour limiter les appels fréquents
+    function debounce(fn: Function, delay: number) {
+      let timer: number | null = null;
+      return function() {
+        if (timer) window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          fn();
+          timer = null;
+        }, delay);
+      };
+    }
     
     return () => {
-      window.removeEventListener('resize', calculateScale);
+      window.removeEventListener('resize', debouncedResize);
     };
-  }, []);
+  }, [onScaleChange]); // Ajouter onScaleChange comme dépendance
   
   // Log des coordonnées des points au chargement
   useEffect(() => {
@@ -173,6 +218,33 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           </div>
         ))}
       </div>
+      
+      {/* Composant de localisation utilisateur (conditionnel) */}
+      {userLocationProps && (
+        <UserLocation 
+          {...userLocationProps}
+          scale={scale}
+          onLocationUpdate={(x, y, gpsPosition) => {
+            setUserMapCoords({x, y});
+            if (userLocationProps.onLocationUpdate) {
+              userLocationProps.onLocationUpdate(x, y, gpsPosition);
+            }
+          }}
+        />
+      )}
+      
+      {/* Composant de navigation simplifié (conditionnel) */}
+      {navigationProps && userLocationProps && (
+        <NavigationGuideSimple 
+          {...navigationProps}
+          mapCoords={userMapCoords}
+          targetMapCoords={navigationProps.targetLocation ? {
+            x: navigationProps.targetLocation.x,
+            y: navigationProps.targetLocation.y
+          } : null}
+          scale={scale}
+        />
+      )}
     </div>
   );
 };
