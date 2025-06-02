@@ -87,12 +87,14 @@
         }
       });
     </script>
-    <script type="module" crossorigin src="./assets/index.js"></script>
+    <script src="./assets/app.js"></script>
   </head>
 
   <body>
     <div id="root"></div>
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <!-- Script externe sans type module -->
+    <script src="https://cdn.gpteng.co/gptengineer.js"></script>
+    <!-- Script principal avec type module pour le bundling, sera converti en script normal par Vite -->
   </body>
 </html>
+
