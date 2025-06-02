@@ -91,13 +91,15 @@ const UserLocation: React.FC<UserLocationProps> = ({
     const mapPosition = gpsToMapCoordinates(gpsPosition.latitude, gpsPosition.longitude);
     setMapCoords(mapPosition);
     
-    // Log uniquement lors de changements significatifs (1 fois sur 200) pour réduire le bruit dans la console
-    // if (process.env.NODE_ENV === 'development' && Math.random() < 0.005) {
-    //   logger.debug('Position utilisateur mise à jour', {
+    // Journaliser les informations de position seulement occasionnellement (1% des mises à jour)
+    // pour éviter de surcharger la console
+    // if (Math.random() < 0.01) {
+    //   logger.info('Position utilisateur mise à jour', {
     //     latitude: gpsPosition.latitude,
     //     longitude: gpsPosition.longitude,
     //     mapX: mapPosition.x,
-    //     mapY: mapPosition.y
+    //     mapY: mapPosition.y,
+    //     accuracy: gpsPosition.accuracy
     //   });
     // }
     

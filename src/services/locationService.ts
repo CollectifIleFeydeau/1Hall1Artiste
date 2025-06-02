@@ -120,7 +120,7 @@ class LocationService implements LocationServiceInterface {
     );
     
     this.watchId = id;
-    logger.info('Suivi de la position démarré', { watchId: id });
+    // Log de démarrage supprimé pour réduire le bruit dans la console
   }
 
   /**
@@ -131,14 +131,14 @@ class LocationService implements LocationServiceInterface {
     if (this.simulationInterval !== null) {
       window.clearInterval(this.simulationInterval);
       this.simulationInterval = null;
-      logger.info('Simulation de position arrêtée');
+      // Log d'arrêt de simulation supprimé pour réduire le bruit dans la console
     }
     
     // Arrêter le suivi si actif
     if (this.watchId !== null) {
       navigator.geolocation.clearWatch(this.watchId);
       this.watchId = null;
-      logger.info('Suivi de la position arrêté');
+      // Log d'arrêt de suivi supprimé pour réduire le bruit dans la console
     }
     
     // Réinitialiser les callbacks

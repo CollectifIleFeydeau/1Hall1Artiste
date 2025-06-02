@@ -83,13 +83,16 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         // containerRef.current.style.transform = `scale(${newScale})`;
         // containerRef.current.style.transformOrigin = 'top left';
         
-        logger.info('MapComponent redimensionné', { 
-          parentWidth, 
-          maxWidth, 
-          scale: newScale, 
-          newWidth: MAP_WIDTH * newScale, 
-          newHeight: MAP_HEIGHT * newScale 
-        });
+        // Journaliser seulement 10% des redimensionnements pour réduire le bruit dans la console
+        // if (Math.random() < 0.1) {
+        //   logger.info('MapComponent redimensionné', { 
+        //     parentWidth, 
+        //     maxWidth, 
+        //     scale: newScale, 
+        //     newWidth: MAP_WIDTH * newScale, 
+        //     newHeight: MAP_HEIGHT * newScale 
+        //   });
+        // }
       }
     };
     
