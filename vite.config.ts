@@ -14,9 +14,17 @@ export default defineConfig(({ mode }) => ({
     assetsDir: 'assets',
     emptyOutDir: true,
     sourcemap: true,
-    // Configuration du code splitting
+    // Utiliser un format plus compatible pour les scripts
+    target: 'es2015',
+    // Désactiver le module splitting pour éviter les problèmes de type MIME
     rollupOptions: {
       output: {
+        // Format de sortie pour une meilleure compatibilité
+        format: 'iife',
+        // Utiliser des noms de fichiers sans hachage pour éviter les problèmes de cache
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]',
         manualChunks: {
           // Regrouper React et les dépendances liées dans un chunk
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
