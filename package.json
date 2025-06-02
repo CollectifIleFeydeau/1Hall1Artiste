@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
+    "deploy:collectif": "gh-pages -d dist -r https://github.com/CollectifIleFeydeau/1Hall1Artiste.git -b gh-pages",
     "test": "vitest run",
     "test:watch": "vitest"
   },
