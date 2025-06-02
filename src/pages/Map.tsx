@@ -318,7 +318,10 @@ const Map = ({ fullScreen = false }: MapProps) => {
     if (gpsPosition) {
       setUserGpsPosition(gpsPosition);
     }
-    logger.info('Position utilisateur mise à jour sur la carte', { x, y, gps: gpsPosition });
+    // Log seulement 0.1% des mises à jour pour réduire drastiquement le bruit dans la console
+    // if (process.env.NODE_ENV === 'development' && Math.random() < 0.001) {
+    //   logger.info('Position utilisateur mise à jour sur la carte', { x, y, gps: gpsPosition });
+    // }
   };
 
   return (
