@@ -372,6 +372,11 @@ const Map = ({ fullScreen = false }: MapProps) => {
               setShowLocationFeatures(false);
               logger.warn('Localisation refusée par l\'utilisateur');
             }}
+            onLocationDisabled={() => {
+              setShowLocationFeatures(false);
+              setNavigationTarget(null); // Arrêter la navigation en cours
+              logger.info('Localisation désactivée manuellement par l\'utilisateur');
+            }}
           />
         </div>
         

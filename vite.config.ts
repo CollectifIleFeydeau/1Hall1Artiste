@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({  
+export default defineConfig(({ mode }) => ({
   // Utiliser une base vide en développement et la base GitHub Pages en production
   // La base URL sera détectée dynamiquement en production
   base: mode === 'production' ? "/" : "/",

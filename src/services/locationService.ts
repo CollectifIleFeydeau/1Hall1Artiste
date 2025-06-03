@@ -3,8 +3,37 @@ import { GeoPosition, isPositionWithinFeydeau, calculateDistanceToCenter } from 
 import { FEYDEAU_CENTER } from "@/data/gpsCoordinates";
 import { toastService } from "@/services/toastService";
 
-// Créer un logger pour le service
-const logger = createLogger('locationService');
+// Créer un logger pour le service avec filtrage des logs indésirables
+const originalLogger = createLogger('locationService');
+
+// Wrapper pour filtrer les logs indésirables
+const logger = {
+  info: (message: string, data?: any) => {
+    // Filtrer les logs liés à la position et au marqueur utilisateur
+    if (message.includes('Position utilisateur') || 
+        message.includes('Rendu du marqueur') || 
+        message.includes('mise à jour')) {
+      // Préserver les logs d'éloignement
+      if (message.includes('Toast d\'éloignement')) {
+        return originalLogger.info(message, data);
+      }
+      // Ignorer les autres logs indésirables
+      return;
+    }
+    return originalLogger.info(message, data);
+  },
+  warn: originalLogger.warn,
+  error: originalLogger.error,
+  debug: (message: string, data?: any) => {
+    // Filtrer les logs de debug liés à la position et au marqueur
+    if (message.includes('Position utilisateur') || 
+        message.includes('Rendu du marqueur') || 
+        message.includes('mise à jour')) {
+      return;
+    }
+    return originalLogger.debug(message, data);
+  }
+};
 
 // Constantes pour le service de localisation
 const LOCATION_UPDATE_INTERVAL = 5000; // 5 secondes
@@ -160,7 +189,7 @@ class LocationService implements LocationServiceInterface {
   public activateLocation(): void {
     localStorage.setItem(LOCATION_CONSENT_KEY, 'granted');
     localStorage.setItem(LOCATION_ACTIVATION_TIMESTAMP_KEY, Date.now().toString());
-    logger.info('Localisation activée');
+    // Suppression du log pour réduire le bruit dans la console
     
     toastService.success({
       title: "Localisation activée",
@@ -179,7 +208,7 @@ class LocationService implements LocationServiceInterface {
   public deactivateLocation(): void {
     localStorage.removeItem(LOCATION_CONSENT_KEY);
     localStorage.removeItem(LOCATION_ACTIVATION_TIMESTAMP_KEY);
-    logger.info('Localisation désactivée');
+    // Suppression du log pour réduire le bruit dans la console
     
     toastService.show({
       title: "Localisation désactivée",
@@ -299,7 +328,7 @@ class LocationService implements LocationServiceInterface {
    * Démarre la simulation de position pour le développement local
    */
   private startPositionSimulation(): void {
-    logger.info('Démarrage de la simulation de position pour le développement local');
+    // Suppression du log pour réduire le bruit dans la console
     
     // Simuler une position initiale au centre de l'Île Feydeau
     const initialPosition: GeoPosition = {

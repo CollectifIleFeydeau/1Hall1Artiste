@@ -41,7 +41,7 @@ class ToastService {
     });
     
     // Logger le toast avec son contexte
-    this.logToast(toastType, title, description, source, context);
+    this.logToast(title, toastType, description, source, context);
   }
   
   /**
@@ -76,35 +76,26 @@ class ToastService {
   
   /**
    * Log un toast dans la console
+   * Désactivation des logs systématiques pour réduire le bruit dans la console
+   * Seuls les toasts de type error sont loggés pour faciliter le débogage
    */
   private logToast(
+    message: string,
     type: ToastType,
-    title: string,
     description?: string,
     source?: string,
     context?: Record<string, any>
   ): void {
-    const logMessage = `Toast [${type}]: ${title}${description ? ` - ${description}` : ''}`;
-    const logContext = {
-      source: source || 'Unknown',
-      ...context
-    };
-    
-    switch (type) {
-      case 'error':
-        logger.warn(logMessage, logContext);
-        break;
-      case 'warning':
-        logger.warn(logMessage, logContext);
-        break;
-      case 'success':
-        logger.info(logMessage, logContext);
-        break;
-      case 'info':
-      default:
-        logger.info(logMessage, logContext);
-        break;
+    // Ne logger que les toasts d'erreur pour réduire le bruit dans la console
+    if (type === 'error') {
+      const logMessage = `Toast [${type}]: ${message}${description ? ` - ${description}` : ''}`;
+      const logContext = {
+        source: source || 'Unknown',
+        ...context
+      };
+      logger.warn(logMessage, logContext);
     }
+    // Les autres types de toasts (info, success, warning) ne génèrent plus de logs
   }
 }
 

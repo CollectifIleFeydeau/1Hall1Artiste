@@ -151,9 +151,9 @@ function NavigationGuideSimple(props: NavigationGuideSimpleProps) {
     <>
       {/* Affichage du chemin uniquement si les coordonnées de carte sont disponibles */}
       {mapCoords && targetMapCoords && (
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-40">
+        <div className="absolute top-0 left-0 w-full h-full z-40">
           {/* Ligne simple entre les deux points */}
-          <svg width="100%" height="100%" className="absolute top-0 left-0">
+          <svg width="100%" height="100%" className="absolute top-0 left-0 pointer-events-none">
             <line 
               x1={mapCoords.x * scale} 
               y1={mapCoords.y * scale} 
@@ -169,16 +169,18 @@ function NavigationGuideSimple(props: NavigationGuideSimpleProps) {
             <circle cx={targetMapCoords.x * scale} cy={targetMapCoords.y * scale} r="6" fill="#ef4444" />
           </svg>
           
-          {/* Affichage de la distance au milieu de la ligne */}
+          {/* Affichage de la distance au milieu de la ligne avec bouton pour arrêter la navigation */}
           <div 
-            className="absolute bg-white/80 px-2 py-1 rounded text-sm font-medium text-blue-700 shadow-sm"
+            className="absolute bg-white/90 px-3 py-1.5 rounded text-sm font-medium text-blue-700 shadow-md flex items-center gap-2 cursor-pointer hover:bg-white/100 transition-colors"
             style={{
               left: `${((mapCoords.x + targetMapCoords.x) / 2) * scale}px`,
               top: `${((mapCoords.y + targetMapCoords.y) / 2) * scale}px`,
               transform: 'translate(-50%, -50%)'
             }}
+            onClick={onClose}
           >
-            {navigationInfo.distance} m
+            <span>{navigationInfo.distance} m</span>
+            <X className="w-3 h-3 text-gray-500" />
           </div>
         </div>
       )}
@@ -190,8 +192,9 @@ function NavigationGuideSimple(props: NavigationGuideSimpleProps) {
             <MapPin className="w-5 h-5 mr-2 text-blue-600" />
             <h3 className="font-semibold text-lg">{targetLocation.name}</h3>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
-            <X className="w-5 h-5" />
+          <Button variant="destructive" size="sm" onClick={onClose} className="flex items-center gap-1">
+            <X className="w-4 h-4" />
+            Arrêter
           </Button>
         </div>
         

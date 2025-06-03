@@ -6,14 +6,6 @@
 
 ## Priorités immédiates à faire 
 
-1. **Intégration avec les calendriers natifs**
-   * Proposer d'ajouter les événements sauvegardés directement au calendrier du téléphone
-   * Synchroniser les rappels avec le système de notification natif
-   * BUG - 31 mai ????
-      * Examiner plus en détail comment les dates sont calculées et formatées
-      * Tester différentes approches pour résoudre le problème
-      * Vérifier si d'autres parties du code influencent les dates
-
 --------------------------
 ## Améliorations en réflexion 
 

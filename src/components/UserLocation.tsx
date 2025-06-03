@@ -30,6 +30,8 @@ export type { GeoPosition };
 const LOCATION_ACTIVATION_TIMESTAMP_KEY = 'locationActivationTimestamp';
 const RECENT_ACTIVATION_THRESHOLD = 5000; // 5 secondes
 const LOCATION_NOTIFICATION_TIMESTAMP_KEY = 'locationNotificationTimestamp';
+const LOCATION_NOTIFICATION_KEY = 'lastLocationNotificationKey';
+const LOCATION_NOTIFICATION_COOLDOWN = 30 * 60 * 1000; // 30 minutes en millisecondes
 const NOTIFICATION_THROTTLE_DURATION = 300000; // 5 minutes (300000 ms)
 
 /**
@@ -59,23 +61,27 @@ const UserLocation: React.FC<UserLocationProps> = ({
   
   // Fonction pour vérifier si une notification peut être affichée
   const canShowNotification = (notificationKey: string): boolean => {
-    // Vérifier si une notification a déjà été affichée récemment
-    const lastNotificationTimestamp = localStorage.getItem(LOCATION_NOTIFICATION_TIMESTAMP_KEY);
-    if (!lastNotificationTimestamp) return true;
-    
-    const timestamp = parseInt(lastNotificationTimestamp, 10);
     const now = Date.now();
+    const lastNotificationTimestamp = localStorage.getItem(LOCATION_NOTIFICATION_TIMESTAMP_KEY);
+    const lastNotificationKey = localStorage.getItem(LOCATION_NOTIFICATION_KEY);
     
-    // Si la dernière notification est trop récente, ne pas en afficher une nouvelle
-    if (now - timestamp < NOTIFICATION_THROTTLE_DURATION) {
+    if (lastNotificationTimestamp) {
+      const lastTime = parseInt(lastNotificationTimestamp, 10);
+      
+      // Si moins de 30 minutes se sont écoulées, ne pas afficher
+      if (now - lastTime < LOCATION_NOTIFICATION_COOLDOWN) {
+        return false;
+      }
+      
       // Vérifier si c'est la même notification
-      if (lastNotificationRef.current === notificationKey) {
+      if (lastNotificationKey === notificationKey) {
         return false;
       }
     }
     
     // Mettre à jour le timestamp et la clé de la dernière notification
     localStorage.setItem(LOCATION_NOTIFICATION_TIMESTAMP_KEY, now.toString());
+    localStorage.setItem(LOCATION_NOTIFICATION_KEY, notificationKey);
     lastNotificationRef.current = notificationKey;
     return true;
   };
@@ -110,13 +116,43 @@ const UserLocation: React.FC<UserLocationProps> = ({
     const distanceToCenter = calculateDistanceToCenter(gpsPosition.latitude, gpsPosition.longitude);
     const isFarFromCenter = distanceToCenter > 300; // Plus de 300 mètres
     
-    // Afficher une notification si l'utilisateur est loin de l'Île
-    if (!isWithin && !firstPositionRef.current && !isRecentlyActivated() && isFarFromCenter) {
+    // Vérifier si l'utilisateur est visible sur la carte
+    const isVisibleOnMap = mapPosition.x >= 0 && mapPosition.x <= MAP_WIDTH && 
+                           mapPosition.y >= 0 && mapPosition.y <= MAP_HEIGHT;
+    
+    // Afficher une notification UNIQUEMENT si l'utilisateur est hors de la carte
+    if (!isWithin && !firstPositionRef.current && !isRecentlyActivated() && isFarFromCenter && !isVisibleOnMap) {
       const direction = getDirectionToFeydeau(gpsPosition);
       const notificationKey = `distance-${Math.round(distanceToCenter/100)}00-${direction}`;
       
       // Vérifier si on peut afficher la notification (pas trop fréquente)
       if (canShowNotification(notificationKey)) {
+        // Ajouter un log spécifique pour le toast d'éloignement pour déboguer
+        console.log('Toast d\'\u00e9loignement de l\'\u00cele Feydeau', {
+          direction,
+          distance: Math.round(distanceToCenter),
+          isWithin,
+          isFarFromCenter,
+          notificationKey,
+          isVisibleOnMap,
+          position: {
+            latitude: gpsPosition.latitude,
+            longitude: gpsPosition.longitude,
+            mapX: mapPosition.x,
+            mapY: mapPosition.y,
+            accuracy: gpsPosition.accuracy
+          }
+        });
+        
+        logger.info('Toast d\'\u00e9loignement de l\'\u00cele Feydeau', {
+          direction,
+          distance: Math.round(distanceToCenter),
+          isWithin,
+          isFarFromCenter,
+          notificationKey,
+          isVisibleOnMap
+        });
+        
         toastService.show({
           title: "Vous êtes éloigné de l'Île Feydeau",
           description: `L'Île Feydeau se trouve au ${direction} de votre position actuelle.`,
@@ -191,6 +227,37 @@ const UserLocation: React.FC<UserLocationProps> = ({
     };
   }, []); // Utilise les fonctions mémorisées pour éviter les re-rendus inutiles
 
+  // Désactiver temporairement les logs pour ce composant
+  React.useEffect(() => {
+    // Sauvegarder les fonctions originales
+    const originalInfo = logger.info;
+    const originalDebug = logger.debug;
+    
+    // Remplacer par des fonctions qui filtrent les logs indésirables
+    logger.info = (message, data) => {
+      // Toujours logger les messages liés aux toasts d'éloignement
+      if (message.includes('Toast d\'éloignement')) {
+        console.log('LOG INFO (TOAST):', message, data);
+        return originalInfo(message, data);
+      }
+      
+      // Ne pas logger les messages liés au rendu du marqueur et à la position
+      if (message.includes('Rendu du marqueur') || 
+          message.includes('Position utilisateur') ||
+          message.includes('mise à jour')) {
+        return;
+      }
+      
+      return originalInfo(message, data);
+    };
+    
+    // Restaurer les fonctions originales lors du démontage
+    return () => {
+      logger.info = originalInfo;
+      logger.debug = originalDebug;
+    };
+  }, []);
+  
   // Si la position n'est pas encore disponible
   if (!mapCoords) {
     return null;
@@ -209,7 +276,6 @@ const UserLocation: React.FC<UserLocationProps> = ({
           left: `${mapCoords.x * scale}px`,
           top: `${mapCoords.y * scale}px`,
           transform: 'translate(-50%, -50%)' // Centrer le marqueur sur les coordonnées
-          // Logs de rendu supprimés pour réduire les messages dans la console
         }}
       >
         <div className="relative">
@@ -218,8 +284,8 @@ const UserLocation: React.FC<UserLocationProps> = ({
             <div 
               className="absolute rounded-full bg-blue-500/20 border border-blue-500/50"
               style={{
-                width: `${(position.accuracy / FEYDEAU_DIMENSIONS.width) * MAP_WIDTH * 2 * scale}px`,
-                height: `${(position.accuracy / FEYDEAU_DIMENSIONS.width) * MAP_WIDTH * 2 * scale}px`,
+                width: `${(position.accuracy / FEYDEAU_DIMENSIONS.width) * MAP_WIDTH * 1 * scale}px`,
+                height: `${(position.accuracy / FEYDEAU_DIMENSIONS.width) * MAP_WIDTH * 1 * scale}px`,
                 transform: 'translate(-50%, -50%)',
                 left: '50%',
                 top: '50%'

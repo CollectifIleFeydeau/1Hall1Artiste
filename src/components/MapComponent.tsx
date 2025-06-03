@@ -5,8 +5,21 @@ import { getImagePath } from "@/utils/imagePaths";
 import { isOnline } from "@/utils/serviceWorkerRegistration";
 import UserLocation, { UserLocationProps } from "./UserLocation";
 
-// Créer un logger pour le composant Map
-const logger = createLogger('MapComponent');
+// Créer un logger pour le composant Map avec filtrage
+const originalLogger = createLogger('MapComponent');
+// Wrapper pour filtrer les logs indésirables
+const logger = {
+  info: (message: string, data?: any) => {
+    // Filtrer les logs de redimensionnement
+    if (message.includes('redimensionné')) {
+      return;
+    }
+    return originalLogger.info(message, data);
+  },
+  warn: originalLogger.warn,
+  error: originalLogger.error,
+  debug: originalLogger.debug
+};
 
 // Dimensions de référence pour la carte (utilisées pour calculer les ratios)
 export const MAP_WIDTH = 400;

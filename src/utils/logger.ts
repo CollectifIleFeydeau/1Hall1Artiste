@@ -41,6 +41,32 @@ export function log(
   level: LogLevel = 'info',
   data?: any
 ) {
+  // Filtrer tous les logs indésirables
+  if (level === 'info') {
+    // Liste complète des motifs à filtrer
+    const blacklistedPatterns = [
+      'Rendu du marqueur utilisateur',
+      'Position utilisateur mise à jour',
+      'Position utilisateur mise à jour sur la carte',
+      'redimensionné',
+      'Marqueur utilisateur',
+      'Rendu du marqueur',
+      'Position utilisateur'
+    ];
+    
+    // Vérifier si le message contient l'un des motifs à filtrer
+    const shouldFilter = blacklistedPatterns.some(pattern => 
+      message.includes(pattern) || 
+      (data && JSON.stringify(data).includes(pattern))
+    );
+    
+    // Ne pas filtrer les logs d'éloignement
+    if (shouldFilter && !message.includes('Toast d\'éloignement')) {
+      // Ignorer ces logs pour réduire le bruit dans la console
+      return;
+    }
+  }
+  
   const now = new Date();
   const timestamp = now.toISOString().split('T')[1].split('.')[0];
   const prefix = `[${timestamp}][${module}]`;
