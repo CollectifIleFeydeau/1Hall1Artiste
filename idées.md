@@ -1,7 +1,6 @@
 
 # Toutes nouvelles idées 
 
-
 # Priorités actuelles (phase de test et optimisation)
 
 ## Priorités immédiates à faire 
