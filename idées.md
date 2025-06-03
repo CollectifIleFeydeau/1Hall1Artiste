@@ -22,6 +22,11 @@ appuyer sur les photos pour les voir en grand
 * **Contenus audio et visuels**
   * Guides audio pour les lieux importants
    * Ambiances sonores historiques (port au 18e siècle)
+Visit Google AI Studio, and select “Native Audio Generation”
+Choose between “Single-speaker” for narrations or “Multi-speaker” for dialogues
+Create your script, adding style instructions and selecting voices for each speaker
+
+Click “Run” to generate your audio and download it for your projects!
    * Galerie de photos historiques avec légendes explicatives
 
 * **Éléments éducatifs**
