@@ -1,0 +1,73 @@
+/* Responsive styles for mobile optimization */
+
+/* Base font sizes */
+:root {
+  --font-size-xs: 0.75rem;  /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem;   /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem;  /* 20px */
+  --font-size-2xl: 1.5rem;  /* 24px */
+}
+
+/* Small screens (phones) */
+@media (max-width: 640px) {
+  :root {
+    --font-size-xs: 0.7rem;    /* 11.2px */
+    --font-size-sm: 0.8125rem; /* 13px */
+    --font-size-base: 0.9375rem; /* 15px */
+    --font-size-lg: 1.0625rem; /* 17px */
+    --font-size-xl: 1.1875rem; /* 19px */
+    --font-size-2xl: 1.375rem; /* 22px */
+  }
+  
+  /* Increase touch targets for better mobile usability */
+  button, 
+  a, 
+  [role="button"],
+  input,
+  select,
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve spacing on mobile */
+  .card-content {
+    padding: 0.75rem !important;
+  }
+  
+  /* Adjust headings */
+  h1, .h1 {
+    font-size: var(--font-size-xl) !important;
+  }
+  
+  h2, .h2 {
+    font-size: var(--font-size-lg) !important;
+  }
+  
+  /* Adjust dialog content */
+  .dialog-content {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Medium screens (tablets) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Tablet-specific styles */
+}
+
+/* Improve contrast for accessibility */
+.text-gray-500 {
+  color: #64748b !important; /* Darker gray for better contrast */
+}
+
+.text-gray-400 {
+  color: #4b5563 !important; /* Darker gray for better contrast */
+}
+
+/* Ensure minimum touch target sizes for accessibility */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}

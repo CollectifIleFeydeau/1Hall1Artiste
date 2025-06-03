@@ -1,0 +1,46 @@
+:root {
+  /* Primary colors from the image */
+  --primary: #ff7a45;      /* Vibrant orange */
+  --primary-foreground: #ffffff;
+  
+  /* Secondary colors */
+  --secondary: #4a5d94;    /* Blue from the image */
+  --secondary-foreground: #ffffff;
+  
+  /* Accent colors */
+  --accent: #ff9d6e;       /* Lighter orange */
+  --accent-foreground: #ffffff;
+  
+  /* Background colors */
+  --background: #f0f5ff;   /* Light blue background */
+  --foreground: #1a2138;   /* Dark blue text */
+  
+  /* Card & UI element colors */
+  --card: #ffffff;
+  --card-foreground: #1a2138;
+  
+  /* Gradient backgrounds */
+  --gradient-primary: linear-gradient(to right, #ff7a45, #ff9d6e);
+  --gradient-secondary: linear-gradient(to bottom, #f0f5ff, #d8e3ff);
+  --gradient-background: linear-gradient(135deg, #f0f5ff 0%, #e0ebff 50%, #d8e3ff 100%);
+  
+  /* Success, warning, destructive colors */
+  --success: #4caf50;
+  --warning: #ff9800;
+  --destructive: #f44336;
+  --destructive-foreground: #ffffff;
+  
+  /* Border & muted colors */
+  --border: #d8e3ff;
+  --input: #e0ebff;
+  --ring: #4a5d94;
+  --muted: #8c9db5;
+  --muted-foreground: #4a5d94;
+  
+  /* Radius & shadows */
+  --radius: 0.5rem;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}

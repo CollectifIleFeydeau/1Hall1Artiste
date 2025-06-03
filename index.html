@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Collectif Feydeau - Île Feydeau, Nantes</title>
+    <meta name="description" content="Découvrez les événements du Collectif Feydeau à Nantes : expositions, concerts et animations sur l'Île Feydeau" />
+    <meta name="author" content="Collectif Feydeau" />
+    
+    <!-- OpenGraph Meta Tags pour le partage sur les réseaux sociaux -->
+    <meta property="og:title" content="Collectif Feydeau - Île Feydeau, Nantes" />
+    <meta property="og:description" content="Découvrez les événements du Collectif Feydeau à Nantes : expositions, concerts et animations sur l'Île Feydeau" />
+    <meta property="og:image" content="https://julienfritsch44.github.io/Collectif-Feydeau---app/assets/feydeau-share.jpg" />
+    <meta property="og:url" content="https://julienfritsch44.github.io/Collectif-Feydeau---app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Collectif Feydeau" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Collectif Feydeau - Île Feydeau, Nantes" />
+    <meta name="twitter:description" content="Découvrez les événements du Collectif Feydeau à Nantes : expositions, concerts et animations sur l'Île Feydeau" />
+    <meta name="twitter:image" content="https://julienfritsch44.github.io/Collectif-Feydeau---app/assets/feydeau-share.jpg" />
+    
+    <!-- Script pour gérer le routage SPA sur GitHub Pages et détecter la base URL -->
+    <script type="text/javascript">
+      // Détecter la base URL en fonction du déploiement
+      (function() {
+        window.APP_CONFIG = window.APP_CONFIG || {};
+        
+        // Détecter si nous sommes sur GitHub Pages
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        
+        // Déterminer la base URL
+        if (isGitHubPages) {
+          if (window.location.hostname === 'collectifilefeydeau.github.io') {
+            window.APP_CONFIG.BASE_URL = '/1Hall1Artiste/';
+          } else if (window.location.hostname === 'julienfritsch44.github.io') {
+            window.APP_CONFIG.BASE_URL = '/Collectif-Feydeau---app/';
+          } else {
+            // Fallback pour d'autres déploiements GitHub Pages
+            window.APP_CONFIG.BASE_URL = '/' + window.location.pathname.split('/')[1] + '/';
+          }
+        } else {
+          window.APP_CONFIG.BASE_URL = '/';
+        }
+        
+        console.log('Détection de la base URL:', window.APP_CONFIG.BASE_URL);
+      })();
+      
+      // Script de redirection pour les routes SPA sur GitHub Pages
+      (function(l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+
+    <meta property="og:title" content="Collectif Feydeau" />
+    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- EmailJS pour le suivi des erreurs -->
+    <script type="text/javascript" src="https://cdn.emailjs.com/sdk/4.1.0/email.min.js"></script>
+    <script type="text/javascript">
+      (function() {
+        // User ID EmailJS avec la version 4
+        emailjs.init("HoNWMyqrINGzjeK6E");
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>
