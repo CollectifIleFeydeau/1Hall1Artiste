@@ -1,6 +1,9 @@
 
 # Toutes nouvelles idées 
 
+icône de calendrier pour ajouter les rendez
+
+appuyer sur les photos pour les voir en grand
 
 # Priorités actuelles (phase de test et optimisation)
 
