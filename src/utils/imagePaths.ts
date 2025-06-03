@@ -4,7 +4,7 @@
  */
 
 // Préfixe pour les chemins d'images en production (GitHub Pages)
-export const BASE_PATH = import.meta.env.PROD ? '/Collectif-Feydeau---app' : '';
+export const BASE_PATH = import.meta.env.PROD ? '/1Hall1Artiste' : '';
 
 /**
  * Retourne le chemin complet d'une image en ajoutant le préfixe de base si nécessaire
@@ -14,5 +14,12 @@ export const BASE_PATH = import.meta.env.PROD ? '/Collectif-Feydeau---app' : '';
 export function getImagePath(path: string): string {
   // S'assurer que le chemin commence par un slash
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${BASE_PATH}${normalizedPath}`;
+  
+  // Encoder les espaces et caractères spéciaux pour les URL
+  // Mais préserver les slashes et autres caractères d'URL valides
+  const encodedPath = normalizedPath.split('/').map(segment => 
+    segment ? encodeURIComponent(segment) : ''
+  ).join('/');
+  
+  return `${BASE_PATH}${encodedPath}`;
 }
