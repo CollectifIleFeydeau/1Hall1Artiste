@@ -81,7 +81,7 @@ class LocationService implements LocationServiceInterface {
 
   constructor() {
     // Détecter si nous sommes en environnement de développement local
-    // Pour les tests sur le terrain, on force cette valeur à false
+    // Pour les tests sur le terrain, on force cette valeur à true pour tester le mode simulation
     this.isLocalDevelopment = false;
     
     // Vérifier si la géolocalisation est disponible
@@ -330,10 +330,10 @@ class LocationService implements LocationServiceInterface {
   private startPositionSimulation(): void {
     // Suppression du log pour réduire le bruit dans la console
     
-    // Simuler une position initiale au centre de l'Île Feydeau
+    // Simuler une position initiale au centre de l'Île Feydeau (utiliser les coordonnées du point de référence)
     const initialPosition: GeoPosition = {
-      latitude: FEYDEAU_CENTER.latitude,
-      longitude: FEYDEAU_CENTER.longitude,
+      latitude: 47.212600, // Centre de référence de la carte
+      longitude: -1.555900, // Centre de référence de la carte
       accuracy: 10 // 10 mètres de précision
     };
     
@@ -358,8 +358,8 @@ class LocationService implements LocationServiceInterface {
       const lngOffset = (Math.random() - 0.5) * 0.0002; // Environ ±10 mètres
       
       const simulatedPosition: GeoPosition = {
-        latitude: FEYDEAU_CENTER.latitude + latOffset,
-        longitude: FEYDEAU_CENTER.longitude + lngOffset,
+        latitude: 47.212600 + latOffset, // Centre de référence de la carte + offset
+        longitude: -1.555900 + lngOffset, // Centre de référence de la carte + offset
         accuracy: 5 + Math.random() * 10 // Entre 5 et 15 mètres de précision
       };
       

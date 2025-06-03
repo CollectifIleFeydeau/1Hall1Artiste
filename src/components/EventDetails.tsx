@@ -12,6 +12,8 @@ import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
 import Info from "lucide-react/dist/esm/icons/info";
 import X from "lucide-react/dist/esm/icons/x";
 import Instagram from "lucide-react/dist/esm/icons/instagram";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import { ShareButton } from "@/components/ShareButton";
 import { saveEvent, getSavedEvents, removeSavedEvent } from "@/services/savedEvents";
 import { type Event, getEventsByLocation } from "@/data/events";
@@ -26,6 +28,81 @@ interface EventDetailsProps {
   onClose: () => void;
   source: "map" | "program" | "saved"; // Pour savoir d'où vient l'utilisateur
 }
+
+// Composant pour afficher la description de l'artiste avec un teaser et une option pour développer
+interface ArtistDescriptionProps {
+  text: string;
+}
+
+const ArtistDescription = ({ text }: ArtistDescriptionProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Créer un teaser en prenant les premiers caractères du texte
+  const createTeaser = (fullText: string): string => {
+    // Environ 100-120 caractères pour 1-2 lignes
+    const maxLength = 120;
+    
+    if (fullText.length <= maxLength) return fullText;
+    
+    // Trouver le dernier espace avant la limite pour ne pas couper un mot
+    const truncated = fullText.substring(0, maxLength);
+    const lastSpaceIndex = truncated.lastIndexOf(' ');
+    
+    return truncated.substring(0, lastSpaceIndex) + '...';
+  };
+  
+  const teaser = createTeaser(text);
+  const showExpandOption = text.length > teaser.length;
+  
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+  
+  return (
+    <div className="text-sm text-[#4a5d94]">
+      {/* Afficher soit le teaser, soit le texte complet */}
+      <div 
+        onClick={showExpandOption ? toggleExpand : undefined}
+        onKeyDown={(e) => {
+          if (showExpandOption && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            toggleExpand();
+          }
+        }}
+        tabIndex={showExpandOption ? 0 : undefined}
+        role={showExpandOption ? "button" : undefined}
+        aria-expanded={isExpanded}
+        className={showExpandOption ? "cursor-pointer" : ""}
+      >
+        <ReactMarkdown components={{
+          p: ({node, ...props}) => <p className="mb-3" {...props} />,
+          h2: ({node, ...props}) => <h2 className="text-lg font-bold mb-2" {...props} />,
+          h3: ({node, ...props}) => <h3 className="text-md font-semibold mb-2" {...props} />,
+          hr: ({node, ...props}) => <hr className="my-4 border-t border-[#d8e3ff]" {...props} />
+        }}>
+          {isExpanded ? text : teaser}
+        </ReactMarkdown>
+        
+        {/* Indicateur visuel pour développer/réduire */}
+        {showExpandOption && (
+          <div className="flex items-center text-xs text-[#8c9db5] mt-1">
+            {isExpanded ? (
+              <>
+                <ChevronUp className="h-3 w-3 mr-1" />
+                <span>Réduire</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-3 w-3 mr-1" />
+                <span>(pour voir +)</span>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsProps) => {
   const navigate = useNavigate();
@@ -190,17 +267,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             {/* Afficher le texte de présentation pour les concerts si disponible */}
             {event.type === "concert" && event.presentation && (
               <div className="mt-3 pt-3 border-t border-[#d8e3ff]">
-                <div className="text-sm text-[#4a5d94]">
-                  <ReactMarkdown components={{
-                    // Configurer les composants pour gérer correctement les sauts de ligne
-                    p: ({node, ...props}) => <p className="mb-3" {...props} />,
-                    h2: ({node, ...props}) => <h2 className="text-lg font-bold mb-2" {...props} />,
-                    h3: ({node, ...props}) => <h3 className="text-md font-semibold mb-2" {...props} />,
-                    hr: ({node, ...props}) => <hr className="my-4 border-t border-[#d8e3ff]" {...props} />
-                  }}>
-                    {event.presentation}
-                  </ReactMarkdown>
-                </div>
+                <ArtistDescription text={event.presentation} />
               </div>
             )}
           </div>

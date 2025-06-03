@@ -90,6 +90,8 @@ const UserLocation: React.FC<UserLocationProps> = ({
   const handleLocationUpdate = React.useCallback((x: number, y: number, gpsPosition?: GeoPosition): void => {
     if (!gpsPosition) return;
     
+    // Log de la position GPS reçue
+    console.log(`[UserLocation] Nouvelle position GPS reçue: lat=${gpsPosition.latitude}, lng=${gpsPosition.longitude}, accuracy=${gpsPosition.accuracy}`);
     // Mettre à jour la position GPS
     setPosition(gpsPosition);
     
@@ -258,14 +260,18 @@ const UserLocation: React.FC<UserLocationProps> = ({
     };
   }, []);
   
-  // Si la position n'est pas encore disponible
-  if (!mapCoords) {
-    return null;
+  // Si la position n'est pas encore disponible ou permission refusée
+  if (!mapCoords || permissionDenied) {
+    return (
+      <div className="absolute left-1/2 top-8 z-40 w-full flex justify-center pointer-events-none">
+        <div className="bg-white/90 text-[#ff7a45] border border-[#ff7a45] rounded px-3 py-2 text-center shadow-md text-sm max-w-xs">
+          {permissionDenied
+            ? "Localisation désactivée ou refusée. Activez la géolocalisation pour voir votre position."
+            : "Position utilisateur indisponible. En attente de signal GPS ou autorisation."}
+        </div>
+      </div>
+    );
   }
-  
-  // Si l'autorisation a été refusée, on affiche quand même le composant
-  // pour que le parent puisse savoir que l'autorisation a été refusée
-  // mais on ne rend pas le marqueur de position
 
   return (
     <>

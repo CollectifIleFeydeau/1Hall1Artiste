@@ -72,10 +72,19 @@
     <!-- EmailJS pour le suivi des erreurs -->
     <script type="text/javascript" src="https://cdn.emailjs.com/sdk/4.1.0/email.min.js"></script>
     <script type="text/javascript">
-      (function() {
-        // User ID EmailJS avec la version 4
-        emailjs.init("HoNWMyqrINGzjeK6E");
-      })();
+      document.addEventListener('DOMContentLoaded', function() {
+        try {
+          // User ID EmailJS avec la version 4
+          if (typeof emailjs !== 'undefined') {
+            emailjs.init("HoNWMyqrINGzjeK6E");
+            console.log('EmailJS initialisé avec succès');
+          } else {
+            console.warn('EmailJS non disponible');
+          }
+        } catch (error) {
+          console.error('Erreur lors de l\'initialisation d\'EmailJS:', error);
+        }
+      });
     </script>
   </head>
 

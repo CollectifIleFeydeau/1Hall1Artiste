@@ -1,10 +1,6 @@
 
 # Toutes nouvelles idées 
 
-icône de calendrier pour ajouter les rendez
-
-appuyer sur les photos pour les voir en grand
-
 # Priorités actuelles (phase de test et optimisation)
 
 ## Priorités immédiates à faire 
@@ -14,19 +10,13 @@ appuyer sur les photos pour les voir en grand
 
 ### 1. Enrichissement des contenus
 
-* **Présentation de chaque artiste**
-  * Idée : 1 ligne ou 2 d'accroche se terminant par ... incitant au double tap.
-    * En tapant sur cette phrase d'accroche le volet se déplie permettant une présentation plus complète de l'artiste.
-    * Il faut éviter qu'un texte trop long apparaisse tout de suite pour permettre de voir le compte insta, des photos ou une vidéo YouTube.
-
 * **Contenus audio et visuels**
   * Guides audio pour les lieux importants
    * Ambiances sonores historiques (port au 18e siècle)
-Visit Google AI Studio, and select “Native Audio Generation”
-Choose between “Single-speaker” for narrations or “Multi-speaker” for dialogues
-Create your script, adding style instructions and selecting voices for each speaker
-
-Click “Run” to generate your audio and download it for your projects!
+         * Visit Google AI Studio, and select “Native Audio Generation”
+         * Choose between “Single-speaker” for narrations or “Multi-speaker” for dialogues
+         * Create your script, adding style instructions and selecting voices for each speaker
+         * Click “Run” to generate your audio and download it for your projects!
    * Galerie de photos historiques avec légendes explicatives
 
 * **Éléments éducatifs**
@@ -35,10 +25,8 @@ Click “Run” to generate your audio and download it for your projects!
 ### 2. Fonctionnalités utilisateur
 
 * **Interaction communautaire**
-   * Partage de photos par les utilisateurs
+   * Partage de photos par les utilisateurs /  Galerie communautaire des meilleurs moments
    * Section témoignages pour chaque événement
-   * Galerie communautaire des meilleurs moments
-   * Système de feedback structuré
 
 ### 3. Gamification
 

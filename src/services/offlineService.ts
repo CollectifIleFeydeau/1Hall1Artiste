@@ -4,6 +4,26 @@ import { Event, getEventById } from '@/data/events';
 import { Location, getLocationNameById, getLocations } from '@/data/locations';
 import { getArtistById } from '@/data/artists';
 
+// Fonction pour obtenir la base URL de l'application
+const getBaseUrl = (): string => {
+  if (typeof window !== 'undefined' && window.APP_CONFIG && window.APP_CONFIG.BASE_URL) {
+    return window.APP_CONFIG.BASE_URL;
+  }
+  return '/';
+};
+
+// Fonction pour construire un chemin complet avec la base URL
+const getFullPath = (path: string): string => {
+  const baseUrl = getBaseUrl();
+  // Si le chemin commence déjà par la base URL, le retourner tel quel
+  if (path.startsWith(baseUrl)) {
+    return path;
+  }
+  // Si le chemin commence par un slash, le supprimer pour éviter les doubles slashs
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  return `${baseUrl}${cleanPath}`;
+};
+
 // Constantes pour les clés de cache
 const CACHE_KEYS = {
   SAVED_EVENTS: 'offline_saved_events',
@@ -123,7 +143,15 @@ export const preloadLocationImages = async (): Promise<string[]> => {
     // Récupérer les URLs des images
     const imageUrls = locations
       .filter(location => location.image)
-      .map(location => location.image as string);
+      .map(location => {
+        const imagePath = location.image as string;
+        // Si l'URL est déjà absolue (commence par http ou https), la laisser telle quelle
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+          return imagePath;
+        }
+        // Sinon, ajouter la base URL
+        return getFullPath(imagePath);
+      });
     
     // Précharger chaque image
     const preloadPromises = imageUrls.map(async (url) => {
@@ -203,7 +231,15 @@ export const preloadHistoryImages = async (): Promise<string[]> => {
     }
     
     // Récupérer les URLs des images
-    const imageUrls = locationsWithHistory.map(location => location.image as string);
+    const imageUrls = locationsWithHistory.map(location => {
+      const imagePath = location.image as string;
+      // Si l'URL est déjà absolue (commence par http ou https), la laisser telle quelle
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+      }
+      // Sinon, ajouter la base URL
+      return getFullPath(imagePath);
+    });
     
     // Précharger chaque image
     const preloadPromises = imageUrls.map(async (url) => {
@@ -275,7 +311,7 @@ export const preloadMapImage = async (): Promise<boolean> => {
   try {
     console.log('[OfflineService] Préchargement de l\'image de la carte');
     
-    const mapImageUrl = '/map-feydeau.png';
+    const mapImageUrl = getFullPath('map-feydeau.png');
     
     // Utiliser fetch pour précharger l'image et la mettre en cache
     const response = await fetch(mapImageUrl, { 

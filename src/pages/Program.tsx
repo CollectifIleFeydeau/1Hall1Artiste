@@ -9,9 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { events, getEventsByDay, type Event } from "@/data/events";
 import { EventFilter } from "@/components/EventFilter";
 import { ShareButton } from "@/components/ShareButton";
+import { toast } from "@/components/ui/use-toast";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { EventDetails } from "@/components/EventDetails";
-import { toast } from "@/components/ui/use-toast";
 import { EventCard } from "@/components/EventCard";
 import { getSavedEvents, saveEvent, removeSavedEvent } from "../services/savedEvents";
 
@@ -84,11 +84,51 @@ const Program = () => {
           </Button>
           <h1 className="text-xl font-bold text-[#ff7a45]">Programme</h1>
           <div className="flex items-center space-x-2">
-            <ShareButton 
-              title="Programme Île Feydeau" 
-              text="Découvrez le programme des événements sur l'Île Feydeau à Nantes!" 
-            />
-          </div>
+  <Button
+    variant="ghost"
+    size="icon"
+    aria-label="Ajouter au calendrier"
+    className="flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-[#4a5d94] transition-all duration-200 hover:shadow-sm"
+    onClick={async () => {
+      try {
+        const { addToCalendar } = await import("../services/calendarService");
+        const allEvents = events;
+        // Ajoute tous les événements du programme au calendrier
+        let successCount = 0;
+        let errorCount = 0;
+        for (const event of allEvents) {
+          const result = await addToCalendar(event);
+          if (result.success) {
+            successCount++;
+          } else {
+            errorCount++;
+          }
+        }
+        if (successCount > 0) {
+          toast({
+            title: "Événements ajoutés au calendrier",
+            description: `${successCount} événement(s) ajouté(s) avec succès.`,
+          });
+        }
+        if (errorCount > 0) {
+          toast({
+            title: "Erreur lors de l'ajout au calendrier",
+            description: `${errorCount} événement(s) n'ont pas pu être ajoutés.`,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Erreur inattendue",
+          description: error instanceof Error ? error.message : "Impossible d'ajouter au calendrier.",
+          variant: "destructive",
+        });
+      }
+    }}
+  >
+    <Calendar className="h-5 w-5" />
+  </Button>
+</div>
         </header>
         
         {/* Event type filter */}
