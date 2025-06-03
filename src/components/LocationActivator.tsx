@@ -74,6 +74,9 @@ const LocationActivator: React.FC<LocationActivatorProps> = ({
           // Stocker le consentement
           localStorage.setItem('locationConsent', 'granted');
           
+          // Mettre à jour l'état du bouton
+          setIsActive(true);
+          
           // Notification de succès
           toast({
             title: "Localisation activée",
