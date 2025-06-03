@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://julienfritsch44.github.io/Collectif-Feydeau---app/",
+  "homepage": "https://collectifilefeydeau.github.io/1Hall1Artiste/",
   "scripts": {
     "dev": "vite",
     "start": "powershell -ExecutionPolicy Bypass -File ./start-dev.ps1",
@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d dist -r https://github.com/CollectifIleFeydeau/1Hall1Artiste.git -b gh-pages",
     "test": "vitest run",
     "test:watch": "vitest"
   },

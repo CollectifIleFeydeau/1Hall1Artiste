@@ -5,9 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Utiliser une base vide en développement et la base GitHub Pages en production
-  // La base URL sera détectée dynamiquement en production
-  base: mode === 'production' ? "/" : "/",
+  // Utiliser le chemin du dépôt du collectif en production et une base vide en développement
+  base: mode === 'production' ? "/1Hall1Artiste/" : "/",
   // Assurer que les chemins d'assets sont correctement générés
   build: {
     outDir: 'dist',
