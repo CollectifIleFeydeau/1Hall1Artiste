@@ -5,6 +5,12 @@
 
 ## Priorités immédiates à faire 
 
+### 2. Fonctionnalités utilisateur
+
+* **Interaction communautaire**
+   * Partage de photos par les utilisateurs /  Galerie communautaire des meilleurs moments
+   * Section témoignages pour chaque événement
+
 --------------------------
 ## Améliorations en réflexion 
 
@@ -21,12 +27,6 @@
 
 * **Éléments éducatifs**
    * Quiz sur l'histoire de l'Île Feydeau
-
-### 2. Fonctionnalités utilisateur
-
-* **Interaction communautaire**
-   * Partage de photos par les utilisateurs /  Galerie communautaire des meilleurs moments
-   * Section témoignages pour chaque événement
 
 ### 3. Gamification
 
