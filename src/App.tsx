@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
 import { Celebration } from "./components/Celebration";
 import { AchievementType, getAchievementCelebrationMessage } from "./services/achievements";
-import { AudioPlayer, AudioProvider } from "./components/AudioPlayer";
+import { AudioPlayer } from "./components/AudioPlayer";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -16,6 +16,7 @@ import { AnimatePresence } from "framer-motion";
 // Contextes
 import { NavigationProvider } from "./contexts/NavigationContext";
 import { LoadingProvider } from "./contexts/LoadingContext";
+import { ErrorBoundary } from "react-error-boundary";
 
 // Composants
 import { AnimatedPageTransition, isSwipeableRoute } from "./components/AnimatedPageTransition";
@@ -37,7 +38,7 @@ import SavedEvents from "./pages/SavedEvents";
 import Onboarding from "./pages/Onboarding";
 import { LocationHistory } from "./pages/LocationHistory";
 import Analytics from "./pages/Analytics";
-
+import CommunityGallery from "./pages/CommunityGallery";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +99,7 @@ const AnimatedRoutes: React.FC = () => {
     { path: '/map', component: Map, swipeable: true },
     { path: '/program', component: Program, swipeable: true },
     { path: '/saved', component: SavedEvents, swipeable: true },
+    { path: '/community', component: CommunityGallery, swipeable: true },
     { path: '/about', component: About, swipeable: true },
     { path: '/donate', component: Donate, swipeable: true },
   ];
@@ -351,20 +353,18 @@ const App: React.FC = () => {
           <Toaster />
           <Sonner />
           <HashRouter>
-            <AudioProvider>
-              <NavigationProvider>
-                {React.createElement(AppContent)}
-                <OfflineIndicator />
+            <NavigationProvider>
+              <AppContent />
+              <OfflineIndicator />
+              {celebration.show && (
                 <Celebration 
                   trigger={celebration.show} 
                   message={celebration.message} 
                   duration={5000}
                   onComplete={() => setCelebration({ show: false, message: '' })}
                 />
-                
-                {/* Le bouton audio a été déplacé dans la page Map à côté du bouton de localisation */}
-              </NavigationProvider>
-            </AudioProvider>
+              )}
+            </NavigationProvider>
           </HashRouter>
         </TooltipProvider>
       </LoadingProvider>

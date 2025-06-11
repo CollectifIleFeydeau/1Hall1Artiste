@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import Volume2 from "lucide-react/dist/esm/icons/volume-2";
 import VolumeX from "lucide-react/dist/esm/icons/volume-x";
-import { createLogger } from "@/utils/logger";
 
-const logger = createLogger('AudioActivator');
+// Audio global partagé entre les instances du composant
+let globalAudioElement: HTMLAudioElement | null = null;
+let isGlobalAudioInitialized = false;
 
 interface AudioActivatorProps {
   onAudioEnabled?: () => void;
@@ -14,63 +15,48 @@ interface AudioActivatorProps {
 
 /**
  * Composant pour activer ou désactiver le son d'ambiance
+ * Utilise une variable globale pour maintenir l'état audio entre les pages
  */
 const AudioActivator: React.FC<AudioActivatorProps> = ({
   onAudioEnabled,
   onAudioDisabled
 }) => {
-  // Par défaut, le bouton est sur "Activer son"
-  const [isActive, setIsActive] = useState<boolean>(false);
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
-  
-  // Vérifier l'état initial du son au chargement
-  useEffect(() => {
+  // État local qui reflète l'état global
+  const [isActive, setIsActive] = useState<boolean>(() => {
     const audioPreference = localStorage.getItem('audioEnabled');
-    // Mettre à jour l'état uniquement si la préférence est explicitement 'true'
-    if (audioPreference === 'true') {
-      setIsActive(true);
-    } else {
-      // S'assurer que l'état est à false si pas de préférence ou autre valeur
-      setIsActive(false);
-    }
-    
-    // Créer l'élément audio
-    const audio = new Audio();
-    audio.loop = true;
-    audio.volume = 0.5;
-    
-    // Déterminer le chemin audio en fonction de l'environnement
-    const audioPath = window.location.hostname.includes('github.io')
-      ? '/1Hall1Artiste/audio/Port-marchand.mp3'
-      : '/audio/Port-marchand.mp3';
-    
-    audio.src = audioPath;
-    setAudioElement(audio);
-    
-    // Nettoyage lors du démontage du composant
-    return () => {
-      if (audio) {
-        audio.pause();
-        audio.src = '';
-      }
-    };
-  }, []);
+    return audioPreference === 'true';
+  });
   
-  // Effet pour gérer la lecture audio en fonction de l'état
+  // Initialisation de l'audio global une seule fois
   useEffect(() => {
-    if (!audioElement) return;
-    
-    if (isActive) {
-      audioElement.play().catch(error => {
-        logger.warn('Impossible de lire l\'audio automatiquement', { error });
-        // Ne pas changer l'état ici, car l'utilisateur a explicitement activé le son
-      });
-    } else {
-      audioElement.pause();
+    if (!isGlobalAudioInitialized) {
+      // Créer l'élément audio s'il n'existe pas déjà
+      if (!globalAudioElement) {
+        globalAudioElement = new Audio();
+        globalAudioElement.loop = true;
+        globalAudioElement.volume = 0.5;
+        
+        // Déterminer le chemin audio en fonction de l'environnement
+        const audioPath = window.location.hostname.includes('github.io')
+          ? '/1Hall1Artiste/audio/Port-marchand.mp3'
+          : '/audio/Port-marchand.mp3';
+        
+        globalAudioElement.src = audioPath;
+      }
+      
+      isGlobalAudioInitialized = true;
+      
+      // Si l'audio était activé, le jouer
+      if (isActive && globalAudioElement) {
+        globalAudioElement.play().catch(error => {
+          console.warn('Impossible de lire l\'audio automatiquement', error);
+        });
+      }
     }
-  }, [isActive, audioElement]);
+  }, [isActive]);
   
-  const toggleAudio = () => {
+  // Fonction pour gérer le clic sur le bouton
+  const handleToggleAudio = () => {
     const newState = !isActive;
     setIsActive(newState);
     
@@ -79,9 +65,9 @@ const AudioActivator: React.FC<AudioActivatorProps> = ({
     
     if (newState) {
       // Activer le son
-      if (audioElement) {
-        audioElement.play().catch(error => {
-          logger.warn('Impossible de lire l\'audio', { error });
+      if (globalAudioElement) {
+        globalAudioElement.play().catch(error => {
+          console.warn('Impossible de lire l\'audio', error);
           toast({
             title: "Activation du son impossible",
             description: "Votre navigateur a bloqué la lecture audio. Réessayez.",
@@ -105,8 +91,8 @@ const AudioActivator: React.FC<AudioActivatorProps> = ({
       }
     } else {
       // Désactiver le son
-      if (audioElement) {
-        audioElement.pause();
+      if (globalAudioElement) {
+        globalAudioElement.pause();
       }
       
       // Notification de désactivation
@@ -128,7 +114,7 @@ const AudioActivator: React.FC<AudioActivatorProps> = ({
       variant={isActive ? "destructive" : "default"}
       size="sm"
       className="flex items-center gap-1 font-medium"
-      onClick={toggleAudio}
+      onClick={handleToggleAudio}
     >
       {isActive ? (
         <>
