@@ -41,11 +41,9 @@ export function LocationHistory() {
   
   // Récupérer le locationId depuis l'état de navigation s'il existe
   const locationIdFromState = location.state?.selectedLocationId;
-  logger.info("ID du lieu reçu en paramètre:", { locationId: locationIdFromState });
   
   // Vérifier d'abord si l'ID reçu correspond à un lieu existant
   const locationFromState = locationIdFromState ? locations.find(loc => loc.id === locationIdFromState) : null;
-  logger.info("Lieu trouvé avec cet ID:", { locationName: locationFromState?.name || "Aucun" });
   
   // Filtrer uniquement les lieux qui ont un historique
   let locationsWithHistory = locations
@@ -58,7 +56,7 @@ export function LocationHistory() {
   // Si le lieu reçu en paramètre a un historique mais n'est pas dans la liste, l'ajouter
   if (locationFromState?.history && !locationsWithHistory.some(loc => loc.id === locationIdFromState)) {
     locationsWithHistory.push(locationFromState);
-    console.log("Ajout du lieu reçu en paramètre à la liste des lieux avec historique");
+    // Le lieu reçu en paramètre a été ajouté à la liste
   }
   
   const [selectedLocation, setSelectedLocation] = useState(() => {
