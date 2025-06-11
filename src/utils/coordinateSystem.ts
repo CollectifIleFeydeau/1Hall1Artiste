@@ -21,99 +21,51 @@ export const FEYDEAU_DIMENSIONS = {
 
 /**
  * Convertit des coordonnées GPS en coordonnées de carte
- * Méthode directe basée sur la position du 8 quai Turenne
+ * Utilise une transformation affine pour une précision optimale
  */
 export function gpsToMapCoordinates(lat: number, lng: number): { x: number, y: number } {
   // Points de référence connus avec leurs coordonnées GPS et de carte précises
   const referencePoints = [
-    // 8 quai Turenne
+    // Nord-Ouest
     {
-      gps: { latitude: 47.212775, longitude: -1.554741 },
-      map: { x: 300, y: 108 }
+      gps: { latitude: 47.21345, longitude: -1.55715 },
+      map: { x: 140, y: 180 }
     },
-    // 9 quai Turenne
+    // Nord-Est
     {
-      gps: { latitude: 47.212650, longitude: -1.554600 },
-      map: { x: 320, y: 150 }
+      gps: { latitude: 47.21345, longitude: -1.55515 },
+      map: { x: 260, y: 180 }
     },
-    // 10 quai Turenne
+    // Sud-Ouest
     {
-      gps: { latitude: 47.212623596191406, longitude: -1.5549430847167969 },
-      map: { x: 340, y: 200 }
+      gps: { latitude: 47.21245, longitude: -1.55715 },
+      map: { x: 140, y: 420 }
     },
-    // 32 Rue Kervégan
+    // Sud-Est
     {
-      gps: { latitude: 47.212306, longitude: -1.556986 },
-      map: { x: 150, y: 350 }
+      gps: { latitude: 47.21245, longitude: -1.55515 },
+      map: { x: 260, y: 420 }
     },
-    // Centre de l'Île
+    // Centre de l'île
     {
-      gps: { latitude: 47.212600, longitude: -1.555900 },
+      gps: { latitude: 47.21295, longitude: -1.55615 },
       map: { x: 200, y: 300 }
     }
   ];
   
-  // Vérifier si les coordonnées correspondent exactement à un point de référence connu
-  for (const point of referencePoints) {
-    if (lat === point.gps.latitude && lng === point.gps.longitude) {
-      return point.map;
-    }
-  }
+  // Coefficients de la transformation affine (calculés à partir des points de référence)
+  const affineCoeffs = {
+    a: 0.0009170025842492867,
+    b: 60000.000024211105,
+    c: 93568.95674327895,
+    d: -240000.0774556037,
+    e: -0.0009183939047143717,
+    f: 11331411.655478384
+  };
   
-  // Si aucune correspondance exacte, utiliser une interpolation pondérée basée sur les points de référence
-  
-  // Trouver les deux points de référence les plus proches
-  let closestPoints = referencePoints.map(point => {
-    // Calculer la distance entre le point de référence et les coordonnées d'entrée
-    const latDiff = lat - point.gps.latitude;
-    const lngDiff = lng - point.gps.longitude;
-    const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
-    return { ...point, distance };
-  }).sort((a, b) => a.distance - b.distance);
-  
-  // Si nous avons au moins deux points de référence, utiliser une interpolation pondérée
-  if (closestPoints.length >= 2) {
-    // Utiliser les trois points les plus proches pour une meilleure précision
-    const numPoints = Math.min(3, closestPoints.length);
-    closestPoints = closestPoints.slice(0, numPoints);
-    
-    // Calculer les poids inverses (plus le point est proche, plus son poids est élevé)
-    const totalWeight = closestPoints.reduce((sum, point) => {
-      // Éviter la division par zéro
-      const weight = point.distance === 0 ? 1000 : 1 / point.distance;
-      return sum + weight;
-    }, 0);
-    
-    // Calculer les coordonnées de carte pondérées
-    let x = 0;
-    let y = 0;
-    
-    closestPoints.forEach(point => {
-      const weight = point.distance === 0 ? 1000 : 1 / point.distance;
-      const normalizedWeight = weight / totalWeight;
-      
-      x += point.map.x * normalizedWeight;
-      y += point.map.y * normalizedWeight;
-    });
-    
-    return { x, y };
-  }
-  
-  // Si l'interpolation échoue pour une raison quelconque, utiliser la méthode de base avec le 8 quai Turenne
-  const referenceGps = referencePoints[0].gps;
-  const referenceMap = referencePoints[0].map;
-  
-  // Facteurs de conversion (déterminés empiriquement)
-  const latPixelsPerDegree = 5000;
-  const lngPixelsPerDegree = 5000;
-  
-  // Calcul des différences en degrés
-  const latDiff = lat - referenceGps.latitude;
-  const lngDiff = lng - referenceGps.longitude;
-  
-  // Conversion en pixels et ajout à la position de référence
-  const x = referenceMap.x + lngDiff * lngPixelsPerDegree;
-  const y = referenceMap.y - latDiff * latPixelsPerDegree; // Inversion car y augmente vers le bas sur la carte
+  // Appliquer la transformation affine
+  const x = affineCoeffs.a * lat + affineCoeffs.b * lng + affineCoeffs.c;
+  const y = affineCoeffs.d * lat + affineCoeffs.e * lng + affineCoeffs.f;
   
   return { x, y };
 }

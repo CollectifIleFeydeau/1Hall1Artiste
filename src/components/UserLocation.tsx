@@ -4,7 +4,7 @@ import { ToastAction } from "@/components/ui/toast";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Navigation from "lucide-react/dist/esm/icons/navigation";
 import { FEYDEAU_DIMENSIONS } from "@/data/gpsCoordinates";
-import { gpsToMapCoordinates } from "@/utils/coordinateSystem";
+import { gpsToMapCoordinatesAffine as gpsToMapCoordinates } from "@/utils/gpsConverter";
 import { GeoPosition, isPositionWithinFeydeau, getDirectionToFeydeau, calculateDistanceToCenter } from "@/utils/locationUtils";
 import { locationService } from "@/services/locationService";
 import { toastService } from "@/services/toastService";

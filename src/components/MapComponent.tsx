@@ -30,10 +30,14 @@ export const MAP_HEIGHT = 600;
 import NavigationGuideSimple from "./NavigationGuideSimple";
 import { GeoPosition } from "./UserLocation";
 
-export type MapComponentProps = {
+export interface MapComponentProps {
   locations: Location[];
-  activeLocation?: string | null;
+  visitedLocations?: string[];
+  onLocationClick?: (locationId: string) => void;
   highlightedLocation?: string | null;
+  testPoint?: { x: number; y: number };
+  testPointAffine?: { x: number; y: number };
+  activeLocation?: string | null;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   readOnly?: boolean;
   onScaleChange?: (scale: number) => void;
@@ -54,8 +58,12 @@ export type MapComponentProps = {
  */
 export const MapComponent: React.FC<MapComponentProps> = ({
   locations,
-  activeLocation,
+  visitedLocations = [],
+  onLocationClick,
   highlightedLocation = null,
+  testPoint,
+  testPointAffine,
+  activeLocation = null,
   onClick,
   readOnly = false,
   onScaleChange,
@@ -192,10 +200,55 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       
       {/* Points sur la carte */}
       <div className="absolute inset-0">
+        {/* Point de test pour la méthode de triangulation */}
+        {testPoint && (
+          <div
+            className="absolute"
+            style={{
+              position: 'absolute',
+              left: `${testPoint.x * scale}px`,
+              top: `${testPoint.y * scale}px`,
+              zIndex: 30,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <div
+              className="rounded-full shadow-lg border-2 border-white bg-[#ff0000]/90"
+              style={{
+                width: `${24 * scale}px`,
+                height: `${24 * scale}px`
+              }}
+            />
+          </div>
+        )}
+        
+        {/* Point de test pour la méthode affine */}
+        {testPointAffine && (
+          <div
+            className="absolute"
+            style={{
+              position: 'absolute',
+              left: `${testPointAffine.x * scale}px`,
+              top: `${testPointAffine.y * scale}px`,
+              zIndex: 30,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <div
+              className="rounded-full shadow-lg border-2 border-white bg-[#0000ff]/90"
+              style={{
+                width: `${24 * scale}px`,
+                height: `${24 * scale}px`
+              }}
+            />
+          </div>
+        )}
+        
         {locations.map((location) => (
           <div 
             key={location.id}
             id={`location-${location.id}`}
+            data-location-id={location.id}
             className="absolute"  
             style={{ 
               position: 'absolute',
@@ -205,7 +258,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               width: `${60 * scale}px`, // Zone de clic mise à l'échelle
               height: `${60 * scale}px`,
               transform: 'translate(-50%, -50%)', // Centrer le point sur les coordonnées
-              pointerEvents: !readOnly ? 'auto' : 'none'
+              pointerEvents: !readOnly ? 'auto' : 'none',
+              cursor: !readOnly ? 'pointer' : 'default'
             }}
             onClick={!readOnly ? (e) => {
               e.stopPropagation();
@@ -218,12 +272,14 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 ${activeLocation === location.id 
                   ? 'bg-[#ff7a45]/90 ring-2 ring-[#ff7a45] ring-opacity-70 scale-110' 
                   : highlightedLocation === location.id
-                    ? location.visited 
+                    ? visitedLocations?.includes(location.id) 
                       ? 'bg-[#4CAF50]/90 ring-4 ring-green-400 ring-opacity-80' 
                       : 'bg-[#ff7a45]/90 ring-4 ring-yellow-400 ring-opacity-80'
-                    : location.visited 
-                      ? 'bg-[#4CAF50]/90' 
-                      : 'bg-[#4a5d94]/90'
+                    : location.hasProgram === false
+                      ? 'bg-[#757575]/90' // Gris pour les lieux sans programmation
+                      : visitedLocations?.includes(location.id) 
+                        ? 'bg-[#4CAF50]/90' 
+                        : 'bg-[#4a5d94]/90'
                 }`}
               style={{
                 transform: 'translate(-50%, -50%)',

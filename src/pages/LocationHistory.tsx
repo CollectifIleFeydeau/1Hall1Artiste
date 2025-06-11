@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Info } from "lucide-react";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Volume2 from "lucide-react/dist/esm/icons/volume-2";
+import Pause from "lucide-react/dist/esm/icons/pause";
+import Play from "lucide-react/dist/esm/icons/play";
 import { getImagePath } from "@/utils/imagePaths";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { isOnline } from "@/utils/serviceWorkerRegistration";
 import { preloadSingleHistoryImage, isHistoryImageCached } from "@/services/offlineService";
 import { createLogger } from "@/utils/logger";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -26,6 +30,13 @@ export function LocationHistory() {
   const navigate = useNavigate();
   const location = useLocation();
   const [imagesLoading, setImagesLoading] = useState<Record<string, boolean>>({});
+  
+  // États pour le lecteur audio
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioLoading, setAudioLoading] = useState(false);
   
   // Récupérer le locationId depuis l'état de navigation s'il existe
   const locationIdFromState = location.state?.selectedLocationId;
@@ -61,6 +72,45 @@ export function LocationHistory() {
   // Trouver le lieu sélectionné
   const selectedLocationData = locationsWithHistory.find(loc => loc.id === selectedLocation);
   
+  // Fonctions pour le lecteur audio
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+      setAudioLoading(false);
+    }
+  };
+
+  const handleSliderChange = (value: number[]) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = value[0];
+      setCurrentTime(value[0]);
+    }
+  };
+
+  // Formater le temps en minutes:secondes
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+  
   // Précharger l'image du lieu sélectionné pour le mode hors-ligne
   useEffect(() => {
     if (selectedLocationData?.image) {
@@ -83,6 +133,23 @@ export function LocationHistory() {
       }
     }
   }, [selectedLocationData]);
+  
+  // Réinitialiser le lecteur audio lors du changement de lieu
+  useEffect(() => {
+    // Arrêter la lecture audio si elle est en cours
+    if (audioRef.current && isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+    
+    setCurrentTime(0);
+    setDuration(0);
+    
+    // Si le nouveau lieu a un fichier audio, préparer le lecteur
+    if (selectedLocationData?.audio) {
+      setAudioLoading(true);
+    }
+  }, [selectedLocation]);
 
   return (
     <div className="container max-w-md mx-auto px-4 pb-20 pt-4">
@@ -188,6 +255,59 @@ export function LocationHistory() {
               </div>
             )}
             
+            {/* Lecteur audio si disponible */}
+            {selectedLocationData.audio && (
+              <div className="mb-4 p-3 bg-[#f5f8ff] rounded-md border border-[#d8e3ff]">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <Volume2 className="h-4 w-4 text-[#4a5d94] mr-2" />
+                    <span className="text-sm font-medium text-[#4a5d94]">Écouter l'histoire</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0 rounded-full" 
+                    onClick={togglePlayPause}
+                    disabled={audioLoading}
+                  >
+                    {audioLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-[#4a5d94]" />
+                    ) : isPlaying ? (
+                      <Pause className="h-4 w-4 text-[#4a5d94]" />
+                    ) : (
+                      <Play className="h-4 w-4 text-[#4a5d94]" />
+                    )}
+                  </Button>
+                </div>
+                
+                <div className="space-y-1">
+                  <Slider
+                    value={[currentTime]}
+                    max={duration || 100}
+                    step={0.1}
+                    onValueChange={handleSliderChange}
+                    disabled={audioLoading}
+                    className="cursor-pointer"
+                  />
+                  <div className="flex justify-between text-xs text-[#4a5d94]">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                  </div>
+                </div>
+                
+                <audio
+                  ref={audioRef}
+                  src={selectedLocationData.audio}
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={handleLoadedMetadata}
+                  onEnded={() => setIsPlaying(false)}
+                  onCanPlay={() => setAudioLoading(false)}
+                  preload="metadata"
+                  className="hidden"
+                />
+              </div>
+            )}
+            
             <h3 className="text-base font-bold text-[#4a5d94] mb-3 pb-1 border-b border-[#d8e3ff]">
               Histoire complète
             </h3>
@@ -224,8 +344,14 @@ export function LocationHistory() {
         <Button 
           className="w-full bg-[#ff7a45] hover:bg-[#ff9d6e] text-white text-sm min-h-[44px]"
           onClick={() => {
-            // Rediriger vers la carte sans paramètres spécifiques
-            navigate('/map');
+            // Rediriger vers la carte avec le lieu sélectionné mis en évidence
+            navigate('/map', {
+              state: {
+                highlightLocationId: selectedLocation,
+                fromHistory: true,
+                timestamp: new Date().getTime()
+              }
+            });
           }}
         >
           Retour à la carte

@@ -5,25 +5,22 @@
 
 ## Priorités immédiates à faire 
 
-### 2. Fonctionnalités utilisateur
+- rajouter les autres batîments : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice
+
+--------------------------
+## Améliorations en réflexion 
+
+### 1. Fonctionnalités utilisateur
 
 * **Interaction communautaire**
    * Partage de photos par les utilisateurs /  Galerie communautaire des meilleurs moments
    * Section témoignages pour chaque événement
 
---------------------------
-## Améliorations en réflexion 
-
-### 1. Enrichissement des contenus
+### 2. Enrichissement des contenus
 
 * **Contenus audio et visuels**
-  * Guides audio pour les lieux importants
-   * Ambiances sonores historiques (port au 18e siècle)
-         * Visit Google AI Studio, and select “Native Audio Generation”
-         * Choose between “Single-speaker” for narrations or “Multi-speaker” for dialogues
-         * Create your script, adding style instructions and selecting voices for each speaker
-         * Click “Run” to generate your audio and download it for your projects!
-   * Galerie de photos historiques avec légendes explicatives
+  * Ambiances sonores historiques (port au 18e siècle avec Suno)
+  * Galerie de photos historiques avec légendes explicatives
 
 * **Éléments éducatifs**
    * Quiz sur l'histoire de l'Île Feydeau
@@ -153,7 +150,20 @@
       * Le système EmailJS reçoit maintenant des informations supplémentaires comme la catégorie d'erreur et l'empreinte digitale
       * Ces données supplémentaires facilitent le débogage et l'analyse des problèmes
 
-19. **Location et naviguation**
+19. **Amélioration de la précision de localisation GPS**
+   * Implémentation d'une transformation affine complète pour la conversion GPS :
+      * Prise en compte de l'inclinaison réelle de l'île Feydeau sur la carte
+      * Calcul précis des coefficients de transformation via résolution d'un système linéaire 3x3
+      * Utilisation de la règle de Cramer pour résoudre le système d'équations
+   * Amélioration de la précision du positionnement :
+      * Utilisation des coordonnées GPS précises des quatre coins de l'île
+      * Correction de l'orientation des points cardinaux sur la carte
+      * Meilleure correspondance entre position GPS réelle et affichage sur la carte
+   * Robustesse du système :
+      * Mécanisme de fallback en cas d'impossibilité de résoudre le système affine
+      * Tests de validation avec des points GPS connus
+
+20. **Location et naviguation**
    * Localiser l'utilisateur.
    * Guidage vers les points d'intérêt :
       * Afficher une flèche directionnelle qui indique la direction vers le point sélectionné

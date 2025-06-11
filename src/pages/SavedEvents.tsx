@@ -207,7 +207,7 @@ export default function SavedEvents() {
                           onClick={() => handleAddToCalendar(event)}
                           title="Ajouter au calendrier"
                         >
-                          <Share2 className="h-3 w-3" />
+                          <Calendar className="h-3 w-3" />
                         </Button>
                       )}
                       <Button 

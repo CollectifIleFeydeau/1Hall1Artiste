@@ -34,20 +34,20 @@ const parseDMS = (dmsString: string): number => {
 // Coins de l'Île Feydeau avec coordonnées précises
 export const FEYDEAU_CORNERS = {
   topLeft: {
-    latitude: parseDMS("47°12'48.5\"N"),
-    longitude: parseDMS("1°33'18.2\"W") * -1 // Convertir en valeur négative pour l'ouest
+    latitude: 47.213490,
+    longitude: -1.555052
   },
   topRight: {
-    latitude: parseDMS("47°12'46.2\"N"),
-    longitude: parseDMS("1°33'16.2\"W") * -1
+    latitude: 47.212850,
+    longitude: -1.554495
   },
   bottomLeft: {
-    latitude: parseDMS("47°12'45.0\"N"),
-    longitude: parseDMS("1°33'26.8\"W") * -1
+    latitude: 47.212509,
+    longitude: -1.557447
   },
   bottomRight: {
-    latitude: 47.2118506776877,
-    longitude: -1.556968915695518
+    latitude: 47.21186198914097,
+    longitude: -1.5569021991319243
   }
 };
 

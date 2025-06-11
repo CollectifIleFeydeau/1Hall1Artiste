@@ -395,7 +395,10 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
               className="border-[#4a5d94] text-[#4a5d94] flex-1"
               onClick={() => {
                 navigate('/location-history', { 
-                  state: { selectedLocationId: event.locationId } 
+                  state: { 
+                    selectedLocationId: event.locationId,
+                    fromEvent: true
+                  } 
                 });
                 onClose();
               }}

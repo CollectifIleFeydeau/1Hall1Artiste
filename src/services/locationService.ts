@@ -88,8 +88,36 @@ class LocationService implements LocationServiceInterface {
     if (!navigator.geolocation && !this.isLocalDevelopment) {
       logger.warn('La géolocalisation n\'est pas prise en charge par ce navigateur');
     }
+    
+    // Ajouter un gestionnaire d'événement pour détecter quand l'application revient au premier plan
+    document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
   }
 
+  /**
+   * Gère les changements de visibilité de la page
+   * Réinitialise le suivi de localisation quand l'application revient au premier plan
+   */
+  private handleVisibilityChange(): void {
+    // Si la page redevient visible et que le suivi est actif
+    if (document.visibilityState === 'visible' && this.watchId !== null && this.isLocationActivated()) {
+      logger.info('Application revenue au premier plan, réinitialisation du suivi de localisation');
+      
+      // Stocker temporairement les callbacks
+      const updateCallback = this.onLocationUpdateCallback;
+      const permissionCallback = this.onPermissionChangeCallback;
+      
+      // Arrêter le suivi actuel
+      this.stopTracking();
+      
+      // Redémarrer le suivi avec les mêmes callbacks
+      if (updateCallback) {
+        setTimeout(() => {
+          this.startTracking(updateCallback, permissionCallback || undefined);
+        }, 500); // Petit délai pour s'assurer que l'arrêt est bien effectué
+      }
+    }
+  }
+  
   /**
    * Démarre le suivi de la localisation
    * @param onLocationUpdate Callback pour les mises à jour de position sur la carte

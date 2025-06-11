@@ -28,7 +28,6 @@ import { useData, useEvents, useLocations } from "@/hooks/useData";
 import { toast } from "@/components/ui/use-toast";
 import { saveEvent, removeSavedEvent, getSavedEvents } from "../services/savedEvents";
 import { unlockAchievement, AchievementType } from "../services/achievements";
-
 // Créer un logger pour le composant Map
 const logger = createLogger('Map');
 
@@ -389,20 +388,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
                 activeLocation={activeLocation}
                 highlightedLocation={highlightedLocation}
                 onClick={(e) => {
-                  // Récupérer l'ID du lieu cliqué
-                  const target = e.currentTarget as HTMLElement;
-                  const locationId = target.id?.replace('location-', '');
-                  
-                  console.log('Clic sur élément:', { targetId: target.id, locationId });
-                  
-                  // Si un lieu est actif, le désactiver
-                  if (activeLocation) {
-                    setActiveLocation(null);
-                    setHighlightedLocation(null);
-                  }
-                  
-                  // Si on a cliqué sur un lieu valide, l'activer
-                  if (locationId && mapLocations.some(loc => loc.id === locationId)) {
+                  // Récupérer l'ID du lieu depuis l'élément cliqué
+                  const locationId = e.currentTarget.dataset.locationId || e.currentTarget.id.replace('location-', '');
+                  if (locationId) {
                     handleLocationClick(locationId);
                   }
                 }}
@@ -419,6 +407,11 @@ const Map = ({ fullScreen = false }: MapProps) => {
                   onClose: () => setNavigationTarget(null)
                 } : undefined}
               />
+              
+              {/* Contrôles de la carte */}
+              <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                <SettingsToggle />
+              </div>
               
               {/* Message d'erreur et bouton pour réactiver la localisation - caché en mode développement */}
               {permissionDenied && !isDevelopmentEnvironment && (
@@ -504,7 +497,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
                           <p className="font-medium text-[#1a2138]">{event.title}</p>
                           <div className="flex items-center mt-1">
                             <Calendar className="h-3 w-3 mr-1 text-[#8c9db5]" />
-                            <p className="text-xs text-[#8c9db5]">{event.time}</p>
+                            <p className="text-xs text-[#8c9db5]">{event.days.map(day => day === "samedi" ? "Sa" : "Di").join("/")}, {event.time}</p>
                           </div>
                           <p className="text-xs text-[#4a5d94] mt-1">{event.artistName}</p>
                         </div>

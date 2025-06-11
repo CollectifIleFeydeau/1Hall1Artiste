@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
 import Celebration from "./components/Celebration";
 import { AchievementType, getAchievementCelebrationMessage } from "./services/achievements";
+import { AudioPlayer } from "./components/AudioPlayer";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -36,6 +37,7 @@ import SavedEvents from "./pages/SavedEvents";
 import Onboarding from "./pages/Onboarding";
 import { LocationHistory } from "./pages/LocationHistory";
 import Analytics from "./pages/Analytics";
+
 
 const queryClient = new QueryClient();
 
@@ -351,6 +353,11 @@ const App = () => {
                 duration={5000}
                 onComplete={() => setCelebration({ show: false, message: '' })}
               />
+              
+              {/* Lecteur audio disponible sur toutes les pages */}
+              <div className="fixed bottom-20 right-4 z-50">
+                <AudioPlayer audioSrc="/audio/Port-marchand.mp3" autoPlay={true} />
+              </div>
               
 
             </NavigationProvider>
