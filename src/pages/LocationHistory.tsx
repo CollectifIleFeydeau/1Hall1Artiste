@@ -7,6 +7,7 @@ import Volume2 from "lucide-react/dist/esm/icons/volume-2";
 import Pause from "lucide-react/dist/esm/icons/pause";
 import Play from "lucide-react/dist/esm/icons/play";
 import { getImagePath } from "@/utils/imagePaths";
+import { getAssetPath } from "@/utils/assetUtils";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -297,11 +298,19 @@ export function LocationHistory() {
                 
                 <audio
                   ref={audioRef}
-                  src={selectedLocationData.audio}
+                  src={selectedLocationData.audio ? 
+                    (window.location.hostname.includes('github.io') 
+                      ? `/1Hall1Artiste${selectedLocationData.audio}` 
+                      : selectedLocationData.audio) 
+                    : ''}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
                   onEnded={() => setIsPlaying(false)}
                   onCanPlay={() => setAudioLoading(false)}
+                  onError={(e) => {
+                    console.error("Erreur de chargement audio:", e, selectedLocationData.audio);
+                    setAudioLoading(false);
+                  }}
                   preload="metadata"
                   className="hidden"
                 />

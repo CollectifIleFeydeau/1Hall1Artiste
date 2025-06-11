@@ -5,21 +5,21 @@
 
 ## Priorités immédiates à faire 
 
-- rajouter les autres batîments : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice
+* **Interaction communautaire**
+   * Partage de photos par les utilisateurs /  Galerie communautaire des meilleurs moments
+   * Section témoignages pour chaque événement
 
 --------------------------
 ## Améliorations en réflexion 
 
 ### 1. Fonctionnalités utilisateur
 
-* **Interaction communautaire**
-   * Partage de photos par les utilisateurs /  Galerie communautaire des meilleurs moments
-   * Section témoignages pour chaque événement
-
 ### 2. Enrichissement des contenus
 
 * **Contenus audio et visuels**
-  * Ambiances sonores historiques (port au 18e siècle avec Suno)
+
+   * rajouter les autres batîments : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice  
+   * Ambiances sonores historiques (port au 18e siècle avec Suno)
   * Galerie de photos historiques avec légendes explicatives
 
 * **Éléments éducatifs**

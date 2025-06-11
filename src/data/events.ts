@@ -140,7 +140,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "emmanuelle-boisson",
     title: "Illustrations et Carnets", // This is the exhibition title
     description: "Portée par le désir de raconter des histoires en images, Manoukidessine explore avec tendresse les émotions, le quotidien et l'imaginaire. Elle partage son univers à travers dessins, carnets et albums jeunesse.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-8",
 
@@ -150,7 +150,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "catherine-clement",
     title: "Peintures en Miniature",
     description: "Dans de petits cadres anciens, l'intimité du format rencontre le charme du passé pour accueillir des créations délicates et contemporaines. Kat Klementi y déploie une peinture sensible, empreinte de douceur et de poésie.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-8",
 
@@ -160,7 +160,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "mostapha-rouine",
     title: "Entre Bretagne et Maroc",
     description: "Puisant son inspiration entre la Bretagne et le Maroc, entre pêche à pied et scènes de vie quotidienne, Mostapha Rouine crée avec aquarelles, brou de noix et huiles. L'artiste peintre autodidacte fait vibrer la lumière, l'ambiance et les couleurs de ces deux mondes.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-8",
 
@@ -171,7 +171,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "bruno-barbier",
     title: "Peintures et dessins",
     description: "Explorant les thèmes du souvenir et de la nostalgie, Bruno Barbier, artiste peintre et dessinateur installé à Nantes, évoque des fragments de mémoire, entre émotions passées et traces du temps.",
-    time: "10h00 - 18h00",
+    time: "12h00 - 19h00",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-9",
 
@@ -181,7 +181,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "pauline-crusson",
     title: "Cartes postales du vieux Nantes",
     description: "Revisitant les cartes postales du vieux Nantes avec un style unique et détaillé, Pauline Crusson sous le nom de PaoaNaoned, redonne vie à ces images anciennes. Elle capture ainsi l'essence de la ville à travers ses dessins.",
-    time: "10h00 - 18h00",
+    time: "12h00 - 19h00",
     days: ["samedi", "dimanche"],
     locationId: "rue-duguesclin",
 
@@ -191,7 +191,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "alain-gremillet",
     title: "Peinture abstraite",
     description: "Associant couleurs, mouvements et lumière pour susciter l'émotion, l'artiste peintre abstrait Alain Gremillet explore librement la matière avec acrylique, spatules et objets du quotidien, donnant naissance à des œuvres uniques et lumineuses.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
 
@@ -201,7 +201,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "jerome-gourdon",
     title: "Photo-émographie",
     description: "Mêlant photographie, intervention in-situ et peinture acrylique, Jérôme Gourdon se définit comme un photo-émographe. Son travail explore les frontières entre image captée et image transformée, pour créer des œuvres à la croisée des médiums.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
 
@@ -211,7 +211,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "nadege-hameau",
     title: "Marqueur acrylique",
     description: "Des mondes imaginaires prennent forme au marqueur acrylique, dans un style mêlant pointillisme, précision et rêverie. Autodidacte, Nadhame.artiste, alias Nadège Hameau, cultive une démarche empreinte de patience et de poésie visuelle.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
 
@@ -221,7 +221,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "pauline-crusson",
     title: "PaoaNaoned",
     description: "Revisitant les cartes postales du vieux Nantes avec un style unique et détaillé, Pauline Crusson sous le nom de PaoaNaoned, redonne vie à ces images anciennes. Elle capture ainsi l'essence de la ville à travers ses dessins.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
 
@@ -231,7 +231,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "marie-husson",
     title: "Dessins et peintures",
     description: "Explorant des instants d'intimité à la lisière du visible, Marie Husson archive ses découvertes sous forme de dessins et peintures mêlant aquarelle, encre, broderie ou huile. Sa pratique, expérimentale et sensible, donne naissance à des images profondes, fragiles et puissamment poétiques.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "rue-kervegan-17",
 
@@ -241,7 +241,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "clotilde-debar-zablocki",
     title: "apolline.design",
     description: "Inspirée par l'histoire et le patrimoine local, notamment celui d'Anne de Bretagne, Clotilde Debar-Zablocki crée un univers poétique et sensible. Avec David, elle forme le duo apolline.design, spécialisé en fresques décoratives et patines.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-15",
 
@@ -251,7 +251,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "malou-tual",
     title: "Peinture et sculpture sur bois",
     description: "Artiste peintre et sculptrice sur bois, Malou Tual crée des œuvres uniques autour de masques ethniques et de mandalas émotionnels. Ses sculptures, façonnées à la main, allient sensibilité et tradition dans une démarche artisanale profonde.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-11",
 
@@ -261,7 +261,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "gael-caudoux",
     title: "Cartographies imaginaires",
     description: "Vastes cartographies de territoires imaginaires, riches en détails et en narration, Gaël Caudoux les réalise à la main depuis l'enfance. Ses grands formats, en constante évolution, invitent à la découverte d'un univers unique et fascinant.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-11",
 
@@ -271,7 +271,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "andry-shango-rajoelina",
     title: "Art multidisciplinaire",
     description: "Artiste multidisciplinaire mêlant peinture, design et art textile, Andry \"Shango\" Rajoelina explore les identités africaines à travers une esthétique vibrante et contemporaine. Son univers visuel, riche en symboles et en couleurs, reflète un profond engagement culturel et narratif.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
 
@@ -281,7 +281,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "jerome-luneau",
     title: "Chun Yong Ho",
     description: "Chun Yong Ho, artiste peintre originaire de Corée du Sud, explore l'abstraction à travers des jeux de couleurs et de lignes évoquant des paysages mentaux. Son travail invite à un voyage intérieur, entre sensations et émotions.",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
 
@@ -291,7 +291,7 @@ const eventScheduleData: EventDetails[] = [
     artistId: "expo9",
     title: "Carnets Nantais",
     description: "Croquant in situ des lieux urbains où la nature reprend ses droits, avec une attention particulière à la lumière et aux détails, Joss Proof invite à un autre regard sur la ville à travers ses carnets sensibles. Il partage cet univers dans son livre \"Carnets Nantais\".",
-    time: "10h00 - 18h00, samedi et dimanche",
+    time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
 

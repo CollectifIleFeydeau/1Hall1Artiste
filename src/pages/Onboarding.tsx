@@ -4,10 +4,21 @@ import { useNavigate } from "react-router-dom";
 import { motion, PanInfo } from "framer-motion";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { getImagePath } from "@/utils/imagePaths";
+import { useAudio } from "@/components/AudioPlayer";
 
 export default function Onboarding() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { setUserInteracted } = useAudio();
+  
+  // Effet pour marquer l'interaction utilisateur lors de l'affichage de l'onboarding
+  useEffect(() => {
+    console.log("[Onboarding] Préparation de l'interaction utilisateur");
+    // Marquer l'interaction utilisateur dans le localStorage pour les futures visites
+    localStorage.setItem('userHasInteracted', 'true');
+    // Informer le contexte audio que l'utilisateur a interagi
+    setUserInteracted(true);
+  }, [setUserInteracted]);
   
   const slides = [
     {
@@ -48,6 +59,11 @@ export default function Onboarding() {
   ];
 
   const nextSlide = () => {
+    // Déclencher l'interaction utilisateur pour activer le son
+    console.log("[Onboarding] Interaction utilisateur via nextSlide");
+    setUserInteracted(true);
+    localStorage.setItem('userHasInteracted', 'true');
+    
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
@@ -62,8 +78,14 @@ export default function Onboarding() {
   };
   
   const handleFinish = () => {
-    // Marquer l'onboarding comme vu
+    // Déclencher l'interaction utilisateur pour activer le son
+    console.log("[Onboarding] Interaction utilisateur via handleFinish");
+    setUserInteracted(true);
+    
+    // Marquer l'onboarding comme vu et l'interaction utilisateur
     localStorage.setItem('hasSeenOnboarding', 'true');
+    localStorage.setItem('userHasInteracted', 'true');
+    
     // Utiliser le chemin de base de l'application pour la redirection
     const basePath = import.meta.env.BASE_URL || '/';
     // Utiliser window.location.href pour assurer la navigation

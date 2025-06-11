@@ -3,9 +3,9 @@ import { initEmailJS, checkAndSendErrors, setupGlobalErrorHandler } from "./serv
 import { initAnalytics, trackEvent, synchronizeWithEmailJS } from "./services/analyticsService";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
-import Celebration from "./components/Celebration";
+import { Celebration } from "./components/Celebration";
 import { AchievementType, getAchievementCelebrationMessage } from "./services/achievements";
-import { AudioPlayer } from "./components/AudioPlayer";
+import { AudioPlayer, AudioProvider } from "./components/AudioPlayer";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -51,7 +51,7 @@ interface RouteConfig {
 /**
  * Composant qui gère les transitions entre les routes
  */
-const AnimatedRoutes = () => {
+const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -168,7 +168,7 @@ const AnimatedRoutes = () => {
   );
 };
 
-const AppContent = () => {
+const AppContent: React.FC = () => {
   return <AnimatedRoutes />;
 };
 
@@ -192,7 +192,7 @@ export const triggerAchievementEvent = (type: AchievementType) => {
   }
 };
 
-const App = () => {
+const App: React.FC = () => {
   // État pour les célébrations
   const [celebration, setCelebration] = useState<{
     show: boolean;
@@ -336,6 +336,14 @@ const App = () => {
     setTimeout(() => window.location.reload(), 1500);
   };
 
+  // Aucun code de gestion de localisation n'est nécessaire ici
+  // La gestion de la localisation est maintenant gérée directement dans le composant AudioActivator
+  
+  // Déterminer le chemin audio en fonction de l'environnement
+  const audioPath = window.location.hostname.includes('github.io')
+    ? '/1Hall1Artiste/audio/Port-marchand.mp3'
+    : '/audio/Port-marchand.mp3';
+    
   return (
     <QueryClientProvider client={queryClient}>
       <LoadingProvider>
@@ -343,24 +351,20 @@ const App = () => {
           <Toaster />
           <Sonner />
           <HashRouter>
-            <NavigationProvider>
-              <AppContent />
-              <OfflineIndicator />
-              {/* Composant de célébration pour les achievements */}
-              <Celebration 
-                trigger={celebration.show} 
-                message={celebration.message} 
-                duration={5000}
-                onComplete={() => setCelebration({ show: false, message: '' })}
-              />
-              
-              {/* Lecteur audio disponible sur toutes les pages */}
-              <div className="fixed bottom-20 right-4 z-50">
-                <AudioPlayer audioSrc="/audio/Port-marchand.mp3" autoPlay={true} />
-              </div>
-              
-
-            </NavigationProvider>
+            <AudioProvider>
+              <NavigationProvider>
+                {React.createElement(AppContent)}
+                <OfflineIndicator />
+                <Celebration 
+                  trigger={celebration.show} 
+                  message={celebration.message} 
+                  duration={5000}
+                  onComplete={() => setCelebration({ show: false, message: '' })}
+                />
+                
+                {/* Le bouton audio a été déplacé dans la page Map à côté du bouton de localisation */}
+              </NavigationProvider>
+            </AudioProvider>
           </HashRouter>
         </TooltipProvider>
       </LoadingProvider>

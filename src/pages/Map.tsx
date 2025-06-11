@@ -3,6 +3,7 @@ import UserLocation, { GeoPosition } from "@/components/UserLocation";
 import ProximityGuide from "@/components/ProximityGuide";
 import NavigationGuideSimple from "@/components/NavigationGuideSimple";
 import LocationActivator from "@/components/LocationActivator";
+import AudioActivator from "@/components/AudioActivator";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createLogger } from "@/utils/logger";
 import { MapComponent, MAP_WIDTH, MAP_HEIGHT } from "@/components/MapComponent";
@@ -357,8 +358,8 @@ const Map = ({ fullScreen = false }: MapProps) => {
         
 
         
-        {/* Bouton d'activation de la localisation */}
-        <div className="flex justify-center my-2">
+        {/* Boutons d'activation de la localisation et du son */}
+        <div className="flex justify-center gap-2 my-2">
           <LocationActivator 
             onLocationEnabled={() => {
               setPermissionDenied(false);
@@ -375,6 +376,15 @@ const Map = ({ fullScreen = false }: MapProps) => {
               setShowLocationFeatures(false);
               setNavigationTarget(null); // Arrêter la navigation en cours
               logger.info('Localisation désactivée manuellement par l\'utilisateur');
+            }}
+          />
+          
+          <AudioActivator 
+            onAudioEnabled={() => {
+              logger.info('Son activé manuellement par l\'utilisateur');
+            }}
+            onAudioDisabled={() => {
+              logger.info('Son désactivé par l\'utilisateur');
             }}
           />
         </div>
@@ -408,11 +418,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
                 } : undefined}
               />
               
-              {/* Contrôles de la carte */}
-              <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                <SettingsToggle />
-              </div>
-              
+            
               {/* Message d'erreur et bouton pour réactiver la localisation - caché en mode développement */}
               {permissionDenied && !isDevelopmentEnvironment && (
                 <div className="absolute top-0 left-0 right-0 z-50 bg-red-500 text-white p-2 text-center">
