@@ -72,7 +72,8 @@ const saveLikedEntries = (entryIds: string[]): void => {
 export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
   try {
     // En production, récupérer les données depuis l'API
-    if (process.env.NODE_ENV !== 'development') {
+    // En développement, utiliser l'API si VITE_USE_API=true
+    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
       const response = await fetch('https://api.collectif-feydeau.org/community-entries');
       
       if (!response.ok) {
@@ -117,7 +118,8 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
 export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
   try {
     // En production, appeler l'API pour supprimer la contribution
-    if (process.env.NODE_ENV !== 'development') {
+    // En développement, utiliser l'API si VITE_USE_API=true
+    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
       const response = await fetch(`https://api.collectif-feydeau.org/community-entries/${entryId}`, {
         method: 'DELETE',
         headers: {
@@ -205,7 +207,8 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
     const action = alreadyLiked ? 'unlike' : 'like';
     
     // En production, utiliser l'API serverless
-    if (process.env.NODE_ENV !== 'development') {
+    // En développement, utiliser l'API si VITE_USE_API=true
+    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
       const response = await fetch(`${API_URL}/toggle-like`, {
         method: 'POST',
         headers: {
@@ -296,7 +299,8 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     const sessionId = AnonymousSessionService.getOrCreateSessionId();
     
     // En production, envoyer à l'API serverless
-    if (process.env.NODE_ENV !== 'development') {
+    // En développement, utiliser l'API si VITE_USE_API=true
+    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
       // Préparer les données pour l'API
       const formData = new FormData();
       formData.append('type', params.type);
@@ -592,7 +596,8 @@ async function resizeAndCompressImage(file: File, maxWidth: number, maxHeight: n
 export async function uploadImage(image: File): Promise<{ imageUrl: string; thumbnailUrl: string }> {
   try {
     // En production, envoyer l'image à l'API serverless
-    if (process.env.NODE_ENV !== 'development') {
+    // En développement, utiliser l'API si VITE_USE_API=true
+    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
       const formData = new FormData();
       formData.append("image", image);
       
@@ -727,7 +732,8 @@ export async function moderateContent(type: "photo" | "testimonial", content: st
     const tempEntryId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     
     // En production, appeler l'API serverless de modération
-    if (process.env.NODE_ENV !== 'development') {
+    // En développement, utiliser l'API si VITE_USE_API=true
+    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
       const formData = new FormData();
       formData.append("type", type);
       formData.append("entryId", tempEntryId);
