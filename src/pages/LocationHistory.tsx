@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Info } from "lucide-react";
+import Camera from "lucide-react/dist/esm/icons/camera";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Volume2 from "lucide-react/dist/esm/icons/volume-2";
 import Pause from "lucide-react/dist/esm/icons/pause";
@@ -23,6 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { locations } from "@/data/locations";
+import { setLocationContributionContext } from "@/services/contextualContributionService";
+import { trackFeatureUsage } from "@/services/analytics";
 
 // Créer un logger pour le composant LocationHistory
 const logger = createLogger('LocationHistory');
@@ -45,23 +48,43 @@ export function LocationHistory() {
   // Vérifier d'abord si l'ID reçu correspond à un lieu existant
   const locationFromState = locationIdFromState ? locations.find(loc => loc.id === locationIdFromState) : null;
   
-  // Filtrer uniquement les lieux qui ont un historique
-  let locationsWithHistory = locations
-    .filter(loc => loc.history) // Garder uniquement les lieux avec historique
-    .filter((loc, index, self) => {
-      // Éliminer les doublons basés sur le nom
-      return index === self.findIndex(l => l.name === loc.name);
-    });
+  // Filtrer uniquement les lieux qui ont un historique ou une référence à un historique
+  // et éliminer les doublons basés sur le nom
+  let locationsWithHistory = [];
+  const processedNames = new Set();
   
-  // Si le lieu reçu en paramètre a un historique mais n'est pas dans la liste, l'ajouter
-  if (locationFromState?.history && !locationsWithHistory.some(loc => loc.id === locationIdFromState)) {
+  // Donner priorité aux lieux avec un historique direct plutôt qu'une référence
+  const sortedLocations = [...locations].sort((a, b) => {
+    // Les lieux avec history viennent avant ceux avec historyRef
+    if (a.history && !b.history) return -1;
+    if (!a.history && b.history) return 1;
+    return 0;
+  });
+  
+  // Filtrer les lieux
+  for (const loc of sortedLocations) {
+    // Vérifier si le lieu a un historique ou une référence
+    if (loc.history || loc.historyRef) {
+      // Vérifier si on a déjà un lieu avec le même nom
+      if (!processedNames.has(loc.name)) {
+        locationsWithHistory.push(loc);
+        processedNames.add(loc.name);
+      }
+    }
+  }
+  
+  // Si le lieu reçu en paramètre a un historique ou une référence mais n'est pas dans la liste, l'ajouter
+  if ((locationFromState?.history || locationFromState?.historyRef) && 
+      !locationsWithHistory.some(loc => loc.id === locationIdFromState)) {
     locationsWithHistory.push(locationFromState);
     // Le lieu reçu en paramètre a été ajouté à la liste
   }
   
   const [selectedLocation, setSelectedLocation] = useState(() => {
     // Si on a reçu un ID valide, l'utiliser
-    if (locationIdFromState && locations.find(loc => loc.id === locationIdFromState)?.history) {
+    if (locationIdFromState && locations.find(loc => loc.id === locationIdFromState) && 
+        (locations.find(loc => loc.id === locationIdFromState)?.history || 
+         locations.find(loc => loc.id === locationIdFromState)?.historyRef)) {
       return locationIdFromState;
     }
     // Sinon, utiliser le premier emplacement disponible
@@ -321,19 +344,36 @@ export function LocationHistory() {
             
             <ScrollArea className="h-[60vh] pr-4">
               <div className="space-y-4">
-                {selectedLocationData.history?.split('\n\n').map((paragraph, index) => (
-                  paragraph.trim() && (
-                    <div key={index} className="mb-4">
-                      {paragraph.startsWith('#') ? (
-                        <h4 className="text-lg font-bold text-[#4a5d94] mb-2">
-                          {paragraph.replace('#', '').trim()}
-                        </h4>
-                      ) : (
-                        <p className="text-[#4a5d94] leading-relaxed text-sm">{paragraph}</p>
-                      )}
-                    </div>
-                  )
-                ))}
+                {(() => {
+                  // Déterminer le contenu historique à afficher
+                  let historyContent = "";
+                  
+                  if (selectedLocationData.history) {
+                    // Utiliser directement l'historique du lieu
+                    historyContent = selectedLocationData.history;
+                  } else if (selectedLocationData.historyRef) {
+                    // Chercher l'historique référencé
+                    const referencedLocation = locations.find(loc => loc.id === selectedLocationData.historyRef);
+                    if (referencedLocation?.history) {
+                      historyContent = referencedLocation.history;
+                    }
+                  }
+                  
+                  // Afficher le contenu historique
+                  return historyContent.split('\n\n').map((paragraph, index) => (
+                    paragraph.trim() && (
+                      <div key={index} className="mb-4">
+                        {paragraph.startsWith('#') ? (
+                          <h4 className="text-lg font-bold text-[#4a5d94] mb-2">
+                            {paragraph.replace('#', '').trim()}
+                          </h4>
+                        ) : (
+                          <p className="text-[#4a5d94] leading-relaxed text-sm">{paragraph}</p>
+                        )}
+                      </div>
+                    )
+                  ));
+                })()}
               </div>
             </ScrollArea>
           </CardContent>
@@ -346,8 +386,33 @@ export function LocationHistory() {
         </div>
       )}
 
-      {/* Bouton fixe Retour à la carte */}
-      <div className="fixed bottom-20 left-0 right-0 mx-auto max-w-md px-4 z-10">
+      {/* Boutons fixes */}
+      <div className="fixed bottom-20 left-0 right-0 mx-auto max-w-md px-4 z-10 space-y-2">
+        {selectedLocationData && (
+          <Button 
+            className="w-full border-[#ff7a45] text-[#ff7a45] hover:bg-[#fff5f0] text-sm min-h-[44px]"
+            variant="outline"
+            onClick={() => {
+              if (selectedLocationData) {
+                // Enregistrer le contexte de contribution
+                setLocationContributionContext(selectedLocationData);
+                
+                // Naviguer vers la galerie communautaire, onglet contribution
+                navigate("/community?tab=contribute");
+                
+                // Tracker l'utilisation de la fonctionnalité
+                trackFeatureUsage.contribute_from_location({
+                  locationId: selectedLocationData.id,
+                  locationName: selectedLocationData.name
+                });
+              }
+            }}
+          >
+            <Camera className="h-4 w-4 mr-2" />
+            Partager un souvenir de ce lieu
+          </Button>
+        )}
+        
         <Button 
           className="w-full bg-[#ff7a45] hover:bg-[#ff9d6e] text-white text-sm min-h-[44px]"
           onClick={() => {
@@ -361,7 +426,8 @@ export function LocationHistory() {
             });
           }}
         >
-          Retour à la carte
+          <MapPin className="h-4 w-4 mr-2" />
+          Voir sur la carte
         </Button>
       </div>
 

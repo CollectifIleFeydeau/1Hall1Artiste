@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { getImagePath } from "@/utils/imagePaths";
+import { setEventContributionContext } from "@/services/contextualContributionService";
 import ReactMarkdown from "react-markdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
@@ -14,13 +15,16 @@ import X from "lucide-react/dist/esm/icons/x";
 import Instagram from "lucide-react/dist/esm/icons/instagram";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
+import Camera from "lucide-react/dist/esm/icons/camera";
 import { ShareButton } from "@/components/ShareButton";
 import { saveEvent, getSavedEvents, removeSavedEvent } from "@/services/savedEvents";
 import { type Event, getEventsByLocation } from "@/data/events";
 import { getLocationNameById } from "@/data/locations";
-import { trackFeatureUsage } from "@/services/analytics";
+import { trackFeatureUsage, trackEvent } from "@/services/analytics";
 import { InstagramCarousel } from "@/components/InstagramCarousel";
 import { TruncatedText } from "@/components/TruncatedText";
+import { addToCalendar, isCalendarSupported, CalendarErrorType } from "@/services/calendarService";
 
 interface EventDetailsProps {
   event: Event | null;
@@ -107,15 +111,32 @@ const ArtistDescription = ({ text }: ArtistDescriptionProps) => {
 export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
   
+  // État pour les événements sauvegardés
+  const [savedEvents, setSavedEvents] = useState<Event[]>([]);
+  const [calendarSupported, setCalendarSupported] = useState<boolean>(false);
+  const [relatedEvents, setRelatedEvents] = useState<Event[]>([]);
+  
+  // Vérifier si l'événement est sauvegardé au chargement
   useEffect(() => {
-    // Charger les événements sauvegardés seulement quand le dialogue est ouvert
-    if (isOpen && event) {
-      const savedEvents = getSavedEvents();
-      setSavedEventIds(savedEvents.map(e => e.id));
+    if (event) {
+      const currentSavedEvents = getSavedEvents();
+      setSavedEvents(currentSavedEvents);
+      
+      // Vérifier si le calendrier est supporté
+      setCalendarSupported(isCalendarSupported());
+      
+      // Charger les événements liés au même lieu
+      if (event.locationId) {
+        const eventsAtSameLocation = getEventsByLocation(event.locationId)
+          .filter(e => e.id !== event.id); // Exclure l'événement actuel
+        setRelatedEvents(eventsAtSameLocation);
+      }
     }
-  }, [isOpen, event]);
+  }, [event]);
+  
+  // Vérifier si l'événement actuel est sauvegardé
+  const isSaved = event ? savedEvents.some(saved => saved.id === event.id) : false;
   
   // Fonction pour naviguer vers la carte
   const navigateToMap = () => {
@@ -146,31 +167,103 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     }, 100);
   };
   
-  // Fonction pour gérer la sauvegarde/suppression d'un événement
-  const toggleSaveEvent = (e: React.MouseEvent) => {
-    if (!event) return;
+  // Fonction pour contribuer à la galerie communautaire avec le contexte de l'événement
+  const handleContribute = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     
-    const isSaved = savedEventIds.includes(event.id);
+    if (!event) return;
     
-    if (isSaved) {
-      // Supprimer l'événement des sauvegardés
+    // Enregistrer le contexte de contribution
+    setEventContributionContext(event);
+    
+    // Naviguer vers la galerie communautaire, onglet contribution
+    navigate("/community?tab=contribute");
+    onClose();
+    
+    // Tracker l'utilisation de la fonctionnalité
+    trackFeatureUsage.contribute_from_event({
+      eventId: event.id,
+      eventName: event.title
+    });
+  };
+
+  // Fonction pour gérer la sauvegarde/suppression d'un événement
+  const toggleSaveEvent = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!event) return;
+    
+    const isCurrentlySaved = savedEvents.some(saved => saved.id === event.id);
+    
+    if (isCurrentlySaved) {
+      // Retirer des favoris
       removeSavedEvent(event.id);
-      setSavedEventIds(savedEventIds.filter(id => id !== event.id));
+      setSavedEvents(getSavedEvents());
+
       
-      // toast({
-      //   title: "Événement retiré",
-      //   description: `${event.title} a été retiré de vos événements sauvegardés.`,
-      // });
+      // Analytics
+      trackFeatureUsage.unsave_event({
+        eventId: event.id,
+        eventName: event.title
+      });
     } else {
-      // Sauvegarder l'événement
+      // Ajouter aux favoris
       saveEvent(event);
-      setSavedEventIds([...savedEventIds, event.id]);
+      setSavedEvents(getSavedEvents());
       
-      // toast({
-      //   title: "Événement sauvegardé",
-      //   description: `${event.title} a été ajouté à vos événements sauvegardés.`,
-      // });
+      
+      // Analytics
+      trackFeatureUsage.save_event({
+        eventId: event.id,
+        eventName: event.title
+      });
+    }
+  };
+  
+  // Fonction pour ajouter un événement au calendrier
+  const handleAddToCalendar = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!event) return;
+    
+    try {
+      // Tracker l'utilisation de la fonctionnalité
+      trackEvent('Calendar', 'Add To Calendar', event.title);
+      
+      // Ajouter l'événement au calendrier
+      const result = await addToCalendar(event);
+      
+      if (result.success) {
+        toast({
+          title: "Événement ajouté au calendrier",
+          description: `${event.title} a été ajouté à votre calendrier.`,
+        });
+      } else {
+        // Gérer les différents types d'erreurs
+        if (result.errorType === CalendarErrorType.NOT_SUPPORTED) {
+          toast({
+            title: "Fonctionnalité non supportée",
+            description: "Votre appareil ne supporte pas l'ajout au calendrier.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Erreur",
+            description: result.errorMessage || "Une erreur est survenue lors de l'ajout au calendrier.",
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'ajout au calendrier:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue est survenue.",
+        variant: "destructive"
+      });
     }
   };
   
@@ -178,11 +271,17 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
   if (!event || !isOpen) return null;
   
   // Déterminer si l'événement est sauvegardé
-  const isEventSaved = savedEventIds.includes(event.id);
+  const isEventSaved = isSaved;
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto pt-14">
+      <DialogContent 
+        className="max-w-md max-h-[80vh] overflow-y-auto pt-14"
+        aria-describedby="event-details-description"
+      >
+        <div id="event-details-description" className="sr-only">
+          Détails de l'événement sélectionné
+        </div>
         {/* Barre d'icônes en haut */}
         <div className="absolute top-0 left-0 right-0 flex justify-end items-center p-3 bg-white z-10">
           <div className="flex space-x-4">
@@ -405,6 +504,37 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             >
               <Info className="h-4 w-4 mr-2" />
               Histoire du lieu
+            </Button>
+          </div>
+          
+          {/* Bouton pour ajouter au calendrier */}
+          <div className="flex space-x-2 mt-3">
+            <Button 
+              variant="outline"
+              className="border-[#4a5d94] text-[#4a5d94] flex-1"
+              onClick={handleAddToCalendar}
+              disabled={!calendarSupported}
+            >
+              {calendarSupported ? (
+                <>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Ajouter au calendrier
+                </>
+              ) : (
+                <>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Partager l'événement
+                </>
+              )}
+            </Button>
+            
+            <Button 
+              variant="outline"
+              className="border-[#ff7a45] text-[#ff7a45] flex-1"
+              onClick={handleContribute}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              Partager un souvenir
             </Button>
           </div>
           

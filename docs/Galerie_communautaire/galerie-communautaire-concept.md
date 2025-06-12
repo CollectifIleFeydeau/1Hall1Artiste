@@ -65,65 +65,51 @@ GitHub Pages étant un service d'hébergement statique, nous utiliserons les app
   2. **Cloudinary** (service gratuit jusqu'à certaines limites) avec API simple
   3. **ImgBB** ou services similaires avec API pour upload anonyme
 
-## Modération par LLM
+## Modération de contenu
 
-### Faisabilité et approche
+> **Note importante (Juin 2025)**: La modération par LLM initialement prévue n'est pas implémentée dans la version actuelle. Nous utilisons pour le moment une approche simplifiée de modération manuelle ou par règles simples.
 
-Un LLM peut assurer une première couche de modération automatisée, particulièrement efficace pour:
+### Approche actuelle
 
-1. **Détection de contenu inapproprié dans les textes:**
-   - Langage offensant ou discriminatoire
-   - Contenu à caractère sexuel explicite
-   - Informations personnelles (emails, téléphones)
-   - Spam ou publicités
+1. **Modération simplifiée pour les textes:**
+   - Filtrage basique par mots-clés pour le contenu inapproprié
+   - Validation manuelle par les administrateurs pour les cas ambigus
+   - Possibilité pour les utilisateurs de signaler du contenu problématique
 
-2. **Analyse d'images (via modèles multimodaux):**
-   - Détection de contenu explicite
-   - Identification d'images hors-sujet
-   - Repérage de texte inapproprié dans les images
+2. **Vérification des images:**
+   - Validation des formats et tailles d'images
+   - Modération manuelle par les administrateurs
+   - Système de signalement par la communauté
 
 ### Implémentation via API serverless
 
 ```typescript
-// Fonction serverless pour la modération
+// Fonction serverless pour la modération simplifiée
 export async function moderateContent(req, res) {
   const { type, content, imageUrl } = req.body;
   
-  // Configuration de l'API LLM
-  const llmConfig = {
-    model: "gpt-4o",
-    temperature: 0.1,
-    max_tokens: 100
-  };
-  
   try {
-    let moderationResult;
+    let isApproved = true;
+    let reason = '';
     
     if (type === 'testimonial') {
-      // Modération de texte
-      const prompt = `
-        Modère le témoignage suivant pour un site culturel familial.
-        Réponds uniquement par "APPROVED" ou "REJECTED", suivi d'une raison courte si rejeté.
-        
-        Témoignage: "${content}"
-      `;
+      // Modération de texte par mots-clés
+      const forbiddenWords = ['mot1', 'mot2', 'mot3']; // Liste à compléter
       
-      moderationResult = await callLLMAPI(prompt, llmConfig);
+      const containsForbiddenWord = forbiddenWords.some(word => 
+        content.toLowerCase().includes(word.toLowerCase())
+      );
+      
+      if (containsForbiddenWord) {
+        isApproved = false;
+        reason = 'Le texte contient des mots inappropriés';
+      }
     } 
-    else if (type === 'photo' && imageUrl) {
-      // Modération d'image via modèle multimodal
-      const prompt = `
-        Analyse cette image et détermine si elle est appropriée pour un site culturel familial.
-        Vérifie: contenu explicite, violence, publicité, hors-sujet.
-        Réponds uniquement par "APPROVED" ou "REJECTED", suivi d'une raison courte si rejeté.
-      `;
-      
-      moderationResult = await callMultimodalLLMAPI(prompt, imageUrl, llmConfig);
+    else if (type === 'photo') {
+      // Pour les images, on approuve automatiquement
+      // La modération manuelle se fera par la suite
+      isApproved = true;
     }
-    
-    // Traiter le résultat
-    const isApproved = moderationResult.toLowerCase().startsWith('approved');
-    const reason = moderationResult.split(':')[1]?.trim() || '';
     
     return {
       status: isApproved ? 'approved' : 'rejected',
@@ -468,3 +454,165 @@ const CommunityFeatureTestPage: React.FC = () => {
 4. **Test utilisateur** avec un petit groupe de bêta-testeurs
 
 Les résultats de ces tests permettront d'affiner l'implémentation finale et d'identifier les éventuels points de blocage avant le déploiement de la fonctionnalité complète.
+
+## État d'avancement de l'implémentation (Mise à jour : 12/06/2025)
+
+### Fonctionnalités implémentées ✅
+
+1. **Interface utilisateur**
+   - Page principale de la galerie communautaire avec onglets "Galerie" et "Contribuer"
+   - Affichage des entrées en grille avec filtres par type (photos/témoignages)
+   - Vue détaillée des entrées avec informations complètes
+   - Formulaire de contribution pour photos et témoignages
+   - Intégration du menu de navigation du bas
+
+2. **Gestion des données**
+   - Stockage local des contributions via localStorage en mode développement
+   - Persistance des images en base64 dans localStorage
+   - Système de likes avec stockage local des entrées aimées
+   - Service communityService entièrement mis à jour pour utiliser l'API serverless en production
+
+3. **Backend et API serverless**
+   - API serverless Netlify complète pour la soumission, récupération et modération des contributions
+   - Workflow GitHub Actions pour traiter automatiquement les contributions en attente (toutes les 6 heures ou sur déclenchement manuel)
+   - Stockage des images optimisées sur GitHub via commits automatisés
+   - Système de tokens d'authentification pour sécuriser les accès API
+
+4. **Composants techniques**
+   - Composant LocalImage pour gérer l'affichage des images stockées localement
+   - Service de modération simplifié
+   - Intégration avec le service de session anonyme
+   - Script Node.js pour le traitement des images (redimensionnement, optimisation) avec sharp
+
+5. **Contribution contextuelle**
+   - Service complet de gestion du contexte de contribution (contextualContributionService)
+   - Bouton "Partager un souvenir" dans la page de détail d'événement
+   - Pré-remplissage des champs du formulaire en fonction du contexte
+   - Enrichissement des données soumises avec le contexte
+   - Affichage du contexte dans le formulaire de contribution
+
+### Fonctionnalités restant à implémenter ⏳
+
+1. **Tests d'intégration**
+   - Tester intégralement le workflow GitHub Actions et le script de traitement des contributions
+   - Valider la persistance des images sur GitHub et leur affichage dans l'application
+   - Vérifier la robustesse du système en conditions réelles
+
+2. **Contribution contextuelle**
+   - Implémenter le bouton "Partager un souvenir" dans la page LocationHistory
+   - Ajouter un filtre dans la galerie pour afficher les contributions par événement ou lieu
+   - Créer des vues dédiées pour les contributions liées à un événement/lieu spécifique
+
+3. **Améliorations UX**
+   - Ajouter des animations et transitions plus fluides
+   - Optimiser le chargement et l'affichage des images
+   - Améliorer la gestion des erreurs et les retours utilisateur
+   - Ajouter des indicateurs de progression lors des uploads d'images
+
+4. **Déploiement et monitoring**
+   - Configurer les variables d'environnement en production (GITHUB_TOKEN, API_TOKEN)
+   - Mettre en place un système de monitoring des appels API
+   - Préparer la documentation utilisateur finale
+
+### Problèmes résolus récemment 🔧
+
+- Mise en place complète de l'API serverless Netlify pour la gestion des contributions
+- Implémentation du workflow GitHub Actions pour le traitement automatique des contributions
+- Intégration du service communityService avec l'API serverless
+- Correction des erreurs TypeScript dans les types et interfaces
+- Configuration de Netlify pour les fonctions serverless et les redirections API
+- Correction de la redirection depuis le bouton "Partager un souvenir" dans EventDetails.tsx (12/06/2025)
+- Amélioration de la gestion des images dans localStorage (12/06/2025)
+
+## Améliorations techniques récentes
+
+### Gestion intelligente des images dans localStorage
+
+Pour résoudre les problèmes de quota dépassé et d'images manquantes dans le localStorage, nous avons implémenté une stratégie de gestion intelligente :
+
+#### 1. Nettoyage intelligent du localStorage
+
+```typescript
+async function cleanupOldImages(requiredSpace?: number, imagesToPreserve: string[] = []): Promise<boolean> {
+  // Estimation de la taille actuelle utilisée
+  // Suppression progressive des images les plus anciennes
+  // Préservation d'images spécifiques
+  // Nettoyage uniquement si l'utilisation dépasse 80% de la capacité
+}
+```
+
+#### 2. Redimensionnement adaptatif des images
+
+- Qualité et dimensions ajustées en fonction de la taille de l'image
+- Compression progressive pour les images volumineuses
+- Dernier recours avec qualité très réduite si nécessaire
+
+#### 3. Gestion améliorée des erreurs dans le composant LocalImage
+
+- Tentative de récupération depuis le cache du navigateur
+- Affichage d'une image de secours en cas d'échec
+- Gestion des erreurs de chargement avec fallback progressif
+
+Ces améliorations permettent de résoudre les erreurs "Image non trouvée dans localStorage" et "ERR_FILE_NOT_FOUND" tout en optimisant l'utilisation de l'espace de stockage disponible.
+
+## Plan de tests manuels d'intégration
+
+### 1. Test du workflow de contribution depuis un événement
+- [x] Ouvrir la page de détail d'un événement
+- [x] Cliquer sur le bouton "Partager un souvenir"
+- [x] Vérifier que vous êtes redirigé vers la page de contribution (/community/contribute)
+- [x] Vérifier que le contexte de l'événement est correctement pré-rempli
+- [x] Soumettre une contribution (photo ou témoignage)
+- [x] Vérifier que la contribution apparaît dans la galerie
+
+### 2. Test du workflow de contribution depuis un lieu
+- [x] Ouvrir la page d'historique d'un lieu
+- [x] Cliquer sur le bouton "Partager un souvenir de ce lieu"
+- [x] Vérifier que vous êtes redirigé vers la page de contribution
+- [x] Vérifier que le contexte du lieu est correctement pré-rempli
+- [x] Soumettre une contribution
+- [x] Vérifier que la contribution apparaît dans la galerie
+
+### 3. Test du workflow GitHub Actions
+- [ ] Soumettre une contribution
+- [ ] Vérifier dans les logs GitHub Actions que le workflow est déclenché
+- [ ] Vérifier que l'image est correctement stockée sur GitHub
+- [ ] Vérifier que les données JSON sont mises à jour
+- [ ] Vérifier que la contribution apparaît dans la galerie après déploiement
+
+### 3bis. Test des améliorations de gestion d'images dans localStorage
+- [ ] Ouvrir la console du navigateur pour surveiller les logs
+- [ ] Soumettre plusieurs contributions avec des images de différentes tailles
+- [ ] Vérifier dans les logs que le nettoyage intelligent du localStorage fonctionne ("[FileService] Nettoyage préventif du localStorage")
+- [ ] Vérifier que les images sont correctement redimensionnées selon leur taille d'origine
+- [ ] Forcer un dépassement de quota en soumettant de très grosses images
+- [ ] Vérifier que le système gère correctement cette situation en supprimant les images les plus anciennes
+- [ ] Vérifier que les images importantes (préservées) ne sont pas supprimées
+- [ ] Fermer l'application et la rouvrir pour vérifier que les images sont toujours accessibles
+- [ ] Vérifier que les images manquantes affichent correctement l'image de secours
+
+### 4. Test de la persistance des images
+- [ ] Soumettre une contribution avec image
+- [ ] Vérifier que l'image est correctement affichée dans la galerie
+- [ ] Vérifier que l'image reste accessible après avoir fermé et rouvert l'application
+- [ ] Vérifier que l'image est correctement redimensionnée (version originale et miniature)
+
+### 5. Test des likes
+- [ ] Aimer une contribution
+- [ ] Vérifier que le compteur de likes augmente
+- [ ] Vérifier que votre like est persistant (après rechargement)
+- [ ] Retirer votre like
+- [ ] Vérifier que le compteur diminue
+
+### 6. Test de la modération
+- [ ] Soumettre une contribution avec du contenu approprié
+- [ ] Vérifier qu'elle est approuvée automatiquement
+- [ ] Soumettre une contribution avec un mot interdit
+- [ ] Vérifier qu'elle est rejetée ou mise en attente de modération
+- [ ] Vérifier le processus de modération manuelle (si implémenté)
+
+### 7. Test des filtres et de l'affichage contextuel
+- [ ] Vérifier que les filtres par type (photo/témoignage) fonctionnent
+- [ ] Vérifier que les contributions liées à un événement sont correctement filtrables
+- [ ] Vérifier que les contributions liées à un lieu sont correctement filtrables
+- [ ] Tester la navigation entre les différentes vues de la galerie

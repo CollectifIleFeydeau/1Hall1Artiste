@@ -1,10 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { exportAllData, exportEvents, exportEventsToCSV, importData, importEventsFromCSV } from '@/services/importExportService';
-import { useToast } from '@/components/ui/use-toast';
 
 export const ImportExportPanel: React.FC = () => {
-  const { toast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const csvInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -12,16 +10,8 @@ export const ImportExportPanel: React.FC = () => {
     try {
       const data = exportAllData();
       downloadFile(data, `feydeau-export-${new Date().toISOString().split('T')[0]}.json`, 'application/json');
-      toast({
-        title: 'Exportation réussie',
-        description: 'Toutes les données ont été exportées avec succès.',
-      });
     } catch (error) {
-      toast({
-        title: 'Erreur d\'exportation',
-        description: 'Une erreur est survenue lors de l\'exportation des données.',
-        variant: 'destructive',
-      });
+      console.error('Erreur d\'exportation', error);
     }
   };
 
@@ -29,16 +19,8 @@ export const ImportExportPanel: React.FC = () => {
     try {
       const data = exportEvents();
       downloadFile(data, `feydeau-events-${new Date().toISOString().split('T')[0]}.json`, 'application/json');
-      toast({
-        title: 'Exportation réussie',
-        description: 'Les événements ont été exportés avec succès.',
-      });
     } catch (error) {
-      toast({
-        title: 'Erreur d\'exportation',
-        description: 'Une erreur est survenue lors de l\'exportation des événements.',
-        variant: 'destructive',
-      });
+      console.error('Erreur d\'exportation des événements', error);
     }
   };
 
@@ -46,16 +28,8 @@ export const ImportExportPanel: React.FC = () => {
     try {
       const data = exportEventsToCSV();
       downloadFile(data, `feydeau-events-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv;charset=utf-8');
-      toast({
-        title: 'Exportation CSV réussie',
-        description: 'Les événements ont été exportés au format CSV avec succès.',
-      });
     } catch (error) {
-      toast({
-        title: 'Erreur d\'exportation',
-        description: 'Une erreur est survenue lors de l\'exportation des événements au format CSV.',
-        variant: 'destructive',
-      });
+      console.error('Erreur d\'exportation des événements au format CSV', error);
     }
   };
 
@@ -70,27 +44,16 @@ export const ImportExportPanel: React.FC = () => {
         const result = importData(content);
         
         if (result.success) {
-          toast({
-            title: 'Importation réussie',
-            description: result.message,
-          });
+          console.log('Importation réussie:', result.message);
         } else {
-          toast({
-            title: 'Erreurs lors de l\'importation',
-            description: result.message,
-            variant: 'destructive',
-          });
+          console.error('Erreurs lors de l\'importation:', result.message);
           
           if (result.errors && result.errors.length > 0) {
             console.error('Erreurs d\'importation:', result.errors);
           }
         }
       } catch (error) {
-        toast({
-          title: 'Erreur d\'importation',
-          description: 'Une erreur est survenue lors de l\'importation des données.',
-          variant: 'destructive',
-        });
+        console.error('Erreur d\'importation des données', error);
       }
       
       // Réinitialiser l'input file
@@ -113,27 +76,16 @@ export const ImportExportPanel: React.FC = () => {
         const result = importEventsFromCSV(content);
         
         if (result.success) {
-          toast({
-            title: 'Importation CSV réussie',
-            description: result.message,
-          });
+          console.log('Importation CSV réussie:', result.message);
         } else {
-          toast({
-            title: 'Erreurs lors de l\'importation CSV',
-            description: result.message,
-            variant: 'destructive',
-          });
+          console.error('Erreurs lors de l\'importation CSV:', result.message);
           
           if (result.errors && result.errors.length > 0) {
             console.error('Erreurs d\'importation CSV:', result.errors);
           }
         }
       } catch (error) {
-        toast({
-          title: 'Erreur d\'importation CSV',
-          description: 'Une erreur est survenue lors de l\'importation des événements depuis CSV.',
-          variant: 'destructive',
-        });
+        console.error('Erreur d\'importation CSV', error);
       }
       
       // Réinitialiser l'input file

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
 import Volume2 from "lucide-react/dist/esm/icons/volume-2";
 import VolumeX from "lucide-react/dist/esm/icons/volume-x";
 
@@ -68,22 +67,11 @@ const AudioActivator: React.FC<AudioActivatorProps> = ({
       if (globalAudioElement) {
         globalAudioElement.play().catch(error => {
           console.warn('Impossible de lire l\'audio', error);
-          toast({
-            title: "Activation du son impossible",
-            description: "Votre navigateur a bloqué la lecture audio. Réessayez.",
-            variant: "destructive"
-          });
           setIsActive(false);
           localStorage.setItem('audioEnabled', 'false');
         });
       }
       
-      // Notification d'activation
-      toast({
-        title: "Son activé",
-        description: "Le son d'ambiance est maintenant actif.",
-        duration: 3000
-      });
       
       // Callback
       if (onAudioEnabled) {
@@ -95,12 +83,6 @@ const AudioActivator: React.FC<AudioActivatorProps> = ({
         globalAudioElement.pause();
       }
       
-      // Notification de désactivation
-      toast({
-        title: "Son désactivé",
-        description: "Le son d'ambiance est maintenant coupé.",
-        duration: 3000
-      });
       
       // Callback
       if (onAudioDisabled) {

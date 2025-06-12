@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import { createLogger } from "@/utils/logger";
 
@@ -41,12 +40,6 @@ const LocationActivator: React.FC<LocationActivatorProps> = ({
       localStorage.removeItem('locationConsent');
       setIsActive(false);
       
-      // Notification de désactivation
-      toast({
-        title: "Localisation désactivée",
-        description: "Votre position ne sera plus suivie sur la carte.",
-        duration: 3000
-      });
       
       // Callback
       if (onLocationDisabled) {
@@ -77,12 +70,6 @@ const LocationActivator: React.FC<LocationActivatorProps> = ({
           // Mettre à jour l'état du bouton
           setIsActive(true);
           
-          // Notification de succès
-          toast({
-            title: "Localisation activée",
-            description: "Votre position est maintenant affichée sur la carte.",
-            duration: 3000
-          });
           
           // Callback
           if (onLocationEnabled) {
@@ -96,12 +83,6 @@ const LocationActivator: React.FC<LocationActivatorProps> = ({
             message: error.message
           });
           
-          // Notification d'erreur
-          toast({
-            title: "Localisation refusée",
-            description: "Veuillez autoriser l'accès à votre position dans les paramètres de votre navigateur.",
-            variant: "destructive"
-          });
           
           // Callback
           if (onLocationDenied) {
@@ -116,11 +97,7 @@ const LocationActivator: React.FC<LocationActivatorProps> = ({
       );
     } else {
       // Géolocalisation non supportée
-      toast({
-        title: "Localisation non disponible",
-        description: "Votre navigateur ne prend pas en charge la géolocalisation.",
-        variant: "destructive"
-      });
+      logger.warn('Géolocalisation non supportée par le navigateur');
     }
   };
 

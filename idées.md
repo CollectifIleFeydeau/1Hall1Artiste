@@ -8,7 +8,7 @@
 * **Interaction communautaire**
    * Partage de photos par les utilisateurs /  Galerie communautaire des meilleurs moments
    * Section témoignages pour chaque événement
-
+   => Voir @galerie-communautaire-concept.md
 --------------------------
 ## Améliorations en réflexion 
 

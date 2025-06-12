@@ -39,5 +39,18 @@ export const trackFeatureUsage = {
   },
   userLocation: () => {
     trackEvent('Map', 'Use Location Feature');
+  },
+  // Nouvelles fonctions de tracking
+  save_event: (params: { eventId: string, eventName: string }) => {
+    trackEvent('Events', 'Save Event', params.eventName);
+  },
+  unsave_event: (params: { eventId: string, eventName: string }) => {
+    trackEvent('Events', 'Unsave Event', params.eventName);
+  },
+  contribute_from_event: (params: { eventId: string, eventName: string }) => {
+    trackEvent('Community', 'Contribute From Event', params.eventName);
+  },
+  contribute_from_location: (params: { locationId: string, locationName: string }) => {
+    trackEvent('Community', 'Contribute From Location', params.locationName);
   }
 };

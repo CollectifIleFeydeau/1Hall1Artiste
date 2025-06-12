@@ -6,6 +6,7 @@ import Home from "lucide-react/dist/esm/icons/home";
 import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import Gift from "lucide-react/dist/esm/icons/gift";
 import Instagram from "lucide-react/dist/esm/icons/instagram";
+import Camera from "lucide-react/dist/esm/icons/camera";
 import { Link, useLocation } from "react-router-dom";
 
 export function BottomNavigation() {
@@ -18,7 +19,7 @@ export function BottomNavigation() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-center h-16 z-[9999] shadow-lg">
-      <div className="w-full max-w-screen-lg grid grid-cols-5 gap-0 px-1 mx-auto">
+      <div className="w-full max-w-screen-lg grid grid-cols-6 gap-0 px-1 mx-auto">
         <Link
           to="/map"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
@@ -49,6 +50,15 @@ export function BottomNavigation() {
           <span className="text-[10px] mt-1 leading-tight">Enregistrés</span>
         </Link>
         
+        <Link
+          to="/community"
+          className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
+            isActive("/community") ? "text-[#ff7a45]" : "text-gray-500"
+          }`}
+        >
+          <Camera className="h-6 w-6" />
+          <span className="text-[10px] mt-1 leading-tight">Galerie</span>
+        </Link>
         
         <Link
           to="/about"

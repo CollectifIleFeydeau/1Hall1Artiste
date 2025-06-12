@@ -181,8 +181,6 @@ export const addToCalendar = async (event: Event): Promise<CalendarResult> => {
           return { success: true };
         }
       } catch (androidError) {
-        logger.warn("Erreur lors du partage sur Android", { androidError });
-        // Continuer avec la méthode alternative
       }
     }
     

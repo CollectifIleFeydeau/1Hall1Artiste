@@ -7,6 +7,7 @@ export type Location = {
   y: number;
   description: string;
   history?: string; // Historique complet du lieu
+  historyRef?: string; // Référence à l'ID d'un autre lieu pour partager son historique
   image?: string; // URL de l'image du lieu
   audio?: string; // URL du fichier audio pour l'histoire du lieu
   visited?: boolean;
@@ -89,7 +90,9 @@ export const locations: Location[] = [
     y: 180,
     description: "Immeuble dit à la 'Cour Ovale' (1756). Construit par Joseph Raimbaud, marchand de bois, avec une cour commune rectangulaire à pans coupés. Décors caractéristiques: mascarons et ferronneries. Double accès côté quai et rue. Monument Historique depuis 1984.",
     image: "/9 quai Turenne.jpg",
-    history: "Immeuble dit à la \"Cour Ovale\"\n\nEn 1756, Joseph Raimbaud (marchand de bois) acquiert sur l'île Feydeau, deux terrains contigus et y fait édifier deux immeubles avec une cour commune, vaste cour rectangulaire à pans coupés, la \"Cour ovale\". Les deux immeubles aux décors caractéristiques du milieu du siècle (mascarons et ferronneries) ont un double accès, côté quai et côté rue. Les deux façades sur quai sont traitées de manière identique et en symétrie, les 12 travées étant groupées deux par deux. Les façades sur rue sont moins ostentatoires, les quatre doubles travées de gauche n'ont reçu qu'un seul étage, le programme architectural n'ayant pas été achevé. Immeuble classé au titre des Monuments Historiques depuis 1984.",
+    audio: "/audio/9-quai-Turenne.mp3",
+    // Référence à la même fiche historique que quai-turenne-9
+    historyRef: "quai-turenne-9",
     visited: false,
     gps: {
       latitude: 47.21273557840543,

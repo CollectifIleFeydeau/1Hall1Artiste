@@ -217,7 +217,7 @@ const eventScheduleData: EventDetails[] = [
 
   },
   {
-    id: "expo-pauline-crusson",
+    id: "expo-pauline-crusson-2",
     artistId: "pauline-crusson",
     title: "PaoaNaoned",
     description: "Revisitant les cartes postales du vieux Nantes avec un style unique et détaillé, Pauline Crusson sous le nom de PaoaNaoned, redonne vie à ces images anciennes. Elle capture ainsi l'essence de la ville à travers ses dessins.",

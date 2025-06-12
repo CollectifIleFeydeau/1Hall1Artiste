@@ -4,6 +4,7 @@ import { Location } from "@/data/locations";
 import { getImagePath } from "@/utils/imagePaths";
 import { isOnline } from "@/utils/serviceWorkerRegistration";
 import UserLocation, { UserLocationProps } from "./UserLocation";
+import { toast } from "@/components/ui/use-toast";
 
 // Créer un logger pour le composant Map avec filtrage
 const originalLogger = createLogger('MapComponent');
@@ -77,6 +78,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
   const [userMapCoords, setUserMapCoords] = useState<{ x: number, y: number } | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+
+  // Référence pour suivre si un avertissement de limite de carte a été affiché
+  const outOfBoundsWarningShownRef = useRef(false);
 
   // Effet pour appliquer des dimensions responsives au conteneur principal
   useEffect(() => {
