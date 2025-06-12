@@ -1,4 +1,17 @@
 {
-  "lastUpdated": "2025-01-21T00:00:00Z",
-  "entries": []
-} 
+  "lastUpdated": "2025-06-12T21:01:07.167Z",
+  "entries": [
+    {
+      "id": "entry-53bebbbf-e743-4a44-b907-3557bdf7a8d9",
+      "type": "testimonial",
+      "content": "Ceci est un témoignage de test généré automatiquement.",
+      "displayName": "Utilisateur Test",
+      "createdAt": "2025-06-12T21:01:07.167Z",
+      "sessionId": "session-f63325be-25b6-48fc-b636-ad4c7051075b",
+      "moderation": {
+        "status": "approved",
+        "moderatedAt": "2025-06-12T21:01:07.167Z"
+      }
+    }
+  ]
+}
