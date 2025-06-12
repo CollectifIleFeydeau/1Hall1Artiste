@@ -14,6 +14,7 @@ import { ImportExportPanel } from "@/components/ImportExportPanel";
 import { EventForm } from "@/components/EventForm";
 import { AdminLogin } from "@/components/AdminLogin";
 import { toast } from "@/components/ui/use-toast";
+import { CommunityManagement } from "@/components/CommunityManagement";
 
 // Créer un logger pour le composant Admin
 const logger = createLogger('Admin');
@@ -286,9 +287,10 @@ export default function Admin() {
       
       <div className="space-y-6">
         <Tabs defaultValue="coordinates" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="locations">Lieux</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="events">Événements</TabsTrigger>
+            <TabsTrigger value="locations">Lieux</TabsTrigger>
+            <TabsTrigger value="community">Contributions</TabsTrigger>
             <TabsTrigger value="import-export">Import/Export</TabsTrigger>
             <TabsTrigger value="reset">Réinitialisation</TabsTrigger>
           </TabsList>
@@ -396,6 +398,11 @@ export default function Admin() {
             </Card>
           </TabsContent>
           
+          {/* Onglet de gestion des contributions */}
+          <TabsContent value="community" className="space-y-4">
+            <CommunityManagement />
+          </TabsContent>
+          
           {/* Onglet d'import/export */}
           <TabsContent value="import-export">
             <Card>
@@ -418,7 +425,7 @@ export default function Admin() {
           </TabsContent>
           
           {/* Onglet de réinitialisation */}
-          <TabsContent value="reset">
+          <TabsContent value="reset" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="text-[#4a5d94]">Réinitialisation des données</CardTitle>

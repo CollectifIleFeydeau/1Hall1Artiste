@@ -1,0 +1,57 @@
+name: Process New Contribution
+
+on:
+  repository_dispatch:
+    types: [new-contribution]
+  # Vous pouvez également déclencher le workflow manuellement pour les tests
+  workflow_dispatch:
+    inputs:
+      contributionId:
+        description: 'ID de la contribution à traiter'
+        required: true
+      contributionType:
+        description: 'Type de contribution (photo/testimonial)'
+        required: true
+        default: 'photo'
+      imageUrl:
+        description: 'URL de l''image (pour les contributions de type photo)'
+        required: false
+
+jobs:
+  process-contribution:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          npm install axios sharp fs-extra
+
+      - name: Process contribution
+        run: |
+          node .github/scripts/process-contribution.js
+        env:
+          CONTRIBUTION_ID: ${{ github.event.client_payload.contributionId || github.event.inputs.contributionId }}
+          CONTRIBUTION_TYPE: ${{ github.event.client_payload.contributionType || github.event.inputs.contributionType }}
+          IMAGE_URL: ${{ github.event.client_payload.imageUrl || github.event.inputs.imageUrl }}
+          DISPLAY_NAME: ${{ github.event.client_payload.displayName || 'Anonyme' }}
+          EVENT_ID: ${{ github.event.client_payload.eventId || '' }}
+          LOCATION_ID: ${{ github.event.client_payload.locationId || '' }}
+          CONTENT: ${{ github.event.client_payload.content || '' }}
+          TIMESTAMP: ${{ github.event.client_payload.timestamp || '' }}
+          
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'GitHub Action Bot'
+          git config --global user.email 'action@github.com'
+          git add data/ images/ thumbnails/
+          git commit -m "Ajout contribution: ${{ github.event.client_payload.contributionId || github.event.inputs.contributionId }}"
+          git push

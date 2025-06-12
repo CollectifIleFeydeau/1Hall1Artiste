@@ -1,0 +1,42 @@
+name: Process Community Contributions
+
+on:
+  workflow_dispatch:  # Permet de déclencher manuellement
+  repository_dispatch:
+    types: [new-contribution]  # Déclenché par l'API serverless
+  schedule:
+    - cron: '0 */6 * * *'  # Exécution toutes les 6 heures
+
+jobs:
+  process-contributions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Nécessaire pour push les modifications
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Process pending contributions
+        run: node scripts/process-contributions.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Commit and push if changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add public/data/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update community content [skip ci]"
+          git push
