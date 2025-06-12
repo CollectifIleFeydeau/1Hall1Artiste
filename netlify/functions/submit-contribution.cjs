@@ -3,6 +3,7 @@ const { createAppAuth } = require('@octokit/auth-app');
 const { v4: uuidv4 } = require('uuid');
 // Removed middy dependencies - using manual CORS and body parsing
 const { Buffer } = require('buffer');
+const busboy = require('busboy');
 
 // Configuration
 const config = {
@@ -12,6 +13,77 @@ const config = {
   dataPath: 'public/data/pending-contributions.json',
   imagesPath: 'public/images/community',
 };
+
+/**
+ * Parse FormData using busboy
+ */
+function parseFormData(event) {
+  return new Promise((resolve, reject) => {
+    const fields = {};
+    
+    // Check if it's actually FormData
+    if (!event.headers['content-type'] || !event.headers['content-type'].includes('multipart/form-data')) {
+      // Fallback for non-FormData requests
+      try {
+        if (typeof event.body === 'string') {
+          // Try JSON first
+          try {
+            resolve(JSON.parse(event.body));
+            return;
+          } catch (e) {
+            // Try URL-encoded
+            const urlParams = new URLSearchParams(event.body);
+            const data = {};
+            for (const [key, value] of urlParams.entries()) {
+              data[key] = value;
+            }
+            resolve(data);
+            return;
+          }
+        }
+        resolve(event.body || {});
+      } catch (e) {
+        resolve({});
+      }
+      return;
+    }
+
+    const bb = busboy({ 
+      headers: event.headers,
+      limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit
+      }
+    });
+    
+    bb.on('field', (fieldname, val) => {
+      fields[fieldname] = val;
+    });
+    
+    bb.on('file', (fieldname, file, info) => {
+      console.log(`File field ${fieldname} received but ignored in production function`);
+      file.resume(); // Important: consume the file stream
+    });
+    
+    bb.on('finish', () => {
+      console.log('FormData parsed successfully:', fields);
+      resolve(fields);
+    });
+    
+    bb.on('error', (err) => {
+      console.error('Error parsing FormData:', err);
+      reject(err);
+    });
+    
+    // Convert base64 body back to buffer and write to busboy
+    try {
+      const bodyBuffer = Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8');
+      bb.end(bodyBuffer);
+    } catch (err) {
+      console.error('Error processing body:', err);
+      reject(err);
+    }
+  });
+}
 
 /**
  * Fonction principale pour recevoir les contributions
@@ -47,19 +119,22 @@ const submitContribution = async (event, context) => {
       };
     }
 
-    // Parser le body manuellement
-    let body;
-    try {
-      body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
-    } catch (e) {
-      body = {};
-    }
+    // Parser le body avec FormData
+    const body = await parseFormData(event);
+    console.log('Données extraites:', {
+      type: body.type,
+      displayName: body.displayName,
+      sessionId: body.sessionId,
+      eventId: body.eventId,
+      locationId: body.locationId
+    });
 
     // Extraire les données de la contribution
     const { type, content, displayName, sessionId, image, eventId, locationId, contextType, contextId } = body;
 
     // Valider les données
     if (!type || !displayName || !sessionId) {
+      console.log('Validation failed - missing required fields:', { type, displayName, sessionId });
       return {
         statusCode: 400,
         headers,
@@ -109,6 +184,26 @@ const submitContribution = async (event, context) => {
     if (contextType) contribution.contextType = contextType;
     if (contextId) contribution.contextId = contextId;
 
+    // Vérifier si on est en mode développement (pas de token GitHub)
+    const isDevelopment = !process.env.GITHUB_TOKEN;
+    
+    if (isDevelopment) {
+      console.log('Mode développement - contribution stockée localement uniquement');
+      // En développement, on simule le succès sans appeler GitHub
+      return {
+        statusCode: 201,
+        headers,
+        body: JSON.stringify({
+          message: 'Contribution soumise avec succès (mode développement)',
+          contribution,
+          development: true,
+        }),
+      };
+    }
+
+    // Mode production : utiliser l'API GitHub
+    console.log('Mode production - utilisation de l\'API GitHub');
+    
     // Initialiser Octokit avec l'authentification GitHub
     const octokit = new Octokit({
       auth: process.env.GITHUB_TOKEN,
@@ -178,6 +273,8 @@ const submitContribution = async (event, context) => {
     // Déclencher le workflow GitHub Actions pour traiter les contributions
     await triggerWorkflow(octokit);
 
+    console.log('Contribution created successfully:', contributionId);
+
     // Retourner la contribution créée
     return {
       statusCode: 201,
@@ -191,7 +288,12 @@ const submitContribution = async (event, context) => {
     console.error('Erreur lors de la soumission de la contribution:', error);
     return {
       statusCode: 500,
-      headers,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ error: 'Erreur serveur lors de la soumission de la contribution' }),
     };
   }
