@@ -2,13 +2,13 @@ import { CommunityEntry, CommunityContentData, SubmissionParams, ModerationResul
 import { AnonymousSessionService } from "../services/anonymousSessionService";
 
 // URL de base pour les données JSON (à adapter selon l'environnement)
-const BASE_URL = window.location.hostname.includes('github.io')
+const BASE_URL = (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
   ? 'https://raw.githubusercontent.com/CollectifIleFeydeau/community-content/main'
   : '/data';
 
 // URL de base pour l'API serverless
-const API_URL = process.env.NODE_ENV === 'production'
-  ? '/api'
+const API_URL = import.meta.env.VITE_USE_API === 'true'
+  ? 'http://localhost:8888/api'  // Netlify Dev avec redirection /api
   : 'http://localhost:8888/api';
 
 // Clé de stockage local pour les entrées
@@ -74,7 +74,7 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
     // En production, récupérer les données depuis l'API
     // En développement, utiliser l'API si VITE_USE_API=true
     if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
-      const response = await fetch('https://api.collectif-feydeau.org/community-entries');
+      const response = await fetch(`${API_URL}/community-entries`);
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -120,7 +120,7 @@ export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
     // En production, appeler l'API pour supprimer la contribution
     // En développement, utiliser l'API si VITE_USE_API=true
     if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
-      const response = await fetch(`https://api.collectif-feydeau.org/community-entries/${entryId}`, {
+      const response = await fetch(`${API_URL}/community-entries/${entryId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -338,7 +338,7 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
         formData.append('contextId', params.contextId);
       }
       
-      // Envoyer la requête à l'API serverless
+      // Envoyer la requête à l'API serverless (version production)
       const response = await fetch(`${API_URL}/submit-contribution`, {
         method: 'POST',
         body: formData
@@ -601,7 +601,7 @@ export async function uploadImage(image: File): Promise<{ imageUrl: string; thum
       const formData = new FormData();
       formData.append("image", image);
       
-      const response = await fetch("https://api.collectif-feydeau.org/upload-image", {
+      const response = await fetch(`${API_URL}/upload-image`, {
         method: "POST",
         body: formData
       });
