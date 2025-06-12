@@ -1,9 +1,7 @@
 const { Octokit } = require('@octokit/rest');
 const { createAppAuth } = require('@octokit/auth-app');
 const { v4: uuidv4 } = require('uuid');
-const middy = require('@middy/core');
-const cors = require('@middy/http-cors');
-const jsonBodyParser = require('@middy/http-json-body-parser');
+// Removed middy dependencies - using manual CORS and body parsing
 const { Buffer } = require('buffer');
 
 // Configuration
@@ -18,23 +16,53 @@ const config = {
 /**
  * Fonction principale pour recevoir les contributions
  */
-const submitContribution = async (event) => {
+const submitContribution = async (event, context) => {
   try {
+    console.log('Submit contribution called with:', event.httpMethod);
+    console.log('Body received:', event.body);
+
+    // Headers CORS
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Content-Type': 'application/json'
+    };
+
+    // Gestion des requêtes OPTIONS (preflight CORS)
+    if (event.httpMethod === 'OPTIONS') {
+      return {
+        statusCode: 200,
+        headers,
+        body: ''
+      };
+    }
+
     // Vérifier la méthode HTTP
     if (event.httpMethod !== 'POST') {
       return {
         statusCode: 405,
+        headers,
         body: JSON.stringify({ error: 'Méthode non autorisée' }),
       };
     }
 
+    // Parser le body manuellement
+    let body;
+    try {
+      body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
+    } catch (e) {
+      body = {};
+    }
+
     // Extraire les données de la contribution
-    const { type, content, displayName, sessionId, image, eventId, locationId, contextType, contextId } = event.body;
+    const { type, content, displayName, sessionId, image, eventId, locationId, contextType, contextId } = body;
 
     // Valider les données
     if (!type || !displayName || !sessionId) {
       return {
         statusCode: 400,
+        headers,
         body: JSON.stringify({ error: 'Données incomplètes' }),
       };
     }
@@ -43,6 +71,7 @@ const submitContribution = async (event) => {
     if (type !== 'photo' && type !== 'testimonial') {
       return {
         statusCode: 400,
+        headers,
         body: JSON.stringify({ error: 'Type de contribution invalide' }),
       };
     }
@@ -51,6 +80,7 @@ const submitContribution = async (event) => {
     if (type === 'testimonial' && !content) {
       return {
         statusCode: 400,
+        headers,
         body: JSON.stringify({ error: 'Contenu requis pour un témoignage' }),
       };
     }
@@ -151,6 +181,7 @@ const submitContribution = async (event) => {
     // Retourner la contribution créée
     return {
       statusCode: 201,
+      headers,
       body: JSON.stringify({
         message: 'Contribution soumise avec succès',
         contribution,
@@ -160,6 +191,7 @@ const submitContribution = async (event) => {
     console.error('Erreur lors de la soumission de la contribution:', error);
     return {
       statusCode: 500,
+      headers,
       body: JSON.stringify({ error: 'Erreur serveur lors de la soumission de la contribution' }),
     };
   }
@@ -199,7 +231,5 @@ async function triggerWorkflow(octokit) {
   }
 }
 
-// Exporter la fonction avec les middlewares
-exports.handler = middy(submitContribution)
-  .use(jsonBodyParser())
-  .use(cors());
+// Exporter la fonction 
+exports.handler = submitContribution;

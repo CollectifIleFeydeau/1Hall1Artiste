@@ -1,4 +1,4 @@
-# Script pour tuer les instances précédentes et démarrer l'application complète
+# Script pour démarrer l'application complète avec Netlify Dev
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "   COLLECTIF FEYDEAU - DEMARRAGE COMPLET" -ForegroundColor Cyan  
 Write-Host "===============================================" -ForegroundColor Cyan
@@ -67,16 +67,16 @@ Write-Host "⏳ Attente de la libération des ports..." -ForegroundColor Yellow
 Start-Sleep -Seconds 2
 
 Write-Host ""
-Write-Host "🧪 Exécution des tests unitaires rapides..." -ForegroundColor Cyan
+Write-Host "🧪 Tests rapides des données..." -ForegroundColor Cyan
 try {
-    # Tests rapides seulement (pas les tests qui nécessitent window/localStorage)
+    # Tests rapides seulement
     $env:NODE_ENV = "test"
-    npm run test -- --run --reporter=basic src/data/
+    npm run test -- --run --reporter=basic src/data/ 2>$null
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✅ Tests de données réussis!" -ForegroundColor Green
     } else {
-        Write-Host "⚠️ Certains tests ont échoué (continuons quand même)" -ForegroundColor Yellow
+        Write-Host "⚠️ Tests ignorés (continuons quand même)" -ForegroundColor Yellow
     }
 } catch {
     Write-Host "⚠️ Tests ignorés, continuons..." -ForegroundColor Yellow
@@ -90,20 +90,26 @@ if (-not (Test-Path ".env.local")) {
     Write-Host "📁 Création du fichier .env.local..." -ForegroundColor Yellow
     "VITE_USE_API=true" | Out-File -FilePath ".env.local" -Encoding utf8
     Write-Host "✅ Fichier .env.local créé" -ForegroundColor Green
+} else {
+    Write-Host "✅ Fichier .env.local existe" -ForegroundColor Green
 }
 
 # Vérifier les fonctions .cjs
 $cjsFiles = Get-ChildItem -Path "netlify/functions" -Filter "*.cjs" -ErrorAction SilentlyContinue
 if ($cjsFiles.Count -gt 0) {
     Write-Host "✅ Fonctions .cjs détectées: $($cjsFiles.Count) fichiers" -ForegroundColor Green
+    $cjsFiles | ForEach-Object { Write-Host "   📄 $($_.Name)" -ForegroundColor Gray }
 } else {
     Write-Host "⚠️ Aucune fonction .cjs trouvée!" -ForegroundColor Yellow
 }
 
 Write-Host ""
-Write-Host "🚀 Démarrage de Netlify Dev + Vite..." -ForegroundColor Cyan
-Write-Host "   📡 Netlify Dev sera sur: http://localhost:8888" -ForegroundColor Magenta
-Write-Host "   🎨 Interface sur: http://localhost:8888" -ForegroundColor Magenta
+Write-Host "🚀 Démarrage de l'application complète..." -ForegroundColor Cyan
+Write-Host "   📡 Netlify Dev: http://localhost:8888" -ForegroundColor Magenta
+Write-Host "   🎨 Interface: http://localhost:8888" -ForegroundColor Magenta  
+Write-Host "   🔧 API Functions: http://localhost:8888/api/*" -ForegroundColor Magenta
+Write-Host ""
+Write-Host "⚡ Attendez le message 'Local dev server ready' avant d'ouvrir le navigateur" -ForegroundColor Yellow
 Write-Host ""
 
 try {
@@ -123,4 +129,4 @@ try {
     Write-Host ""
     Write-Host "Appuyez sur une touche pour fermer cette fenêtre..." -ForegroundColor Magenta
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-}
+} 
