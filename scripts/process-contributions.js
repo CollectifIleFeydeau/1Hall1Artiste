@@ -7,18 +7,22 @@
  * 4. Sauvegarder les images dans le dépôt
  */
 
-const fs = require('fs').promises;
-const path = require('path');
-const sharp = require('sharp');
-const { v4: uuidv4 } = require('uuid');
+import { promises as fs } from 'fs';
+import path from 'path';
+import sharp from 'sharp';
+import { v4 as uuidv4 } from 'uuid';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration
 const CONFIG = {
   // Dossier où sont stockées les données
-  dataDir: path.join(process.cwd(), 'public', 'data'),
+  dataDir: path.join(path.dirname(__dirname), 'public', 'data'),
   
   // Dossier où sont stockées les images
-  imagesDir: path.join(process.cwd(), 'public', 'images', 'community'),
+  imagesDir: path.join(path.dirname(__dirname), 'public', 'images', 'community'),
   
   // URL de l'API pour récupérer les contributions en attente (en mode développement, utiliser des données mock)
   pendingContributionsUrl: process.env.PENDING_CONTRIBUTIONS_URL || 'mock',
