@@ -616,3 +616,143 @@ Ces améliorations permettent de résoudre les erreurs "Image non trouvée dans 
 - [ ] Vérifier que les contributions liées à un événement sont correctement filtrables
 - [ ] Vérifier que les contributions liées à un lieu sont correctement filtrables
 - [ ] Tester la navigation entre les différentes vues de la galerie
+
+# Annexes : historique de développement et synthèse
+
+## Résumé de la conversation et de l'implémentation (Juin 2025)
+
+La fonctionnalité de galerie communautaire interactive a été développée en suivant les étapes ci-dessous, en s'appuyant sur une architecture React/Vite (frontend), Netlify Functions (API serverless), et GitHub Actions (traitement des contributions et stockage sur GitHub Pages).
+
+### 1. Mise en place initiale & tests
+- Frontend React/Vite, backend Netlify Functions, workflow GitHub.
+- Stockage localStorage fonctionnel, mais les appels API et GitHub Actions non déclenchés en mode dev.
+
+### 2. Basculer en mode API en dev
+- Ajout du flag `VITE_USE_API` pour forcer l'utilisation de l'API en dev.
+- Adaptation de `communityService.ts` pour respecter ce flag.
+
+### 3. Dépendances & configuration
+- Résolution des conflits de lockfile, installation des dépendances manquantes pour les fonctions Netlify, correction des problèmes ES module/CommonJS.
+- Configuration des ports Netlify/Vite, création de `.env.local`.
+
+### 4. Debug des fonctions serverless
+- Problèmes avec `middy` (middleware) à cause des modules ES/CJS.
+- Suppression de `middy`, gestion manuelle du CORS et parsing du body.
+- Renommage des fonctions en `.cjs` pour éviter les warnings.
+
+### 5. Parsing FormData
+- Le frontend envoyait du FormData, le backend attendait du JSON : champs indéfinis et erreurs 400.
+- Intégration de `busboy` pour parser le FormData côté fonction serverless.
+
+### 6. Unification du démarrage dev
+- Création/MAJ de `start-dev.bat` et `start-dev.ps1` pour automatiser le nettoyage, la libération des ports, la suppression du cache, et le lancement de Netlify Dev + Vite.
+- Installation globale de Netlify CLI pour éviter les prompts répétés.
+
+### 7. Prêt pour la production
+- Ajout d'une logique dans `submit-contribution.cjs` pour simuler le succès en dev (pas de token GitHub) et utiliser l'API GitHub en prod.
+- Création de `public/data/pending-contributions.json` pour éviter les 404 à la première contribution.
+- Commit et push de tous les changements sur GitHub.
+
+### 8. Tests finaux
+- Après corrections, soumission d'une photo/témoignage et affichage dans la galerie OK.
+- HTTP 201 sur succès, UI affiche la nouvelle contribution (placeholder si image manquante).
+- Suggestions d'amélioration : fallback image, messages d'erreur, documentation, déploiement prod.
+
+### Points restants / prochaines étapes
+- En dev, les images ne sont pas uploadées (champ file ignoré), donc "Image non disponible".
+- En prod, vérifier la variable `GITHUB_TOKEN` sur Netlify et tester le workflow complet.
+- Améliorer l'UX pour les erreurs et fallback image, documenter le workflow pour les mainteneurs.
+
+---
+
+## Extrait de log de soumission de contribution (mode développement)
+
+```
+File field image received but ignored in production function
+FormData parsed successfully: {
+  type: 'photo',
+  displayName: 'Anonyme',
+  sessionId: 'mbtxx333k9gklrqnuv',
+  eventId: 'expo-emmanuelle-boisson',
+  locationId: 'quai-turenne-8',
+  contextType: 'event',
+  contextId: 'expo-emmanuelle-boisson'
+}
+Données extraites: {
+  type: 'photo',
+  displayName: 'Anonyme',
+  sessionId: 'mbtxx333k9gklrqnuv',
+  eventId: 'expo-emmanuelle-boisson',
+  locationId: 'quai-turenne-8'
+}
+Mode développement - contribution stockée localement uniquement
+Response with status 201 in 106 ms.
+```
+
+---
+
+## Plan de tests manuels d'intégration (rappel)
+
+### 1. Test du workflow de contribution depuis un événement
+- [x] Ouvrir la page de détail d'un événement
+- [x] Cliquer sur le bouton "Partager un souvenir"
+- [x] Vérifier que vous êtes redirigé vers la page de contribution (/community/contribute)
+- [x] Vérifier que le contexte de l'événement est correctement pré-rempli
+- [x] Soumettre une contribution (photo ou témoignage)
+- [x] Vérifier que la contribution apparaît dans la galerie
+
+### 2. Test du workflow de contribution depuis un lieu
+- [x] Ouvrir la page d'historique d'un lieu
+- [x] Cliquer sur le bouton "Partager un souvenir de ce lieu"
+- [x] Vérifier que vous êtes redirigé vers la page de contribution
+- [x] Vérifier que le contexte du lieu est correctement pré-rempli
+- [x] Soumettre une contribution
+- [x] Vérifier que la contribution apparaît dans la galerie
+
+### 3. Test du workflow GitHub Actions
+- [ ] Soumettre une contribution
+- [ ] Vérifier dans les logs GitHub Actions que le workflow est déclenché
+- [ ] Vérifier que l'image est correctement stockée sur GitHub
+- [ ] Vérifier que les données JSON sont mises à jour
+- [ ] Vérifier que la contribution apparaît dans la galerie après déploiement
+
+### 3bis. Test des améliorations de gestion d'images dans localStorage
+- [ ] Ouvrir la console du navigateur pour surveiller les logs
+- [ ] Soumettre plusieurs contributions avec des images de différentes tailles
+- [ ] Vérifier dans les logs que le nettoyage intelligent du localStorage fonctionne ("[FileService] Nettoyage préventif du localStorage")
+- [ ] Vérifier que les images sont correctement redimensionnées selon leur taille d'origine
+- [ ] Forcer un dépassement de quota en soumettant de très grosses images
+- [ ] Vérifier que le système gère correctement cette situation en supprimant les images les plus anciennes
+- [ ] Vérifier que les images importantes (préservées) ne sont pas supprimées
+- [ ] Fermer l'application et la rouvrir pour vérifier que les images sont toujours accessibles
+- [ ] Vérifier que les images manquantes affichent correctement l'image de secours
+
+### 4. Test de la persistance des images
+- [ ] Soumettre une contribution avec image
+- [ ] Vérifier que l'image est correctement affichée dans la galerie
+- [ ] Vérifier que l'image reste accessible après avoir fermé et rouvert l'application
+- [ ] Vérifier que l'image est correctement redimensionnée (version originale et miniature)
+
+### 5. Test des likes
+- [ ] Aimer une contribution
+- [ ] Vérifier que le compteur de likes augmente
+- [ ] Vérifier que votre like est persistant (après rechargement)
+- [ ] Retirer votre like
+- [ ] Vérifier que le compteur diminue
+
+### 6. Test de la modération
+- [ ] Soumettre une contribution avec du contenu approprié
+- [ ] Vérifier qu'elle est approuvée automatiquement
+- [ ] Soumettre une contribution avec un mot interdit
+- [ ] Vérifier qu'elle est rejetée ou mise en attente de modération
+- [ ] Vérifier le processus de modération manuelle (si implémenté)
+
+### 7. Test des filtres et de l'affichage contextuel
+- [ ] Vérifier que les filtres par type (photo/témoignage) fonctionnent
+- [ ] Vérifier que les contributions liées à un événement sont correctement filtrables
+- [ ] Vérifier que les contributions liées à un lieu sont correctement filtrables
+- [ ] Tester la navigation entre les différentes vues de la galerie
+
+---
+
+Pour toute évolution ou maintenance, se référer à cette annexe pour comprendre l'historique, les choix techniques, et les points d'attention restants.

@@ -112,7 +112,7 @@ try {
     
     # Démarrer Netlify Dev (qui inclut Vite automatiquement)
     npx netlify dev
-    
+
 } catch {
     Write-Host ""
     Write-Host "❌ Erreur lors du démarrage: $_" -ForegroundColor Red

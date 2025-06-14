@@ -9,6 +9,7 @@ import { associationInfo } from "@/data/association";
 import { teamMembers } from "@/data/team";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { getImagePath } from "@/utils/imagePaths";
 
 const About = () => {
   const navigate = useNavigate();
@@ -78,6 +79,23 @@ const About = () => {
           </TabsContent>
           
           <TabsContent value="association" className="space-y-4">
+            <div className="bg-white rounded-lg p-6 shadow-md mb-4">
+              <h2 className="text-lg font-semibold mb-3">Découvrez notre collectif en vidéo</h2>
+              <div className="aspect-video w-full mb-4 bg-gray-100 rounded overflow-hidden">
+                <video 
+                  className="w-full h-full object-contain" 
+                  controls 
+                  playsInline
+                  poster={getImagePath("/onboarding-image.webp")}
+                  src={getImagePath("/video/intro-video.mp4")}
+                >
+                  Votre navigateur ne prend pas en charge la lecture de vidéos.
+                </video>
+              </div>
+              <p className="text-gray-700 text-sm italic text-center">
+                Vidéo d'introduction du Collectif Île Feydeau (45 secondes)
+              </p>
+            </div>
             <div className="bg-white rounded-lg p-6 shadow-md">
               <div className="mb-4 pb-4 border-b">
                 <p>Contact : <a href={`mailto:${associationInfo.contactEmail}`} className="text-blue-600 hover:underline">{associationInfo.contactEmail}</a></p>

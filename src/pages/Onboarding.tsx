@@ -24,6 +24,14 @@ export default function Onboarding() {
     {
       title: "Bienvenue sur l'application Collectif Île Feydeau",
       description: [
+        "Découvrez notre collectif en vidéo"
+      ],
+      image: "/onboarding-image.webp",
+      video: "/video/intro-video.mp4" // Chemin vers votre vidéo d'introduction
+    },
+    {
+      title: "Bienvenue sur l'application Collectif Île Feydeau",
+      description: [
         "Découvrez le <strong>patrimoine unique</strong> de l'Île Feydeau à travers notre <strong>parcours interactif</strong>.",
         "Explorez les <strong>expositions</strong> et <strong>concerts</strong> organisés par les artistes du collectif."
       ],
@@ -125,23 +133,30 @@ export default function Onboarding() {
           dragConstraints={{ left: 0, right: 0 }}
           onDragEnd={handleDragEnd}
         >
-          {/* Section image - hauteur fixe pour garantir de l'espace pour le contenu et les boutons */}
+          {/* Section image ou vidéo - hauteur fixe pour garantir de l'espace pour le contenu et les boutons */}
           <div className="relative h-[30vh] md:h-[40vh] overflow-hidden bg-gray-200">
-            <div 
-              className="absolute inset-0 bg-center bg-no-repeat bg-contain" 
-              style={{ backgroundImage: `url(${getImagePath(slides[currentSlide].image)})` }}
-              aria-label={slides[currentSlide].title}
-            ></div>
-            
-            <div className="absolute inset-0 z-20 flex items-center justify-center p-4">
-              <div className="text-center text-white bg-black bg-opacity-30 p-3 rounded-lg max-w-[90%]">
-                <h1 className="text-xl md:text-2xl font-bold">{slides[currentSlide].title}</h1>
-              </div>
-            </div>
+            {slides[currentSlide].video ? (
+              <video 
+                className="absolute inset-0 w-full h-full object-contain" 
+                controls
+                autoPlay={currentSlide === 0}
+                playsInline
+                src={getImagePath(slides[currentSlide].video)}
+                aria-label={`Vidéo: ${slides[currentSlide].title}`}
+              />
+            ) : (
+              <div 
+                className="absolute inset-0 bg-center bg-no-repeat bg-contain" 
+                style={{ backgroundImage: `url(${getImagePath(slides[currentSlide].image)})` }}
+                aria-label={slides[currentSlide].title}
+              ></div>
+            )}
           </div>
           
           {/* Section texte - hauteur limitée avec scroll si nécessaire */}
           <div className="flex-1 p-4 overflow-y-auto pb-[80px]">
+            <h1 className="text-xl md:text-2xl font-bold text-center mb-4">{slides[currentSlide].title}</h1>
+            
             {Array.isArray(slides[currentSlide].description) ? (
               <div className="space-y-3">
                 {slides[currentSlide].description.map((desc, i) => (
