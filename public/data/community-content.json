@@ -1,6 +1,18 @@
 {
-  "lastUpdated": "2025-06-13T18:52:32.118Z",
+  "lastUpdated": "2025-06-14T03:32:33.716Z",
   "entries": [
+    {
+      "id": "entry-ee65f602-0ebd-45c6-94f8-18a83c4ff5cd",
+      "type": "testimonial",
+      "content": "Ceci est un témoignage de test généré automatiquement.",
+      "displayName": "Utilisateur Test",
+      "createdAt": "2025-06-14T03:32:33.716Z",
+      "sessionId": "session-64b378c9-0c3d-4179-8f3a-66f80e1d7f28",
+      "moderation": {
+        "status": "approved",
+        "moderatedAt": "2025-06-14T03:32:33.716Z"
+      }
+    },
     {
       "id": "entry-d0327148-6217-419b-8928-c6d1efc9fe41",
       "type": "testimonial",
