@@ -1,4 +1,6 @@
+import React from "react";
 import Share2 from "lucide-react/dist/esm/icons/share-2";
+import QrCode from "lucide-react/dist/esm/icons/qr-code";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,6 +9,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { trackFeatureUsage } from "../services/analytics";
+import { QRCodeSVG } from "qrcode.react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface ShareButtonProps {
   title: string;
@@ -17,6 +27,7 @@ interface ShareButtonProps {
 export function ShareButton({ title, text, url }: ShareButtonProps) {
   // Utiliser une référence pour s'assurer que l'URL est disponible après le rendu
   const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
+  const [showQrCode, setShowQrCode] = React.useState(false);
   
   const handleShare = async (platform: string) => {
     try {
@@ -143,35 +154,65 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
   };
   
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-[#4a5d94] transition-all duration-200 hover:shadow-sm"
-        >
-          <Share2 className="h-5 w-5" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[150px]">
-        {typeof navigator !== 'undefined' && navigator.share && (
-          <DropdownMenuItem onClick={() => handleShare("native")} className="cursor-pointer">
-            Partager
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-[#4a5d94] transition-all duration-200 hover:shadow-sm"
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[150px]">
+          {typeof navigator !== 'undefined' && navigator.share && (
+            <DropdownMenuItem onClick={() => handleShare("native")} className="cursor-pointer">
+              Partager
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem onClick={() => handleShare("facebook")} className="cursor-pointer">
+            Facebook
           </DropdownMenuItem>
-        )}
-        <DropdownMenuItem onClick={() => handleShare("facebook")} className="cursor-pointer">
-          Facebook
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("x")} className="cursor-pointer">
-          X
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("instagram")} className="cursor-pointer">
-          Instagram
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("copy")} className="cursor-pointer">
-          Copier le lien
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem onClick={() => handleShare("x")} className="cursor-pointer">
+            X
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare("instagram")} className="cursor-pointer">
+            Instagram
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare("copy")} className="cursor-pointer">
+            Copier le lien
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowQrCode(true)} className="cursor-pointer">
+            <QrCode className="h-4 w-4 mr-2" />
+            Afficher QR code
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
+      <Dialog open={showQrCode} onOpenChange={setShowQrCode}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Scannez ce QR code</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-4">
+            <QRCodeSVG 
+              value={shareUrl} 
+              size={200} 
+              bgColor={"#ffffff"}
+              fgColor={"#4a5d94"}
+              level={"H"}
+              includeMargin={true}
+            />
+            <p className="text-sm text-gray-500 mt-4 text-center">
+              Partagez facilement cette page en scannant le code QR
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowQrCode(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

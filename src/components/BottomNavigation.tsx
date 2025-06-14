@@ -7,7 +7,15 @@ import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import Gift from "lucide-react/dist/esm/icons/gift";
 import Instagram from "lucide-react/dist/esm/icons/instagram";
 import Camera from "lucide-react/dist/esm/icons/camera";
+import Twitter from "lucide-react/dist/esm/icons/twitter";
 import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function BottomNavigation() {
   const location = useLocation();
@@ -15,6 +23,10 @@ export function BottomNavigation() {
 
   const isActive = (path: string) => {
     return currentPath === path;
+  };
+  
+  const openSocialMedia = (url: string) => {
+    window.open(url, '_blank');
   };
 
   return (

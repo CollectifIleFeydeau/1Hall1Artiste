@@ -295,8 +295,27 @@ const eventScheduleData: EventDetails[] = [
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
 
-  }
+  },
+  {
+    id: "expo-elizaveta-vojnovich",
+    artistId: "elizaveta-vojnovich",
+    title: "Peinture",
+    description: "Artiste peintre aux inspirations variées",
+    time: "12h00 - 19h00, samedi et dimanche",
+    days: ["samedi", "dimanche"],
+    locationId: "quai-turenne-10",
 
+  },
+  {
+    id: "expo-fabienne-choyau",
+    artistId: "fabienne-choyau",
+    title: "Peinture contemporaine",
+    description: "Artiste peintre contemporaine explorant les couleurs et les formes",
+    time: "12h00 - 19h00, samedi et dimanche",
+    days: ["samedi", "dimanche"],
+    locationId: "allee-duguay-trouin-15",
+
+  }
 ];
 
 // Dynamically construct the events array by merging EventDetails with Artist data

@@ -1,4 +1,3 @@
-
 # Toutes nouvelles idées 
 
 # Priorités actuelles (phase de test et optimisation)
@@ -10,6 +9,9 @@
    * Section témoignages pour chaque événement
    => Voir @galerie-communautaire-concept.md
 --------------------------
+
+* Changer les immages de l'onboarding
+
 ## Améliorations en réflexion 
 
 ### 1. Fonctionnalités utilisateur
@@ -52,6 +54,12 @@
    * Amélioration de l'interface utilisateur
    * Mise en place de hooks de suivi des actions
 
+### 4. Navigation par chemins praticables
+   - Implémentation d'un système de waypoints pour représenter les chemins réels sur l'île Feydeau
+   - Algorithme A* pour calculer les itinéraires optimaux en suivant les rues et chemins
+   - Interface utilisateur permettant de basculer entre navigation simple et navigation avancée
+   - Visualisation des intersections et des points de passage sur la carte
+
 ### 5. Optimisations techniques
 
 * **Performance**
@@ -70,7 +78,7 @@
    * Tests unitaires et d'intégration
    * Gestion améliorée des erreurs
 
-## Optimisations complétées ✅
+## Optimisations complétées 
 
 1. **Support hors ligne**
    - Implémentation d'un Service Worker pour mettre en cache les ressources statiques
@@ -83,19 +91,21 @@
    - Mise à jour du composant AppImage pour utiliser les nouvelles optimisations
    - Standardisation des noms de fichiers d'images pour éviter les problèmes avec les caractères spéciaux
 
-3. **Nettoyage du code**
+
+
+4. **Nettoyage du code**
    - Suppression des fichiers et composants inutilisés
    - Consolidation des composants d'animation (PageTransition et SwipeNavigation)
 
-4. **Amélioration de la structure du routage**
+5. **Amélioration de la structure du routage**
    - Refactorisation du système de routage pour une meilleure maintenabilité
    - Implémentation d'une approche déclarative pour la configuration des routes
 
-4. **Gestion des erreurs**
+6. **Gestion des erreurs**
    - Améliorer la gestion des erreurs pour l'intégration HelloAsso
    - Ajouter des messages d'erreur conviviaux en cas de problème de connexion
 
-4. **Tests de performance**
+7. **Tests de performance**
    - Vérifier les performances sur différents appareils et navigateurs
    - Optimiser les temps de chargement sur les connexions lentes
 

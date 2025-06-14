@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Users, Heart } from "lucide-react";
+import Instagram from "lucide-react/dist/esm/icons/instagram";
+import Twitter from "lucide-react/dist/esm/icons/twitter";
 import { useNavigate } from "react-router-dom";
 import { aboutInfo } from "@/data/about";
 import { associationInfo } from "@/data/association";
@@ -79,6 +81,23 @@ const About = () => {
           </TabsContent>
           
           <TabsContent value="association" className="space-y-4">
+          <div className="flex items-center justify-center space-x-4 mt-4 mb-2">
+                <a href="https://www.instagram.com/ilefeydeau/" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-700 hover:text-[#E1306C] transition-colors">
+                  <Instagram className="h-5 w-5 mr-2" />
+                  <span>@ilefeydeau</span>
+                </a>
+                <a href="https://x.com/Ilefeydeau" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-700 hover:text-[#1DA1F2] transition-colors">
+                  <Twitter className="h-5 w-5 mr-2" />
+                  <span>@Ilefeydeau</span>
+                </a>
+                <a href={`mailto:${associationInfo.contactEmail}`} className="flex items-center text-gray-700 hover:text-[#4285F4] transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2">
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                  <span>{associationInfo.contactEmail}</span>
+                </a>
+              </div>
             <div className="bg-white rounded-lg p-6 shadow-md mb-4">
               <h2 className="text-lg font-semibold mb-3">Découvrez notre collectif en vidéo</h2>
               <div className="aspect-video w-full mb-4 bg-gray-100 rounded overflow-hidden">
@@ -86,21 +105,18 @@ const About = () => {
                   className="w-full h-full object-contain" 
                   controls 
                   playsInline
-                  poster={getImagePath("/onboarding-image.webp")}
+                  poster={getImagePath("intro-video-image.png")}
                   src={getImagePath("/video/intro-video.mp4")}
-                >
-                  Votre navigateur ne prend pas en charge la lecture de vidéos.
-                </video>
+                  aria-label="Vidéo de présentation du Collectif Île Feydeau"
+                />
               </div>
               <p className="text-gray-700 text-sm italic text-center">
                 Vidéo d'introduction du Collectif Île Feydeau (45 secondes)
               </p>
             </div>
+
+             
             <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="mb-4 pb-4 border-b">
-                <p>Contact : <a href={`mailto:${associationInfo.contactEmail}`} className="text-blue-600 hover:underline">{associationInfo.contactEmail}</a></p>
-                <p>Instagram : <a href={associationInfo.instagram} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{associationInfo.instagram.replace("https://www.", "@")}</a></p>
-              </div>
               
               <h2 className="text-lg font-semibold mb-3">Notre histoire</h2>
               <p className="text-gray-700 mb-4">

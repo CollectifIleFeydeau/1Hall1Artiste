@@ -285,6 +285,28 @@ export const artists: Artist[] = [
     bio: "Variabilis",
     contact: "contact@variabilis.fr",
     instagram: ""
+  },
+  {
+    id: "elizaveta-vojnovich",
+    name: "Elizaveta Vojnovich",
+    type: "exposition",
+    title: "Peinture",
+    description: "Artiste peintre aux inspirations variées",
+    bio: "Artiste peintre",
+    contact: "vojnovich@yandex.com",
+    email: "vojnovich@yandex.com",
+    instagram: "https://www.instagram.com/elizaveta.vojnovich"
+  },
+  {
+    id: "fabienne-choyau",
+    name: "Fabienne Choyau",
+    type: "exposition",
+    title: "Peinture contemporaine",
+    description: "Artiste peintre contemporaine explorant les couleurs et les formes",
+    bio: "Artiste peintre contemporaine",
+    contact: "fabienne.choyau@laposte.net",
+    email: "fabienne.choyau@laposte.net",
+    instagram: "https://www.instagram.com/fabienne.choyau.art"
   }
   // Ajouter d'autres artistes au besoin
 ];

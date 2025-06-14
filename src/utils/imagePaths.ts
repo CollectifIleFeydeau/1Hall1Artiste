@@ -3,8 +3,20 @@
  * pour GitHub Pages en production
  */
 
-// Préfixe pour les chemins d'images en production (GitHub Pages)
-export const BASE_PATH = import.meta.env.PROD ? '/1Hall1Artiste' : '';
+// Utiliser la base URL dynamique définie dans index.html
+export const getBasePath = (): string => {
+  // Récupérer la base URL depuis la configuration globale
+  if (typeof window !== 'undefined' && window.APP_CONFIG && window.APP_CONFIG.BASE_URL) {
+    // Enlever le slash final s'il existe pour la cohérence
+    const baseUrl = window.APP_CONFIG.BASE_URL.endsWith('/') 
+      ? window.APP_CONFIG.BASE_URL.slice(0, -1) 
+      : window.APP_CONFIG.BASE_URL;
+    return baseUrl;
+  }
+  
+  // Fallback pour le développement local ou si la configuration n'est pas disponible
+  return import.meta.env.PROD ? '/1Hall1Artiste' : '';
+};
 
 /**
  * Retourne le chemin complet d'une image en ajoutant le préfixe de base si nécessaire
@@ -21,5 +33,6 @@ export function getImagePath(path: string): string {
     segment ? encodeURIComponent(segment) : ''
   ).join('/');
   
-  return `${BASE_PATH}${encodedPath}`;
+  // Utiliser la fonction getBasePath pour obtenir le préfixe dynamique
+  return `${getBasePath()}${encodedPath}`;
 }
