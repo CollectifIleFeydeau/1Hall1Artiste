@@ -7,9 +7,11 @@ const BASE_URL = (typeof window !== 'undefined' && window.location.hostname.incl
   : '/data';
 
 // URL de base pour l'API serverless
-const API_URL = import.meta.env.VITE_USE_API === 'true'
-  ? 'http://localhost:8888/api'  // Netlify Dev avec redirection /api
-  : 'http://localhost:8888/api';
+const API_URL = (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
+  ? 'https://collectif-feydeau-api.netlify.app/.netlify/functions'
+  : import.meta.env.VITE_USE_API === 'true'
+    ? 'http://localhost:8888/.netlify/functions'
+    : 'http://localhost:8888/api';
 
 // Clé de stockage local pour les entrées
 const COMMUNITY_ENTRIES_KEY = 'community_entries';
@@ -71,9 +73,10 @@ const saveLikedEntries = (entryIds: string[]): void => {
  */
 export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
   try {
-    // En production, récupérer les données depuis l'API
-    // En développement, utiliser l'API si VITE_USE_API=true
-    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
+    // En production ou si l'API est activée, récupérer les données depuis l'API
+    if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
+        process.env.NODE_ENV !== 'development' || 
+        import.meta.env.VITE_USE_API === 'true') {
       const response = await fetch(`${API_URL}/community-entries`);
       
       if (!response.ok) {
@@ -117,8 +120,7 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
  */
 export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
   try {
-    // En production, appeler l'API pour supprimer la contribution
-    // En développement, utiliser l'API si VITE_USE_API=true
+    // En production ou si l'API est activée, appeler l'API pour supprimer la contribution
     if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
       const response = await fetch(`${API_URL}/community-entries/${entryId}`, {
         method: 'DELETE',
@@ -168,6 +170,27 @@ export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
  */
 export async function fetchFeaturedEntries(): Promise<CommunityEntry[]> {
   try {
+    // En production ou si l'API est activée, récupérer les données depuis l'API
+    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
+      const response = await fetch(`${API_URL}/featured-entries`);
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Récupérer les likes de l'utilisateur actuel
+      const likedEntries = getLikedEntries();
+      
+      // Ajouter un flag pour indiquer si l'entrée est likée par l'utilisateur actuel
+      return data.entries.map(entry => ({
+        ...entry,
+        isLikedByCurrentUser: likedEntries.includes(entry.id)
+      }));
+    }
+    
+    // En développement, récupérer les données depuis le fichier JSON
     const response = await fetch(`${BASE_URL}/featured-content.json`);
     
     if (!response.ok) {
@@ -176,7 +199,7 @@ export async function fetchFeaturedEntries(): Promise<CommunityEntry[]> {
     
     const data: CommunityContentData = await response.json();
     
-    // Récupérer les entrées aimées par l'utilisateur actuel
+    // Récupérer les likes de l'utilisateur actuel
     const likedEntries = getLikedEntries();
     
     // Marquer les entrées aimées par l'utilisateur
@@ -298,9 +321,10 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     // Générer un ID de session si non fourni
     const sessionId = AnonymousSessionService.getOrCreateSessionId();
     
-    // En production, envoyer à l'API serverless
-    // En développement, utiliser l'API si VITE_USE_API=true
-    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
+    // En production ou si l'API est activée, envoyer à l'API serverless
+    if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
+        process.env.NODE_ENV !== 'development' || 
+        import.meta.env.VITE_USE_API === 'true') {
       // Préparer les données pour l'API
       const formData = new FormData();
       formData.append('type', params.type);
@@ -731,9 +755,10 @@ export async function moderateContent(type: "photo" | "testimonial", content: st
     // Générer un ID temporaire pour cette demande de modération
     const tempEntryId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     
-    // En production, appeler l'API serverless de modération
-    // En développement, utiliser l'API si VITE_USE_API=true
-    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
+    // En production ou si l'API est activée, appeler l'API serverless de modération
+    if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
+        process.env.NODE_ENV !== 'development' || 
+        import.meta.env.VITE_USE_API === 'true') {
       const formData = new FormData();
       formData.append("type", type);
       formData.append("entryId", tempEntryId);
@@ -802,8 +827,10 @@ function removeLike(entryId: string): void {
 }
 
 async function sendLikeUpdate(entryId: string, isLiking: boolean, sessionId: string): Promise<void> {
-  // En production, envoyer la mise à jour à l'API serverless
-  if (process.env.NODE_ENV !== 'development') {
+  // En production ou si l'API est activée, envoyer la mise à jour à l'API serverless
+  if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
+      process.env.NODE_ENV !== 'development' || 
+      import.meta.env.VITE_USE_API === 'true') {
     const response = await fetch(`${API_URL}/toggle-like`, {
       method: "POST",
       headers: {

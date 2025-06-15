@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { initEmailJS, checkAndSendErrors, setupGlobalErrorHandler } from "./services/errorTracking";
 import { initAnalytics, trackEvent, synchronizeWithEmailJS } from "./services/analyticsService";
+import { initFirebaseAnalytics } from "./services/firebaseConfig";
+import { analytics, trackPageView, EventCategory, EventAction } from "./services/firebaseAnalytics";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
 import { Celebration } from "./components/Celebration";
@@ -39,6 +41,9 @@ import Onboarding from "./pages/Onboarding";
 import { LocationHistory } from "./pages/LocationHistory";
 import Analytics from "./pages/Analytics";
 import CommunityGallery from "./pages/CommunityGallery";
+import HistoricalGallery from "./pages/HistoricalGallery";
+import Galleries from "./pages/Galleries";
+import AnalyticsDebugger from "./debug/AnalyticsDebugger";
 
 const queryClient = new QueryClient();
 
@@ -97,9 +102,13 @@ const AnimatedRoutes: React.FC = () => {
   // Configuration des routes principales
   const mainRoutes: RouteConfig[] = [
     { path: '/map', component: Map, swipeable: true },
+    // Route de débogage pour Firebase Analytics (uniquement en dev)
+    { path: '/debug-analytics', component: AnalyticsDebugger },
     { path: '/program', component: Program, swipeable: true },
     { path: '/saved', component: SavedEvents, swipeable: true },
     { path: '/community', component: CommunityGallery, swipeable: true },
+    { path: '/galleries', component: Galleries, swipeable: false },
+    { path: '/historical', component: HistoricalGallery, swipeable: false },
     { path: '/about', component: About, swipeable: true },
     { path: '/donate', component: Donate, swipeable: true },
   ];
@@ -256,9 +265,16 @@ const App: React.FC = () => {
     setupGlobalErrorHandler();
     initEmailJS();
     
-    // Initialiser le service d'analyse
+    // Initialiser le service d'analyse (ancien système)
     const metadata = initAnalytics();
     console.log('[App] Service d\'analyse initialisé', metadata);
+    
+    // Initialiser Firebase Analytics (nouveau système)
+    initFirebaseAnalytics();
+    console.log('[App] Firebase Analytics initialisé');
+    
+    // Démarrer une nouvelle session analytics
+    analytics.startSession();
     
     // Suivre l'événement de démarrage de l'application
     trackEvent('app_start', {
@@ -273,27 +289,22 @@ const App: React.FC = () => {
       synchronizeWithEmailJS();
     }, 30 * 60 * 1000);
     
-    // Vérifier les erreurs lors de la fermeture de l'application
-    window.addEventListener('beforeunload', () => {
-      checkAndSendErrors();
-    });
+    // Vérifier et envoyer les erreurs stockées
+    checkAndSendErrors();
     
-    // Nettoyer les intervalles lors du démontage
+    // Configurer le gestionnaire d'erreurs global
+    setupGlobalErrorHandler();
+    
+    // Enregistrer le service worker pour le mode hors ligne
+    registerServiceWorker();
+    
+    // Précharger les données hors ligne
+    preloadAllOfflineData();
+    
+    // Nettoyer la session analytics à la fermeture
     return () => {
-      clearInterval(errorCheckInterval);
+      analytics.endSession();
     };
-  }, []);
-  
-  // Initialiser le mode hors-ligne
-  useEffect(() => {
-    // Vérifier si l'utilisateur est en ligne
-    if (navigator.onLine) {
-      // Précharger les données pour le mode hors-ligne
-      console.log('[App] Initialisation du préchargement des données hors-ligne');
-      preloadAllOfflineData().catch(error => {
-        console.error('[App] Erreur lors du préchargement des données hors-ligne:', error);
-      });
-    }
   }, []);
 
   // Fonction pour réinitialiser l'onboarding
@@ -352,20 +363,20 @@ const App: React.FC = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <HashRouter>
-            <NavigationProvider>
-              <AppContent />
-              <OfflineIndicator />
-              {celebration.show && (
-                <Celebration 
-                  trigger={celebration.show} 
-                  message={celebration.message} 
-                  duration={5000}
-                  onComplete={() => setCelebration({ show: false, message: '' })}
-                />
-              )}
-            </NavigationProvider>
-          </HashRouter>
+            <HashRouter>
+              <NavigationProvider>
+                <AppContent />
+                <OfflineIndicator />
+                {celebration.show && (
+                  <Celebration 
+                    trigger={celebration.show} 
+                    message={celebration.message} 
+                    duration={5000}
+                    onComplete={() => setCelebration({ show: false, message: '' })}
+                  />
+                )}
+              </NavigationProvider>
+            </HashRouter>
         </TooltipProvider>
       </LoadingProvider>
     </QueryClientProvider>

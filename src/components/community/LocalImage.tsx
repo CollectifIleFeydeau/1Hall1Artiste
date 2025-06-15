@@ -17,7 +17,7 @@ export const LocalImage: React.FC<LocalImageProps> = ({
   src, 
   alt, 
   className = '',
-  fallbackSrc = '/images/placeholder-image.jpg' 
+  fallbackSrc = 'images/placeholder-image.jpg' 
 }) => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -42,7 +42,7 @@ export const LocalImage: React.FC<LocalImageProps> = ({
             // Essayer de récupérer l'image depuis le cache du navigateur si disponible
             if (caches && 'match' in caches && retryCount === 0) {
               caches.open('image-cache').then(cache => {
-                cache.match(`/community-images/${imageId}`).then(response => {
+                cache.match(`community-images/${imageId}`).then(response => {
                   if (response) {
                     response.blob().then(blob => {
                       const objectURL = URL.createObjectURL(blob);

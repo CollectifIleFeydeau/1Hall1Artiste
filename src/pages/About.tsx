@@ -59,6 +59,7 @@ const About = () => {
               </div>
 
               
+              <div className="mt-8"></div>
               <h2 className="text-lg font-semibold mb-3">Architecture unique</h2>
               <p className="text-gray-700 mb-4">
                 Les immeubles de l'Île Feydeau se caractérisent par leurs façades ornées de mascarons, 
@@ -81,21 +82,21 @@ const About = () => {
           </TabsContent>
           
           <TabsContent value="association" className="space-y-4">
-          <div className="flex items-center justify-center space-x-4 mt-4 mb-2">
-                <a href="https://www.instagram.com/ilefeydeau/" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-700 hover:text-[#E1306C] transition-colors">
+          <div className="flex flex-col md:flex-row items-center justify-center md:space-x-4 space-y-3 md:space-y-0 mt-4 mb-2 p-4 bg-white rounded-lg shadow-md">
+                <a href="https://www.instagram.com/ilefeydeau/" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-700 hover:text-[#E1306C] transition-colors w-full md:w-auto justify-center">
                   <Instagram className="h-5 w-5 mr-2" />
                   <span>@ilefeydeau</span>
                 </a>
-                <a href="https://x.com/Ilefeydeau" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-700 hover:text-[#1DA1F2] transition-colors">
+                <a href="https://x.com/Ilefeydeau" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-700 hover:text-[#1DA1F2] transition-colors w-full md:w-auto justify-center">
                   <Twitter className="h-5 w-5 mr-2" />
                   <span>@Ilefeydeau</span>
                 </a>
-                <a href={`mailto:${associationInfo.contactEmail}`} className="flex items-center text-gray-700 hover:text-[#4285F4] transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2">
+                <a href={`mailto:${associationInfo.contactEmail}`} className="flex items-center text-gray-700 hover:text-[#4285F4] transition-colors w-full md:w-auto justify-center break-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2 flex-shrink-0">
                     <rect width="20" height="16" x="2" y="4" rx="2" />
                     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                   </svg>
-                  <span>{associationInfo.contactEmail}</span>
+                  <span className="truncate">{associationInfo.contactEmail}</span>
                 </a>
               </div>
             <div className="bg-white rounded-lg p-6 shadow-md mb-4">
