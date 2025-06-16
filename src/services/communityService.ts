@@ -6,12 +6,15 @@ const BASE_URL = (typeof window !== 'undefined' && window.location.hostname.incl
   ? 'https://raw.githubusercontent.com/CollectifIleFeydeau/community-content/main'
   : '/data';
 
-// URL de base pour l'API GitHub
+// URL de base pour l'API GitHub (pour les requêtes GET publiques)
 const API_URL = (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
   ? 'https://api.github.com/repos/CollectifIleFeydeau/community-content'
   : import.meta.env.VITE_USE_API === 'true'
     ? 'https://api.github.com/repos/CollectifIleFeydeau/community-content'
     : '/api';
+
+// URL du Worker Cloudflare qui sert de proxy pour les requêtes POST à l'API GitHub
+const WORKER_URL = 'https://github-contribution-proxy.collectifilefeydeau.workers.dev';
 
 // Clé de stockage local pour les entrées
 const COMMUNITY_ENTRIES_KEY = 'community_entries';
@@ -382,13 +385,16 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
         issueBody += `**ID de contexte:** ${params.contextId}\n`;
       }
       
-      // Envoyer la requête à l'API GitHub (version production)
-      const response = await fetch(`${API_URL}/issues`, {
+      // Envoyer la requête au Worker Cloudflare qui sert de proxy sécurisé
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      };
+      
+      // Le Worker s'occupe d'ajouter le token d'authentification GitHub
+      const response = await fetch(WORKER_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/vnd.github.v3+json'
-        },
+        headers,
         body: JSON.stringify({
           title: issueTitle,
           body: issueBody,

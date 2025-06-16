@@ -4,7 +4,7 @@
  */
 
 import { getFirebaseAnalytics } from '../services/firebaseConfig';
-import { firebaseApp } from '../services/firebaseConfig';
+import { getFirebaseApp } from '../services/firebaseConfig';
 import { getAnalytics, isSupported, setAnalyticsCollectionEnabled } from 'firebase/analytics';
 
 interface DiagnosticResult {
@@ -34,7 +34,8 @@ export const runAnalyticsDiagnostics = async (): Promise<DiagnosticResult[]> => 
     }
     
     // 2. Vérifier si Firebase est initialisé
-    const isFirebaseInitialized = !!firebaseApp;
+    const app = getFirebaseApp();
+    const isFirebaseInitialized = !!app;
     results.push({
       success: isFirebaseInitialized,
       message: isFirebaseInitialized 
@@ -47,7 +48,7 @@ export const runAnalyticsDiagnostics = async (): Promise<DiagnosticResult[]> => 
     }
     
     // 3. Vérifier la configuration Firebase
-    const config = firebaseApp.options;
+    const config = app ? app.options : {};
     const hasMeasurementId = !!config.measurementId;
     results.push({
       success: hasMeasurementId,
@@ -64,7 +65,11 @@ export const runAnalyticsDiagnostics = async (): Promise<DiagnosticResult[]> => 
     // 4. Vérifier si Analytics peut être initialisé
     let analytics = null;
     try {
-      analytics = getAnalytics(firebaseApp);
+      if (app) {
+        analytics = getAnalytics(app);
+      } else {
+        console.warn('Firebase non initialisé, impossible d\'utiliser Analytics');
+      }
       results.push({
         success: !!analytics,
         message: !!analytics 

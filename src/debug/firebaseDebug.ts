@@ -1,5 +1,5 @@
 import { getAnalytics, setAnalyticsCollectionEnabled, isSupported, setUserId } from "firebase/analytics";
-import { firebaseApp } from "../services/firebaseConfig";
+import { getFirebaseApp } from "../services/firebaseConfig";
 
 /**
  * Active le mode debug pour Firebase Analytics
@@ -15,7 +15,12 @@ export const initFirebaseDebug = async () => {
     }
 
     // Obtenir l'instance Analytics
-    const analytics = getAnalytics(firebaseApp);
+    const app = getFirebaseApp();
+    if (!app) {
+      console.warn('Firebase non initialisé, impossible d\'utiliser Analytics');
+      return;
+    }
+    const analytics = getAnalytics(app);
     
     // Activer la collecte de données
     setAnalyticsCollectionEnabled(analytics, true);
@@ -60,7 +65,12 @@ export const initFirebaseDebug = async () => {
  */
 export const sendTestEvent = () => {
   try {
-    const analytics = getAnalytics(firebaseApp);
+    const app = getFirebaseApp();
+    if (!app) {
+      console.warn('Firebase non initialisé, impossible d\'utiliser Analytics');
+      return;
+    }
+    const analytics = getAnalytics(app);
     if (!analytics) {
       console.warn("[FirebaseDebug] Analytics non disponible pour l'événement de test");
       return;

@@ -4,7 +4,7 @@
  */
 
 import { getAnalytics, logEvent } from 'firebase/analytics';
-import { firebaseApp } from '../services/firebaseConfig';
+import { getFirebaseApp } from '../services/firebaseConfig';
 import { analytics, EventCategory, EventAction } from '../services/firebaseAnalytics';
 
 /**
@@ -23,7 +23,12 @@ export const forceSendEvent = (eventName: string, eventParams: Record<string, an
 
   // 1. Méthode Firebase Analytics standard
   try {
-    const analyticsInstance = getAnalytics(firebaseApp);
+    const app = getFirebaseApp();
+    if (!app) {
+      console.warn('Firebase non initialisé, impossible d\'utiliser Analytics');
+      return;
+    }
+    const analyticsInstance = getAnalytics(app);
     logEvent(analyticsInstance, eventName, params);
     console.log(`[Force Send] Événement "${eventName}" envoyé via Firebase Analytics`);
   } catch (error) {

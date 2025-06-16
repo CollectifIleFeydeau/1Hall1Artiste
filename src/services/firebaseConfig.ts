@@ -4,7 +4,7 @@ import { getAnalytics } from 'firebase/analytics';
 
 // Configuration Firebase
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
   authDomain: "collectif-ile-feydeau----app.firebaseapp.com",
   projectId: "collectif-ile-feydeau----app",
   storageBucket: "collectif-ile-feydeau----app.firebasestorage.app",
@@ -13,16 +13,47 @@ const firebaseConfig = {
   measurementId: "G-D6K43TLW5Y" // ID Google Analytics
 };
 
-// Initialiser Firebase
-export const firebaseApp = initializeApp(firebaseConfig);
+// Variable pour stocker l'instance Firebase
+let firebaseApp: any = null;
 
-// Initialiser Analytics (uniquement côté client)
+// Fonction pour initialiser Firebase de manière conditionnelle
+const initializeFirebase = () => {
+  // Vérifier si la clé API est disponible
+  if (firebaseConfig.apiKey) {
+    try {
+      return initializeApp(firebaseConfig);
+    } catch (error) {
+      console.warn('Erreur lors de l\'initialisation de Firebase:', error);
+      return null;
+    }
+  } else {
+    console.warn('Firebase non initialisé: clé API manquante');
+    return null;
+  }
+};
+
+// Initialiser Firebase uniquement si la clé API est disponible
+export const getFirebaseApp = () => {
+  if (!firebaseApp) {
+    firebaseApp = initializeFirebase();
+  }
+  return firebaseApp;
+};
+
+// Initialiser Analytics (uniquement côté client et si Firebase est initialisé)
 let analyticsInstance: any = null;
 
 export const initFirebaseAnalytics = () => {
   if (typeof window !== 'undefined') {
-    analyticsInstance = getAnalytics(firebaseApp);
-    return analyticsInstance;
+    const app = getFirebaseApp();
+    if (app) {
+      try {
+        analyticsInstance = getAnalytics(app);
+        return analyticsInstance;
+      } catch (error) {
+        console.warn('Erreur lors de l\'initialisation de Firebase Analytics:', error);
+      }
+    }
   }
   return null;
 };
