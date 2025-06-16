@@ -221,16 +221,30 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
       }
       
       // 3. Fusionner les deux sources de données (en évitant les doublons)
-      const allEntries = [...entriesFromJson];
+      // Si nous avons des données du serveur (entries.json ou issues), nous les utilisons en priorité
+      // et ignorons les données locales pour éviter que des contributions supprimées ne réapparaissent
+      let allEntries = [];
       
-      // Ajouter les entrées des issues qui ne sont pas déjà dans le JSON
-      for (const issueEntry of entriesFromIssues) {
-        // Vérifier si cette issue existe déjà dans les entrées JSON (par ID)
-        const exists = allEntries.some(entry => entry.id === issueEntry.id);
+      // Si nous avons des données du serveur, nous les utilisons
+      if (entriesFromJson.length > 0 || entriesFromIssues.length > 0) {
+        allEntries = [...entriesFromJson];
         
-        if (!exists) {
-          allEntries.push(issueEntry);
+        // Ajouter les entrées des issues qui ne sont pas déjà dans le JSON
+        for (const issueEntry of entriesFromIssues) {
+          // Vérifier si cette issue existe déjà dans les entrées JSON (par ID)
+          const exists = allEntries.some(entry => entry.id === issueEntry.id);
+          
+          if (!exists) {
+            allEntries.push(issueEntry);
+          }
         }
+        
+        // Mettre à jour le stockage local avec les données du serveur
+        saveEntries(allEntries);
+      } else {
+        // Si nous n'avons pas de données du serveur, utiliser les données locales
+        console.log('[CommunityService] Aucune donnée du serveur, utilisation des données locales');
+        allEntries = getStoredEntries();
       }
       
       console.log(`[CommunityService] Total de ${allEntries.length} entrées après fusion`);
@@ -412,22 +426,91 @@ export async function fetchFeaturedEntries(): Promise<CommunityEntry[]> {
  */
 export async function toggleLike(entryId: string, sessionId: string): Promise<CommunityEntry> {
   try {
+    console.log(`[CommunityService] Tentative de like/unlike pour l'entrée ${entryId}`);
+    
     // Vérifier si l'utilisateur a déjà aimé cette entrée
     const likedEntries = getLikedEntries();
     const alreadyLiked = likedEntries.includes(entryId);
     const action = alreadyLiked ? 'unlike' : 'like';
     
+    console.log(`[CommunityService] Action: ${action}, Déjà liké: ${alreadyLiked}`);
+    
     // Récupérer les entrées stockées
-    const entries = getStoredEntries();
+    let entries = getStoredEntries();
     
     // Trouver l'entrée à mettre à jour
-    const entryIndex = entries.findIndex(entry => entry.id === entryId);
+    let entryIndex = entries.findIndex(entry => entry.id === entryId);
+    let entry;
     
+    // Si l'entrée n'existe pas, essayer de la récupérer depuis le DOM
     if (entryIndex === -1) {
-      throw new Error(`Entrée non trouvée: ${entryId}`);
+      console.log(`[CommunityService] Entrée ${entryId} non trouvée dans la collection locale, recherche dans le DOM...`);
+      
+      // Essayer de récupérer les données de l'entrée depuis le DOM
+      const entryElement = document.querySelector(`[data-entry-id="${entryId}"]`);
+      if (entryElement) {
+        // Extraire les données de l'entrée depuis les attributs data-*
+        const type = entryElement.getAttribute('data-entry-type') as EntryType || 'photo';
+        const displayName = entryElement.getAttribute('data-entry-author') || 'Contributeur anonyme';
+        const imageUrl = entryElement.querySelector('img')?.src || undefined;
+        const description = entryElement.getAttribute('data-entry-description') || '';
+        
+        console.log(`[CommunityService] Données récupérées depuis le DOM: type=${type}, auteur=${displayName}`);
+        
+        // Créer une nouvelle entrée avec les données récupérées
+        const newEntry: CommunityEntry = {
+          id: entryId,
+          type: type,
+          displayName: displayName,
+          createdAt: new Date().toISOString(),
+          likes: 0,
+          likedBy: [],
+          isLikedByCurrentUser: false,
+          moderation: {
+            status: 'approved',
+            moderatedAt: new Date().toISOString()
+          }
+        };
+        
+        // Ajouter les champs spécifiques au type
+        if (type === 'photo' && imageUrl) {
+          newEntry.imageUrl = imageUrl;
+          newEntry.thumbnailUrl = imageUrl;
+          newEntry.description = description;
+        }
+        
+        entries.push(newEntry);
+        entryIndex = entries.length - 1;
+        entry = newEntry;
+        
+        console.log(`[CommunityService] Nouvelle entrée créée à partir du DOM: ${JSON.stringify(newEntry)}`);
+      } else {
+        // Si l'entrée n'est pas trouvée dans le DOM, créer une entrée minimale
+        console.log(`[CommunityService] Création d'une entrée temporaire minimale pour le like avec ID: ${entryId}`);
+        const newEntry: CommunityEntry = {
+          id: entryId,
+          type: 'photo',
+          displayName: 'Contributeur anonyme',
+          createdAt: new Date().toISOString(),
+          likes: 0,
+          likedBy: [],
+          isLikedByCurrentUser: false,
+          moderation: {
+            status: 'approved',
+            moderatedAt: new Date().toISOString()
+          }
+        };
+        
+        entries.push(newEntry);
+        entryIndex = entries.length - 1;
+        entry = newEntry;
+      }
+      
+      // Sauvegarder l'entrée dans le stockage local
+      saveEntries(entries);
+    } else {
+      entry = entries[entryIndex];
     }
-    
-    const entry = entries[entryIndex];
     
     // Mettre à jour le nombre de likes
     if (!alreadyLiked) {
@@ -441,6 +524,8 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
       
       // Ajouter l'ID de l'entrée à la liste des entrées aimées
       addLike(entryId);
+      
+      console.log(`[CommunityService] Like ajouté pour l'entrée ${entryId}, nouveau total: ${entry.likes}`);
     } else {
       // Retirer un like
       entry.likes = Math.max(0, (entry.likes || 0) - 1);
@@ -453,6 +538,8 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
       
       // Retirer l'ID de l'entrée de la liste des entrées aimées
       removeLike(entryId);
+      
+      console.log(`[CommunityService] Like retiré pour l'entrée ${entryId}, nouveau total: ${entry.likes}`);
     }
     
     // Mettre à jour l'entrée dans le stockage local
