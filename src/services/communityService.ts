@@ -29,11 +29,9 @@ const API_URL = (typeof window !== 'undefined' && window.location.hostname.inclu
 // URL du Worker Cloudflare qui sert de proxy pour les requêtes POST à l'API GitHub
 const WORKER_URL = 'https://github-contribution-proxy.collectifilefeydeau.workers.dev';
 
-// Clé de stockage local pour les entrées
+// Clés pour le stockage local
 const COMMUNITY_ENTRIES_KEY = 'community_entries';
-
-// Clé de stockage local pour les likes
-const LIKES_KEY = 'community_liked_entries';
+const COMMUNITY_LIKES_KEY = 'community_liked_entries'; // Clé pour stocker les likes
 
 // Récupérer les entrées stockées localement ou renvoyer un tableau vide
 const getStoredEntries = (): CommunityEntry[] => {
@@ -67,7 +65,7 @@ const saveEntries = (entries: CommunityEntry[]): void => {
 // Récupérer les IDs des entrées aimées par l'utilisateur
 const getLikedEntries = (): string[] => {
   try {
-    const likedEntries = localStorage.getItem(LIKES_KEY);
+    const likedEntries = localStorage.getItem(COMMUNITY_LIKES_KEY);
     return likedEntries ? JSON.parse(likedEntries) : [];
   } catch (error) {
     console.error('Erreur lors de la récupération des likes:', error);
@@ -78,7 +76,7 @@ const getLikedEntries = (): string[] => {
 // Sauvegarder les IDs des entrées aimées par l'utilisateur
 const saveLikedEntries = (entryIds: string[]): void => {
   try {
-    localStorage.setItem(LIKES_KEY, JSON.stringify(entryIds));
+    localStorage.setItem(COMMUNITY_LIKES_KEY, JSON.stringify(entryIds));
   } catch (error) {
     console.error('Erreur lors de la sauvegarde des likes:', error);
   }
@@ -113,7 +111,7 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
     }
     
     // En développement, récupérer les données depuis le localStorage
-    const entriesString = localStorage.getItem('community_entries');
+    const entriesString = localStorage.getItem(COMMUNITY_ENTRIES_KEY);
     const entries = entriesString ? JSON.parse(entriesString) : [];
     
     // Récupérer les likes de l'utilisateur actuel
@@ -962,13 +960,13 @@ function addLike(entryId: string): void {
   const likes = getLikedEntries();
   if (!likes.includes(entryId)) {
     likes.push(entryId);
-    localStorage.setItem(LIKES_KEY, JSON.stringify(likes));
+    localStorage.setItem(COMMUNITY_LIKES_KEY, JSON.stringify(likes));
   }
 }
 
 function removeLike(entryId: string): void {
   const likes = getLikedEntries().filter(id => id !== entryId);
-  localStorage.setItem(LIKES_KEY, JSON.stringify(likes));
+  localStorage.setItem(COMMUNITY_LIKES_KEY, JSON.stringify(likes));
 }
 
 async function sendLikeUpdate(entryId: string, isLiking: boolean, sessionId: string): Promise<void> {
