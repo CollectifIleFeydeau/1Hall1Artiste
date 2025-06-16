@@ -417,37 +417,6 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
     const alreadyLiked = likedEntries.includes(entryId);
     const action = alreadyLiked ? 'unlike' : 'like';
     
-    // En production, utiliser l'API GitHub pour la modération
-    // En développement, utiliser l'API si VITE_USE_API=true
-    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
-      // Utiliser l'API GitHub pour mettre à jour le like
-      const response = await fetch(`${API_URL}/issues/${entryId}/reactions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          reaction: action === 'like' ? '+1' : '-1'
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      
-      // Mettre à jour la liste locale des likes
-      if (action === 'like') {
-        addLike(entryId);
-      } else {
-        removeLike(entryId);
-      }
-      
-      return result.entry;
-    }
-    
-    // En développement, gérer localement
     // Récupérer les entrées stockées
     const entries = getStoredEntries();
     
@@ -489,6 +458,9 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
     // Mettre à jour l'entrée dans le stockage local
     entries[entryIndex] = entry;
     saveEntries(entries);
+    
+    // Envoyer la mise à jour au serveur (pour traitement asynchrone)
+    await sendLikeUpdate(entryId, !alreadyLiked, sessionId);
     
     return entry;
   } catch (error) {

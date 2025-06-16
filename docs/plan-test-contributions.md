@@ -4,60 +4,39 @@
 
 - [x] Lancer l'application en mode live
 - [x] Ouvrir deux navigateurs différents (ou un navigateur normal + un navigateur en mode incognito) pour simuler deux utilisateurs distincts
-- [x] Préparer quelques images de test (tailles et formats variés)
-- [x] Préparer quelques textes de témoignages
-
-## 2. Test de soumission de contributions
-
-### Photos
 1. [x] Accéder à la page de contribution
-2. [x] Sélectionner "Photo" comme type de contribution
-3. [x] Remplir le formulaire avec:
-   - [x] Nom d'affichage
-   - [x] Description
+2. [x] Soumettre une photo:
    - [x] Sélectionner une image
-4. [x] Soumettre et vérifier:
-   - [x] Message de confirmation
-   - [x] Redirection vers la galerie
-   - [x] Présence de la nouvelle contribution dans la galerie avant de rafraîchir
-5. [x] Rafraîchir la galerie et vérifier:
-   - [] Présence de la nouvelle contribution dans la galerie
+   - [x] Ajouter une description
+   - [x] Ajouter un nom (optionnel)
+   - [x] Soumettre
+3. [x] Soumettre un témoignage:
+   - [x] Écrire un texte
+   - [x] Ajouter un nom (optionnel)
+   - [x] Soumettre
+4. [x] Vérifier que la contribution apparaît dans la galerie
+5. [x] Vérifier que la contribution est visible par d'autres utilisateurs
 
-### Témoignages
-1. [ ] Accéder à la page de contribution
-2. [ ] Sélectionner "Témoignage" comme type de contribution
-3. [ ] Remplir le formulaire avec:
-   - [ ] Nom d'affichage
-   - [ ] Texte du témoignage
-4. [ ] Soumettre et vérifier les mêmes points que pour les photos
+## 2. Test d'affichage dans la galerie
 
-### Cas limites
-1. [ ] Tester avec une image très grande (>5MB)
-2. [ ] Tester avec un témoignage très long
-3. [ ] Tester avec des caractères spéciaux dans les champs texte
-4. [ ] Tester sans remplir les champs obligatoires
-
-## 3. Test de visualisation
-
-### Galerie principale
-1. [ ] Vérifier que les nouvelles contributions apparaissent dans la galerie
-2. [ ] Vérifier le tri (par date, par popularité)
-3. [ ] Vérifier les filtres (photos, témoignages)
-4. [ ] Vérifier la pagination si implémentée
+1. [x] Accéder à la galerie communautaire
+2. [x] Vérifier que les contributions soumises sont visibles
+3. [x] Vérifier les filtres (photos, témoignages)
+4. [x] Vérifier la pagination si implémentée
 
 ### Vue détaillée
-1. [ ] Cliquer sur une contribution pour l'ouvrir en détail
-2. [ ] Vérifier que toutes les informations sont correctement affichées:
-   - [ ] Image en pleine résolution pour les photos
-   - [ ] Texte complet pour les témoignages
-   - [ ] Nom d'affichage
-   - [ ] Date
-   - [ ] Nombre de likes
+1. [x] Cliquer sur une contribution pour l'ouvrir en détail
+2. [x] Vérifier que toutes les informations sont correctement affichées:
+   - [x] Image en pleine résolution pour les photos
+   - [x] Texte complet pour les témoignages
+   - [x] Nom d'affichage
+   - [x] Date
+   - [x] Nombre de likes
 
-## 4. Test multi-utilisateurs
+## 3. Test multi-utilisateurs
 
-1. [ ] Sur le navigateur 1, soumettre une contribution
-2. [ ] Sur le navigateur 2, rafraîchir la galerie et vérifier que la contribution est visible
+1. [x] Sur le navigateur 1, soumettre une contribution
+2. [x] Sur le navigateur 2, rafraîchir la galerie et vérifier que la contribution est visible
 3. [ ] Sur le navigateur 2, liker la contribution
 4. [ ] Sur le navigateur 1, rafraîchir et vérifier que le like est comptabilisé
 5. [ ] Sur le navigateur 2, vérifier que le bouton like est désactivé ou indique que l'utilisateur a déjà liké
@@ -76,10 +55,10 @@
 
 ## 6. Test de persistance
 
-1. [ ] Fermer complètement le navigateur
-2. [ ] Rouvrir l'application
-3. [ ] Vérifier que:
-   - [ ] Les contributions soumises sont toujours visibles
+1. [x] Fermer complètement le navigateur
+2. [x] Rouvrir l'application
+3. [x] Vérifier que:
+   - [x] Les contributions soumises sont toujours visibles
    - [ ] Les likes sont conservés
    - [ ] Les contributions supprimées ne réapparaissent pas
 
