@@ -81,7 +81,7 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
         process.env.NODE_ENV !== 'development' || 
         import.meta.env.VITE_USE_API === 'true') {
       // Utiliser l'API GitHub pour récupérer le contenu du fichier JSON
-      const response = await fetch(`${BASE_URL}/data/community-content.json`);
+      const response = await fetch(`${BASE_URL}/entries.json`);
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);

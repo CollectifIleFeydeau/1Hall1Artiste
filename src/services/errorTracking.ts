@@ -158,12 +158,14 @@ export const sendErrorsToTrackingService = async (): Promise<boolean> => {
         app_name: 'Collectif Feydeau'
       };
       
-      // Envoyer l'email sans spécifier le USER_ID
-      // EmailJS le récupérera depuis le script chargé dans index.html
+      // Envoyer l'email avec la clé publique explicite
+      // Même si elle est déjà initialisée dans index.html, la fournir ici pour s'assurer qu'elle est disponible
+      const PUBLIC_KEY = 'HoNWMyqrINGzjeK6E';
       const response = await emailjs.send(
         EMAIL_SERVICE_ID,
         EMAIL_TEMPLATE_ID,
-        templateParams
+        templateParams,
+        PUBLIC_KEY
       );
       
       if (response.status === 200) {
