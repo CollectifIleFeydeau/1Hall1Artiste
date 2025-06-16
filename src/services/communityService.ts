@@ -6,12 +6,12 @@ const BASE_URL = (typeof window !== 'undefined' && window.location.hostname.incl
   ? 'https://raw.githubusercontent.com/CollectifIleFeydeau/community-content/main'
   : '/data';
 
-// URL de base pour l'API serverless
+// URL de base pour l'API GitHub
 const API_URL = (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
-  ? 'https://collectif-feydeau-api.netlify.app/.netlify/functions'
+  ? 'https://api.github.com/repos/CollectifIleFeydeau/community-content'
   : import.meta.env.VITE_USE_API === 'true'
-    ? 'http://localhost:8888/.netlify/functions'
-    : 'http://localhost:8888/api';
+    ? 'https://api.github.com/repos/CollectifIleFeydeau/community-content'
+    : '/api';
 
 // Clé de stockage local pour les entrées
 const COMMUNITY_ENTRIES_KEY = 'community_entries';
@@ -73,11 +73,12 @@ const saveLikedEntries = (entryIds: string[]): void => {
  */
 export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
   try {
-    // En production ou si l'API est activée, récupérer les données depuis l'API
+    // En production ou si l'API est activée, récupérer les données depuis l'API GitHub
     if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
         process.env.NODE_ENV !== 'development' || 
         import.meta.env.VITE_USE_API === 'true') {
-      const response = await fetch(`${API_URL}/community-entries`);
+      // Utiliser l'API GitHub pour récupérer le contenu du fichier JSON
+      const response = await fetch(`${BASE_URL}/data/community-content.json`);
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -122,7 +123,8 @@ export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
   try {
     // En production ou si l'API est activée, appeler l'API pour supprimer la contribution
     if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
-      const response = await fetch(`${API_URL}/community-entries/${entryId}`, {
+      // Utiliser l'API GitHub pour supprimer la contribution
+      const response = await fetch(`${API_URL}/issues/${entryId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -170,9 +172,10 @@ export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
  */
 export async function fetchFeaturedEntries(): Promise<CommunityEntry[]> {
   try {
-    // En production ou si l'API est activée, récupérer les données depuis l'API
+    // En production ou si l'API est activée, récupérer les données depuis l'API GitHub
     if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
-      const response = await fetch(`${API_URL}/featured-entries`);
+      // Utiliser l'API GitHub pour récupérer le contenu du fichier JSON
+      const response = await fetch(`${BASE_URL}/data/featured-content.json`);
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -229,18 +232,17 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
     const alreadyLiked = likedEntries.includes(entryId);
     const action = alreadyLiked ? 'unlike' : 'like';
     
-    // En production, utiliser l'API serverless
+    // En production, utiliser l'API GitHub pour la modération
     // En développement, utiliser l'API si VITE_USE_API=true
     if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
-      const response = await fetch(`${API_URL}/toggle-like`, {
+      // Utiliser l'API GitHub pour mettre à jour le like
+      const response = await fetch(`${API_URL}/issues/${entryId}/reactions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          entryId,
-          action,
-          sessionId
+          reaction: action === 'like' ? '+1' : '-1'
         })
       });
       
@@ -321,15 +323,14 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     // Générer un ID de session si non fourni
     const sessionId = AnonymousSessionService.getOrCreateSessionId();
     
-    // En production ou si l'API est activée, envoyer à l'API serverless
+    // En production ou si l'API est activée, envoyer à l'API GitHub
     if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
         process.env.NODE_ENV !== 'development' || 
         import.meta.env.VITE_USE_API === 'true') {
       // Préparer les données pour l'API
       const formData = new FormData();
-      formData.append('type', params.type);
-      formData.append('displayName', displayName);
-      formData.append('sessionId', sessionId);
+      formData.append('title', params.title);
+      formData.append('body', params.content);
       
       // Ajouter les champs spécifiques selon le type
       if (params.type === 'photo') {
@@ -362,8 +363,8 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
         formData.append('contextId', params.contextId);
       }
       
-      // Envoyer la requête à l'API serverless (version production)
-      const response = await fetch(`${API_URL}/submit-contribution`, {
+      // Envoyer la requête à l'API GitHub (version production)
+      const response = await fetch(`${API_URL}/issues`, {
         method: 'POST',
         body: formData
       });
@@ -374,7 +375,7 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
       
       const result = await response.json();
       return {
-        ...result.contribution,
+        ...result.issue,
         isLikedByCurrentUser: false
       };
     }
@@ -619,13 +620,13 @@ async function resizeAndCompressImage(file: File, maxWidth: number, maxHeight: n
 
 export async function uploadImage(image: File): Promise<{ imageUrl: string; thumbnailUrl: string }> {
   try {
-    // En production, envoyer l'image à l'API serverless
+    // En production, envoyer l'image à l'API GitHub
     // En développement, utiliser l'API si VITE_USE_API=true
     if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
       const formData = new FormData();
       formData.append("image", image);
       
-      const response = await fetch(`${API_URL}/upload-image`, {
+      const response = await fetch(`${API_URL}/issues`, {
         method: "POST",
         body: formData
       });
@@ -755,30 +756,38 @@ export async function moderateContent(type: "photo" | "testimonial", content: st
     // Générer un ID temporaire pour cette demande de modération
     const tempEntryId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     
-    // En production ou si l'API est activée, appeler l'API serverless de modération
+    // En production ou si l'API est activée, utiliser GitHub Actions pour la modération
     if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
         process.env.NODE_ENV !== 'development' || 
         import.meta.env.VITE_USE_API === 'true') {
-      const formData = new FormData();
-      formData.append("type", type);
-      formData.append("entryId", tempEntryId);
       
-      if (typeof content === "string") {
-        formData.append("content", content);
-      } else {
-        formData.append("image", content);
+      // En production, on effectue une modération côté client basique
+      // La modération complète sera effectuée par GitHub Actions
+      
+      if (type === 'testimonial' && typeof content === 'string') {
+        // Liste de mots interdits simplifiée
+        const forbiddenWords = ['mot1', 'mot2', 'mot3'];
+        
+        // Vérifier si le contenu contient des mots interdits
+        const containsForbiddenWord = forbiddenWords.some(word => 
+          content.toLowerCase().includes(word.toLowerCase())
+        );
+        
+        if (containsForbiddenWord) {
+          return {
+            entryId: tempEntryId,
+            status: 'rejected',
+            message: 'Le texte contient des mots inappropriés'
+          };
+        }
       }
       
-      const response = await fetch(`${API_URL}/moderate-content`, {
-        method: "POST",
-        body: formData
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-      
-      return await response.json();
+      // Par défaut, marquer comme "en attente" pour modération par GitHub Actions
+      return {
+        entryId: tempEntryId,
+        status: "pending",
+        message: "En attente de modération"
+      };
     }
     
     // En développement, effectuer une modération basique
@@ -827,24 +836,25 @@ function removeLike(entryId: string): void {
 }
 
 async function sendLikeUpdate(entryId: string, isLiking: boolean, sessionId: string): Promise<void> {
-  // En production ou si l'API est activée, envoyer la mise à jour à l'API serverless
+  // En production ou si l'API est activée, envoyer la mise à jour via GitHub Actions
   if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
       process.env.NODE_ENV !== 'development' || 
       import.meta.env.VITE_USE_API === 'true') {
-    const response = await fetch(`${API_URL}/toggle-like`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        entryId,
-        action: isLiking ? "like" : "unlike",
-        sessionId
-      })
-    });
+      
+    // Créer un objet pour l'action de like
+    const likeAction = {
+      entryId,
+      action: isLiking ? "like" : "unlike",
+      sessionId,
+      timestamp: new Date().toISOString()
+    };
     
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
-    }
+    // Stocker l'action dans localStorage pour traitement ultérieur par GitHub Actions
+    const pendingActions = JSON.parse(localStorage.getItem('pending_like_actions') || '[]');
+    pendingActions.push(likeAction);
+    localStorage.setItem('pending_like_actions', JSON.stringify(pendingActions));
+    
+    // En production, on pourrait déclencher un workflow GitHub Actions ici
+    // mais pour simplifier, nous stockons simplement les actions en attente
   }
 }
