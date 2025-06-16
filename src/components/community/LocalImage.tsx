@@ -17,7 +17,7 @@ export const LocalImage: React.FC<LocalImageProps> = ({
   src, 
   alt, 
   className = '',
-  fallbackSrc = 'images/placeholder-image.jpg' 
+  fallbackSrc = '/images/placeholder-image.jpg' 
 }) => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -85,9 +85,14 @@ export const LocalImage: React.FC<LocalImageProps> = ({
 
   if (error) {
     // Essayer d'utiliser l'image de secours
-    return (
+      // Utiliser une URL absolue pour l'image de secours
+      const absoluteFallbackSrc = fallbackSrc.startsWith('/') 
+        ? window.location.origin + fallbackSrc
+        : fallbackSrc;
+        
+      return (
       <img 
-        src={fallbackSrc} 
+        src={absoluteFallbackSrc} 
         alt={alt} 
         className={className} 
         onError={(e) => {
@@ -103,6 +108,11 @@ export const LocalImage: React.FC<LocalImageProps> = ({
     );
   }
 
+  // Utiliser une URL absolue pour l'image de secours
+  const absoluteFallbackSrc = fallbackSrc.startsWith('/') 
+    ? window.location.origin + fallbackSrc
+    : fallbackSrc;
+    
   return (
     <img 
       src={imageSrc} 
@@ -111,8 +121,8 @@ export const LocalImage: React.FC<LocalImageProps> = ({
       onError={(e) => {
         // En cas d'erreur de chargement, essayer l'image de secours
         console.log(`Erreur de chargement de l'image, utilisation de l'image de secours`);
-        if (e.currentTarget.src !== fallbackSrc) {
-          e.currentTarget.src = fallbackSrc;
+        if (e.currentTarget.src !== absoluteFallbackSrc) {
+          e.currentTarget.src = absoluteFallbackSrc;
         } else {
           e.currentTarget.style.display = 'none';
           e.currentTarget.parentElement?.classList.add('bg-gray-200', 'flex', 'items-center', 'justify-center');

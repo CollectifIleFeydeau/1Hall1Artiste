@@ -6,6 +6,11 @@ const BASE_URL = (typeof window !== 'undefined' && window.location.hostname.incl
   ? 'https://raw.githubusercontent.com/CollectifIleFeydeau/community-content/main'
   : '/data';
 
+// URL de base pour les images (à adapter selon l'environnement)
+const IMAGES_BASE_URL = (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
+  ? 'https://collectifilefeydeau.github.io/images'
+  : '/images';
+
 // URL de base pour l'API GitHub (pour les requêtes GET publiques)
 const API_URL = (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
   ? 'https://api.github.com/repos/CollectifIleFeydeau/community-content'
@@ -107,10 +112,24 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
     const likedEntries = getLikedEntries();
     
     // Ajouter un flag pour indiquer si l'entrée est likée par l'utilisateur actuel
-    return entries.map(entry => ({
-      ...entry,
-      isLikedByCurrentUser: likedEntries.includes(entry.id)
-    }));
+    // et corriger les URLs des images si nécessaire
+    return entries.map(entry => {
+      // Corriger les URLs des images pour qu'elles soient absolues
+      const processedEntry = { ...entry };
+      
+      if (processedEntry.imageUrl && !processedEntry.imageUrl.startsWith('data:') && !processedEntry.imageUrl.startsWith('http')) {
+        processedEntry.imageUrl = window.location.origin + (processedEntry.imageUrl.startsWith('/') ? '' : '/') + processedEntry.imageUrl;
+      }
+      
+      if (processedEntry.thumbnailUrl && !processedEntry.thumbnailUrl.startsWith('data:') && !processedEntry.thumbnailUrl.startsWith('http')) {
+        processedEntry.thumbnailUrl = window.location.origin + (processedEntry.thumbnailUrl.startsWith('/') ? '' : '/') + processedEntry.thumbnailUrl;
+      }
+      
+      return {
+        ...processedEntry,
+        isLikedByCurrentUser: likedEntries.includes(entry.id)
+      };
+    });
   } catch (error) {
     console.error('Erreur lors de la récupération des contributions:', error);
     return [];
@@ -706,9 +725,11 @@ export async function uploadImage(image: File): Promise<{ imageUrl: string; thum
       const data = await response.json();
       
       // Extraire l'URL de l'image du corps de l'issue
+      // En production, utiliser l'URL absolue pour les images
+      const imageUrl = base64Image;
       return {
-        imageUrl: base64Image,
-        thumbnailUrl: base64Image
+        imageUrl: imageUrl,
+        thumbnailUrl: imageUrl
       };
     }
     
@@ -764,6 +785,14 @@ export async function uploadImage(image: File): Promise<{ imageUrl: string; thum
             const base64String = reader.result as string;
             // Générer un ID unique pour cette image
             const imageId = `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+            
+            // Ajouter l'origine à l'URL si nécessaire pour les chemins absolus
+            const processImageUrl = (url: string) => {
+              if (url.startsWith('data:')) return url; // Déjà en base64
+              if (url.startsWith('http')) return url; // Déjà une URL absolue
+              // Construire une URL absolue pour les chemins relatifs
+              return window.location.origin + (url.startsWith('/') ? '' : '/') + url;
+            };
             
             console.log("[FileService] Stockage de l'image:", finalImage.name, `(${Math.round(base64String.length / 1024)} Ko)`);
             
