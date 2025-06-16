@@ -8,10 +8,11 @@ const NOTIFICATIONS_STORE = 'collectif-feydeau-notifications';
 
 // Détecter si nous sommes en production (GitHub Pages) ou en développement
 const isProduction = self.location.hostname !== 'localhost' && !self.location.hostname.includes('127.0.0.1');
+const isNetlify = self.location.hostname.includes('netlify.app');
 
 // Déterminer le bon chemin de base en fonction du déploiement
 let BASE_PATH = '';
-if (isProduction) {
+if (isProduction && !isNetlify) {
   // Vérifier quel déploiement est utilisé
   if (self.location.hostname === 'collectifilefeydeau.github.io') {
     BASE_PATH = '/1Hall1Artiste';

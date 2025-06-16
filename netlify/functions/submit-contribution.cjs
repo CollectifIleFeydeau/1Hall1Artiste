@@ -60,8 +60,25 @@ function parseFormData(event) {
     });
     
     bb.on('file', (fieldname, file, info) => {
-      console.log(`File field ${fieldname} received but ignored in production function`);
-      file.resume(); // Important: consume the file stream
+      console.log(`File field ${fieldname} received: ${info.filename}, mimetype: ${info.mimeType}`);
+      
+      if (fieldname === 'image') {
+        // Traiter le fichier image
+        const chunks = [];
+        
+        file.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+        
+        file.on('end', () => {
+          const buffer = Buffer.concat(chunks);
+          fields[fieldname] = buffer.toString('base64');
+          console.log(`Image reçue et convertie en base64 (${Math.round(buffer.length / 1024)} Ko)`);
+        });
+      } else {
+        // Pour les autres champs de type fichier, ignorer
+        file.resume();
+      }
     });
     
     bb.on('finish', () => {

@@ -3,9 +3,9 @@ import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 
 // Configuration Firebase
-// Remplacez ces valeurs par celles de votre projet Firebase
+// Les valeurs sont maintenant chargées depuis les variables d'environnement
 const firebaseConfig = {
-  apiKey: "AIzaSyAjiVgKin-J3S7zsirw9xImh4sOBxAwUuU",
+  apiKey: process.env.FIREBASE_API_KEY || "YOUR_API_KEY", // Remplacer par la nouvelle clé ou utiliser une variable d'environnement
   authDomain: "collectif-ile-feydeau----app.firebaseapp.com",
   projectId: "collectif-ile-feydeau----app",
   storageBucket: "collectif-ile-feydeau----app.firebasestorage.app",

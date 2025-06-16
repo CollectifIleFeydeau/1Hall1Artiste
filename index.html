@@ -29,6 +29,7 @@
         
         // Détecter si nous sommes sur GitHub Pages
         const isGitHubPages = window.location.hostname.includes('github.io');
+        const isNetlify = window.location.hostname.includes('netlify.app');
         
         // Déterminer la base URL
         if (isGitHubPages) {
@@ -41,6 +42,7 @@
             window.APP_CONFIG.BASE_URL = '/' + window.location.pathname.split('/')[1] + '/';
           }
         } else {
+          // Pour Netlify et autres déploiements
           window.APP_CONFIG.BASE_URL = '/';
         }
         
