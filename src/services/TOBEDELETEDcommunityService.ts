@@ -1,5 +1,5 @@
 import { CommunityEntry, CommunityContentData, SubmissionParams, ModerationResult, ModerationStatus, EntryType } from "../types/communityTypes";
-import { AnonymousSessionService } from "../services/anonymousSessionService";
+import { AnonymousSessionService } from "./anonymousSessionService";
 
 // URL de base pour les données JSON (à adapter selon l'environnement)
 const BASE_URL = (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
@@ -32,6 +32,17 @@ const WORKER_URL = 'https://github-contribution-proxy.collectifilefeydeau.worker
 // Clés pour le stockage local
 const COMMUNITY_ENTRIES_KEY = 'community_entries';
 const COMMUNITY_LIKES_KEY = 'community_liked_entries'; // Clé pour stocker les likes
+const SESSION_ID_KEY = 'anonymous_session_id'; // Clé pour stocker l'ID de session anonyme
+
+// Récupérer ou générer un ID de session anonyme
+const getSessionId = (): string => {
+  let sessionId = localStorage.getItem(SESSION_ID_KEY);
+  if (!sessionId) {
+    sessionId = `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem(SESSION_ID_KEY, sessionId);
+  }
+  return sessionId;
+}
 
 // Récupérer les entrées stockées localement ou renvoyer un tableau vide
 const getStoredEntries = (): CommunityEntry[] => {
@@ -139,72 +150,65 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
                 continue;
               }
               
-              const type = isPhoto ? 'photo' as EntryType : 'testimonial' as EntryType;
-              
               // Extraire les données de l'issue
               const body = issue.body || '';
               
-              // Extraire l'image si c'est une photo
-              let imageUrl = null;
-              let description = '';
-              let content = '';
+              // Déterminer le type en fonction des labels et du contenu
+              const typeMatch = body.match(/\*\*Type:\*\*\s*([^\n]+)/);
+              const entryType: EntryType = (isTestimonial || (typeMatch && typeMatch[1].trim().toLowerCase() === 'témoignage')) 
+                ? 'testimonial' 
+                : 'photo';
               
-              if (type === 'photo') {
-                const imageMatch = body.match(/!\[Image\]\((data:image\/[^;]+;base64,[^)]+)\)/);
-                if (imageMatch && imageMatch[1]) {
-                  imageUrl = imageMatch[1];
-                  console.log(`[CommunityService] Image trouvée dans l'issue #${issue.number}`);
-                } else {
-                  console.warn(`[CommunityService] Pas d'image trouvée dans l'issue photo #${issue.number}`);
-                }
-                
-                // Extraire la description
-                const descMatch = body.match(/\*\*Description:\*\*\s*([^\n]+)/);
-                if (descMatch && descMatch[1]) {
-                  description = descMatch[1];
-                }
-              } else {
-                // Pour un témoignage, prendre tout le contenu avant les métadonnées
-                const contentMatch = body.match(/([\s\S]+?)\n\n---\n\n/);
-                if (contentMatch && contentMatch[1]) {
-                  content = contentMatch[1].trim();
-                } else {
-                  // Si pas de séparateur, prendre tout le contenu
-                  content = body.trim();
-                }
-              }
+              // Extraire le nom d'affichage
+              const nameMatch = body.match(/\*\*Nom:\*\*\s*([^\n]+)/);
+              const displayName = nameMatch ? nameMatch[1].trim() : 'Contributeur anonyme';
               
-              // Extraire le nom du contributeur
-              let displayName = 'Anonyme';
-              const nameMatch = body.match(/\*\*Contributeur:\*\*\s*([^\n]+)/);
-              if (nameMatch && nameMatch[1]) {
-                displayName = nameMatch[1];
-              }
+              // Extraire la description
+              const descriptionMatch = body.match(/\*\*Description:\*\*\s*([^\n]+)/);
+              const description = descriptionMatch ? descriptionMatch[1].trim() : '';
               
-              // Créer l'entrée
+              // Extraire l'URL de l'image (pour les photos)
+              const imageUrlMatch = body.match(/!\[.*?\]\((.*?)\)/);
+              const imageUrl = imageUrlMatch ? imageUrlMatch[1].trim() : undefined;
+              
+              // Extraire le témoignage (pour les témoignages)
+              const testimonyMatch = body.match(/\*\*Témoignage:\*\*\s*([\s\S]+?)(?=\*\*|$)/);
+              const testimony = testimonyMatch ? testimonyMatch[1].trim() : undefined;
+              
+              // Extraire les informations de likes
+              const likesMatch = body.match(/\*\*Likes:\*\*\s*(\d+)/);
+              const likes = likesMatch ? parseInt(likesMatch[1], 10) : 0;
+              
+              // Extraire la liste des utilisateurs qui ont liké
+              const likedByMatch = body.match(/\*\*LikedBy:\*\*\s*(.+)/);
+              const likedBy = likedByMatch ? likedByMatch[1].split(',').map(id => id.trim()) : [];
+              
+              // Vérifier si l'utilisateur actuel a liké cette entrée
+              const sessionId = getSessionId();
+              const isLikedByCurrentUser = likedBy.includes(sessionId);
+              
+              // Créer l'entrée de base
               const entry: CommunityEntry = {
                 id: `issue-${issue.number}`,
-                type,
+                type: entryType,
                 displayName,
-                sessionId: '', // Non disponible depuis l'issue
                 createdAt: issue.created_at,
-                timestamp: issue.created_at,
-                likes: 0, // À implémenter via les réactions GitHub
-                likedBy: [],
+                likes,
+                likedBy,
+                isLikedByCurrentUser,
                 moderation: {
-                  status: 'approved', // Considérer les issues comme approuvées
-                  moderatedAt: issue.created_at
-                },
-                isLikedByCurrentUser: false
+                  status: issue.state === 'open' ? 'approved' : 'rejected',
+                  moderatedAt: issue.updated_at
+                }
               };
               
               // Ajouter les champs spécifiques au type
-              if (type === 'photo') {
+              if (entryType === 'photo' && imageUrl) {
                 entry.imageUrl = imageUrl;
                 entry.thumbnailUrl = imageUrl; // Utiliser la même image comme miniature pour l'instant
                 entry.description = description;
-              } else {
-                entry.content = content;
+              } else if (entryType === 'testimonial' && testimony) {
+                entry.content = testimony;
               }
               
               entriesFromIssues.push(entry);
@@ -297,6 +301,14 @@ export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
   try {
     console.log(`[CommunityService] Tentative de suppression de la contribution ${entryId}`);
     
+    // Extraire le numéro d'issue si l'ID est au format "issue-X"
+    let issueNumber = entryId;
+    if (entryId.startsWith('issue-')) {
+      issueNumber = entryId.replace('issue-', '');
+    }
+    
+    console.log(`[CommunityService] Numéro d'issue extrait: ${issueNumber}`);
+    
     // En production ou si l'API est activée, appeler l'API pour supprimer la contribution
     if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
         process.env.NODE_ENV !== 'development' || 
@@ -308,25 +320,39 @@ export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
       const response = await fetch(`${WORKER_URL}/delete-issue`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
-          issueNumber: entryId
+          issueNumber: issueNumber
         })
       });
       
+      // Log de la réponse brute pour le débogage
+      console.log(`[CommunityService] Réponse brute: ${response.status} ${response.statusText}`);
+      
       if (!response.ok) {
         console.error(`[CommunityService] Erreur HTTP lors de la suppression: ${response.status}`);
-        const errorText = await response.text();
-        console.error(`[CommunityService] Détail de l'erreur: ${errorText}`);
+        let errorText = '';
+        try {
+          errorText = await response.text();
+          console.error(`[CommunityService] Détail de l'erreur: ${errorText}`);
+        } catch (textError) {
+          console.error(`[CommunityService] Impossible de lire le corps de l'erreur:`, textError);
+        }
         
         // Même en cas d'erreur, on supprime localement pour que l'UI soit cohérente
         removeEntryFromLocalStorage(entryId);
         return true; // On retourne true pour que l'UI se mette à jour
       }
       
-      const responseData = await response.json();
-      console.log(`[CommunityService] Réponse de l'API: ${JSON.stringify(responseData)}`);
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log(`[CommunityService] Réponse de l'API: ${JSON.stringify(responseData)}`);
+      } catch (jsonError) {
+        console.warn(`[CommunityService] Impossible de parser la réponse JSON:`, jsonError);
+      }
       
       // Supprimer également de localStorage pour une mise à jour immédiate de l'UI
       removeEntryFromLocalStorage(entryId);
@@ -536,15 +562,64 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
       entry = entries[entryIndex];
     }
     
-    // Mettre à jour le nombre de likes
+    // Extraire le numéro d'issue depuis l'ID de l'entrée
+    // Format attendu: "issue-123" ou simplement "123"
+    let issueNumber = entryId;
+    if (entryId.startsWith('issue-')) {
+      issueNumber = entryId.substring(6); // Enlever le préfixe "issue-"
+    }
+    
+    // En production ou si l'API est activée, synchroniser le like avec le serveur
+    if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
+        process.env.NODE_ENV !== 'development' || 
+        import.meta.env.VITE_USE_API === 'true') {
+      
+      try {
+        console.log(`[CommunityService] Synchronisation du like avec le serveur pour l'issue #${issueNumber}`);
+        
+        // Appeler l'API du Worker Cloudflare pour mettre à jour le like sur GitHub
+        const response = await fetch(`${WORKER_URL}/like-issue`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            issueNumber: issueNumber,
+            sessionId: sessionId,
+            action: action
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`[CommunityService] Réponse du serveur:`, data);
+          
+          // Mettre à jour l'entrée avec les données du serveur
+          entry.likes = data.likes;
+          entry.likedBy = data.likedBy || [];
+          entry.isLikedByCurrentUser = data.isLikedByCurrentUser;
+        } else {
+          console.error(`[CommunityService] Erreur lors de la synchronisation du like: ${response.status}`);
+          // Continuer avec la mise à jour locale malgré l'erreur
+        }
+      } catch (error) {
+        console.error(`[CommunityService] Erreur lors de l'appel à l'API de like:`, error);
+        // Continuer avec la mise à jour locale malgré l'erreur
+      }
+    }
+    
+    // Mettre à jour le nombre de likes localement (même si la synchronisation a échoué)
     if (!alreadyLiked) {
       // Ajouter un like
-      entry.likes = (entry.likes || 0) + 1;
+      if (!entry.likes) entry.likes = 0;
+      entry.likes++;
       entry.isLikedByCurrentUser = true;
       
       // Initialiser ou mettre à jour la liste des utilisateurs qui ont aimé
       if (!entry.likedBy) entry.likedBy = [];
-      entry.likedBy.push(sessionId);
+      if (!entry.likedBy.includes(sessionId)) {
+        entry.likedBy.push(sessionId);
+      }
       
       // Ajouter l'ID de l'entrée à la liste des entrées aimées
       addLike(entryId);
@@ -552,7 +627,9 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
       console.log(`[CommunityService] Like ajouté pour l'entrée ${entryId}, nouveau total: ${entry.likes}`);
     } else {
       // Retirer un like
-      entry.likes = Math.max(0, (entry.likes || 0) - 1);
+      if (entry.likes && entry.likes > 0) {
+        entry.likes--;
+      }
       entry.isLikedByCurrentUser = false;
       
       // Mettre à jour la liste des utilisateurs qui ont aimé

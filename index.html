@@ -6,6 +6,7 @@
     <title>Collectif Feydeau - Île Feydeau, Nantes</title>
     <meta name="description" content="Découvrez les événements du Collectif Feydeau à Nantes : expositions, concerts et animations sur l'Île Feydeau" />
     <meta name="author" content="Collectif Feydeau" />
+    <link rel="icon" href="" id="favicon-link" />
     
     <!-- OpenGraph Meta Tags pour le partage sur les réseaux sociaux -->
     <meta property="og:title" content="Collectif Feydeau - Île Feydeau, Nantes" />
@@ -47,6 +48,9 @@
         }
         
         console.log('Détection de la base URL:', window.APP_CONFIG.BASE_URL);
+        
+        // Mise à jour dynamique du lien favicon
+        document.getElementById('favicon-link').href = window.APP_CONFIG.BASE_URL + 'favicon.ico';
       })();
       
       // Script de redirection pour les routes SPA sur GitHub Pages

@@ -15,7 +15,7 @@ import { BottomNavigation } from "../components/BottomNavigation";
 import { CommunityEntry, EntryType } from "../types/communityTypes";
 
 // Services
-import { fetchCommunityEntries, toggleLike } from "../services/communityService";
+import { fetchCommunityEntries, toggleLike } from "../services/communityServiceBridge";
 
 // Composants
 import { PageContainer } from "../components/PageContainer";

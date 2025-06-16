@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createLogger } from "@/utils/logger";
-import { fetchCommunityEntries, deleteCommunityEntry } from "@/services/communityService";
+import { fetchCommunityEntries, deleteCommunityEntry } from "@/services/communityServiceBridge";
 import { CommunityEntry } from "@/types/communityTypes";
 import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";

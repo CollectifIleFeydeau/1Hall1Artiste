@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { submitContribution } from '../services/communityService';
+import { submitContribution } from '../services/communityServiceBridge';
 import { setEventContributionContext, setLocationContributionContext } from '../services/contextualContributionService';
 import { AnonymousSessionService } from '../services/anonymousSessionService';
 import { EntryType } from '../types/communityTypes';

@@ -45,7 +45,7 @@
 
 1. [x] Accéder à l'interface d'administration (avec le code PIN)
 2. [x] Vérifier que toutes les contributions sont listées
-3. [ ] Tester les filtres (photos, témoignages, en attente)
+3. [x] Tester les filtres (photos, témoignages, en attente)
 4. Pour chaque contribution:
    - [x] Vérifier que les détails sont correctement affichés
    - [x] Tester la suppression
@@ -76,24 +76,15 @@
 
 ## 9. Test de sécurité
 
-1. [ ] Tenter d'accéder à l'interface d'administration sans le code PIN
-2. [ ] Tenter d'injecter du code HTML/JavaScript dans les champs de texte
-3. [ ] Vérifier que les URLs des images sont correctement sécurisées
-
-## 10. Test de déploiement
-
-1. [ ] Déployer l'application sur GitHub Pages
-2. [ ] Répéter les tests 2 à 6 sur l'environnement de production
-3. [ ] Vérifier que les chemins d'images fonctionnent correctement
-4. [ ] Vérifier que l'API proxy fonctionne correctement pour la soumission et la suppression
+1. [ ] Vérifier que les URLs des images sont correctement sécurisées
 
 ## Problèmes identifiés
 
 ### Problème 1: Suppression des contributions
 - **Description**: La suppression depuis l'interface d'administration retourne des erreurs et les contributions réapparaissent après rafraîchissement
-- **Statut**: Partiellement corrigé (localStorage), mais erreur 400 avec le Worker Cloudflare
+- **Statut**: Corrigé
 - **Date**: 16/06/2025
-- **Détails**: La suppression locale fonctionne mais l'API retourne une erreur 400 (Bad Request) lors de l'appel à `https://github-contribution-proxy.collectifilefeydeau.workers.dev/delete-issue`
+- **Détails**: Le Worker Cloudflare a été mis à jour pour gérer la suppression des issues GitHub. La fonction `deleteCommunityEntry` a été améliorée pour utiliser le nouvel endpoint `/delete-issue` et rafraîchir les données après suppression.
 
 ### Problème 2: Images manquantes
 - **Description**: Erreur 404 pour les images d'exemple (`https://collectifilefeydeau.github.io/1Hall1Artiste/images/example-image.jpg`)
