@@ -12,8 +12,6 @@
 * Changer les immages de l'onboarding
 
 * S'assurer que les stats de firebase marchent
-
-* S'assurer que l'export de firebase fonctionne
 => Voir @ANALYTICS_TESTING_GUIDE.md
 
 
