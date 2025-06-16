@@ -17,6 +17,11 @@ interface ContributionData {
   labels?: string[];
 }
 
+// Interface pour les données de suppression d'issue
+interface DeleteIssueData {
+  issueNumber: string;
+}
+
 export default {
   // Fonction principale qui traite toutes les requêtes
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -50,37 +55,78 @@ export default {
     try {
       console.log("Traitement d'une requête POST");
       
+      // Déterminer le type d'opération en fonction de l'URL
+      const url = new URL(request.url);
+      const path = url.pathname;
+      
       // Récupérer les données de la requête
-      const data = await request.json() as ContributionData;
+      const requestData = await request.json();
+      let githubResponse;
       
-      // Valider les données
-      if (!data.title || !data.body) {
-        return new Response("Données invalides: titre et corps requis", { 
-          status: 400,
-          headers: corsHeaders
-        });
-      }
-
-      console.log(`Création d'une issue GitHub: ${data.title}`);
-      
-      // Préparer la requête vers l'API GitHub
-      const githubResponse = await fetch(
-        "https://api.github.com/repos/CollectifIleFeydeau/community-content/issues",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/vnd.github.v3+json",
-            "Authorization": `token ${env.GITHUB_TOKEN}`,
-            "User-Agent": "Cloudflare-Worker-CollectifFeydeau"
-          },
-          body: JSON.stringify({
-            title: data.title,
-            body: data.body,
-            labels: data.labels || []
-          })
+      // Traiter les différents types de requêtes
+      if (path === "/delete-issue") {
+        // Suppression d'une issue
+        const deleteData = requestData as DeleteIssueData;
+        
+        // Valider les données
+        if (!deleteData.issueNumber) {
+          return new Response("Données invalides: numéro d'issue requis", { 
+            status: 400,
+            headers: corsHeaders
+          });
         }
-      );
+        
+        console.log(`Suppression de l'issue GitHub #${deleteData.issueNumber}`);
+        
+        // Préparer la requête vers l'API GitHub pour fermer l'issue
+        githubResponse = await fetch(
+          `https://api.github.com/repos/CollectifIleFeydeau/community-content/issues/${deleteData.issueNumber}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/vnd.github.v3+json",
+              "Authorization": `token ${env.GITHUB_TOKEN}`,
+              "User-Agent": "Cloudflare-Worker-CollectifFeydeau"
+            },
+            body: JSON.stringify({
+              state: "closed"
+            })
+          }
+        );
+      } else {
+        // Création d'une issue (comportement par défaut)
+        const data = requestData as ContributionData;
+        
+        // Valider les données
+        if (!data.title || !data.body) {
+          return new Response("Données invalides: titre et corps requis", { 
+            status: 400,
+            headers: corsHeaders
+          });
+        }
+
+        console.log(`Création d'une issue GitHub: ${data.title}`);
+        
+        // Préparer la requête vers l'API GitHub
+        githubResponse = await fetch(
+          "https://api.github.com/repos/CollectifIleFeydeau/community-content/issues",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/vnd.github.v3+json",
+              "Authorization": `token ${env.GITHUB_TOKEN}`,
+              "User-Agent": "Cloudflare-Worker-CollectifFeydeau"
+            },
+            body: JSON.stringify({
+              title: data.title,
+              body: data.body,
+              labels: data.labels || []
+            })
+          }
+        );
+      }
 
       // Récupérer la réponse de GitHub
       const githubData = await githubResponse.json();

@@ -295,10 +295,14 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
  */
 export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
   try {
+    console.log(`[CommunityService] Tentative de suppression de la contribution ${entryId}`);
+    
     // En production ou si l'API est activée, appeler l'API pour supprimer la contribution
     if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
         process.env.NODE_ENV !== 'development' || 
         import.meta.env.VITE_USE_API === 'true') {
+      
+      console.log(`[CommunityService] Utilisation du Worker Cloudflare pour supprimer l'issue GitHub`);
       
       // En production, utiliser le Worker Cloudflare comme proxy pour l'API GitHub
       const response = await fetch(`${WORKER_URL}/delete-issue`, {
@@ -312,21 +316,41 @@ export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
       });
       
       if (!response.ok) {
-        console.error(`Erreur HTTP: ${response.status}`);
+        console.error(`[CommunityService] Erreur HTTP lors de la suppression: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`[CommunityService] Détail de l'erreur: ${errorText}`);
+        
         // Même en cas d'erreur, on supprime localement pour que l'UI soit cohérente
         removeEntryFromLocalStorage(entryId);
         return true; // On retourne true pour que l'UI se mette à jour
       }
       
+      const responseData = await response.json();
+      console.log(`[CommunityService] Réponse de l'API: ${JSON.stringify(responseData)}`);
+      
       // Supprimer également de localStorage pour une mise à jour immédiate de l'UI
       removeEntryFromLocalStorage(entryId);
+      
+      // Mettre à jour le fichier entries.json via une autre requête au Worker
+      // Cette étape est optionnelle car le Worker pourrait le faire directement,
+      // mais cela permet de s'assurer que les données sont synchronisées
+      try {
+        console.log(`[CommunityService] Mise à jour du cache local après suppression`);
+        // Forcer un rechargement des entrées depuis GitHub pour mettre à jour le cache local
+        await fetchCommunityEntries();
+      } catch (syncError) {
+        console.error(`[CommunityService] Erreur lors de la synchronisation après suppression:`, syncError);
+        // On ignore cette erreur car la suppression a déjà réussi
+      }
+      
       return true;
     }
     
     // En développement, supprimer la contribution du localStorage
+    console.log(`[CommunityService] Mode développement: suppression locale uniquement`);
     return removeEntryFromLocalStorage(entryId);
   } catch (error) {
-    console.error(`Erreur lors de la suppression de la contribution ${entryId}:`, error);
+    console.error(`[CommunityService] Erreur lors de la suppression de la contribution ${entryId}:`, error);
     // Même en cas d'erreur, on essaie de supprimer localement
     removeEntryFromLocalStorage(entryId);
     return true; // On retourne true pour que l'UI se mette à jour
