@@ -563,6 +563,7 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
  * Télécharge une image vers le service de stockage
  * En mode développement, convertit l'image en base64 pour la stocker dans localStorage
  */
+
 // Taille maximale estimée du localStorage (en octets) - généralement 5-10 Mo selon les navigateurs
 const MAX_LOCAL_STORAGE_SIZE = 5 * 1024 * 1024; // 5 Mo par défaut
 
@@ -570,18 +571,24 @@ const MAX_LOCAL_STORAGE_SIZE = 5 * 1024 * 1024; // 5 Mo par défaut
 const MAX_IMAGE_SIZE = 800 * 1024; // 800 Ko
 
 /**
- * Estime la taille actuelle utilisée par le localStorage
+ * Estime la taille actuelle utilisée par le localStorage en octets
+ * @returns Taille estimée en octets
  */
 function estimateLocalStorageSize(): number {
-  let totalSize = 0;
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key) {
-      const value = localStorage.getItem(key) || '';
-      totalSize += (key.length + value.length) * 2; // Approximation en UTF-16
+  try {
+    let totalSize = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        const value = localStorage.getItem(key) || '';
+        totalSize += (key.length + value.length) * 2; // Approximation en octets (2 octets par caractère)
+      }
     }
+    return totalSize;
+  } catch (error) {
+    console.error("Erreur lors de l'estimation de la taille du localStorage:", error);
+    return 0;
   }
-  return totalSize;
 }
 
 /**

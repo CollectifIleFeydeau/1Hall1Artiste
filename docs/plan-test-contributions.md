@@ -2,21 +2,21 @@
 
 ## 1. Préparation de l'environnement
 
-- [x] Lancer l'application en mode développement
-- [ ] Ouvrir deux navigateurs différents (ou un navigateur normal + un navigateur en mode incognito) pour simuler deux utilisateurs distincts
-- [ ] Préparer quelques images de test (tailles et formats variés)
-- [ ] Préparer quelques textes de témoignages
+- [x] Lancer l'application en mode live
+- [x] Ouvrir deux navigateurs différents (ou un navigateur normal + un navigateur en mode incognito) pour simuler deux utilisateurs distincts
+- [x] Préparer quelques images de test (tailles et formats variés)
+- [x] Préparer quelques textes de témoignages
 
 ## 2. Test de soumission de contributions
 
 ### Photos
-1. [ ] Accéder à la page de contribution
-2. [ ] Sélectionner "Photo" comme type de contribution
-3. [ ] Remplir le formulaire avec:
-   - [ ] Nom d'affichage
-   - [ ] Description
-   - [ ] Sélectionner une image
-4. [ ] Soumettre et vérifier:
+1. [x] Accéder à la page de contribution
+2. [x] Sélectionner "Photo" comme type de contribution
+3. [x] Remplir le formulaire avec:
+   - [x] Nom d'affichage
+   - [x] Description
+   - [x] Sélectionner une image
+4. [x] Soumettre et vérifier:
    - [ ] Message de confirmation
    - [ ] Redirection vers la galerie
    - [ ] Présence de la nouvelle contribution dans la galerie
@@ -110,5 +110,12 @@
 
 ### Problème 1: Suppression des contributions
 - **Description**: La suppression depuis l'interface d'administration retourne des erreurs et les contributions réapparaissent après rafraîchissement
+- **Statut**: Partiellement corrigé (localStorage), mais erreur 400 avec le Worker Cloudflare
+- **Date**: 16/06/2025
+- **Détails**: La suppression locale fonctionne mais l'API retourne une erreur 400 (Bad Request) lors de l'appel à `https://github-contribution-proxy.collectifilefeydeau.workers.dev/delete-issue`
+
+### Problème 2: Images manquantes
+- **Description**: Erreur 404 pour les images d'exemple (`https://collectifilefeydeau.github.io/1Hall1Artiste/images/example-image.jpg`)
 - **Statut**: À corriger
 - **Date**: 16/06/2025
+- **Détails**: Les chemins d'images pour les exemples ne sont pas corrects ou les images n'existent pas
