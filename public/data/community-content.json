@@ -1,6 +1,30 @@
 {
-  "lastUpdated": "2025-06-15T18:48:06.138Z",
+  "lastUpdated": "2025-06-16T06:56:40.465Z",
   "entries": [
+    {
+      "id": "entry-8991a24a-4436-4968-b54c-e2fca80c74c1",
+      "type": "testimonial",
+      "content": "Ceci est un témoignage de test généré automatiquement.",
+      "displayName": "Utilisateur Test",
+      "createdAt": "2025-06-16T06:56:40.465Z",
+      "sessionId": "session-ed506181-019b-4cfc-bc36-5185d63dfa72",
+      "moderation": {
+        "status": "approved",
+        "moderatedAt": "2025-06-16T06:56:40.465Z"
+      }
+    },
+    {
+      "id": "entry-18c78951-2aee-4f3a-8a33-d1859dbd3a05",
+      "type": "testimonial",
+      "content": "Ceci est un témoignage de test généré automatiquement.",
+      "displayName": "Utilisateur Test",
+      "createdAt": "2025-06-16T03:43:25.343Z",
+      "sessionId": "session-45df6fc5-3889-496f-bd75-e9ea7f04db8c",
+      "moderation": {
+        "status": "approved",
+        "moderatedAt": "2025-06-16T03:43:25.343Z"
+      }
+    },
     {
       "id": "entry-249a3126-65d3-4f42-8e9b-dafb4e3c5c49",
       "type": "testimonial",
