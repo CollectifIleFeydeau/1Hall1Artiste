@@ -1,12 +1,27 @@
 # Toutes nouvelles idées 
 
+## Améliorations pour la galerie communautaire
+
+* Correction des problèmes identifiés:
+   * Chemins d'images pour les exemples incorrects ou images manquantes
+   * Améliorer la persistance des likes après fermeture du navigateur
+   * S'assurer que les contributions supprimées ne réapparaissent pas
+
+* Tests à compléter:
+   * Tests multi-navigateurs (Chrome, Firefox, Safari, Edge)
+   * Tests sur mobile et différentes tailles d'écran
+   * Tests de performance avec de nombreuses contributions
+   * Tests de sécurité pour les URLs des images
+
 # Priorités actuelles (phase de test et optimisation)
 
 ## Priorités immédiates à faire 
 
-* Interaction communautaire
-   * Partage de photos par les utilisateurs /  Galerie communautaire des meilleurs moments
-   * Section témoignages pour chaque événement
+* ~~Interaction communautaire~~ ✅ Implémentée
+   * ✅ Partage de photos par les utilisateurs / Galerie communautaire des meilleurs moments
+   * ✅ Section témoignages pour les utilisateurs
+   * ✅ Interface d'administration avec code PIN pour modération
+   * ✅ Système de likes pour les contributions
    => Voir @galerie-communautaire-concept.md
 
 * Changer les immages de l'onboarding
