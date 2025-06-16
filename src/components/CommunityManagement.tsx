@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createLogger } from "@/utils/logger";
 import { fetchCommunityEntries, deleteCommunityEntry } from "@/services/communityService";
-import { CommunityEntry } from "@/types/community";
+import { CommunityEntry } from "@/types/communityTypes";
 import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -18,7 +18,7 @@ import XCircle from "lucide-react/dist/esm/icons/x-circle";
 const logger = createLogger('CommunityManagement');
 
 export function CommunityManagement() {
-  const [entries, setEntries] = useState<CommunityEntry[]>([]);
+  const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -33,7 +33,7 @@ export function CommunityManagement() {
       setLoading(true);
       const data = await fetchCommunityEntries();
       logger.info(`${data.length} contributions chargées`);
-      setEntries(data);
+      setEntries(data as any[]);
     } catch (error) {
       logger.error('Erreur lors du chargement des contributions', error);
       toast({
@@ -55,7 +55,7 @@ export function CommunityManagement() {
       await deleteCommunityEntry(entryId);
       
       // Mettre à jour la liste des contributions
-      setEntries(entries.filter(entry => entry.id !== entryId));
+      setEntries(prev => prev.filter(entry => entry.id !== entryId));
       
       toast({
         title: "Succès",
@@ -193,7 +193,10 @@ export function CommunityManagement() {
                     alt={`Contribution de ${entry.displayName}`}
                     className="absolute top-0 left-0 w-full h-full object-cover rounded-md"
                     onError={(e) => {
-                      e.currentTarget.src = '/images/placeholder-image.jpg';
+                      const basePath = typeof window !== 'undefined' && window.location.hostname.includes('github.io')
+                        ? '/1Hall1Artiste'
+                        : '';
+                      e.currentTarget.src = `${basePath}/images/placeholder-image.jpg`;
                     }}
                   />
                 </div>
