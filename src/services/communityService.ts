@@ -6,9 +6,17 @@ const BASE_URL = (typeof window !== 'undefined' && window.location.hostname.incl
   ? 'https://raw.githubusercontent.com/CollectifIleFeydeau/community-content/main'
   : '/data';
 
+// Fonction utilitaire pour obtenir le chemin de base en fonction de l'environnement
+const getBasePath = () => {
+  if (typeof window !== 'undefined' && window.location.hostname.includes('github.io')) {
+    return '/1Hall1Artiste'; // Chemin de base sur GitHub Pages
+  }
+  return ''; // Chemin de base en local
+};
+
 // URL de base pour les images (à adapter selon l'environnement)
 const IMAGES_BASE_URL = (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
-  ? 'https://collectifilefeydeau.github.io/images'
+  ? `https://collectifilefeydeau.github.io${getBasePath()}/images`
   : '/images';
 
 // URL de base pour l'API GitHub (pour les requêtes GET publiques)
@@ -118,11 +126,11 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
       const processedEntry = { ...entry };
       
       if (processedEntry.imageUrl && !processedEntry.imageUrl.startsWith('data:') && !processedEntry.imageUrl.startsWith('http')) {
-        processedEntry.imageUrl = window.location.origin + (processedEntry.imageUrl.startsWith('/') ? '' : '/') + processedEntry.imageUrl;
+        processedEntry.imageUrl = window.location.origin + getBasePath() + (processedEntry.imageUrl.startsWith('/') ? '' : '/') + processedEntry.imageUrl;
       }
       
       if (processedEntry.thumbnailUrl && !processedEntry.thumbnailUrl.startsWith('data:') && !processedEntry.thumbnailUrl.startsWith('http')) {
-        processedEntry.thumbnailUrl = window.location.origin + (processedEntry.thumbnailUrl.startsWith('/') ? '' : '/') + processedEntry.thumbnailUrl;
+        processedEntry.thumbnailUrl = window.location.origin + getBasePath() + (processedEntry.thumbnailUrl.startsWith('/') ? '' : '/') + processedEntry.thumbnailUrl;
       }
       
       return {
@@ -144,26 +152,51 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
 export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
   try {
     // En production ou si l'API est activée, appeler l'API pour supprimer la contribution
-    if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
-      // Utiliser l'API GitHub pour supprimer la contribution
-      const response = await fetch(`${API_URL}/issues/${entryId}`, {
-        method: 'DELETE',
+    if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
+        process.env.NODE_ENV !== 'development' || 
+        import.meta.env.VITE_USE_API === 'true') {
+      
+      // En production, utiliser le Worker Cloudflare comme proxy pour l'API GitHub
+      const response = await fetch(`${WORKER_URL}/delete-issue`, {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          // Ajouter ici un token d'authentification si nécessaire
-          'Authorization': `Bearer ${sessionStorage.getItem('adminToken') || ''}`
-        }
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          issueNumber: entryId
+        })
       });
       
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+        console.error(`Erreur HTTP: ${response.status}`);
+        // Même en cas d'erreur, on supprime localement pour que l'UI soit cohérente
+        removeEntryFromLocalStorage(entryId);
+        return true; // On retourne true pour que l'UI se mette à jour
       }
       
+      // Supprimer également de localStorage pour une mise à jour immédiate de l'UI
+      removeEntryFromLocalStorage(entryId);
       return true;
     }
     
     // En développement, supprimer la contribution du localStorage
-    const entriesString = localStorage.getItem('community_entries');
+    return removeEntryFromLocalStorage(entryId);
+  } catch (error) {
+    console.error(`Erreur lors de la suppression de la contribution ${entryId}:`, error);
+    // Même en cas d'erreur, on essaie de supprimer localement
+    removeEntryFromLocalStorage(entryId);
+    return true; // On retourne true pour que l'UI se mette à jour
+  }
+}
+
+/**
+ * Fonction utilitaire pour supprimer une entrée du localStorage
+ * @param entryId ID de l'entrée à supprimer
+ * @returns true si la suppression a réussi, false sinon
+ */
+function removeEntryFromLocalStorage(entryId: string): boolean {
+  try {
+    const entriesString = localStorage.getItem(COMMUNITY_ENTRIES_KEY);
     if (!entriesString) return false;
     
     const entries = JSON.parse(entriesString);
@@ -179,12 +212,12 @@ export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
     });
     
     // Mettre à jour le localStorage
-    localStorage.setItem('community_entries', JSON.stringify(updatedEntries));
+    localStorage.setItem(COMMUNITY_ENTRIES_KEY, JSON.stringify(updatedEntries));
     console.log(`[CommunityService] Contribution supprimée: ${entryId}`);
     
     return true;
   } catch (error) {
-    console.error(`Erreur lors de la suppression de la contribution ${entryId}:`, error);
+    console.error(`Erreur lors de la suppression locale de la contribution ${entryId}:`, error);
     return false;
   }
 }

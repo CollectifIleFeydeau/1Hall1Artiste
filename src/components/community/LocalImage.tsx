@@ -13,11 +13,19 @@ interface LocalImageProps {
  * Sinon, utilise l'URL directement
  * Gère les erreurs et les images manquantes avec une image de secours
  */
+// Fonction utilitaire pour obtenir le chemin de base en fonction de l'environnement
+const getBasePath = () => {
+  if (typeof window !== 'undefined' && window.location.hostname.includes('github.io')) {
+    return '/1Hall1Artiste'; // Chemin de base sur GitHub Pages
+  }
+  return ''; // Chemin de base en local
+};
+
 export const LocalImage: React.FC<LocalImageProps> = ({ 
   src, 
   alt, 
   className = '',
-  fallbackSrc = '/images/placeholder-image.jpg' 
+  fallbackSrc = `${getBasePath()}/images/placeholder-image.jpg` 
 }) => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
