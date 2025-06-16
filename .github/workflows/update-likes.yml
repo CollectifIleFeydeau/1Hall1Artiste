@@ -1,0 +1,54 @@
+name: Update Content Likes
+
+on:
+  repository_dispatch:
+    types: [update-likes]
+  # Possibilité de déclencher manuellement pour les tests
+  workflow_dispatch:
+    inputs:
+      entryId:
+        description: 'ID de l''entrée à mettre à jour'
+        required: true
+      action:
+        description: 'Action à effectuer (add/remove)'
+        required: true
+        default: 'add'
+      sessionId:
+        description: 'ID de session de l''utilisateur'
+        required: true
+
+jobs:
+  update-likes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Nécessaire pour push les modifications
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm install fs-extra
+      
+      - name: Update likes
+        id: update
+        run: node .github/scripts/update-likes.js
+        env:
+          ENTRY_ID: ${{ github.event.client_payload.entryId || github.event.inputs.entryId }}
+          ACTION: ${{ github.event.client_payload.action || github.event.inputs.action }}
+          SESSION_ID: ${{ github.event.client_payload.sessionId || github.event.inputs.sessionId }}
+      
+      - name: Commit and push if changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add public/data/community-content.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update likes for entry ${{ github.event.client_payload.entryId || github.event.inputs.entryId }} [skip ci]"
+          git push

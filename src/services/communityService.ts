@@ -327,46 +327,73 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
         process.env.NODE_ENV !== 'development' || 
         import.meta.env.VITE_USE_API === 'true') {
-      // Préparer les données pour l'API
-      const formData = new FormData();
-      formData.append('title', params.title);
-      formData.append('body', params.content);
       
-      // Ajouter les champs spécifiques selon le type
+      // Préparer les données pour l'API GitHub
+      let issueTitle = '';
+      let issueBody = '';
+      let labels = [];
+      
+      // Configurer le titre et le corps selon le type de contribution
       if (params.type === 'photo') {
+        issueTitle = `Photo contribution: ${params.description || 'Sans titre'}`;
+        labels.push('photo');
+        
+        // Si une image est fournie, la convertir en base64 et l'inclure dans le corps
         if (params.image) {
-          formData.append('image', params.image);
+          try {
+            // Convertir l'image en base64
+            const base64Image = await resizeAndCompressImage(params.image, 800, 800, 0.7);
+            issueBody = `![Image](${base64Image})\n\n`;
+          } catch (error) {
+            console.error('Erreur lors du traitement de l\'image:', error);
+          }
         }
         
+        // Ajouter la description si présente
         if (params.description) {
-          formData.append('description', params.description);
+          issueBody += `**Description:** ${params.description}\n\n`;
         }
-      } else if (params.type === 'testimonial' && params.content) {
-        formData.append('content', params.content);
+      } else if (params.type === 'testimonial') {
+        issueTitle = `Témoignage de ${displayName}`;
+        issueBody = params.content || '';
+        labels.push('testimonial');
       }
+      
+      // Ajouter les métadonnées au corps
+      issueBody += `\n\n---\n\n`;
+      issueBody += `**Contributeur:** ${displayName}\n`;
+      issueBody += `**Type:** ${params.type}\n`;
       
       // Ajouter les références à l'événement ou au lieu si présentes
       if (params.eventId) {
-        formData.append('eventId', params.eventId);
+        issueBody += `**Événement:** ${params.eventId}\n`;
       }
       
       if (params.locationId) {
-        formData.append('locationId', params.locationId);
+        issueBody += `**Lieu:** ${params.locationId}\n`;
       }
       
       // Ajouter les informations de contexte si présentes
       if (params.contextType) {
-        formData.append('contextType', params.contextType);
+        issueBody += `**Type de contexte:** ${params.contextType}\n`;
       }
       
       if (params.contextId) {
-        formData.append('contextId', params.contextId);
+        issueBody += `**ID de contexte:** ${params.contextId}\n`;
       }
       
       // Envoyer la requête à l'API GitHub (version production)
       const response = await fetch(`${API_URL}/issues`, {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify({
+          title: issueTitle,
+          body: issueBody,
+          labels: labels
+        })
       });
       
       if (!response.ok) {
@@ -374,9 +401,35 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
       }
       
       const result = await response.json();
+      
+      // Créer une entrée communautaire à partir de la réponse de l'API GitHub
       return {
-        ...result.issue,
-        isLikedByCurrentUser: false
+        id: `${result.number}`,
+        type: params.type,
+        displayName: displayName,
+        sessionId: sessionId,
+        createdAt: result.created_at,
+        timestamp: result.created_at,
+        likes: 0,
+        likedBy: [],
+        moderation: {
+          status: 'pending',
+          moderatedAt: null
+        },
+        isLikedByCurrentUser: false,
+        // Ajouter les champs spécifiques selon le type
+        ...(params.type === 'photo' && {
+          imageUrl: params.image ? await resizeAndCompressImage(params.image, 800, 800, 0.7) : null,
+          description: params.description || ''
+        }),
+        ...(params.type === 'testimonial' && {
+          content: params.content || ''
+        }),
+        // Ajouter les références si présentes
+        ...(params.eventId && { eventId: params.eventId }),
+        ...(params.locationId && { locationId: params.locationId }),
+        ...(params.contextType && { contextType: params.contextType }),
+        ...(params.contextId && { contextId: params.contextId })
       };
     }
     
@@ -388,8 +441,8 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     const newEntry: CommunityEntry = {
       id: entryId,
       type: params.type,
-      displayName,
-      sessionId,
+      displayName: displayName,
+      sessionId: sessionId,
       createdAt: new Date().toISOString(),
       timestamp: new Date().toISOString(), // Ajout explicite du timestamp pour éviter les erreurs de formatage
       likes: 0,
@@ -620,22 +673,37 @@ async function resizeAndCompressImage(file: File, maxWidth: number, maxHeight: n
 
 export async function uploadImage(image: File): Promise<{ imageUrl: string; thumbnailUrl: string }> {
   try {
-    // En production, envoyer l'image à l'API GitHub
+    // En production, convertir l'image en base64 et créer un issue GitHub avec l'image encodée
     // En développement, utiliser l'API si VITE_USE_API=true
     if (process.env.NODE_ENV !== 'development' || import.meta.env.VITE_USE_API === 'true') {
-      const formData = new FormData();
-      formData.append("image", image);
+      // Convertir l'image en base64
+      const base64Image = await resizeAndCompressImage(image, 800, 800, 0.7);
       
+      // Créer un issue GitHub avec l'image encodée en base64 dans le corps
       const response = await fetch(`${API_URL}/issues`, {
         method: "POST",
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify({
+          title: `Photo contribution ${new Date().toISOString()}`,
+          body: `![Image](${base64Image})`,
+          labels: ['photo-contribution']
+        })
       });
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      
+      // Extraire l'URL de l'image du corps de l'issue
+      return {
+        imageUrl: base64Image,
+        thumbnailUrl: base64Image
+      };
     }
     
     // En développement, convertir l'image en base64 pour la stocker dans localStorage
