@@ -98,6 +98,7 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
       // 1. Récupérer les entrées du fichier JSON
       let entriesFromJson: CommunityEntry[] = [];
       try {
+        console.log('[CommunityService] Récupération du fichier entries.json...');
         const jsonResponse = await fetch(`${BASE_URL}/entries.json`);
         if (jsonResponse.ok) {
           const data = await jsonResponse.json();
@@ -113,75 +114,105 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
       // 2. Récupérer les issues GitHub récentes (contributions)
       let entriesFromIssues: CommunityEntry[] = [];
       try {
-        // Récupérer les issues ouvertes avec les labels 'photo' ou 'testimonial'
-        const issuesResponse = await fetch(`https://api.github.com/repos/CollectifIleFeydeau/community-content/issues?state=open&labels=photo,testimonial&per_page=30`);
+        console.log('[CommunityService] Récupération des issues GitHub...');
+        
+        // Récupérer les issues ouvertes
+        const issuesUrl = 'https://api.github.com/repos/CollectifIleFeydeau/community-content/issues?state=open';
+        console.log(`[CommunityService] URL de l'API GitHub: ${issuesUrl}`);
+        
+        const issuesResponse = await fetch(issuesUrl);
+        console.log(`[CommunityService] Statut de la réponse: ${issuesResponse.status}`);
         
         if (issuesResponse.ok) {
           const issues = await issuesResponse.json();
           console.log(`[CommunityService] ${issues.length} issues récupérées depuis GitHub`);
           
           // Convertir les issues en entrées communautaires
-          entriesFromIssues = issues.map(issue => {
-            // Déterminer le type d'entrée
-            const isPhoto = issue.labels.some(label => label.name === 'photo');
-            const isTestimonial = issue.labels.some(label => label.name === 'testimonial');
-            const type = isPhoto ? 'photo' : isTestimonial ? 'testimonial' : 'unknown';
-            
-            // Extraire l'image si c'est une photo (rechercher le pattern ![Image](data:image...)
-            let imageUrl = null;
-            let description = '';
-            let content = '';
-            
-            if (type === 'photo') {
-              const imageMatch = issue.body.match(/!\[Image\]\((data:image\/[^;]+;base64,[^)]+)\)/);
-              if (imageMatch && imageMatch[1]) {
-                imageUrl = imageMatch[1];
+          for (const issue of issues) {
+            try {
+              // Vérifier si c'est une issue de contribution (avec label photo ou testimonial)
+              const isPhoto = issue.labels && issue.labels.some((label: any) => label.name === 'photo');
+              const isTestimonial = issue.labels && issue.labels.some((label: any) => label.name === 'testimonial');
+              
+              if (!isPhoto && !isTestimonial) {
+                console.log(`[CommunityService] Issue #${issue.number} ignorée (pas de label photo/testimonial)`);
+                continue;
               }
               
-              // Extraire la description
-              const descMatch = issue.body.match(/\*\*Description:\*\*\s*([^\n]+)/);
-              if (descMatch && descMatch[1]) {
-                description = descMatch[1];
+              const type = isPhoto ? 'photo' as EntryType : 'testimonial' as EntryType;
+              
+              // Extraire les données de l'issue
+              const body = issue.body || '';
+              
+              // Extraire l'image si c'est une photo
+              let imageUrl = null;
+              let description = '';
+              let content = '';
+              
+              if (type === 'photo') {
+                const imageMatch = body.match(/!\[Image\]\((data:image\/[^;]+;base64,[^)]+)\)/);
+                if (imageMatch && imageMatch[1]) {
+                  imageUrl = imageMatch[1];
+                  console.log(`[CommunityService] Image trouvée dans l'issue #${issue.number}`);
+                } else {
+                  console.warn(`[CommunityService] Pas d'image trouvée dans l'issue photo #${issue.number}`);
+                }
+                
+                // Extraire la description
+                const descMatch = body.match(/\*\*Description:\*\*\s*([^\n]+)/);
+                if (descMatch && descMatch[1]) {
+                  description = descMatch[1];
+                }
+              } else {
+                // Pour un témoignage, prendre tout le contenu avant les métadonnées
+                const contentMatch = body.match(/([\s\S]+?)\n\n---\n\n/);
+                if (contentMatch && contentMatch[1]) {
+                  content = contentMatch[1].trim();
+                } else {
+                  // Si pas de séparateur, prendre tout le contenu
+                  content = body.trim();
+                }
               }
-            } else if (type === 'testimonial') {
-              // Pour un témoignage, prendre tout le contenu avant les métadonnées
-              const contentMatch = issue.body.match(/([\s\S]+?)\n\n---\n\n/);
-              if (contentMatch && contentMatch[1]) {
-                content = contentMatch[1].trim();
+              
+              // Extraire le nom du contributeur
+              let displayName = 'Anonyme';
+              const nameMatch = body.match(/\*\*Contributeur:\*\*\s*([^\n]+)/);
+              if (nameMatch && nameMatch[1]) {
+                displayName = nameMatch[1];
               }
+              
+              // Créer l'entrée
+              const entry: CommunityEntry = {
+                id: `issue-${issue.number}`,
+                type,
+                displayName,
+                sessionId: '', // Non disponible depuis l'issue
+                createdAt: issue.created_at,
+                timestamp: issue.created_at,
+                likes: 0, // À implémenter via les réactions GitHub
+                likedBy: [],
+                moderation: {
+                  status: 'approved', // Considérer les issues comme approuvées
+                  moderatedAt: issue.created_at
+                },
+                isLikedByCurrentUser: false
+              };
+              
+              // Ajouter les champs spécifiques au type
+              if (type === 'photo') {
+                entry.imageUrl = imageUrl;
+                entry.thumbnailUrl = imageUrl; // Utiliser la même image comme miniature pour l'instant
+                entry.description = description;
+              } else {
+                entry.content = content;
+              }
+              
+              entriesFromIssues.push(entry);
+              console.log(`[CommunityService] Issue #${issue.number} convertie en entrée communautaire`);
+            } catch (error) {
+              console.error(`[CommunityService] Erreur lors du traitement de l'issue #${issue.number}:`, error);
             }
-            
-            // Extraire le nom du contributeur
-            let displayName = 'Anonyme';
-            const nameMatch = issue.body.match(/\*\*Contributeur:\*\*\s*([^\n]+)/);
-            if (nameMatch && nameMatch[1]) {
-              displayName = nameMatch[1];
-            }
-            
-            // Créer l'entrée
-            return {
-              id: `issue-${issue.number}`,
-              type,
-              displayName,
-              sessionId: '', // Non disponible depuis l'issue
-              createdAt: issue.created_at,
-              timestamp: issue.created_at,
-              likes: 0, // À implémenter via les réactions GitHub
-              likedBy: [],
-              moderation: {
-                status: 'approved', // Considérer les issues comme approuvées
-                moderatedAt: issue.created_at
-              },
-              isLikedByCurrentUser: false,
-              ...(type === 'photo' && {
-                imageUrl,
-                description
-              }),
-              ...(type === 'testimonial' && {
-                content
-              })
-            };
-          }).filter(entry => entry.type !== 'unknown');
+          }
         } else {
           console.warn(`[CommunityService] Impossible de récupérer les issues: ${issuesResponse.status}`);
         }
@@ -194,13 +225,8 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
       
       // Ajouter les entrées des issues qui ne sont pas déjà dans le JSON
       for (const issueEntry of entriesFromIssues) {
-        // Vérifier si cette issue existe déjà dans les entrées JSON (par ID ou contenu similaire)
-        const exists = allEntries.some(entry => 
-          entry.id === issueEntry.id || 
-          (entry.type === issueEntry.type && 
-           ((entry.type === 'photo' && entry.imageUrl === issueEntry.imageUrl) || 
-            (entry.type === 'testimonial' && entry.content === issueEntry.content)))
-        );
+        // Vérifier si cette issue existe déjà dans les entrées JSON (par ID)
+        const exists = allEntries.some(entry => entry.id === issueEntry.id);
         
         if (!exists) {
           allEntries.push(issueEntry);
