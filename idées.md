@@ -1,28 +1,17 @@
 # Toutes nouvelles idées 
 
-## Améliorations pour la galerie communautaire
-
-* Correction des problèmes identifiés:
-   * Chemins d'images pour les exemples incorrects ou images manquantes
-   * Améliorer la persistance des likes après fermeture du navigateur
-   * S'assurer que les contributions supprimées ne réapparaissent pas
-
-* Tests à compléter:
-   * Tests multi-navigateurs (Chrome, Firefox, Safari, Edge)
-   * Tests sur mobile et différentes tailles d'écran
-   * Tests de performance avec de nombreuses contributions
-   * Tests de sécurité pour les URLs des images
-
 # Priorités actuelles (phase de test et optimisation)
 
 ## Priorités immédiates à faire 
 
-* ~~Interaction communautaire~~ ✅ Implémentée
-   * ✅ Partage de photos par les utilisateurs / Galerie communautaire des meilleurs moments
-   * ✅ Section témoignages pour les utilisateurs
-   * ✅ Interface d'administration avec code PIN pour modération
-   * ✅ Système de likes pour les contributions
-   => Voir @galerie-communautaire-concept.md
+* Tests de la galerie communautaire 
+   * Tests à compléter:
+      * Tests multi-navigateurs (Chrome, Firefox, Safari, Edge)
+      * Tests sur mobile et différentes tailles d'écran
+      * Tests de performance avec de nombreuses contributions
+      * Tests de sécurité pour les URLs des images
+      => Voir @galerie-communautaire-concept.md
+      => Tests sur @plan-test-contributions.md
 
 * Changer les immages de l'onboarding
 
@@ -219,3 +208,13 @@
    - Configuration du mode debug pour visualiser les événements en temps réel
    - Tracking des interactions utilisateur, vues de pages et événements personnalisés
    - Mise en place d'un système de diagnostic pour vérifier la configuration
+
+25. **Améliorations pour la galerie communautaire**
+   - Partage de photos par les utilisateurs / Galerie communautaire des meilleurs moments
+   - Section témoignages pour les utilisateurs
+   - Interface d'administration avec code PIN pour modération
+   - Système de likes pour les contributions
+   - Correction des problèmes identifiés:
+      * Chemins d'images pour les exemples incorrects ou images manquantes
+      * Améliorer la persistance des likes après fermeture du navigateur
+      * S'assurer que les contributions supprimées ne réapparaissent pas
