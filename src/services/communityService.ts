@@ -91,20 +91,126 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
     if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
         process.env.NODE_ENV !== 'development' || 
         import.meta.env.VITE_USE_API === 'true') {
-      // Utiliser l'API GitHub pour récupérer le contenu du fichier JSON
-      const response = await fetch(`${BASE_URL}/entries.json`);
-      
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-      
-      const data = await response.json();
       
       // Récupérer les likes de l'utilisateur actuel
       const likedEntries = getLikedEntries();
       
+      // 1. Récupérer les entrées du fichier JSON
+      let entriesFromJson: CommunityEntry[] = [];
+      try {
+        const jsonResponse = await fetch(`${BASE_URL}/entries.json`);
+        if (jsonResponse.ok) {
+          const data = await jsonResponse.json();
+          entriesFromJson = data.entries || [];
+          console.log(`[CommunityService] ${entriesFromJson.length} entrées récupérées depuis entries.json`);
+        } else {
+          console.warn(`[CommunityService] Impossible de récupérer entries.json: ${jsonResponse.status}`);
+        }
+      } catch (error) {
+        console.error('[CommunityService] Erreur lors de la récupération de entries.json:', error);
+      }
+      
+      // 2. Récupérer les issues GitHub récentes (contributions)
+      let entriesFromIssues: CommunityEntry[] = [];
+      try {
+        // Récupérer les issues ouvertes avec les labels 'photo' ou 'testimonial'
+        const issuesResponse = await fetch(`https://api.github.com/repos/CollectifIleFeydeau/community-content/issues?state=open&labels=photo,testimonial&per_page=30`);
+        
+        if (issuesResponse.ok) {
+          const issues = await issuesResponse.json();
+          console.log(`[CommunityService] ${issues.length} issues récupérées depuis GitHub`);
+          
+          // Convertir les issues en entrées communautaires
+          entriesFromIssues = issues.map(issue => {
+            // Déterminer le type d'entrée
+            const isPhoto = issue.labels.some(label => label.name === 'photo');
+            const isTestimonial = issue.labels.some(label => label.name === 'testimonial');
+            const type = isPhoto ? 'photo' : isTestimonial ? 'testimonial' : 'unknown';
+            
+            // Extraire l'image si c'est une photo (rechercher le pattern ![Image](data:image...)
+            let imageUrl = null;
+            let description = '';
+            let content = '';
+            
+            if (type === 'photo') {
+              const imageMatch = issue.body.match(/!\[Image\]\((data:image\/[^;]+;base64,[^)]+)\)/);
+              if (imageMatch && imageMatch[1]) {
+                imageUrl = imageMatch[1];
+              }
+              
+              // Extraire la description
+              const descMatch = issue.body.match(/\*\*Description:\*\*\s*([^\n]+)/);
+              if (descMatch && descMatch[1]) {
+                description = descMatch[1];
+              }
+            } else if (type === 'testimonial') {
+              // Pour un témoignage, prendre tout le contenu avant les métadonnées
+              const contentMatch = issue.body.match(/([\s\S]+?)\n\n---\n\n/);
+              if (contentMatch && contentMatch[1]) {
+                content = contentMatch[1].trim();
+              }
+            }
+            
+            // Extraire le nom du contributeur
+            let displayName = 'Anonyme';
+            const nameMatch = issue.body.match(/\*\*Contributeur:\*\*\s*([^\n]+)/);
+            if (nameMatch && nameMatch[1]) {
+              displayName = nameMatch[1];
+            }
+            
+            // Créer l'entrée
+            return {
+              id: `issue-${issue.number}`,
+              type,
+              displayName,
+              sessionId: '', // Non disponible depuis l'issue
+              createdAt: issue.created_at,
+              timestamp: issue.created_at,
+              likes: 0, // À implémenter via les réactions GitHub
+              likedBy: [],
+              moderation: {
+                status: 'approved', // Considérer les issues comme approuvées
+                moderatedAt: issue.created_at
+              },
+              isLikedByCurrentUser: false,
+              ...(type === 'photo' && {
+                imageUrl,
+                description
+              }),
+              ...(type === 'testimonial' && {
+                content
+              })
+            };
+          }).filter(entry => entry.type !== 'unknown');
+        } else {
+          console.warn(`[CommunityService] Impossible de récupérer les issues: ${issuesResponse.status}`);
+        }
+      } catch (error) {
+        console.error('[CommunityService] Erreur lors de la récupération des issues:', error);
+      }
+      
+      // 3. Fusionner les deux sources de données (en évitant les doublons)
+      const allEntries = [...entriesFromJson];
+      
+      // Ajouter les entrées des issues qui ne sont pas déjà dans le JSON
+      for (const issueEntry of entriesFromIssues) {
+        // Vérifier si cette issue existe déjà dans les entrées JSON (par ID ou contenu similaire)
+        const exists = allEntries.some(entry => 
+          entry.id === issueEntry.id || 
+          (entry.type === issueEntry.type && 
+           ((entry.type === 'photo' && entry.imageUrl === issueEntry.imageUrl) || 
+            (entry.type === 'testimonial' && entry.content === issueEntry.content)))
+        );
+        
+        if (!exists) {
+          allEntries.push(issueEntry);
+        }
+      }
+      
+      console.log(`[CommunityService] Total de ${allEntries.length} entrées après fusion`);
+      
       // Ajouter un flag pour indiquer si l'entrée est likée par l'utilisateur actuel
-      return data.entries.map(entry => ({
+      return allEntries.map(entry => ({
         ...entry,
         isLikedByCurrentUser: likedEntries.includes(entry.id)
       }));

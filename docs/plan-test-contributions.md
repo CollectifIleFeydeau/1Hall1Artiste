@@ -17,9 +17,11 @@
    - [x] Description
    - [x] Sélectionner une image
 4. [x] Soumettre et vérifier:
-   - [ ] Message de confirmation
-   - [ ] Redirection vers la galerie
-   - [ ] Présence de la nouvelle contribution dans la galerie
+   - [x] Message de confirmation
+   - [x] Redirection vers la galerie
+   - [x] Présence de la nouvelle contribution dans la galerie avant de rafraîchir
+5. [x] Rafraîchir la galerie et vérifier:
+   - [] Présence de la nouvelle contribution dans la galerie
 
 ### Témoignages
 1. [ ] Accéder à la page de contribution
