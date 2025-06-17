@@ -95,21 +95,39 @@ const saveLikedEntries = (entryIds: string[]): void => {
 // Exporter les fonctions du service communautaire avec les types TypeScript appropriés
 export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
   try {
-    // En production ou si l'API est activée, récupérer les données depuis l'API GitHub
-    if ((typeof window !== 'undefined' && window.location.hostname.includes('github.io')) || 
-        (typeof process !== 'undefined' && process.env.NODE_ENV !== 'development') || 
-        (typeof process !== 'undefined' && process.env.VITE_USE_API === 'true')) {
+    const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
+    const useAPI = (typeof process !== 'undefined' && process.env.VITE_USE_API === 'true');
+    const isProduction = (typeof process !== 'undefined' && process.env.NODE_ENV === 'production');
+    
+    console.log(`[CommunityService] Environment check:`, {
+      isGitHubPages,
+      useAPI,
+      isProduction,
+      hostname: typeof window !== 'undefined' ? window.location.hostname : 'undefined',
+      BASE_URL_INTERNAL
+    });
+    
+    // En production, sur GitHub Pages, ou si l'API est explicitement activée
+    if (isGitHubPages || isProduction || useAPI) {
       
       console.log(`[CommunityService] Récupération des entrées depuis l'API GitHub`);
+      console.log(`[CommunityService] URL complète: ${BASE_URL_INTERNAL}/entries.json`);
       
       // Récupérer les données depuis le fichier JSON sur GitHub
-      const response = await fetch(`${BASE_URL_INTERNAL}/data/community_entries.json`);
+      const response = await fetch(`${BASE_URL_INTERNAL}/entries.json`);
       
       if (!response.ok) {
+        console.warn(`[CommunityService] Erreur HTTP ${response.status}, utilisation des données locales`);
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       
-      const entries = await response.json();
+      const data = await response.json();
+      
+      // Le fichier peut contenir un objet avec une propriété 'entries' ou être un tableau direct
+      const entries = Array.isArray(data) ? data : (data.entries || []);
+      
+      console.log(`[CommunityService] ${entries.length} entrées récupérées depuis GitHub`);
+      console.log(`[CommunityService] Dernière mise à jour:`, data.lastUpdated || 'Non disponible');
       
       // Sauvegarder les entrées dans le stockage local pour utilisation hors ligne
       saveEntries(entries);
@@ -122,14 +140,14 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
       }));
     }
     
-    // En développement, utiliser les données stockées localement
-    console.log(`[CommunityService] Mode développement: utilisation des données locales`);
+    // En développement local, utiliser les données stockées localement
+    console.log(`[CommunityService] Mode développement local: utilisation des données locales`);
     return getStoredEntries();
   } catch (error) {
     console.error('Erreur lors de la récupération des entrées:', error);
     
     // En cas d'erreur, utiliser les données stockées localement
-    console.log(`[CommunityService] Erreur, utilisation des données locales`);
+    console.log(`[CommunityService] Erreur, utilisation des données locales de secours`);
     return getStoredEntries();
   }
 }

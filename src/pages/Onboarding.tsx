@@ -148,13 +148,20 @@ export default function Onboarding() {
         // Force un rechargement de la page pour s'assurer que le Map component est correctement monté
         setTimeout(() => {
           console.log("[Onboarding] Forçage du rechargement de la page");
-          window.location.href = '/#/map';
+          // Déterminer la base URL en fonction de l'environnement
+          const baseUrl = window.location.hostname.includes('github.io') 
+            ? '/1Hall1Artiste/#' 
+            : '/#';
+          window.location.href = `${baseUrl}/map`;
         }, 100);
       }, 300);
     } catch (error) {
       console.error("[Onboarding] Erreur lors de la finalisation de l'onboarding:", error);
       // Fallback en cas d'erreur avec le format HashRouter
-      window.location.href = '/#/map';
+      const baseUrl = window.location.hostname.includes('github.io') 
+        ? '/1Hall1Artiste/#' 
+        : '/#';
+      window.location.href = `${baseUrl}/map`;
     }
   };
 
