@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "/",
+  "homepage": "/1Hall1Artiste/",
   "scripts": {
     "dev": "vite",
     "start": "powershell -ExecutionPolicy Bypass -File ./start-dev.ps1",
