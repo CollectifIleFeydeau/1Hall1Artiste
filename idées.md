@@ -58,24 +58,6 @@
    * Amélioration de l'interface utilisateur
    * Mise en place de hooks de suivi des actions
 
-### Optimisations techniques
-
-* **Performance**
-   * Utilisation de l'API Intersection Observer pour le chargement conditionnel
-   * Code splitting pour réduire la taille du bundle initial
-   * Optimisation des images avec des noms de fichiers standardisés sans caractères spéciaux
-
-* **Architecture**
-   * Solution de gestion d'état plus robuste (Redux)
-   * Système de versionnement des données
-   * Refactorisation des composants pour une meilleure réutilisation
-
-* **Sécurité et robustesse**
-   * Définitions de types renforcées
-   * Couche API dédiée pour la gestion des données
-   * Tests unitaires et d'intégration
-   * Gestion améliorée des erreurs
-
 ## Optimisations complétées 
 
 1. **Support hors ligne**
