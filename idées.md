@@ -4,6 +4,8 @@
 
 ## Priorités immédiates à faire 
 
+   * rajouter les autres batîments : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice
+
 * Tests de la galerie communautaire 
    * Tests à compléter:
       * Tests multi-navigateurs (Chrome, Firefox, Safari, Edge)
@@ -18,7 +20,6 @@
 * S'assurer que les stats de firebase marchent
 => Voir @ANALYTICS_TESTING_GUIDE.md
 
-
 ## Améliorations en réflexion 
 
 ### Navigation par chemins praticables
@@ -27,15 +28,10 @@
    - Interface utilisateur permettant de basculer entre navigation simple et navigation avancée
    - Visualisation des intersections et des points de passage sur la carte
 
-### Enrichissement des contenus
-
-* **Contenus audio et visuels**
-   * rajouter les autres batîments : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice
+### Gamification
 
 * **Éléments éducatifs**
    * Quiz sur l'histoire de l'Île Feydeau
-
-### Gamification
 
 * **Système d'achievements**
    * Implémenter ALL_LOCATIONS_VISITED dans markLocationAsVisited
@@ -61,8 +57,6 @@
    * Création d'un service de progression
    * Amélioration de l'interface utilisateur
    * Mise en place de hooks de suivi des actions
-
-
 
 ### Optimisations techniques
 
