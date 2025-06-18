@@ -123,8 +123,11 @@ export default function Onboarding() {
     
     try {
       setIsNavigating(true);
-      console.log("[Onboarding] Début de handleFinish");
+      console.log("[Onboarding] ===== Début de handleFinish =====");
+      console.log("[Onboarding] Avant localStorage.setItem - hasSeenOnboarding actuel:", localStorage.getItem('hasSeenOnboarding'));
+      
       localStorage.setItem('hasSeenOnboarding', 'true');
+      console.log("[Onboarding] Après localStorage.setItem - hasSeenOnboarding:", localStorage.getItem('hasSeenOnboarding'));
       
       // Tracker la fin de l'onboarding
       analytics.trackOnboarding(EventAction.ONBOARDING_COMPLETE, {
@@ -132,10 +135,18 @@ export default function Onboarding() {
         completion_time: new Date().toISOString()
       });
       
-      console.log("[Onboarding] Navigation vers la carte");
+      console.log("[Onboarding] URL actuelle avant navigation:", window.location.href);
+      console.log("[Onboarding] Navigation vers la carte...");
       
       // Navigation simple et directe
       navigate('/map', { replace: true });
+      
+      console.log("[Onboarding] navigate() appelé vers /map");
+      
+      // Vérifier après un court délai si la navigation a fonctionné
+      setTimeout(() => {
+        console.log("[Onboarding] URL après navigation (500ms):", window.location.href);
+      }, 500);
       
     } catch (error) {
       console.error("[Onboarding] Erreur lors de la finalisation de l'onboarding:", error);

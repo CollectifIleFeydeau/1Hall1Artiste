@@ -67,6 +67,29 @@ const AnimatedRoutes: React.FC = () => {
     return storedValue === 'true';
   });
   
+  // Surveiller les changements du localStorage pour hasSeenOnboarding
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedValue = localStorage.getItem('hasSeenOnboarding');
+      const newValue = storedValue === 'true';
+      if (newValue !== hasSeenOnboarding) {
+        console.log('[App] Mise à jour de hasSeenOnboarding depuis localStorage:', newValue);
+        setHasSeenOnboarding(newValue);
+      }
+    };
+
+    // Écouter les changements du localStorage
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Vérifier aussi périodiquement (pour les changements dans le même onglet)
+    const interval = setInterval(handleStorageChange, 100);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [hasSeenOnboarding]);
+
   // État pour l'écran d'accueil
   const [showSplash, setShowSplash] = useState<boolean>(true);
   
@@ -83,12 +106,27 @@ const AnimatedRoutes: React.FC = () => {
   
   // Vérifier si c'est la première visite
   useEffect(() => {
+    console.log('[App] useEffect navigation - État actuel:', {
+      showSplash,
+      hasSeenOnboarding,
+      pathname: location.pathname
+    });
+    
     // Ne rien faire si l'écran d'accueil est encore affiché
-    if (showSplash) return;
+    if (showSplash) {
+      console.log('[App] Écran d\'accueil encore affiché, aucune action');
+      return;
+    }
     
     // Si c'est la première visite et que l'utilisateur n'est pas déjà sur la page d'onboarding
     if (!hasSeenOnboarding && location.pathname !== '/onboarding') {
+      console.log('[App] Redirection vers onboarding depuis:', location.pathname);
       navigate('/onboarding');
+    } else if (hasSeenOnboarding && location.pathname === '/onboarding') {
+      console.log('[App] Onboarding terminé, redirection vers /map');
+      navigate('/map');
+    } else {
+      console.log('[App] Aucune action de navigation nécessaire');
     }
   }, [hasSeenOnboarding, location.pathname, navigate, showSplash]);
   
@@ -238,12 +276,21 @@ const App: React.FC = () => {
       console.log('[App] Célébration activée avec le message:', customEvent.detail.message);
     };
 
-    // Ajouter les écouteurs d'événements
+    // Ajouter les écouteurs
     console.log('[App] Ajout de l\'écouteur pour l\'événement interne "achievement"');
     achievementEvent.addEventListener('achievement', handleInternalAchievement);
     
     console.log('[App] Ajout de l\'écouteur pour l\'événement global "app-achievement"');
     window.addEventListener('app-achievement', handleGlobalAchievement);
+
+    // Fonction de test globale pour réinitialiser l'onboarding
+    (window as any).resetOnboardingTest = () => {
+      console.log('[App] [TEST] Réinitialisation de l\'onboarding...');
+      localStorage.removeItem('hasSeenOnboarding');
+      window.location.reload();
+    };
+
+    console.log('[App] [TEST] Fonction resetOnboardingTest() disponible dans la console');
 
     // Nettoyer les écouteurs d'événements lors du démontage
     return () => {
