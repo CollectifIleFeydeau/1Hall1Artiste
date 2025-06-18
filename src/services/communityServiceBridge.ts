@@ -393,10 +393,10 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     const newEntry: CommunityEntry = {
       id,
       type: params.type,
-      displayName: params.displayName || 'Anonyme',
-      content: params.content,
+      displayName: params.displayName?.trim() || 'Anonyme',
+      content: params.content?.trim() || '',
       imageUrl: imageUrl,
-      description: params.description,
+      description: params.description?.trim() || '',
       createdAt: new Date().toISOString(),
       timestamp: new Date().toISOString(),
       likes: 0,

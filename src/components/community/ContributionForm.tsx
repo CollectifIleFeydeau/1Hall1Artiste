@@ -200,15 +200,18 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       >
         {/* Nom d'affichage */}
         <div className="space-y-2">
-          <Label htmlFor="displayName">Votre nom ou pseudo</Label>
+          <Label htmlFor="displayName">Nom d'affichage (optionnel)</Label>
           <Input 
             id="displayName" 
-            placeholder="Comment souhaitez-vous être identifié?"
-            defaultValue={AnonymousSessionService.getDisplayName() || ""}
+            placeholder="Votre nom ou pseudonyme"
+            defaultValue="Anonyme"
             autoComplete="off"
-            data-form-type="contribution-name"
+            data-form-type="contribution-displayname"
             {...register("displayName")}
           />
+          <p className="text-xs text-slate-500">
+            Laissez vide pour contribuer anonymement
+          </p>
         </div>
 
         {/* Événement associé */}
