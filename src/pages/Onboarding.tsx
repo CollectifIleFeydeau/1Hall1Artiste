@@ -96,12 +96,8 @@ export default function Onboarding() {
     
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
-    } else {
-      console.log("[Onboarding] Dernière slide atteinte, appel de handleFinish");
-      setTimeout(() => {
-        handleFinish();
-      }, 100);
     }
+    // Note: Ne plus appeler handleFinish ici car le bouton le gère directement
   };
 
   const prevSlide = () => {
@@ -341,7 +337,7 @@ export default function Onboarding() {
         )}
         
         <Button 
-          onClick={() => currentSlide === slides.length - 1 ? handleFinish() : nextSlide()}
+          onClick={currentSlide === slides.length - 1 ? handleFinish : nextSlide}
           className="flex-1 bg-[#4a5d94] text-white"
         >
           {currentSlide === slides.length - 1 ? 'Commencer' : 'Suivant'}

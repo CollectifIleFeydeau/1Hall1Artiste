@@ -37,9 +37,19 @@
 
 1. [x] Sur le navigateur 1, soumettre une contribution
 2. [x] Sur le navigateur 2, rafraîchir la galerie et vérifier que la contribution est visible
-3. [ ] Sur le navigateur 2, liker la contribution
-4. [ ] Sur le navigateur 1, rafraîchir et vérifier que le like est comptabilisé
-5. [ ] Sur le navigateur 2, vérifier que le bouton like est désactivé ou indique que l'utilisateur a déjà liké
+3. [x] Ouvrir la même contribution sur deux navigateurs différents
+4. [x] Vérifier que la même image s'affiche (✅ fonctionne)
+5. [ ] Sur le navigateur 2, liker la contribution
+6. [ ] Rafraîchir le navigateur 2 et vérifier que le like est visible
+7. [ ] Rafraîchir le navigateur 1 et vérifier que le like persiste
+8. [ ] Vérifier que le bouton like est désactivé ou indique que l'utilisateur a déjà liké
+9. [ ] Tester la persistance des likes après fermeture/réouverture du navigateur
+
+## 4. Test de fin d'onboarding
+
+1. [ ] Compléter entièrement l'onboarding
+2. [ ] Vérifier que la navigation vers la carte s'effectue automatiquement
+3. [ ] Tester depuis différents points d'entrée (première visite, retour utilisateur)
 
 ## 5. Test d'administration
 
@@ -113,18 +123,3 @@
   - Mise en place d'un système de fallback local en cas d'échec de synchronisation
   - Les likes sont maintenant persistés sur GitHub et synchronisés entre tous les clients
   - Logs détaillés ajoutés pour le diagnostic
-
-## Tests de régression à effectuer
-
-### Test de synchronisation multi-clients
-1. [x] Ouvrir la même contribution sur deux navigateurs différents
-2. [x] Vérifier que la même image s'affiche (✅ fonctionne)
-3. [ ] Ajouter un like sur le navigateur 1
-4. [ ] Rafraîchir le navigateur 2 et vérifier que le like est visible
-5. [ ] Rafraîchir le navigateur 1 et vérifier que le like persiste
-6. [ ] Tester la persistance des likes après fermeture/réouverture du navigateur
-
-### Test de fin d'onboarding
-1. [ ] Compléter entièrement l'onboarding
-2. [ ] Vérifier que la navigation vers la carte s'effectue automatiquement
-3. [ ] Tester depuis différents points d'entrée (première visite, retour utilisateur)

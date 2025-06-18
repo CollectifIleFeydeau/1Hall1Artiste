@@ -77,27 +77,43 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
 
   // Gérer le changement d'image
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        // Vérification de sécurité pour éviter l'erreur TypeError
-        if (event.target && event.target.result) {
-          setImagePreview(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+    try {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            // Vérification de sécurité pour éviter l'erreur TypeError
+            if (event.target && event.target.result) {
+              setImagePreview(event.target.result as string);
+            }
+          } catch (readerError) {
+            console.error('[ContributionForm] Erreur lors de la lecture du fichier:', readerError);
+          }
+        };
+        reader.onerror = (error) => {
+          console.error('[ContributionForm] Erreur FileReader:', error);
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch (error) {
+      console.error('[ContributionForm] Erreur lors du changement d\'image:', error);
     }
   };
 
   // Soumettre le formulaire
   const processSubmit = async (data: SubmissionParams) => {
+    console.log('[ContributionForm] === DÉBUT DE SOUMISSION ===');
+    console.log('[ContributionForm] Données reçues du formulaire:', data);
+    
     try {
       setIsSubmitting(true);
+      console.log('[ContributionForm] État de soumission activé');
 
       // Déterminer le type de contribution automatiquement
       const hasImage = fileInputRef.current?.files?.[0];
       const type: EntryType = hasImage ? "photo" : "testimonial";
+      console.log('[ContributionForm] Type déterminé automatiquement:', type, hasImage ? '(avec image)' : '(sans image)');
 
       // Ajouter le type aux données
       data.type = type;
@@ -105,32 +121,50 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       // Ajouter l'image si présente
       if (fileInputRef.current?.files?.[0]) {
         data.image = fileInputRef.current.files[0];
+        console.log('[ContributionForm] Image ajoutée:', {
+          name: data.image.name,
+          size: data.image.size,
+          type: data.image.type
+        });
+      } else {
+        console.log('[ContributionForm] Aucune image à ajouter');
       }
       
       // Enrichir les données avec le contexte si présent
+      console.log('[ContributionForm] Contexte avant enrichissement:', contributionContext);
       data = enrichSubmissionWithContext(data);
+      console.log('[ContributionForm] Données après enrichissement avec contexte:', data);
 
       // Modérer le contenu avant soumission
+      console.log('[ContributionForm] Appel du service de soumission...');
       // Soumettre la contribution
       const newEntry = await submitContribution(data);
+      console.log('[ContributionForm] Contribution soumise avec succès:', newEntry);
       
       // Réinitialiser le formulaire
+      console.log('[ContributionForm] Réinitialisation du formulaire...');
       reset();
       setImagePreview(null);
       clearContributionContext();
       setContributionContext(null);
       setSelectedEventId("");
       setSelectedLocationId("");
+      console.log('[ContributionForm] Formulaire réinitialisé');
       
       // Notifier le parent
+      console.log('[ContributionForm] Notification du composant parent...');
       onSubmit(newEntry);
+      console.log('[ContributionForm] === SOUMISSION TERMINÉE AVEC SUCCÈS ===');
       
     } catch (error) {
-      console.error("Erreur lors de la soumission:", error);
+      console.error("[ContributionForm] === ERREUR LORS DE LA SOUMISSION ===");
+      console.error("[ContributionForm] Erreur détaillée:", error);
+      console.error("[ContributionForm] Stack trace:", error instanceof Error ? error.stack : 'N/A');
       // Gérer l'erreur (pourrait être amélioré avec un système de notification)
       alert("Une erreur est survenue lors de l'envoi de votre contribution. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
+      console.log('[ContributionForm] État de soumission désactivé');
     }
   };
 
@@ -157,7 +191,13 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
         )}
       </div>
 
-      <form onSubmit={handleSubmit(processSubmit)} className="space-y-6">
+      <form 
+        onSubmit={handleSubmit(processSubmit)} 
+        className="space-y-6"
+        autoComplete="off"
+        data-form-type="contribution"
+        noValidate
+      >
         {/* Nom d'affichage */}
         <div className="space-y-2">
           <Label htmlFor="displayName">Votre nom ou pseudo</Label>
@@ -165,6 +205,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
             id="displayName" 
             placeholder="Comment souhaitez-vous être identifié?"
             defaultValue={AnonymousSessionService.getDisplayName() || ""}
+            autoComplete="off"
+            data-form-type="contribution-name"
             {...register("displayName")}
           />
         </div>
@@ -188,7 +230,13 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
               ))}
             </SelectContent>
           </Select>
-          <input type="hidden" {...register("eventId")} value={selectedEventId} />
+          <input 
+            type="hidden" 
+            {...register("eventId")} 
+            value={selectedEventId}
+            data-form-type="contribution-event"
+            autoComplete="off"
+          />
         </div>
 
         {/* Lieu associé */}
@@ -210,7 +258,13 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
               ))}
             </SelectContent>
           </Select>
-          <input type="hidden" {...register("locationId")} value={selectedLocationId} />
+          <input 
+            type="hidden" 
+            {...register("locationId")} 
+            value={selectedLocationId}
+            data-form-type="contribution-location"
+            autoComplete="off"
+          />
         </div>
 
         {/* Champs spécifiques au type */}
@@ -259,6 +313,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
                 accept="image/*"
                 className="hidden"
                 onChange={handleImageChange}
+                data-form-type="contribution-image"
+                autoComplete="off"
               />
             </div>
           </div>
@@ -269,6 +325,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
             <Textarea 
               id="description" 
               placeholder="Décrivez votre photo..."
+              autoComplete="off"
+              data-form-type="contribution-description"
               {...register("description")}
             />
           </div>

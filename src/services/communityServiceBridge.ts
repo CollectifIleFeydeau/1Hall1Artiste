@@ -35,38 +35,75 @@ const API_URL_INTERNAL = (typeof window !== 'undefined' && window.location.hostn
     : '/api';
 
 // Clés pour le stockage local
-const COMMUNITY_ENTRIES_KEY = 'community_entries';
-const COMMUNITY_LIKES_KEY = 'community_liked_entries'; // Clé pour stocker les likes
+const STORAGE_KEYS = {
+  ENTRIES: 'community_entries',
+  LIKED_ENTRIES: 'liked_entries'
+};
+
+const SESSION_ID_KEY = 'user_session_id';
+
+// Fonction pour obtenir ou créer un identifiant de session utilisateur
+function getSessionId(): string {
+  let sessionId = localStorage.getItem(SESSION_ID_KEY);
+  if (!sessionId) {
+    sessionId = `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem(SESSION_ID_KEY, sessionId);
+  }
+  return sessionId;
+}
 
 // Fonctions utilitaires pour la gestion du stockage local
 const getStoredEntries = (): CommunityEntry[] => {
   try {
-    if (typeof localStorage === 'undefined') return [];
+    if (typeof localStorage === 'undefined') {
+      console.log('[CommunityService] localStorage non disponible, retour tableau vide');
+      return [];
+    }
     
-    const storedEntries = localStorage.getItem(COMMUNITY_ENTRIES_KEY);
+    console.log('[CommunityService] Récupération des entrées depuis localStorage...');
+    const storedEntries = localStorage.getItem(STORAGE_KEYS.ENTRIES);
+    console.log('[CommunityService] Données brutes localStorage:', storedEntries ? `${storedEntries.length} caractères` : 'null');
+    
     const entries = storedEntries ? JSON.parse(storedEntries) : [];
+    console.log('[CommunityService] Entrées parsées:', entries.length, 'entrées');
     
     // Ajouter l'information des likes pour l'utilisateur actuel
     const likedEntries = getLikedEntries();
-    return entries.map(entry => ({
+    console.log('[CommunityService] Likes utilisateur actuel:', likedEntries.length, 'entrées likées');
+    
+    const entriesWithLikes = entries.map((entry: CommunityEntry) => ({
       ...entry,
       isLikedByCurrentUser: likedEntries.includes(entry.id)
     }));
+    
+    console.log('[CommunityService] Entrées avec informations de likes préparées');
+    return entriesWithLikes;
   } catch (error) {
-    console.error('Erreur lors de la récupération des entrées locales:', error);
+    console.error('[CommunityService] Erreur lors de la récupération des entrées:', error);
     return [];
   }
 };
 
 const saveEntries = (entries: CommunityEntry[]): void => {
   try {
-    if (typeof localStorage === 'undefined') return;
+    if (typeof localStorage === 'undefined') {
+      console.warn('[CommunityService] localStorage non disponible, impossible de sauvegarder');
+      return;
+    }
+    
+    console.log('[CommunityService] Sauvegarde de', entries.length, 'entrées...');
     
     // Retirer la propriété isLikedByCurrentUser avant de sauvegarder
     const entriesToSave = entries.map(({ isLikedByCurrentUser, ...rest }) => rest);
-    localStorage.setItem(COMMUNITY_ENTRIES_KEY, JSON.stringify(entriesToSave));
+    console.log('[CommunityService] Propriétés isLikedByCurrentUser supprimées pour la sauvegarde');
+    
+    const dataToSave = JSON.stringify(entriesToSave);
+    console.log('[CommunityService] Taille des données à sauvegarder:', dataToSave.length, 'caractères');
+    
+    localStorage.setItem(STORAGE_KEYS.ENTRIES, dataToSave);
+    console.log('[CommunityService] Entrées sauvegardées avec succès dans localStorage');
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde des entrées locales:', error);
+    console.error('[CommunityService] Erreur lors de la sauvegarde des entrées locales:', error);
   }
 };
 
@@ -74,7 +111,7 @@ const getLikedEntries = (): string[] => {
   try {
     if (typeof localStorage === 'undefined') return [];
     
-    const likedEntries = localStorage.getItem(COMMUNITY_LIKES_KEY);
+    const likedEntries = localStorage.getItem(STORAGE_KEYS.LIKED_ENTRIES);
     return likedEntries ? JSON.parse(likedEntries) : [];
   } catch (error) {
     console.error('Erreur lors de la récupération des likes:', error);
@@ -86,7 +123,7 @@ const saveLikedEntries = (entryIds: string[]): void => {
   try {
     if (typeof localStorage === 'undefined') return;
     
-    localStorage.setItem(COMMUNITY_LIKES_KEY, JSON.stringify(entryIds));
+    localStorage.setItem(STORAGE_KEYS.LIKED_ENTRIES, JSON.stringify(entryIds));
   } catch (error) {
     console.error('Erreur lors de la sauvegarde des likes:', error);
   }
@@ -132,12 +169,61 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
       // Sauvegarder les entrées dans le stockage local pour utilisation hors ligne
       saveEntries(entries);
       
-      // Ajouter l'information des likes pour l'utilisateur actuel
-      const likedEntries = getLikedEntries();
-      return entries.map(entry => ({
-        ...entry,
-        isLikedByCurrentUser: likedEntries.includes(entry.id)
+      // Récupérer les likes actuels pour chaque entrée depuis le serveur
+      const entriesWithLikes = await Promise.all(entries.map(async (entry) => {
+        try {
+          // Extraire le numéro d'issue depuis l'ID
+          const issueMatch = entry.id.match(/issue-(\d+)/);
+          if (!issueMatch) {
+            console.warn(`[CommunityService] ID d'entrée invalide: ${entry.id}`);
+            return {
+              ...entry,
+              likes: entry.likes || 0,
+              isLikedByCurrentUser: getLikedEntries().includes(entry.id)
+            };
+          }
+          
+          const issueNumber = parseInt(issueMatch[1]);
+          
+          // Récupérer les likes depuis le serveur
+          const response = await fetch(`${WORKER_URL}/like-issue`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              issueNumber, 
+              sessionId: getSessionId(), 
+              action: 'get' 
+            })
+          });
+          
+          if (response.ok) {
+            const likeData = await response.json();
+            return {
+              ...entry,
+              likes: likeData.likes || 0,
+              isLikedByCurrentUser: likeData.isLikedByCurrentUser || false
+            };
+          } else {
+            // En cas d'erreur, utiliser les données locales
+            return {
+              ...entry,
+              likes: entry.likes || 0,
+              isLikedByCurrentUser: getLikedEntries().includes(entry.id)
+            };
+          }
+        } catch (error) {
+          console.warn(`[CommunityService] Erreur lors de la récupération des likes pour ${entry.id}:`, error);
+          // En cas d'erreur, utiliser les données locales
+          return {
+            ...entry,
+            likes: entry.likes || 0,
+            isLikedByCurrentUser: getLikedEntries().includes(entry.id)
+          };
+        }
       }));
+      
+      console.log(`[CommunityService] Likes synchronisés pour ${entriesWithLikes.length} entrées`);
+      return entriesWithLikes;
     }
     
     // En développement local, utiliser les données stockées localement
@@ -268,17 +354,48 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
 
 // Fonction pour soumettre une nouvelle contribution
 export async function submitContribution(params: SubmissionParams): Promise<CommunityEntry> {
+  console.log('[CommunityService] === DÉBUT DE SUBMIT CONTRIBUTION ===');
+  console.log('[CommunityService] Paramètres reçus:', {
+    type: params.type,
+    displayName: params.displayName,
+    content: params.content,
+    description: params.description,
+    hasImage: !!params.image,
+    imageInfo: params.image ? {
+      name: params.image.name,
+      size: params.image.size,
+      type: params.image.type
+    } : null,
+    eventId: params.eventId,
+    locationId: params.locationId
+  });
+
   try {
     // Générer un ID unique pour la nouvelle entrée
     const id = `entry_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    console.log('[CommunityService] ID généré pour la nouvelle entrée:', id);
     
+    // Traitement de l'image si présente
+    let imageUrl: string | undefined;
+    if (params.image) {
+      console.log('[CommunityService] Traitement de l\'image...');
+      try {
+        imageUrl = URL.createObjectURL(params.image);
+        console.log('[CommunityService] URL temporaire créée pour l\'image:', imageUrl);
+      } catch (imageError) {
+        console.error('[CommunityService] Erreur lors de la création de l\'URL image:', imageError);
+      }
+    } else {
+      console.log('[CommunityService] Aucune image à traiter');
+    }
+
     // Créer la nouvelle entrée
     const newEntry: CommunityEntry = {
       id,
       type: params.type,
       displayName: params.displayName || 'Anonyme',
       content: params.content,
-      imageUrl: params.image ? URL.createObjectURL(params.image) : undefined,
+      imageUrl: imageUrl,
       description: params.description,
       createdAt: new Date().toISOString(),
       timestamp: new Date().toISOString(),
@@ -290,14 +407,36 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
       }
     };
     
+    console.log('[CommunityService] Nouvelle entrée créée:', {
+      id: newEntry.id,
+      type: newEntry.type,
+      displayName: newEntry.displayName,
+      hasContent: !!newEntry.content,
+      hasImage: !!newEntry.imageUrl,
+      hasDescription: !!newEntry.description,
+      likes: newEntry.likes,
+      moderationStatus: newEntry.moderation?.status
+    });
+
     // Récupérer les entrées existantes et ajouter la nouvelle
+    console.log('[CommunityService] Récupération des entrées existantes...');
     const entries = getStoredEntries();
-    const updatedEntries = [newEntry, ...entries];
-    saveEntries(updatedEntries);
+    console.log('[CommunityService] Nombre d\'entrées existantes:', entries.length);
     
+    const updatedEntries = [newEntry, ...entries];
+    console.log('[CommunityService] Nouvelle liste après ajout:', updatedEntries.length, 'entrées');
+    
+    console.log('[CommunityService] Sauvegarde des entrées...');
+    saveEntries(updatedEntries);
+    console.log('[CommunityService] Entrées sauvegardées avec succès');
+
+    console.log('[CommunityService] === SUBMIT CONTRIBUTION TERMINÉ AVEC SUCCÈS ===');
     return newEntry;
   } catch (error) {
-    console.error('Erreur lors de la soumission de la contribution:', error);
+    console.error('[CommunityService] === ERREUR LORS DU SUBMIT CONTRIBUTION ===');
+    console.error('[CommunityService] Erreur détaillée:', error);
+    console.error('[CommunityService] Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    console.error('[CommunityService] Paramètres qui ont causé l\'erreur:', params);
     throw error;
   }
 }
