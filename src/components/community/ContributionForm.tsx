@@ -80,8 +80,11 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
+      reader.onload = (event) => {
+        // Vérification de sécurité pour éviter l'erreur TypeError
+        if (event.target && event.target.result) {
+          setImagePreview(event.target.result as string);
+        }
       };
       reader.readAsDataURL(file);
     }

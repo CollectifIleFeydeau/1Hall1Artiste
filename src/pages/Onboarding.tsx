@@ -136,32 +136,18 @@ export default function Onboarding() {
         completion_time: new Date().toISOString()
       });
       
-      // Ajout d'un log pour déboguer
       console.log("[Onboarding] Navigation vers la carte");
       
-      // Forcer un petit délai avant la navigation
-      setTimeout(() => {
-        console.log("[Onboarding] Exécution de la navigation vers /map");
-        // Utiliser le format de route compatible avec HashRouter
-        navigate('/map');
-        
-        // Force un rechargement de la page pour s'assurer que le Map component est correctement monté
-        setTimeout(() => {
-          console.log("[Onboarding] Forçage du rechargement de la page");
-          // Déterminer la base URL en fonction de l'environnement
-          const baseUrl = window.location.hostname.includes('github.io') 
-            ? '/1Hall1Artiste/#' 
-            : '/#';
-          window.location.href = `${baseUrl}/map`;
-        }, 100);
-      }, 300);
+      // Navigation simple et directe
+      navigate('/map', { replace: true });
+      
     } catch (error) {
       console.error("[Onboarding] Erreur lors de la finalisation de l'onboarding:", error);
-      // Fallback en cas d'erreur avec le format HashRouter
-      const baseUrl = window.location.hostname.includes('github.io') 
-        ? '/1Hall1Artiste/#' 
-        : '/#';
-      window.location.href = `${baseUrl}/map`;
+      // Fallback simple
+      navigate('/map', { replace: true });
+    } finally {
+      // Réinitialiser le flag après un délai court
+      setTimeout(() => setIsNavigating(false), 1000);
     }
   };
 

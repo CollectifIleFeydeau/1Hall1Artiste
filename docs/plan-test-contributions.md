@@ -91,3 +91,40 @@
 - **Statut**: À corriger
 - **Date**: 16/06/2025
 - **Détails**: Les chemins d'images pour les exemples ne sont pas corrects ou les images n'existent pas
+
+### Problème 3: Fin d'onboarding défaillante
+- **Description**: L'onboarding ne se termine pas correctement, l'utilisateur reste bloqué sur la dernière slide au lieu d'être redirigé vers la carte
+- **Statut**: Corrigé
+- **Date**: 18/06/2025
+- **Détails**: Simplification de la logique de navigation en supprimant les timeouts complexes et en utilisant une navigation directe avec `navigate('/map', { replace: true })`
+
+### Problème 4: Bug lors de la contribution
+- **Description**: Une erreur se produit lors de la soumission d'une contribution
+- **Statut**: Corrigé
+- **Date**: 18/06/2025
+- **Détails**: Ajout de vérifications de sécurité dans le FileReader (`if (event.target && event.target.result)`) pour éviter l'erreur TypeError: Cannot read properties of undefined
+
+### Problème 5: Synchronisation des likes défaillante
+- **Description**: Les likes ne se synchronisent pas correctement entre les clients
+- **Statut**: Corrigé
+- **Date**: 18/06/2025
+- **Détails**: 
+  - Modification de la fonction `toggleLike` pour synchroniser avec le serveur via l'API Cloudflare Worker (`/like-issue`)
+  - Mise en place d'un système de fallback local en cas d'échec de synchronisation
+  - Les likes sont maintenant persistés sur GitHub et synchronisés entre tous les clients
+  - Logs détaillés ajoutés pour le diagnostic
+
+## Tests de régression à effectuer
+
+### Test de synchronisation multi-clients
+1. [x] Ouvrir la même contribution sur deux navigateurs différents
+2. [x] Vérifier que la même image s'affiche (✅ fonctionne)
+3. [ ] Ajouter un like sur le navigateur 1
+4. [ ] Rafraîchir le navigateur 2 et vérifier que le like est visible
+5. [ ] Rafraîchir le navigateur 1 et vérifier que le like persiste
+6. [ ] Tester la persistance des likes après fermeture/réouverture du navigateur
+
+### Test de fin d'onboarding
+1. [ ] Compléter entièrement l'onboarding
+2. [ ] Vérifier que la navigation vers la carte s'effectue automatiquement
+3. [ ] Tester depuis différents points d'entrée (première visite, retour utilisateur)

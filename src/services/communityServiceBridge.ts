@@ -168,7 +168,9 @@ export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
 
 export async function toggleLike(entryId: string, sessionId: string): Promise<CommunityEntry> {
   try {
-    // Récupérer les entrées et les likes
+    console.log(`[CommunityService] Tentative de like/unlike pour l'entrée ${entryId}`);
+    
+    // Récupérer les entrées locales
     const entries = getStoredEntries();
     const likedEntries = getLikedEntries();
     
@@ -182,26 +184,82 @@ export async function toggleLike(entryId: string, sessionId: string): Promise<Co
     
     // Vérifier si l'utilisateur a déjà aimé cette entrée
     const hasLiked = likedEntries.includes(entryId);
+    const action = hasLiked ? 'unlike' : 'like';
     
-    // Mettre à jour l'entrée
-    const updatedEntry = {
-      ...entry,
-      likes: hasLiked ? Math.max(0, entry.likes - 1) : entry.likes + 1,
-      isLikedByCurrentUser: !hasLiked
-    };
+    console.log(`[CommunityService] Action: ${action} pour l'entrée ${entryId}`);
     
-    // Mettre à jour la liste des entrées
-    entries[entryIndex] = updatedEntry;
-    saveEntries(entries);
-    
-    // Mettre à jour la liste des likes
-    if (hasLiked) {
-      saveLikedEntries(likedEntries.filter(id => id !== entryId));
-    } else {
-      saveLikedEntries([...likedEntries, entryId]);
+    // Tenter de synchroniser avec le serveur
+    try {
+      // Extraire le numéro d'issue de l'ID de l'entrée
+      const issueMatch = entryId.match(/issue-(\d+)/);
+      if (!issueMatch) {
+        throw new Error(`Format d'ID invalide: ${entryId}`);
+      }
+      const issueNumber = parseInt(issueMatch[1]);
+      
+      const response = await fetch(`${WORKER_URL}/like-issue`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          issueNumber: issueNumber,
+          sessionId: sessionId,
+          action: action
+        })
+      });
+      
+      if (response.ok) {
+        const serverData = await response.json();
+        console.log(`[CommunityService] Réponse du serveur:`, serverData);
+        
+        // Mettre à jour l'entrée avec les données du serveur
+        const updatedEntry = {
+          ...entry,
+          likes: serverData.likes || (hasLiked ? Math.max(0, entry.likes - 1) : entry.likes + 1),
+          likedBy: serverData.likedBy || [],
+          isLikedByCurrentUser: !hasLiked
+        };
+        
+        // Mettre à jour la liste des entrées
+        entries[entryIndex] = updatedEntry;
+        saveEntries(entries);
+        
+        // Mettre à jour la liste des likes locaux
+        if (hasLiked) {
+          saveLikedEntries(likedEntries.filter(id => id !== entryId));
+        } else {
+          saveLikedEntries([...likedEntries, entryId]);
+        }
+        
+        console.log(`[CommunityService] Like synchronisé avec succès`);
+        return updatedEntry;
+      } else {
+        throw new Error(`Erreur serveur: ${response.status}`);
+      }
+    } catch (serverError) {
+      console.warn(`[CommunityService] Impossible de synchroniser avec le serveur, mise à jour locale uniquement:`, serverError);
+      
+      // Fallback: mise à jour locale uniquement
+      const updatedEntry = {
+        ...entry,
+        likes: hasLiked ? Math.max(0, entry.likes - 1) : entry.likes + 1,
+        isLikedByCurrentUser: !hasLiked
+      };
+      
+      // Mettre à jour la liste des entrées
+      entries[entryIndex] = updatedEntry;
+      saveEntries(entries);
+      
+      // Mettre à jour la liste des likes
+      if (hasLiked) {
+        saveLikedEntries(likedEntries.filter(id => id !== entryId));
+      } else {
+        saveLikedEntries([...likedEntries, entryId]);
+      }
+      
+      return updatedEntry;
     }
-    
-    return updatedEntry;
   } catch (error) {
     console.error('Erreur lors de la mise à jour du like:', error);
     throw error;
