@@ -430,6 +430,51 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     saveEntries(updatedEntries);
     console.log('[CommunityService] Entrées sauvegardées avec succès');
 
+    // Tenter de sauvegarder la contribution sur GitHub via le Worker
+    try {
+      console.log('[CommunityService] Tentative de sauvegarde sur GitHub...');
+      
+      const response = await fetch(`${WORKER_URL}/create-contribution`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          entry: {
+            id: newEntry.id,
+            type: newEntry.type,
+            displayName: newEntry.displayName,
+            content: newEntry.content,
+            description: newEntry.description,
+            createdAt: newEntry.createdAt,
+            timestamp: newEntry.timestamp,
+            likes: newEntry.likes,
+            moderation: newEntry.moderation
+          },
+          sessionId: getSessionId()
+        })
+      });
+      
+      if (response.ok) {
+        const serverData = await response.json();
+        console.log('[CommunityService] Contribution sauvegardée sur GitHub avec succès:', serverData);
+        
+        // Mettre à jour l'ID de l'entrée avec celui du serveur si fourni
+        if (serverData.id && serverData.id !== newEntry.id) {
+          newEntry.id = serverData.id;
+          updatedEntries[0] = newEntry; // Mettre à jour la première entrée (la nouvelle)
+          saveEntries(updatedEntries);
+          console.log('[CommunityService] ID de l\'entrée mis à jour:', serverData.id);
+        }
+      } else {
+        const errorText = await response.text();
+        console.warn('[CommunityService] Erreur serveur lors de la sauvegarde GitHub:', response.status, errorText);
+        console.warn('[CommunityService] La contribution reste sauvegardée localement');
+      }
+    } catch (serverError) {
+      console.warn('[CommunityService] Impossible de sauvegarder sur GitHub, contribution sauvegardée localement uniquement:', serverError);
+    }
+
     console.log('[CommunityService] === SUBMIT CONTRIBUTION TERMINÉ AVEC SUCCÈS ===');
     return newEntry;
   } catch (error) {
