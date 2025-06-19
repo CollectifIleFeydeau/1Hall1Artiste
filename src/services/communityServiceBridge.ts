@@ -446,6 +446,7 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
             displayName: newEntry.displayName,
             content: newEntry.content,
             description: newEntry.description,
+            imageUrl: newEntry.imageUrl,
             createdAt: newEntry.createdAt,
             timestamp: newEntry.timestamp,
             likes: newEntry.likes,
