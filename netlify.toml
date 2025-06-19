@@ -4,7 +4,7 @@
 
 [dev]
   command = "npm run dev"
-  targetPort = 5173
+  targetPort = 8080
   port = 8888
   publish = "dist"
 
