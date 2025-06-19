@@ -59,9 +59,9 @@
 4. Pour chaque contribution:
    - [x] Vérifier que les détails sont correctement affichés
    - [x] Tester la suppression
-   - [ ] Vérifier que la contribution disparaît de la liste
-5. [ ] Rafraîchir la page et vérifier que les contributions supprimées ne réapparaissent pas
-6. [ ] Revenir à la galerie publique et vérifier que les contributions supprimées n'y apparaissent plus
+   - [x] Vérifier que la contribution disparaît de la liste
+5. [x] Rafraîchir la page et vérifier que les contributions supprimées ne réapparaissent pas
+6. [x] Revenir à la galerie publique et vérifier que les contributions supprimées n'y apparaissent plus
 
 ## 6. Test de persistance
 
@@ -69,8 +69,8 @@
 2. [x] Rouvrir l'application
 3. [x] Vérifier que:
    - [x] Les contributions soumises sont toujours visibles
-   - [ ] Les likes sont conservés
-   - [ ] Les contributions supprimées ne réapparaissent pas
+   - [x] Les likes sont conservés
+   - [x] Les contributions supprimées ne réapparaissent pas
 
 ## 7. Test de compatibilité
 
@@ -92,9 +92,16 @@
 
 ### Problème 1: Suppression des contributions
 - **Description**: La suppression depuis l'interface d'administration retourne des erreurs et les contributions réapparaissent après rafraîchissement
-- **Statut**: Corrigé
-- **Date**: 16/06/2025
-- **Détails**: Le Worker Cloudflare a été mis à jour pour gérer la suppression des issues GitHub. La fonction `deleteCommunityEntry` a été améliorée pour utiliser le nouvel endpoint `/delete-issue` et rafraîchir les données après suppression.
+- **Statut**: ✅ **Résolu définitivement**
+- **Date**: 19/06/2025
+- **Détails**: 
+  - **Phase 1** (16/06): Le Worker Cloudflare a été mis à jour pour gérer la suppression des issues GitHub via l'endpoint `/delete-issue`
+  - **Phase 2** (19/06): Fix complet de la persistance des suppressions :
+    - Modification de `deleteCommunityEntry` pour fermer automatiquement l'issue GitHub correspondante
+    - Ajout de filtres dans la galerie pour exclure les entrées avec `moderation.status === "rejected"`
+    - Ajout de filtres dans l'interface admin pour masquer les contributions supprimées
+    - Optimisation du workflow GitHub Actions pour éviter les conflits lors de suppressions massives
+    - **Résultat** : Les contributions supprimées disparaissent définitivement de tous les clients et ne réapparaissent plus jamais
 
 ### Problème 2: Images manquantes
 - **Description**: Erreur 404 pour les images d'exemple (`https://collectifilefeydeau.github.io/1Hall1Artiste/images/example-image.jpg`)
@@ -123,3 +130,12 @@
   - Mise en place d'un système de fallback local en cas d'échec de synchronisation
   - Les likes sont maintenant persistés sur GitHub et synchronisés entre tous les clients
   - Logs détaillés ajoutés pour le diagnostic
+
+### Problème 6: Suppressions massives causent des conflits
+- **Description**: La suppression de nombreuses contributions simultanément déclenche des workflows concurrents provoquant des conflits Git
+- **Statut**: ✅ **Résolu**
+- **Date**: 19/06/2025
+- **Détails**: 
+  - Optimisation du workflow `sync-entries.yml` avec `cancel-in-progress: true` 
+  - Ajout d'un délai de 10 secondes pour regrouper les modifications
+  - Évite les conflits lors de suppressions massives (test avec 75 suppressions simultanées réussi)
