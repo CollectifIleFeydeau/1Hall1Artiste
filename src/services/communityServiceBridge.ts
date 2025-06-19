@@ -460,6 +460,14 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
         const serverData = await response.json();
         console.log('[CommunityService] Contribution sauvegardée sur GitHub avec succès:', serverData);
         
+        // Mettre à jour l'URL de l'image si le Worker l'a uploadée vers GitHub
+        if (serverData.imageUrl && newEntry.type === 'photo') {
+          console.log('[CommunityService] Mise à jour de l\'imageUrl avec l\'URL GitHub:', serverData.imageUrl);
+          newEntry.imageUrl = serverData.imageUrl;
+          updatedEntries[0] = newEntry; // Mettre à jour la première entrée (la nouvelle)
+          saveEntries(updatedEntries);
+        }
+        
         // Mettre à jour l'ID de l'entrée avec celui du serveur si fourni
         if (serverData.id && serverData.id !== newEntry.id) {
           newEntry.id = serverData.id;
