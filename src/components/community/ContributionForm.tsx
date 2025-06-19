@@ -77,6 +77,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
 
   // Gérer le changement d'image
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('🔥 [handleImageChange] FONCTION APPELÉE !', e.target.files?.length, 'fichier(s)');
+    
     try {
       const file = e.target.files?.[0];
       if (file) {
@@ -137,70 +139,6 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
     } catch (error) {
       console.error('[ContributionForm] Erreur lors du changement d\'image:', error);
     }
-  };
-
-  // TEST: Fonction de test Cloudinary isolée
-  const testCloudinaryUpload = async () => {
-    console.log('=== TEST CLOUDINARY UPLOAD ===');
-    
-    // Créer un fichier de test (1x1 pixel PNG)
-    const canvas = document.createElement('canvas');
-    canvas.width = 1;
-    canvas.height = 1;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.fillStyle = 'red';
-      ctx.fillRect(0, 0, 1, 1);
-    }
-    
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-      
-      const testFile = new File([blob], 'test.png', { type: 'image/png' });
-      console.log('[TEST] Fichier test créé:', testFile.name, testFile.size, 'bytes');
-      
-      try {
-        // Upload vers Cloudinary
-        const formData = new FormData();
-        formData.append('file', testFile);
-        formData.append('upload_preset', 'collectif_photos');
-        formData.append('cloud_name', 'dpatqkgsc');
-
-        console.log('[TEST] Requête Cloudinary:', {
-          url: 'https://api.cloudinary.com/v1_1/dpatqkgsc/image/upload',
-          preset: 'collectif_photos',
-          fileSize: testFile.size,
-          fileType: testFile.type
-        });
-
-        const response = await fetch(
-          'https://api.cloudinary.com/v1_1/dpatqkgsc/image/upload',
-          {
-            method: 'POST',
-            body: formData,
-          }
-        );
-
-        console.log('[TEST] Response status:', response.status, response.statusText);
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('[TEST] SUCCESS - Cloudinary response:', data);
-          alert(`SUCCESS: ${data.secure_url}`);
-        } else {
-          const errorText = await response.text();
-          console.error('[TEST] ERROR - Cloudinary response:', {
-            status: response.status,
-            statusText: response.statusText,
-            error: errorText
-          });
-          alert(`ERROR: ${response.status} - ${errorText}`);
-        }
-      } catch (error) {
-        console.error('[TEST] Exception:', error);
-        alert(`EXCEPTION: ${error}`);
-      }
-    }, 'image/png');
   };
 
   // Soumettre le formulaire
@@ -446,13 +384,6 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
           ) : (
             "Partager"
           )}
-        </Button>
-        <Button 
-          type="button" 
-          className="w-full" 
-          onClick={testCloudinaryUpload}
-        >
-          Tester l'upload Cloudinary
         </Button>
       </form>
     </motion.div>
