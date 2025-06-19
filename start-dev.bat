@@ -37,10 +37,6 @@ if not exist ".env.local" (
     echo ✅ Fichier .env.local cree
 )
 
-REM Attendre un peu
-echo ⏳ Attente de 2 secondes...
-timeout /t 2 /nobreak >nul
-
 echo.
 echo 🚀 Demarrage de l'application complete...
 echo    📡 Netlify Dev: http://localhost:8888
