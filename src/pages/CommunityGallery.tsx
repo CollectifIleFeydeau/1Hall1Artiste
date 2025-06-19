@@ -64,9 +64,10 @@ const CommunityGallery: React.FC = () => {
     loadEntries();
   }, []);
 
-  // Filtrer les entrées selon le type sélectionné
+  // Filtrer les entrées selon le type sélectionné et exclure les entrées supprimées
   const filteredEntries = entries.filter(entry => 
-    filter === "all" || entry.type === filter
+    (filter === "all" || entry.type === filter) &&
+    entry.moderation?.status !== "rejected"
   );
 
   // Gérer les likes

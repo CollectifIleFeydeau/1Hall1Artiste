@@ -110,15 +110,15 @@ export function CommunityManagement() {
         </TabsList>
 
         <TabsContent value="all">
-          {renderEntries(entries, deleting, handleDelete)}
+          {renderEntries(entries.filter(entry => entry.moderation?.status !== 'rejected'), deleting, handleDelete)}
         </TabsContent>
 
         <TabsContent value="photos">
-          {renderEntries(entries.filter(entry => entry.type === 'photo'), deleting, handleDelete)}
+          {renderEntries(entries.filter(entry => entry.type === 'photo' && entry.moderation?.status !== 'rejected'), deleting, handleDelete)}
         </TabsContent>
 
         <TabsContent value="testimonials">
-          {renderEntries(entries.filter(entry => entry.type === 'testimonial'), deleting, handleDelete)}
+          {renderEntries(entries.filter(entry => entry.type === 'testimonial' && entry.moderation?.status !== 'rejected'), deleting, handleDelete)}
         </TabsContent>
 
         <TabsContent value="pending">

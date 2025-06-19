@@ -47,9 +47,9 @@
 
 ## 4. Test de fin d'onboarding
 
-1. [ ] Compléter entièrement l'onboarding
-2. [ ] Vérifier que la navigation vers la carte s'effectue automatiquement
-3. [ ] Tester depuis différents points d'entrée (première visite, retour utilisateur)
+1. [x] Compléter entièrement l'onboarding
+2. [x] Vérifier que la navigation vers la carte s'effectue automatiquement
+3. [x] Tester depuis différents points d'entrée (première visite, retour utilisateur)
 
 ## 5. Test d'administration
 
