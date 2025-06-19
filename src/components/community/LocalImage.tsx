@@ -38,6 +38,14 @@ export const LocalImage: React.FC<LocalImageProps> = ({
       setError(false);
 
       try {
+        // Vérifier que src existe avant de l'utiliser
+        if (!src) {
+          console.error('LocalImage: src prop is undefined or empty');
+          setError(true);
+          setLoading(false);
+          return;
+        }
+
         // Si l'URL commence par "local:", récupérer l'image depuis localStorage
         if (src.startsWith('local:')) {
           const imageId = src.substring(6); // Enlever le préfixe "local:"

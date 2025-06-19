@@ -69,9 +69,14 @@ const AnimatedRoutes: React.FC = () => {
   
   // Surveiller les changements du localStorage pour hasSeenOnboarding
   useEffect(() => {
+    console.log('[App] Initialisation des écouteurs d\'événements d\'onboarding');
+    
+    // Fonction pour vérifier les changements du localStorage
     const handleStorageChange = () => {
       const storedValue = localStorage.getItem('hasSeenOnboarding');
       const newValue = storedValue === 'true';
+      
+      // Early return si la valeur n'a pas changé pour éviter des re-renders inutiles
       if (newValue !== hasSeenOnboarding) {
         console.log('[App] Mise à jour de hasSeenOnboarding depuis localStorage:', newValue);
         setHasSeenOnboarding(newValue);
@@ -81,8 +86,8 @@ const AnimatedRoutes: React.FC = () => {
     // Écouter les changements du localStorage
     window.addEventListener('storage', handleStorageChange);
     
-    // Vérifier aussi périodiquement (pour les changements dans le même onglet)
-    const interval = setInterval(handleStorageChange, 100);
+    // Vérifier aussi périodiquement avec une fréquence réduite (500ms au lieu de 100ms)
+    const interval = setInterval(handleStorageChange, 500);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
