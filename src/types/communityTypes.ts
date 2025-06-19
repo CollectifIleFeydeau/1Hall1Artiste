@@ -49,6 +49,7 @@ export interface SubmissionParams {
   
   // Pour les photos
   image?: File;
+  cloudinaryUrl?: string; // URL Cloudinary après upload
   description?: string;
   
   // Pour les témoignages

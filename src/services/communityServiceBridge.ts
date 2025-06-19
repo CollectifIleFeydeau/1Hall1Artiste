@@ -360,11 +360,9 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     displayName: params.displayName,
     content: params.content,
     description: params.description,
-    hasImage: !!params.image,
-    imageInfo: params.image ? {
-      name: params.image.name,
-      size: params.image.size,
-      type: params.image.type
+    hasImage: !!params.cloudinaryUrl,
+    imageInfo: params.cloudinaryUrl ? {
+      url: params.cloudinaryUrl
     } : null,
     eventId: params.eventId,
     locationId: params.locationId
@@ -377,16 +375,11 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     
     // Traitement de l'image si présente
     let imageUrl: string | undefined;
-    if (params.image) {
-      console.log('[CommunityService] Traitement de l\'image...');
-      try {
-        imageUrl = URL.createObjectURL(params.image);
-        console.log('[CommunityService] URL temporaire créée pour l\'image:', imageUrl);
-      } catch (imageError) {
-        console.error('[CommunityService] Erreur lors de la création de l\'URL image:', imageError);
-      }
+    if (params.cloudinaryUrl) {
+      console.log('[CommunityService] URL Cloudinary disponible:', params.cloudinaryUrl);
+      imageUrl = params.cloudinaryUrl;
     } else {
-      console.log('[CommunityService] Aucune image à traiter');
+      console.log('[CommunityService] Aucune URL Cloudinary fournie');
     }
 
     // Créer la nouvelle entrée
@@ -459,14 +452,6 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
       if (response.ok) {
         const serverData = await response.json();
         console.log('[CommunityService] Contribution sauvegardée sur GitHub avec succès:', serverData);
-        
-        // Mettre à jour l'URL de l'image si le Worker l'a uploadée vers GitHub
-        if (serverData.imageUrl && newEntry.type === 'photo') {
-          console.log('[CommunityService] Mise à jour de l\'imageUrl avec l\'URL GitHub:', serverData.imageUrl);
-          newEntry.imageUrl = serverData.imageUrl;
-          updatedEntries[0] = newEntry; // Mettre à jour la première entrée (la nouvelle)
-          saveEntries(updatedEntries);
-        }
         
         // Mettre à jour l'ID de l'entrée avec celui du serveur si fourni
         if (serverData.id && serverData.id !== newEntry.id) {

@@ -76,25 +76,63 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
   }, [setValue]);
 
   // Gérer le changement d'image
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = e.target.files?.[0];
       if (file) {
+        console.log('[ContributionForm] Début upload Cloudinary:', file.name);
+        
+        // Créer un aperçu local immédiatement
         const reader = new FileReader();
         reader.onload = (event) => {
-          try {
-            // Vérification de sécurité pour éviter l'erreur TypeError
-            if (event.target && event.target.result) {
-              setImagePreview(event.target.result as string);
-            }
-          } catch (readerError) {
-            console.error('[ContributionForm] Erreur lors de la lecture du fichier:', readerError);
+          if (event.target && event.target.result) {
+            setImagePreview(event.target.result as string);
           }
         };
-        reader.onerror = (error) => {
-          console.error('[ContributionForm] Erreur FileReader:', error);
-        };
         reader.readAsDataURL(file);
+
+        // Upload vers Cloudinary
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'collectif_photos');
+        formData.append('cloud_name', 'dpatqkgsc');
+
+        console.log('[ContributionForm] Requête Cloudinary:', {
+          url: 'https://api.cloudinary.com/v1_1/dpatqkgsc/image/upload',
+          preset: 'collectif_photos',
+          fileSize: file.size,
+          fileType: file.type
+        });
+
+        const response = await fetch(
+          'https://api.cloudinary.com/v1_1/dpatqkgsc/image/upload',
+          {
+            method: 'POST',
+            body: formData,
+          }
+        );
+
+        console.log('[ContributionForm] Cloudinary response status:', response.status, response.statusText);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[ContributionForm] Cloudinary response data:', data);
+          
+          if (data.secure_url) {
+            console.log('[ContributionForm] Upload Cloudinary réussi:', data.secure_url);
+            // Stocker l'URL Cloudinary pour la soumission
+            setValue('cloudinaryUrl', data.secure_url);
+          } else {
+            console.error('[ContributionForm] Pas de secure_url dans la réponse:', data);
+          }
+        } else {
+          const errorText = await response.text();
+          console.error('[ContributionForm] Erreur upload Cloudinary:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorText
+          });
+        }
       }
     } catch (error) {
       console.error('[ContributionForm] Erreur lors du changement d\'image:', error);
@@ -111,25 +149,20 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       console.log('[ContributionForm] État de soumission activé');
 
       // Déterminer le type de contribution automatiquement
-      const hasImage = fileInputRef.current?.files?.[0];
+      const hasImage = data.cloudinaryUrl || fileInputRef.current?.files?.[0];
       const type: EntryType = hasImage ? "photo" : "testimonial";
       console.log('[ContributionForm] Type déterminé automatiquement:', type, hasImage ? '(avec image)' : '(sans image)');
 
       // Ajouter le type aux données
       data.type = type;
 
-      // Ajouter l'image si présente
-      if (fileInputRef.current?.files?.[0]) {
-        data.image = fileInputRef.current.files[0];
-        console.log('[ContributionForm] Image ajoutée:', {
-          name: data.image.name,
-          size: data.image.size,
-          type: data.image.type
-        });
+      // Log de l'URL Cloudinary si présente
+      if (data.cloudinaryUrl) {
+        console.log('[ContributionForm] URL Cloudinary disponible:', data.cloudinaryUrl);
       } else {
-        console.log('[ContributionForm] Aucune image à ajouter');
+        console.log('[ContributionForm] Aucune URL Cloudinary disponible');
       }
-      
+
       // Enrichir les données avec le contexte si présent
       console.log('[ContributionForm] Contexte avant enrichissement:', contributionContext);
       data = enrichSubmissionWithContext(data);

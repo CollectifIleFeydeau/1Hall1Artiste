@@ -47,7 +47,7 @@ export const LocalImage: React.FC<LocalImageProps> = ({
         }
 
         // Si l'URL commence par "local:", récupérer l'image depuis localStorage
-        if (src.startsWith('local:')) {
+        if (src && typeof src === 'string' && src.startsWith('local:')) {
           const imageId = src.substring(6); // Enlever le préfixe "local:"
           const base64Data = localStorage.getItem(`community_image_${imageId}`);
           
