@@ -36,6 +36,15 @@ export type Event = {
 const eventScheduleData: EventDetails[] = [
   // Concerts
   {
+    id: "clarine",
+    artistId: "clarine",
+    title: "Clarine Julienne",
+    // description: "Choeur de femmes Nota Bene en concert",
+    time: "14h00 - 14h30",
+    days: ["samedi"],
+    locationId: "quai-turenne-9-concert",
+  },
+  {
     id: "concert-nota-bene",
     artistId: "nota-bene",
     title: "Choeur de femmes Nota Bene",
@@ -43,7 +52,14 @@ const eventScheduleData: EventDetails[] = [
     time: "14h45 - 15h15",
     days: ["samedi"],
     locationId: "quai-turenne-9-concert",
-
+  },
+  {
+    id: "Omega",
+    artistId: "Semaphore Omega",
+    title: "Semaphore Omega (lectures poétiques en musique)",
+    time: "15h30 - 16h00",
+    days: ["samedi"],
+    locationId: "quai-turenne-9-concert",
   },
   {
     id: "concert-conteurs-samedi",
@@ -53,49 +69,6 @@ const eventScheduleData: EventDetails[] = [
     time: "16h00 - 16h45",
     days: ["samedi"],
     locationId: "quai-turenne-9-concert",
-
-  },
-  {
-    id: "concert-scarabees",
-    artistId: "les-scarabees-rodent", // Matched with artists.ts id
-    title: "Les Scarabées Rôdent",
-    // description: "Concert du groupe Les Scarabées Rôdent",
-    time: "17h45 - 18h15",
-    days: ["samedi"],
-    locationId: "quai-turenne-9-concert",
-
-  },
-  {
-    id: "concert-aperto",
-    artistId: "aperto", // Matched with artists.ts id
-    title: "Aperto !",
-    // description: "Concert du groupe Aperto !",
-    time: "18h30 - 19h00",
-    days: ["samedi"],
-    locationId: "quai-turenne-9-concert",
-
-  },
-  {
-    id: "concert-quatuor-liger",
-    artistId: "quatuor-liger", // Matched with artists.ts id
-    title: "Quatuor Liger",
-    // description: "",
-    // description: "Programme : Wolfgang Mozart - Quatuor n°17 'La chasse' ou Franz Schubert - Quatuor n°10. Le Quatuor Liger interprète ces compositeurs viennois sur des instruments historiques (cordes en boyaux, archets classiques).",
-    time: "14h00 - 14h30",
-    days: ["dimanche"],
-    locationId: "quai-turenne-9-concert",
-
-  },
-  {
-    id: "concert-eva",
-    artistId: "eva", // Matched with artists.ts id
-    title: "L'Ensemble Vocal EVA",
-    // description: "",
-    // description: "L'Ensemble Vocal EVA, dirigé depuis 2023 par Pascale GARCIA, propose des créations de compositeurs emblématiques des XXe et XXIe siècles.",
-    time: "15h30 - 16h00",
-    days: ["dimanche"],
-    locationId: "quai-turenne-9-concert",
-
   },
   {
     id: "concert-conteurs-dimanche",
@@ -105,34 +78,78 @@ const eventScheduleData: EventDetails[] = [
     time: "16h00 - 16h45",
     days: ["dimanche"],
     locationId: "quai-turenne-9-concert",
-
+  },
+  {
+    id: "concert-violoncelles",
+    artistId: "violoncelles", // Same artist, different event
+    title: "Ensemble de violoncelles du conservatoire",
+    time: "17h45 - 18h15",
+    days: ["samedi"],
+    locationId: "quai-turenne-9-concert",
+  },
+  {
+    id: "scarabees",
+    artistId: "scarabees", // Matched with artists.ts id
+    title: "Les Scarabées Rôdent",
+    time: "17h45 - 18h15",
+    days: ["samedi"],
+    locationId: "quai-turenne-9-concert",
+  },
+  {
+    id: "aperto",
+    artistId: "aperto", // Matched with artists.ts id
+    title: "Aperto !",
+    time: "18h30 - 19h00",
+    days: ["samedi"],
+    locationId: "quai-turenne-9-concert",
+  },
+  {
+    id: "concert-quatuor-liger",
+    artistId: "quatuor-liger", // Matched with artists.ts id
+    title: "Quatuor Liger",
+    time: "14h00 - 14h30",
+    days: ["dimanche"],
+    locationId: "quai-turenne-9-concert",
+  },
+  {
+    id: "concert-eva",
+    artistId: "eva", // Matched with artists.ts id
+    title: "L'Ensemble Vocal EVA",
+    time: "14h45 - 15h15",
+    days: ["dimanche"],
+    locationId: "quai-turenne-9-concert",
+  },
+  {
+    id: "Omega",
+    artistId: "Semaphore Omega",
+    title: "Semaphore Omega (lectures poétiques en musique)",
+    time: "15h30 - 16h00",
+    days: ["dimanche"],
+    locationId: "quai-turenne-9-concert",
   },
   {
     id: "concert-swing-it",
     artistId: "swing-it", // Matched with artists.ts id
     title: "Swing it !",
-    // description: "Concert du groupe Swing it !",
     time: "17h00 - 17h30",
     days: ["dimanche"],
     locationId: "quai-turenne-9-concert",
-
   },
   {
     id: "concert-variabilis",
     artistId: "variabilis", // Matched with artists.ts id
     title: "Variabilis",
-    // description: "Concert du groupe Variabilis",
     time: "17h45 - 18h15",
     days: ["dimanche"],
     locationId: "quai-turenne-9-concert",
-
   },
+
+
   // Expositions
   {
     id: "expo-emmanuelle-boisson", // Changed ID to be more descriptive
     artistId: "emmanuelle-boisson",
     title: "Illustrations et Carnets", // This is the exhibition title
-    // description: "Portée par le désir de raconter des histoires en images, Manoukidessine explore avec tendresse les émotions, le quotidien et l'imaginaire. Elle partage son univers à travers dessins, carnets et albums jeunesse.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-8",
@@ -142,7 +159,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-catherine-clement", // Changed ID
     artistId: "catherine-clement",
     title: "Peintures en Miniature",
-    // description: "",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-8",
@@ -152,7 +168,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-mostapha-rouine", // Changed ID
     artistId: "mostapha-rouine",
     title: "Entre Bretagne et Maroc",
-    // description: "Puisant son inspiration entre la Bretagne et le Maroc, entre pêche à pied et scènes de vie quotidienne, Mostapha Rouine crée avec aquarelles, brou de noix et huiles. L'artiste peintre autodidacte fait vibrer la lumière, l'ambiance et les couleurs de ces deux mondes.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-8",
@@ -163,7 +178,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-bruno-barbier", 
     artistId: "bruno-barbier",
     title: "Peintures et dessins",
-    // description: "Explorant les thèmes du souvenir et de la nostalgie, Bruno Barbier, artiste peintre et dessinateur installé à Nantes, évoque des fragments de mémoire, entre émotions passées et traces du temps.",
     time: "12h00 - 19h00",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-9",
@@ -173,7 +187,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-pauline-crusson", // Changed ID (was pauline-crusson)
     artistId: "pauline-crusson",
     title: "Cartes postales du vieux Nantes",
-    // description: "Revisitant les cartes postales du vieux Nantes avec un style unique et détaillé, Pauline Crusson sous le nom de PaoaNaoned, redonne vie à ces images anciennes. Elle capture ainsi l'essence de la ville à travers ses dessins.",
     time: "12h00 - 19h00",
     days: ["samedi", "dimanche"],
     locationId: "rue-duguesclin",
@@ -183,7 +196,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-alain-gremillet",
     artistId: "alain-gremillet",
     title: "Peinture abstraite",
-    // description: "Associant couleurs, mouvements et lumière pour susciter l'émotion, l'artiste peintre abstrait Alain Gremillet explore librement la matière avec acrylique, spatules et objets du quotidien, donnant naissance à des œuvres uniques et lumineuses.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
@@ -193,7 +205,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-jerome-gourdon",
     artistId: "jerome-gourdon",
     title: "Photo-émographie",
-    // description: "Mêlant photographie, intervention in-situ et peinture acrylique, Jérôme Gourdon se définit comme un photo-émographe. Son travail explore les frontières entre image captée et image transformée, pour créer des œuvres à la croisée des médiums.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
@@ -203,7 +214,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-nadege-hameau",
     artistId: "nadege-hameau",
     title: "Marqueur acrylique",
-    // description: "Des mondes imaginaires prennent forme au marqueur acrylique, dans un style mêlant pointillisme, précision et rêverie. Autodidacte, Nadhame.artiste, alias Nadège Hameau, cultive une démarche empreinte de patience et de poésie visuelle.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
@@ -213,7 +223,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-pauline-crusson-2",
     artistId: "pauline-crusson",
     title: "PaoaNaoned",
-    // description: "Revisitant les cartes postales du vieux Nantes avec un style unique et détaillé, Pauline Crusson sous le nom de PaoaNaoned, redonne vie à ces images anciennes. Elle capture ainsi l'essence de la ville à travers ses dessins.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
@@ -223,7 +232,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-marie-husson",
     artistId: "marie-husson",
     title: "Dessins et peintures",
-    // description: "Explorant des instants d'intimité à la lisière du visible, Marie Husson archive ses découvertes sous forme de dessins et peintures mêlant aquarelle, encre, broderie ou huile. Sa pratique, expérimentale et sensible, donne naissance à des images profondes, fragiles et puissamment poétiques.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "rue-kervegan-17",
@@ -233,7 +241,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-clotilde-debar-zablocki",
     artistId: "clotilde-debar-zablocki",
     title: "apolline.design",
-    // description: "Inspirée par l'histoire et le patrimoine local, notamment celui d'Anne de Bretagne, Clotilde Debar-Zablocki crée un univers poétique et sensible. Avec David, elle forme le duo apolline.design, spécialisé en fresques décoratives et patines.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-15",
@@ -243,7 +250,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-malou-tual",
     artistId: "malou-tual",
     title: "Peinture et sculpture sur bois",
-    // description: "Artiste peintre et sculptrice sur bois, Malou Tual crée des œuvres uniques autour de masques ethniques et de mandalas émotionnels. Ses sculptures, façonnées à la main, allient sensibilité et tradition dans une démarche artisanale profonde.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-11",
@@ -253,7 +259,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-gael-caudoux",
     artistId: "gael-caudoux",
     title: "Cartographies imaginaires",
-    // description: "Vastes cartographies de territoires imaginaires, riches en détails et en narration, Gaël Caudoux les réalise à la main depuis l'enfance. Ses grands formats, en constante évolution, invitent à la découverte d'un univers unique et fascinant.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-11",
@@ -263,7 +268,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-andry-shango-rajoelina",
     artistId: "andry-shango-rajoelina",
     title: "Art multidisciplinaire",
-    // description: "Artiste multidisciplinaire mêlant peinture, design et art textile, Andry \"Shango\" Rajoelina explore les identités africaines à travers une esthétique vibrante et contemporaine. Son univers visuel, riche en symboles et en couleurs, reflète un profond engagement culturel et narratif.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
@@ -273,7 +277,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-jerome-luneau",
     artistId: "jerome-luneau",
     title: "Chun Yong Ho",
-    // description: "Chun Yong Ho, artiste peintre originaire de Corée du Sud, explore l'abstraction à travers des jeux de couleurs et de lignes évoquant des paysages mentaux. Son travail invite à un voyage intérieur, entre sensations et émotions.",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
@@ -283,17 +286,15 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-jocelyn-prouff", // Changed ID (was expo9)
     artistId: "expo9",
     title: "Carnets Nantais",
-    // description: "Croquant in situ des lieux urbains où la nature reprend ses droits, avec une attention particulière à la lumière et aux détails, Joss Proof invite à un autre regard sur la ville à travers ses carnets sensibles. Il partage cet univers dans son livre \"Carnets Nantais\".",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
 
   },
   {
-    id: "expo-elizaveta-vojnovich",
-    artistId: "elizaveta-vojnovich",
+    id: "expo-elizaveta-vodyanova",
+    artistId: "elizaveta-vodyanova",
     title: "Peinture",
-    // description: "Artiste peintre aux inspirations variées",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "quai-turenne-10",
@@ -303,7 +304,6 @@ const eventScheduleData: EventDetails[] = [
     id: "expo-fabienne-choyau",
     artistId: "fabienne-choyau",
     title: "Peinture contemporaine",
-    // description: "Artiste peintre contemporaine explorant les couleurs et les formes",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-15",

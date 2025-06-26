@@ -10,6 +10,7 @@ export type Artist = {
   // Nouveaux champs pour les concerts
   email?: string;
   photos?: string[];
+  videos?: string[]; // Tableau de liens vers des vidéos (YouTube, Vimeo, etc.)
   presentation?: string;
   link?: string;
   website?: string;
@@ -17,6 +18,8 @@ export type Artist = {
   phone?: string;
   director?: string;
   members?: string; // Liste des membres pour les groupes/ensembles
+  youtube?: string;
+  tiktok?: string;
 };
 
 export const artists: Artist[] = [
@@ -126,7 +129,6 @@ export const artists: Artist[] = [
     bio: "Croquant in situ des lieux urbains où la nature reprend ses droits, avec une attention particulière à la lumière et aux détails, Joss Proof invite à un autre regard sur la ville à travers ses carnets sensibles. Il partage cet univers dans son livre \"Carnets Nantais\".",
     instagram: "https://www.instagram.com/joss_proof"
   },
-  // Artistes de la Maison Collective (from artistsData.ts)
   {
     id: "emmanuelle-boisson",
     name: "Emmanuelle Boisson (Manoukidessine)",
@@ -151,7 +153,50 @@ export const artists: Artist[] = [
     bio: "Puisant son inspiration entre la Bretagne et le Maroc, entre pêche à pied et scènes de vie quotidienne, Mostapha Rouine crée avec aquarelles, brou de noix et huiles. L'artiste peintre autodidacte fait vibrer la lumière, l'ambiance et les couleurs de ces deux mondes.",
     instagram: "https://www.instagram.com/mostapharouine"
   },
+  {
+    id: "elizaveta-vodyanova",
+    name: "Elizaveta Vodyanova",
+    type: "exposition",
+    title: "Peinture",
+    bio: "Artiste peintre contemporaine basée à Nantes, Elizaveta Vodyanova explore la peinture figurative à l'acrylique. Ses œuvres, intimes et poétiques, capturent des instants de vie — intérieurs, visages, paysages marins — avec une palette subtile et vibrante.",
+    email: "vojnovich@yandex.com",
+    instagram: "https://www.instagram.com/elizaveta.vojnovich"
+  },
+  {
+    id: "fabienne-choyau",
+    name: "Fabienne Choyau",
+    type: "exposition",
+    title: "Peinture contemporaine",
+    bio: "Artiste peintre contemporaine d’origine colombienne, Fabienne Choyau est diplômée en arts plastiques de l’Université des Andes.Installée en France, elle crée des œuvres vibrantes mêlant souvenirs, émotions et récits intimes, déployées au travers de séries thématiques puissantes.",
+    email: "fabienne.choyau@laposte.net",
+    instagram: "https://www.instagram.com/fabienne.choyau.art"
+  },
+
+
+
   // Concerts (from artistsData.ts)
+  {
+    id: "violoncelles",
+    name: "Ensemble de violoncelles du conservatoire",
+    type: "concert",
+    title: "Ensemble de violoncelles du conservatoire",
+    bio: ""
+  },
+  {
+    id: "clarine",
+    name: "Clarine Julienne",
+    type: "concert",
+    title: "Concert de Clarine Julienne",
+    bio: "Après avoir sillonné l'Amérique Latine avec sa guitare, Clarine revient avec de nombreuses chansons de l'Argentine au Mexique, en passant par les Andes péruviennes. Elle propose un set doux, rythmé et coloré, mêlant musiques traditionnelles et compositions personnelles.",
+    email: "contact@notabene.fr",
+    instagram: "https://www.instagram.com/clarinemusic",
+    youtube: "https://www.youtube.com/clarinemusic",
+    tiktok: "https://www.tiktok.com/@clarine.musica",
+    photos: ["/concerts/Clarine/Clarine.JPG"],
+    videos: [
+      "https://www.youtube.com/watch?v=-RMQS5dNWfE&authuser=0", 
+      "https://www.youtube.com/watch?v=5mpeAOWKl-M&authuser=0"]
+  },
   {
     id: "nota-bene",
     name: "Nota Bene",
@@ -171,7 +216,7 @@ export const artists: Artist[] = [
     instagram: ""
   },
   {
-    id: "les-scarabees-rodent",
+    id: "scarabees",
     name: "Les Scarabées Rôdent",
     type: "concert",
     title: "Les Scarabées Rôdent",
@@ -251,25 +296,18 @@ export const artists: Artist[] = [
     title: "Variabilis",
     bio: "",
     email: "contact@variabilis.fr",
+    instagram: "https://www.instagram.com/variabilis_ensemble/?igshid=MzRlODBiNWFlZA%3D%3D",
+    photos: ["/concerts/Variabilis/Variabilis.jpg"],
+    facebook: "https://www.facebook.com/EnsembleVariabilis"
+  },
+  {
+    id: "Semaphore Omega",
+    name: "Semaphore Omega",
+    type: "concert",
+    title: "Semaphore Omega",
+    bio: "Lectures poétiques en musique",
+    email: "",
     instagram: ""
-  },
-  {
-    id: "elizaveta-vojnovich",
-    name: "Elizaveta Vojnovich",
-    type: "exposition",
-    title: "Peinture",
-    bio: "Artiste peintre aux inspirations variées",
-    email: "vojnovich@yandex.com",
-    instagram: "https://www.instagram.com/elizaveta.vojnovich"
-  },
-  {
-    id: "fabienne-choyau",
-    name: "Fabienne Choyau",
-    type: "exposition",
-    title: "Peinture contemporaine",
-    bio: "Artiste peintre contemporaine explorant les couleurs et les formes",
-    email: "fabienne.choyau@laposte.net",
-    instagram: "https://www.instagram.com/fabienne.choyau.art"
   }
   // Ajouter d'autres artistes au besoin
 ];

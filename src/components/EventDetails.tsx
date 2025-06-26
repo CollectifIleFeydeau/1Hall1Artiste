@@ -280,7 +280,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
-        className="max-w-md max-h-[80vh] overflow-y-auto pt-14"
+        className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:max-w-md max-h-[85vh] overflow-y-auto pt-14"
         aria-describedby="event-details-description"
       >
         <div id="event-details-description" className="sr-only">
@@ -325,7 +325,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           <DialogTitle>{event.title}</DialogTitle>
         </DialogHeader>
         
-        <div className="py-2 px-1">
+        <div className="py-2 px-1 overflow-x-hidden">
           {event.type === "exposition" ? (
             <>
               <div className="bg-[#e0ebff] p-3 rounded-lg mb-2">
@@ -434,6 +434,36 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                   </div>
                 )}
 
+                {/* YouTube */}
+                {artist.youtube && (
+                  <div>
+                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">YouTube:</h4>
+                    <a 
+                      href={artist.youtube} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {artist.youtube.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                    </a>
+                  </div>
+                )}
+
+                {/* TikTok */}
+                {artist.tiktok && (
+                  <div>
+                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">TikTok:</h4>
+                    <a 
+                      href={artist.tiktok} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {artist.tiktok.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                    </a>
+                  </div>
+                )}
+
                 {/* Directeur/Chef */}
                 {artist.director && (
                   <div className="flex items-center mb-2">
@@ -454,18 +484,74 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
 
             {/* Afficher les photos pour les concerts si disponibles */}
             {event.type === "concert" && artist?.photos && artist.photos.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-xs font-medium mb-2 text-[#4a5d94]">Photos:</h4>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="mt-6">
+                <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
+                  <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
+                  Photos
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                   {artist.photos.map((photo, index) => (
-                    <div key={index} className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
+                    <div key={index} className="relative pb-[75%] overflow-hidden rounded-lg">
                       <img 
-                        src={getImagePath(photo)} 
-                        alt={`${event.artistName} - Photo ${index + 1}`}
-                        className="object-cover w-full h-full"
+                        src={photo} 
+                        alt={`${event.artistName} - photo ${index + 1}`}
+                        className="absolute top-0 left-0 object-cover w-full h-full"
+                        loading="lazy"
                       />
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Affichage des vidéos si présentes */}
+            {event.type === "concert" && artist?.videos && artist.videos.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
+                  <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
+                  Vidéos
+                </h4>
+                <div className="grid grid-cols-1 gap-4 w-full">
+                  {artist.videos.map((videoUrl, index) => {
+                    // Déterminer le type de vidéo (YouTube, Vimeo, etc.)
+                    let embedUrl = videoUrl;
+                    
+                    // Traitement des URLs YouTube
+                    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                      // Extraire l'ID de la vidéo YouTube
+                      let videoId = '';
+                      
+                      if (videoUrl.includes('youtube.com/watch?v=')) {
+                        videoId = videoUrl.split('v=')[1];
+                        // Gérer les paramètres supplémentaires
+                        const ampersandPosition = videoId.indexOf('&');
+                        if (ampersandPosition !== -1) {
+                          videoId = videoId.substring(0, ampersandPosition);
+                        }
+                      } else if (videoUrl.includes('youtu.be/')) {
+                        videoId = videoUrl.split('youtu.be/')[1];
+                      }
+                      
+                      if (videoId) {
+                        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                      }
+                    }
+                    // Traitement des URLs Vimeo (à ajouter si nécessaire)
+                    // else if (videoUrl.includes('vimeo.com')) { ... }
+                    
+                    return (
+                      <div key={index} className="relative w-full pb-[56.25%] overflow-hidden rounded-lg">
+                        <iframe
+                          src={embedUrl}
+                          title={`${event.artistName} - vidéo ${index + 1}`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="absolute top-0 left-0 w-full h-full"
+                          loading="lazy"
+                        ></iframe>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -480,25 +566,27 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                   Photos Instagram de l'artiste
                 </h4> */}
                 <div 
-                  className="instagram-embed-container overflow-hidden rounded-lg" 
+                  className="instagram-embed-container w-full overflow-hidden rounded-lg relative" 
                   style={{
-                    maxHeight: '240px',
-                    overflow: 'hidden'
+                    paddingBottom: '100%',
+                    height: 0
                   }}
                 >
                   <iframe
                     title={`Instagram feed de ${event.artistName}`}
-                    src={`https://www.instagram.com/${artist.instagram.split('/').pop()}/embed?hidecaption=1&header=0`}
+                    src={`https://www.instagram.com/${artist.instagram.split('/').pop().split('?')[0]}/embed?hidecaption=1&header=0`}
                     width="100%"
-                    height="275"
+                    height="100%"
                     frameBorder="0"
                     scrolling="no"
                     allowtransparency="true"
                     loading="lazy"
                     style={{
-                      transform: 'scale(0.99)',
-                      transformOrigin: 'top center',
-                      marginTop: '-43px' // Réduit le décalage vers le haut pour éviter que le contenu soit coupé
+                      position: 'absolute',
+                      top: '-43px',
+                      left: 0,
+                      width: '100%',
+                      height: 'calc(100% + 43px)'
                     }}
                   ></iframe>
                 </div>
@@ -508,7 +596,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-6 border-t border-[#d8e3ff] pt-4">
               {source === "program" ? (
                 <Button 
-                  className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"
+                  className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1 text-xs sm:text-sm"
                   onClick={navigateToMap}
                 >
                   <MapPin className="h-4 w-4 mr-2" />
@@ -516,7 +604,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                 </Button>
               ) : (
                 <Button 
-                  className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"
+                  className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1 text-xs sm:text-sm"
                   onClick={() => navigate("/program")}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
@@ -526,7 +614,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
               
               <Button 
                 variant="outline"
-                className="border-[#4a5d94] text-[#4a5d94] flex-1"
+                className="border-[#4a5d94] text-[#4a5d94] flex-1 text-xs sm:text-sm"
                 onClick={() => {
                   navigate('/location-history', { 
                     state: { 
@@ -543,10 +631,10 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             </div>
             
             {/* Bouton pour ajouter au calendrier */}
-            <div className="flex space-x-2 mt-3">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-3">
               <Button 
                 variant="outline"
-                className="border-[#4a5d94] text-[#4a5d94] flex-1"
+                className="border-[#4a5d94] text-[#4a5d94] flex-1 text-xs sm:text-sm"
                 onClick={handleAddToCalendar}
                 disabled={!calendarSupported}
               >
@@ -565,7 +653,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
               
               <Button 
                 variant="outline"
-                className="border-[#ff7a45] text-[#ff7a45] flex-1"
+                className="border-[#ff7a45] text-[#ff7a45] flex-1 text-xs sm:text-sm"
                 onClick={handleContribute}
               >
                 <Camera className="h-4 w-4 mr-2" />
@@ -574,7 +662,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             </div>
             
             <Button 
-              className="w-full mt-3 border-[#8c9db5] text-[#8c9db5]"
+              className="w-full mt-3 border-[#8c9db5] text-[#8c9db5] text-xs sm:text-sm"
               variant="outline"
               onClick={onClose}
             >
