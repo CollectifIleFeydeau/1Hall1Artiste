@@ -1,0 +1,18 @@
+{
+  "lastUpdated": "2025-01-21T00:00:00Z",
+  "contributions": [
+    {
+      "id": "entry-test-12345",
+      "type": "testimonial",
+      "content": "Ceci est un témoignage de test pour valider le workflow GitHub Actions.",
+      "displayName": "Utilisateur Test",
+      "sessionId": "session-test-12345",
+      "createdAt": "2025-01-21T00:00:00Z",
+      "likes": 0,
+      "eventId": "",
+      "locationId": "",
+      "contextType": "event",
+      "contextId": "test-event"
+    }
+  ]
+} 
