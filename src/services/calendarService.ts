@@ -110,7 +110,7 @@ const formatEventForCalendar = (event: Event): string => {
     `DTSTART:${formatDate(startDate)}`,
     `DTEND:${formatDate(endDate)}`,
     `SUMMARY:${formatText(event.title)}`,
-    `DESCRIPTION:${formatText(event.description || '')}`,
+    `DESCRIPTION:${formatText(event.artistBio || '')}`,
     `LOCATION:${formatText('Île Feydeau, Nantes')}`,
     'END:VEVENT',
     'END:VCALENDAR'

@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import ThumbsUp from "lucide-react/dist/esm/icons/thumbs-up";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -11,10 +10,9 @@ import { LocalImage } from "./LocalImage";
 interface GalleryGridProps {
   entries: CommunityEntry[];
   onEntryClick: (entry: CommunityEntry) => void;
-  onLike: (entryId: string) => void;
 }
 
-export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick, onLike }) => {
+export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick }) => {
   // Animation pour les éléments de la grille
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -67,7 +65,7 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick,
           )}
 
           {/* Informations communes */}
-          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 flex justify-between items-center text-xs">
+          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-xs">
             <div className="truncate">
               <span>{entry.displayName}</span>
               <span className="text-xs text-slate-300 ml-1">
@@ -76,22 +74,6 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick,
                   : ""}
               </span>
             </div>
-            <button
-              className="ml-2 flex items-center gap-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                onLike(entry.id);
-              }}
-            >
-              <ThumbsUp 
-                size={14} 
-                className={cn(
-                  "transition-colors",
-                  entry.isLikedByCurrentUser ? "fill-white text-white" : "text-white"
-                )} 
-              />
-              <span>{entry.likes}</span>
-            </button>
           </div>
         </motion.div>
       ))}

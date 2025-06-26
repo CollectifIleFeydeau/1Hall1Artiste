@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import { Artist } from '../data/artists';
+import { Artist, artists } from '../data/artists';
 import { Event } from '../data/events';
 
 type InstagramCarouselProps = {
@@ -32,10 +32,12 @@ export function InstagramCarousel({ artists, events, title = "Découvrez les art
     
     if (events) {
       events.forEach(event => {
-        if (event.contact && event.contact.includes('instagram')) {
+        // Récupérer les données de l'artiste associé à l'événement
+        const artist = artists.find(a => a.id === event.artistId);
+        if (artist && artist.instagram && artist.instagram.includes('instagram')) {
           items.push({
             name: event.artistName,
-            instagram: event.contact,
+            instagram: artist.instagram,
             id: event.id
           });
         }

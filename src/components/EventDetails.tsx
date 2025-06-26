@@ -21,6 +21,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { saveEvent, getSavedEvents, removeSavedEvent } from "@/services/savedEvents";
 import { type Event, getEventsByLocation } from "@/data/events";
 import { getLocationNameById } from "@/data/locations";
+import { artists } from "@/data/artists";
 import { trackFeatureUsage, trackEvent } from "@/services/analytics";
 import { InstagramCarousel } from "@/components/InstagramCarousel";
 import { TruncatedText } from "@/components/TruncatedText";
@@ -273,6 +274,9 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
   // Déterminer si l'événement est sauvegardé
   const isEventSaved = isSaved;
   
+  // Récupérer l'artiste correspondant à l'événement
+  const artist = artists.find(artist => artist.id === event.artistId);
+  
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
@@ -358,193 +362,225 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           </div>
           
           <div className="bg-[#f0f5ff] p-3 rounded-lg mb-4">
-            <p className="text-sm text-[#4a5d94]">
-              {/* Pas de troncature pour la description, car c'est un élément important */}
-              {event.description}
-            </p>
+            {/* Afficher la bio de l'artiste si disponible */}
+            {artist?.bio && (
+              <ArtistDescription text={artist.bio} />
+            )}
             
-            {/* Afficher le texte de présentation pour les concerts si disponible */}
-            {event.type === "concert" && event.presentation && (
+            {/* Afficher la présentation de l'artiste si disponible */}
+            {artist?.presentation && (
               <div className="mt-3 pt-3 border-t border-[#d8e3ff]">
-                <ArtistDescription text={event.presentation} />
+                <h4 className="text-sm font-medium mb-2 text-[#4a5d94]">Présentation:</h4>
+                <ArtistDescription text={artist.presentation} />
               </div>
             )}
-          </div>
-          
-          {/* Afficher l'email pour les concerts si disponible */}
-          {event.type === "concert" && event.email && (
-            <div className="mb-4">
-              <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Contact email:</h4>
-              <a 
-                href={`mailto:${event.email}`} 
-                className="text-sm text-blue-600 hover:underline"
-              >
-                {event.email}
-              </a>
-            </div>
-          )}
-          
-          {/* Afficher le lien pour les concerts si disponible */}
-          {event.type === "concert" && event.link && (
-            <div className="mb-4">
-              {/* Si c'est un lien YouTube, afficher une vidéo intégrée */}
-              {event.link.includes('youtu') ? (
-                <div>
-                  <h4 className="text-xs font-medium mb-2 text-[#4a5d94]">Vidéo:</h4>
-                  <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
-                    <iframe
-                      src={event.link.replace('youtu.be/', 'youtube.com/embed/').replace('watch?v=', 'embed/')}
-                      title={`Vidéo de ${event.artistName}`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full"
-                    ></iframe>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Site web:</h4>
-                  <a 
-                    href={event.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    {event.link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {/* Afficher les photos pour les concerts si disponibles */}
-          {event.type === "concert" && event.photos && event.photos.length > 0 && (
-            <div className="mb-4">
-              <h4 className="text-xs font-medium mb-2 text-[#4a5d94]">Photos:</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {event.photos.map((photo, index) => (
-                  <div key={index} className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
-                    <img 
-                      src={getImagePath(photo)} 
-                      alt={`${event.artistName} - Photo ${index + 1}`} 
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                ))}
+            
+            {/* Fallback: afficher le texte de présentation de l'événement si pas de bio artiste */}
+            {!artist?.bio && artist?.presentation && (
+              <div className="mt-3 pt-3 border-t border-[#d8e3ff]">
+                <ArtistDescription text={artist.presentation} />
               </div>
-            </div>
-          )}
-          
-          {/* Nous ne montrons plus l'adresse Instagram car le widget l'affiche déjà */}
-          
-          {/* Instagram Embed - Show actual Instagram feed */}
-          {event.contact && event.contact.includes('instagram') && (
-            <div className="border-t border-[#d8e3ff] pt-4 mt-4">
-              {/* <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
-                <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
-                Photos Instagram de l'artiste
-              </h4> */}
-              <div 
-                className="instagram-embed-container overflow-hidden rounded-lg" 
-                style={{
-                  maxHeight: '240px',
-                  overflow: 'hidden'
+            )}
+            
+            {/* Afficher les informations complètes de l'artiste pour les concerts */}
+            {event.type === "concert" && artist && (
+              <div className="space-y-4">
+                {/* Email de contact */}
+                {artist.email && (
+                  <div>
+                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Contact email:</h4>
+                    <a 
+                      href={`mailto:${artist.email}`} 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {artist.email}
+                    </a>
+                  </div>
+                )}
+
+                {/* Site web */}
+                {artist.website && (
+                  <div>
+                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Site web:</h4>
+                    <a 
+                      href={artist.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {artist.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                    </a>
+                  </div>
+                )}
+
+                {/* Téléphone */}
+                {artist.phone && (
+                  <div>
+                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Téléphone:</h4>
+                    <a 
+                      href={`tel:${artist.phone}`} 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {artist.phone}
+                    </a>
+                  </div>
+                )}
+
+                {/* Facebook */}
+                {artist.facebook && (
+                  <div>
+                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Facebook:</h4>
+                    <span className="text-sm text-gray-700">{artist.facebook}</span>
+                  </div>
+                )}
+
+                {/* Directeur/Chef */}
+                {artist.director && (
+                  <div className="flex items-center mb-2">
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mr-2">Direction:</span>
+                    <span className="text-sm text-gray-700">{artist.director}</span>
+                  </div>
+                )}
+
+                {/* Membres */}
+                {artist.members && (
+                  <div className="flex items-center mb-2">
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mr-2">Membres:</span>
+                    <span className="text-sm text-gray-700">{artist.members}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Afficher les photos pour les concerts si disponibles */}
+            {event.type === "concert" && artist?.photos && artist.photos.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-xs font-medium mb-2 text-[#4a5d94]">Photos:</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {artist.photos.map((photo, index) => (
+                    <div key={index} className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
+                      <img 
+                        src={getImagePath(photo)} 
+                        alt={`${event.artistName} - Photo ${index + 1}`}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Nous ne montrons plus l'adresse Instagram car le widget l'affiche déjà */}
+            
+            {/* Instagram Embed - Show actual Instagram feed */}
+            {artist && artist.instagram && artist.instagram.includes('instagram') && (
+              <div className="border-t border-[#d8e3ff] pt-4 mt-4">
+                {/* <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
+                  <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
+                  Photos Instagram de l'artiste
+                </h4> */}
+                <div 
+                  className="instagram-embed-container overflow-hidden rounded-lg" 
+                  style={{
+                    maxHeight: '240px',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <iframe
+                    title={`Instagram feed de ${event.artistName}`}
+                    src={`https://www.instagram.com/${artist.instagram.split('/').pop()}/embed?hidecaption=1&header=0`}
+                    width="100%"
+                    height="275"
+                    frameBorder="0"
+                    scrolling="no"
+                    allowtransparency="true"
+                    loading="lazy"
+                    style={{
+                      transform: 'scale(0.99)',
+                      transformOrigin: 'top center',
+                      marginTop: '-43px' // Réduit le décalage vers le haut pour éviter que le contenu soit coupé
+                    }}
+                  ></iframe>
+                </div>
+              </div>
+            )}
+            
+            <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-6 border-t border-[#d8e3ff] pt-4">
+              {source === "program" ? (
+                <Button 
+                  className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"
+                  onClick={navigateToMap}
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Voir sur la carte
+                </Button>
+              ) : (
+                <Button 
+                  className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"
+                  onClick={() => navigate("/program")}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Voir le programme
+                </Button>
+              )}
+              
+              <Button 
+                variant="outline"
+                className="border-[#4a5d94] text-[#4a5d94] flex-1"
+                onClick={() => {
+                  navigate('/location-history', { 
+                    state: { 
+                      selectedLocationId: event.locationId,
+                      fromEvent: true
+                    } 
+                  });
+                  onClose();
                 }}
               >
-                <iframe
-                  title={`Instagram feed de ${event.artistName}`}
-                  src={`https://www.instagram.com/${event.contact.split('/').pop()}/embed?hidecaption=1&header=0`}
-                  width="100%"
-                  height="275"
-                  frameBorder="0"
-                  scrolling="no"
-                  allowtransparency="true"
-                  loading="lazy"
-                  style={{
-                    transform: 'scale(0.99)',
-                    transformOrigin: 'top center',
-                    marginTop: '-43px' // Réduit le décalage vers le haut pour éviter que le contenu soit coupé
-                  }}
-                ></iframe>
-              </div>
+                <Info className="h-4 w-4 mr-2" />
+                Histoire du lieu
+              </Button>
             </div>
-          )}
-          
-          <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-6 border-t border-[#d8e3ff] pt-4">
-            {source === "program" ? (
+            
+            {/* Bouton pour ajouter au calendrier */}
+            <div className="flex space-x-2 mt-3">
               <Button 
-                className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"
-                onClick={navigateToMap}
+                variant="outline"
+                className="border-[#4a5d94] text-[#4a5d94] flex-1"
+                onClick={handleAddToCalendar}
+                disabled={!calendarSupported}
               >
-                <MapPin className="h-4 w-4 mr-2" />
-                Voir sur la carte
+                {calendarSupported ? (
+                  <>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Ajouter au calendrier
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Partager l'événement
+                  </>
+                )}
               </Button>
-            ) : (
+              
               <Button 
-                className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1"
-                onClick={() => navigate("/program")}
+                variant="outline"
+                className="border-[#ff7a45] text-[#ff7a45] flex-1"
+                onClick={handleContribute}
               >
-                <Calendar className="h-4 w-4 mr-2" />
-                Voir le programme
+                <Camera className="h-4 w-4 mr-2" />
+                Partager un souvenir
               </Button>
-            )}
+            </div>
             
             <Button 
+              className="w-full mt-3 border-[#8c9db5] text-[#8c9db5]"
               variant="outline"
-              className="border-[#4a5d94] text-[#4a5d94] flex-1"
-              onClick={() => {
-                navigate('/location-history', { 
-                  state: { 
-                    selectedLocationId: event.locationId,
-                    fromEvent: true
-                  } 
-                });
-                onClose();
-              }}
+              onClick={onClose}
             >
-              <Info className="h-4 w-4 mr-2" />
-              Histoire du lieu
+              Retour
             </Button>
           </div>
-          
-          {/* Bouton pour ajouter au calendrier */}
-          <div className="flex space-x-2 mt-3">
-            <Button 
-              variant="outline"
-              className="border-[#4a5d94] text-[#4a5d94] flex-1"
-              onClick={handleAddToCalendar}
-              disabled={!calendarSupported}
-            >
-              {calendarSupported ? (
-                <>
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Ajouter au calendrier
-                </>
-              ) : (
-                <>
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Partager l'événement
-                </>
-              )}
-            </Button>
-            
-            <Button 
-              variant="outline"
-              className="border-[#ff7a45] text-[#ff7a45] flex-1"
-              onClick={handleContribute}
-            >
-              <Camera className="h-4 w-4 mr-2" />
-              Partager un souvenir
-            </Button>
-          </div>
-          
-          <Button 
-            className="w-full mt-3 border-[#8c9db5] text-[#8c9db5]"
-            variant="outline"
-            onClick={onClose}
-          >
-            Retour
-          </Button>
         </div>
       </DialogContent>
     </Dialog>

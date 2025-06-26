@@ -6,7 +6,6 @@ import { useLocation } from "react-router-dom";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Camera from "lucide-react/dist/esm/icons/camera";
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import ThumbsUp from "lucide-react/dist/esm/icons/thumbs-up";
 import Filter from "lucide-react/dist/esm/icons/filter";
 import { useToast } from "../components/ui/use-toast";
 import { BottomNavigation } from "../components/BottomNavigation";
@@ -15,12 +14,11 @@ import { BottomNavigation } from "../components/BottomNavigation";
 import { CommunityEntry, EntryType } from "../types/communityTypes";
 
 // Services
-import { fetchCommunityEntries, toggleLike } from "../services/communityServiceBridge";
+import { fetchCommunityEntries } from "../services/communityServiceBridge";
 
 // Composants
 import { PageContainer } from "../components/PageContainer";
 import { PageHeader } from "../components/PageHeader";
-import { AnonymousSessionService } from "../services/anonymousSessionService";
 import { ContributionForm } from "../components/community/ContributionForm";
 import { GalleryGrid } from "../components/community/GalleryGrid";
 import { EntryDetail } from "../components/community/EntryDetail";
@@ -69,31 +67,6 @@ const CommunityGallery: React.FC = () => {
     (filter === "all" || entry.type === filter) &&
     entry.moderation?.status !== "rejected"
   );
-
-  // Gérer les likes
-  const handleLike = async (entryId: string) => {
-    try {
-      const sessionId = AnonymousSessionService.getOrCreateSessionId();
-      const updatedEntry = await toggleLike(entryId, sessionId);
-      
-      // Mettre à jour l'entrée dans la liste
-      setEntries(entries.map(entry => 
-        entry.id === entryId ? updatedEntry : entry
-      ));
-      
-      // Si une entrée est sélectionnée, la mettre à jour également
-      if (selectedEntry && selectedEntry.id === entryId) {
-        setSelectedEntry(updatedEntry);
-      }
-    } catch (err) {
-      console.error("Erreur lors de la mise à jour du like:", err);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'enregistrer votre appréciation. Veuillez réessayer.",
-        variant: "destructive"
-      });
-    }
-  };
 
   // Gérer l'ajout d'une nouvelle contribution
   const handleNewContribution = (newEntry: CommunityEntry) => {
@@ -185,7 +158,6 @@ const CommunityGallery: React.FC = () => {
                   <GalleryGrid 
                     entries={filteredEntries} 
                     onEntryClick={setSelectedEntry}
-                    onLike={handleLike}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -208,7 +180,6 @@ const CommunityGallery: React.FC = () => {
         <EntryDetail 
           entry={selectedEntry} 
           onClose={() => setSelectedEntry(null)}
-          onLike={handleLike}
         />
       )}
       

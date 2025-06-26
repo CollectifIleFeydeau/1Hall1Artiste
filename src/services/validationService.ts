@@ -41,16 +41,12 @@ export const validateEvent = (event: Event): ValidationResult => {
     errors.push({ field: 'type', message: 'Le type d\'événement doit être "exposition" ou "concert"' });
   }
   
-  if (!event.description || event.description.trim() === '') {
-    errors.push({ field: 'description', message: 'La description est obligatoire' });
-  }
-  
   if (!event.artistBio || event.artistBio.trim() === '') {
     errors.push({ field: 'artistBio', message: 'La biographie de l\'artiste est obligatoire' });
   }
   
   if (!event.time || event.time.trim() === '') {
-    errors.push({ field: 'time', message: 'L\'horaire est obligatoire' });
+    errors.push({ field: 'time', message: 'L\'heure est obligatoire' });
   }
   
   if (!event.days || event.days.length === 0) {

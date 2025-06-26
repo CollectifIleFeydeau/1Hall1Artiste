@@ -160,7 +160,6 @@ describe('Community Gallery Workflow Integration Tests', () => {
                 type: 'photo',
                 displayName: 'Test User',
                 createdAt: new Date().toISOString(),
-                likes: 0,
                 moderation: {
                   status: 'approved',
                   moderatedAt: new Date().toISOString()

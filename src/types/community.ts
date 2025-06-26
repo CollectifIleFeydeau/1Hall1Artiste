@@ -20,9 +20,6 @@ export interface CommunityEntry {
   imageUrl?: string;
   thumbnailUrl?: string;
   content?: string;
-  likes: number;
-  likedBy: string[];
-  isLikedByCurrentUser?: boolean;
   moderation?: ModerationStatus;
 }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { fetchCommunityEntries, moderateContent, submitContribution, toggleLike } from './communityServiceBridge';
+import { fetchCommunityEntries, moderateContent, submitContribution } from './communityServiceBridge';
 import { AnonymousSessionService } from './anonymousSessionService';
 import { CommunityEntry, EntryType, ModerationStatus } from '../types/communityTypes';
 import { enrichSubmissionWithContext, getContributionContext, setEventContributionContext, setLocationContributionContext, clearContributionContext } from './contextualContributionService';
@@ -120,7 +120,6 @@ describe('Community Service Integration Tests', () => {
           type: 'photo',
           displayName: 'User 1',
           createdAt: new Date().toISOString(),
-          likes: 5,
           moderation: {
             status: 'approved' as ModerationStatus,
             moderatedAt: new Date().toISOString()
@@ -133,7 +132,6 @@ describe('Community Service Integration Tests', () => {
           type: 'testimonial',
           displayName: 'User 2',
           createdAt: new Date().toISOString(),
-          likes: 3,
           moderation: {
             status: 'approved' as ModerationStatus,
             moderatedAt: new Date().toISOString()
@@ -278,52 +276,6 @@ describe('Community Service Integration Tests', () => {
       const storedEntries = JSON.parse(localStorage.getItem('community_entries') || '[]');
       expect(storedEntries).toHaveLength(1);
       expect(storedEntries[0].id).toBe(result.id);
-    });
-  });
-
-  describe('Likes Management Integration', () => {
-    it('should toggle like on an entry', async () => {
-      // Arrange
-      const mockEntry: CommunityEntry = {
-        id: 'entry1',
-        type: 'photo',
-        displayName: 'User 1',
-        createdAt: new Date().toISOString(),
-        likes: 5,
-        moderation: {
-          status: 'approved' as ModerationStatus,
-          moderatedAt: new Date().toISOString()
-        },
-        imageUrl: 'local:test-image-1',
-        description: 'Test photo'
-      };
-      
-      localStorage.setItem('community_entries', JSON.stringify([mockEntry]));
-      
-      // Mock the session ID
-      vi.spyOn(AnonymousSessionService, 'getOrCreateSessionId').mockReturnValue('test-session-id');
-      
-      // Act - Add like
-      const resultAfterLike = await toggleLike('entry1', 'test-session-id');
-      
-      // Assert - Like added
-      expect(resultAfterLike.likes).toBe(6);
-      expect(resultAfterLike.isLikedByCurrentUser).toBe(true);
-      
-      // Verify liked entries in localStorage
-      const likedEntries = JSON.parse(localStorage.getItem('community_liked_entries') || '[]');
-      expect(likedEntries).toContain('entry1');
-      
-      // Act - Remove like
-      const resultAfterUnlike = await toggleLike('entry1', 'test-session-id');
-      
-      // Assert - Like removed
-      expect(resultAfterUnlike.likes).toBe(5);
-      expect(resultAfterUnlike.isLikedByCurrentUser).toBe(false);
-      
-      // Verify liked entries in localStorage
-      const likedEntriesAfterUnlike = JSON.parse(localStorage.getItem('community_liked_entries') || '[]');
-      expect(likedEntriesAfterUnlike).not.toContain('entry1');
     });
   });
 

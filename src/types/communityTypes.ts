@@ -16,9 +16,6 @@ export interface CommunityEntry {
   sessionId?: string;
   createdAt: string;
   timestamp?: string; // Date formatée pour l'affichage
-  likes: number;
-  likedBy?: string[];
-  isLikedByCurrentUser?: boolean;
   moderation: {
     status: ModerationStatus;
     moderatedAt: string | null;

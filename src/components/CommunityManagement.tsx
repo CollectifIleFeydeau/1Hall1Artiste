@@ -212,7 +212,6 @@ export function CommunityManagement() {
                 <p>ID: {entry.id}</p>
                 {entry.eventId && <p>Événement: {entry.eventId}</p>}
                 {entry.locationId && <p>Lieu: {entry.locationId}</p>}
-                <p>Likes: {entry.likes || 0}</p>
               </div>
             </CardContent>
           </Card>

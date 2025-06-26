@@ -32,13 +32,10 @@ export function EventForm({ onSuccess, editingEvent }: EventFormProps) {
       type: "exposition",
       description: "",
       artistBio: "",
-      contact: "",
       time: "",
       days: [],
       locationId: "",
-      locationName: "",
-      x: 0,
-      y: 0
+      locationName: ""
     }
   );
   
@@ -69,9 +66,7 @@ export function EventForm({ onSuccess, editingEvent }: EventFormProps) {
       if (selectedLocation) {
         setFormData(prev => ({ 
           ...prev, 
-          locationName: selectedLocation.name,
-          x: selectedLocation.x,
-          y: selectedLocation.y
+          locationName: selectedLocation.name
         }));
       }
     }
@@ -180,13 +175,10 @@ export function EventForm({ onSuccess, editingEvent }: EventFormProps) {
             type: "exposition",
             description: "",
             artistBio: "",
-            contact: "",
             time: "",
             days: [],
             locationId: "",
-            locationName: "",
-            x: 0,
-            y: 0
+            locationName: ""
           });
         }
         
@@ -284,17 +276,6 @@ export function EventForm({ onSuccess, editingEvent }: EventFormProps) {
               onChange={handleInputChange}
               placeholder="Biographie de l'artiste"
               className="min-h-24"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="contact">Contact</Label>
-            <Input
-              id="contact"
-              name="contact"
-              value={formData.contact || ""}
-              onChange={handleInputChange}
-              placeholder="Email ou téléphone"
             />
           </div>
           

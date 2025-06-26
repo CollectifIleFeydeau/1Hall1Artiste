@@ -117,15 +117,10 @@ export const exportEventsToCSV = (): string => {
       'title',
       'artistName',
       'type',
-      'description',
       'artistBio',
-      'contact',
       'time',
       'days',
-      'locationName',
-      'locationDescription',
-      'x',
-      'y'
+      'locationName'
     ];
     
     // Convertir les événements en lignes CSV
@@ -135,15 +130,10 @@ export const exportEventsToCSV = (): string => {
         `"${event.title.replace(/"/g, '""')}"`,
         `"${event.artistName.replace(/"/g, '""')}"`,
         event.type,
-        `"${event.description.replace(/"/g, '""')}"`,
         `"${event.artistBio.replace(/"/g, '""')}"`,
-        `"${event.contact.replace(/"/g, '""')}"`,
         `"${event.time.replace(/"/g, '""')}"`,
         `"${event.days.join(',')}"`,
-        `"${event.locationName.replace(/"/g, '""')}"`,
-        `"${event.locationDescription.replace(/"/g, '""')}"`,
-        event.x,
-        event.y
+        `"${event.locationName.replace(/"/g, '""')}"`
       ];
       
       return values.join(',');

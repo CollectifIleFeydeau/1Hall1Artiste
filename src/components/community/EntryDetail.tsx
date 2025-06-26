@@ -1,7 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import X from "lucide-react/dist/esm/icons/x";
-import ThumbsUp from "lucide-react/dist/esm/icons/thumbs-up";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import { format } from "date-fns";
@@ -15,10 +14,9 @@ import { LocalImage } from "./LocalImage";
 interface EntryDetailProps {
   entry: CommunityEntry;
   onClose: () => void;
-  onLike: (entryId: string) => void;
 }
 
-export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, onClose, onLike }) => {
+export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, onClose }) => {
   // Empêcher le défilement du corps lorsque le modal est ouvert
   React.useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -107,28 +105,11 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, onClose, onLike
             </div>
           </div>
 
-          {/* Pied de page avec likes */}
-          <div className="p-4 border-t flex justify-between items-center">
+          {/* Pied de page */}
+          <div className="p-4 border-t">
             <span className="text-sm text-slate-500">
               Partagé le {format(new Date(entry.timestamp), "d MMMM yyyy à HH:mm", { locale: fr })}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                "flex items-center gap-2",
-                entry.isLikedByCurrentUser && "bg-primary/10"
-              )}
-              onClick={() => onLike(entry.id)}
-            >
-              <ThumbsUp
-                size={16}
-                className={cn(
-                  entry.isLikedByCurrentUser && "fill-primary text-primary"
-                )}
-              />
-              <span>{entry.likes}</span>
-            </Button>
           </div>
         </motion.div>
       </motion.div>

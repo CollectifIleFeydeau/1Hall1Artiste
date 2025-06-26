@@ -1,25 +1,10 @@
 # Toutes nouvelles idées 
 
-
-test
-
-
 # Priorités actuelles (phase de test et optimisation)
 
 ## Priorités immédiates à faire 
 
    * rajouter les autres batîments : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice
-
-* Tests de la galerie communautaire 
-   * Tests à compléter:
-      * Tests multi-navigateurs (Chrome, Firefox, Safari, Edge)
-      * Tests sur mobile et différentes tailles d'écran
-      * Tests de performance avec de nombreuses contributions
-      * Tests de sécurité pour les URLs des images
-      => Voir @galerie-communautaire-concept.md
-      => Tests sur @plan-test-contributions.md
-
-* Changer les immages de l'onboarding
 
 * S'assurer que les stats de firebase marchent
 => Voir @ANALYTICS_TESTING_GUIDE.md
@@ -198,3 +183,81 @@ test
       * Chemins d'images pour les exemples incorrects ou images manquantes
       * Améliorer la persistance des likes après fermeture du navigateur
       * S'assurer que les contributions supprimées ne réapparaissent pas
+
+## Cartographie des Fonctionnalités pour Tests Anti-Régression
+
+# Notes
+
+- L'objectif principal est d'éviter les régressions en mettant en place une suite de tests complète.
+- Le projet est une application **React/TypeScript**, et non Google App Script.
+- L'architecture comprend un frontend React, des services pour le suivi des erreurs (EmailJS), l'analyse (Firebase, EmailJS) et le contenu communautaire (localStorage, Cloudflare Worker, GitHub API).
+- Les frameworks de test choisis sont **Jest** et **React Testing Library** pour les tests unitaires/intégration, et **Cypress** pour les tests E2E.
+### 🔴 **Priorité P0 (Critiques - Régressions historiques)**
+
+#### **Navigation & Onboarding**
+- ✅ Page d'accueil (`Index.tsx`) - Écran de bienvenue
+- ✅ Système d'onboarding (`Onboarding.tsx`) - **[Régression historique : boucles infinies]**
+- ✅ Navigation animée (`AnimatedRoutes`) - Transitions entre pages
+- ✅ Context de navigation (`NavigationContext.tsx`) - Historique navigation
+
+#### **Contributions Communautaires**
+- ✅ Service de contributions (`communityServiceBridge.ts`) - **[Régression historique : persistence]**
+- ✅ Galerie communautaire (`CommunityGallery.tsx`) - Affichage contributions
+- ✅ Système de likes - **[Régression historique : disparition après refresh]**
+- ✅ Upload d'images Cloudinary - **[Régression historique : upload cassé]**
+
+#### **Administration**
+- ✅ Interface admin (`Admin.tsx`) - Gestion contenus
+- ✅ Suppression de contributions - **[Régression historique : réapparition après suppression]**
+
+### 🟡 **Priorité P1 (Importantes)**
+
+#### **Pages Principales**
+- 📍 Carte interactive (`Map.tsx`) - Page centrale de l'app
+- 📅 Programme événements (`Program.tsx`) - Événements du festival
+- 📜 Historique des lieux (`LocationHistory.tsx`) - Contenu historique
+- 👥 Équipe (`Team.tsx`) - Présentation équipe
+- ℹ️ À propos (`About.tsx`) - Informations association
+
+#### **Navigation & Interface**
+- 🧭 Navigation guidée (`NavigationGuideSimple.tsx`) - Guidage utilisateur
+- 📱 Navigation bottom (`BottomNavigation.tsx`) - Menu principal
+- 🎭 Galeries (`Galleries.tsx`) - Accès aux différentes galeries
+- 💰 Dons (`Donate.tsx`) - Système de donation
+
+#### **Gestion d'Erreurs**
+- ❌ Page 404 (`NotFound.tsx`) - Gestion pages inexistantes
+- 🛡️ ErrorBoundary - Gestion erreurs globales
+
+### 🟢 **Priorité P2 (Secondaires mais à risques)**
+
+#### **Services Critiques**
+- 🌍 **Géolocalisation** - LocationService avec simulation
+- 📡 **Mode hors-ligne** - useOfflineMode + Service Worker
+- 📁 **Upload/Import fichiers** - CSV, JSON avec FileReader
+- 🔊 **Audio/Vidéo** - AudioProvider + autoplay policies
+- 📅 **Système calendrier** - CalendarService + timezones
+- 📤 **Partage social** - ShareButton + génération QR codes
+
+#### **Performance & Sécurité**
+- 🧠 **Memory leaks** - useEffect sans cleanup
+- 🔒 **Sécurité** - Validation uploads, XSS potentiel
+- 🌐 **Compatibilité navigateur** - APIs modernes sans fallbacks
+- 📊 **Analytics** - Firebase Analytics + tracking
+
+### 🎯 **Stratégie de Test Recommandée**
+
+#### **Phase 1 : Tests P0 (Prévention régressions)**
+1. **Tests unitaires** pour `communityServiceBridge.ts`
+2. **Tests d'intégration** pour navigation/onboarding  
+3. **Tests E2E** pour flux critiques (contribution, likes, suppression)
+
+#### **Phase 2 : Tests P1 (Stabilité générale)**
+1. **Tests de composants** pour pages principales
+2. **Tests d'intégration** pour navigation et interface
+3. **Tests E2E** pour parcours utilisateur complets
+
+#### **Phase 3 : Tests P2 (Robustesse)**
+1. **Tests de services** pour géolocalisation, offline, audio
+2. **Tests de performance** pour memory leaks
+3. **Tests de sécurité** pour uploads et validation
