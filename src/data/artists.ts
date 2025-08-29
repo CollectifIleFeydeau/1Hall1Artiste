@@ -160,16 +160,17 @@ export const artists: Artist[] = [
     title: "Peinture",
     bio: "Artiste peintre contemporaine basée à Nantes, Elizaveta Vodyanova explore la peinture figurative à l'acrylique. Ses œuvres, intimes et poétiques, capturent des instants de vie — intérieurs, visages, paysages marins — avec une palette subtile et vibrante.",
     email: "vojnovich@yandex.com",
-    instagram: "https://www.instagram.com/elizaveta.vojnovich"
+    instagram: "https://www.instagram.com/elvodyanova"
+
   },
   {
     id: "fabienne-choyau",
     name: "Fabienne Choyau",
     type: "exposition",
     title: "Peinture contemporaine",
-    bio: "Artiste peintre contemporaine d’origine colombienne, Fabienne Choyau est diplômée en arts plastiques de l’Université des Andes.Installée en France, elle crée des œuvres vibrantes mêlant souvenirs, émotions et récits intimes, déployées au travers de séries thématiques puissantes.",
+    bio: "Guidée par sa passion pour la couleur, Fabienne Choyau puise son inspiration dan la nature et les instants du quotidien. Son regard se laisse porter par ce qui l'entoure, transformant émotions et impressions en toiles vibrantes",
     email: "fabienne.choyau@laposte.net",
-    instagram: "https://www.instagram.com/fabienne.choyau.art"
+    instagram: "https://www.instagram.com/fabiennechoyau/"
   },
 
 
@@ -298,7 +299,9 @@ export const artists: Artist[] = [
     email: "contact@variabilis.fr",
     instagram: "https://www.instagram.com/variabilis_ensemble/?igshid=MzRlODBiNWFlZA%3D%3D",
     photos: ["/concerts/Variabilis/Variabilis.jpg"],
-    facebook: "https://www.facebook.com/EnsembleVariabilis"
+    facebook: "https://www.facebook.com/EnsembleVariabilis",
+    website: "https://www.variabilis.fr",
+    presentation: "VARIABILIS, C'EST 70 MUSICIENS AMATEURS.\n\nL'ambition de cet ensemble :\n\n- Vivre la musique dans un esprit d'ouverture et de partage.\n\n- Explorer la diversité du répertoire classique.\n\n- Présenter des concerts dans des formats et des lieux variés.\n\n- Aller au devant de publics parfois éloignés des scènes musicales classiques.\n\nContact et plus d'infos https://www.variabilis.fr"
   },
   {
     id: "Semaphore Omega",

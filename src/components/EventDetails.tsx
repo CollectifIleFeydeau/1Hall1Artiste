@@ -559,7 +559,23 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             {/* Nous ne montrons plus l'adresse Instagram car le widget l'affiche déjà */}
             
             {/* Instagram Embed - Show actual Instagram feed */}
-            {artist && artist.instagram && artist.instagram.includes('instagram') && (
+            {artist && artist.instagram && artist.instagram.includes('instagram') && (() => {
+              // Extract handle robustly (handles trailing slashes and query params)
+              const extractInstagramHandle = (url: string): string => {
+                try {
+                  const u = new URL(url);
+                  const cleanedPath = u.pathname.replace(/\/$/, "");
+                  const parts = cleanedPath.split('/').filter(Boolean);
+                  return parts.pop() || "";
+                } catch {
+                  const cleaned = url.split('?')[0].replace(/\/$/, "");
+                  const parts = cleaned.split('/').filter(Boolean);
+                  return parts.pop() || "";
+                }
+              };
+              const handle = extractInstagramHandle(artist.instagram);
+              if (!handle) return null;
+              return (
               <div className="border-t border-[#d8e3ff] pt-4 mt-4">
                 {/* <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
                   <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
@@ -574,7 +590,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                 >
                   <iframe
                     title={`Instagram feed de ${event.artistName}`}
-                    src={`https://www.instagram.com/${artist.instagram.split('/').pop().split('?')[0]}/embed?hidecaption=1&header=0`}
+                    src={`https://www.instagram.com/${handle}/embed?hidecaption=1&header=0`}
                     width="100%"
                     height="100%"
                     frameBorder="0"
@@ -591,7 +607,8 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                   ></iframe>
                 </div>
               </div>
-            )}
+              );
+            })()}
             
             <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-6 border-t border-[#d8e3ff] pt-4">
               {source === "program" ? (
@@ -634,30 +651,30 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-3">
               <Button 
                 variant="outline"
-                className="border-[#4a5d94] text-[#4a5d94] flex-1 text-xs sm:text-sm"
+                className="border-[#4a5d94] text-[#4a5d94] flex-1 text-xs sm:text-sm min-w-0"
                 onClick={handleAddToCalendar}
                 disabled={!calendarSupported}
               >
                 {calendarSupported ? (
                   <>
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Ajouter au calendrier
+                    <Calendar className="h-4 w-4 mr-2 shrink-0" />
+                    <span className="truncate">Ajouter au calendrier</span>
                   </>
                 ) : (
                   <>
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Partager l'événement
+                    <Share2 className="h-4 w-4 mr-2 shrink-0" />
+                    <span className="truncate">Partager l'événement</span>
                   </>
                 )}
               </Button>
               
               <Button 
                 variant="outline"
-                className="border-[#ff7a45] text-[#ff7a45] flex-1 text-xs sm:text-sm"
+                className="border-[#ff7a45] text-[#ff7a45] flex-1 text-xs sm:text-sm min-w-0"
                 onClick={handleContribute}
               >
-                <Camera className="h-4 w-4 mr-2" />
-                Partager un souvenir
+                <Camera className="h-4 w-4 mr-2 shrink-0" />
+                <span className="truncate">Partager un souvenir</span>
               </Button>
             </div>
             

@@ -74,6 +74,20 @@ const Program = () => {
     return events.filter(event => event.type === filter);
   };
   
+  // Parse "HHhMM - HHhMM" and return minutes since midnight for the start time
+  const startMinutes = (timeRange: string): number => {
+    // Examples: "14h00 - 14h30", "12h00 - 19h00"
+    const match = timeRange.match(/(\d{1,2})h(\d{2})/);
+    if (!match) return Number.MAX_SAFE_INTEGER; // place unknowns at the end
+    const h = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    return h * 60 + m;
+  };
+
+  const sortByStartTime = (items: Event[]): Event[] => {
+    return [...items].sort((a, b) => startMinutes(a.time) - startMinutes(b.time));
+  };
+  
   return (
     <div className="min-h-screen app-gradient pb-20">
       <div className="max-w-md mx-auto px-4 pt-4">
@@ -158,7 +172,7 @@ const Program = () => {
           </TabsList>
           
           <TabsContent value="samedi" className="space-y-4">
-            {filterEvents(getEventsByDay("samedi"), currentFilter).map((event, index) => {
+            {sortByStartTime(filterEvents(getEventsByDay("samedi"), currentFilter)).map((event, index) => {
                 const eventKey = `samedi-${event.id}-${index}`;
                 return (
                   <div key={eventKey}>
@@ -183,7 +197,7 @@ const Program = () => {
           </TabsContent>
           
           <TabsContent value="dimanche" className="space-y-4">
-            {filterEvents(getEventsByDay("dimanche"), currentFilter).map((event, index) => {
+            {sortByStartTime(filterEvents(getEventsByDay("dimanche"), currentFilter)).map((event, index) => {
                 const eventKey = `dimanche-${event.id}-${index}`;
                 return (
                   <div key={eventKey}>
