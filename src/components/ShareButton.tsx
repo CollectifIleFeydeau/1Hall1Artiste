@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { trackFeatureUsage } from "../services/analytics";
+import { analytics } from "@/services/firebaseAnalytics";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Dialog,
@@ -31,8 +31,8 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
   
   const handleShare = async (platform: string) => {
     try {
-      // Track share event
-      trackFeatureUsage.shareContent(platform, title);
+      // Analytics: share
+      analytics.trackFeatureUse('share', { platform, title });
     
     // S'assurer que l'URL est absolue
     const absoluteUrl = shareUrl.startsWith('http') ? shareUrl : (typeof window !== 'undefined' ? window.location.origin + shareUrl : shareUrl);

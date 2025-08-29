@@ -9,6 +9,7 @@ import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import Filter from "lucide-react/dist/esm/icons/filter";
 import { useToast } from "../components/ui/use-toast";
 import { BottomNavigation } from "../components/BottomNavigation";
+import { analytics, EventAction } from "@/services/firebaseAnalytics";
 
 // Types
 import { CommunityEntry, EntryType } from "../types/communityTypes";
@@ -40,6 +41,8 @@ const CommunityGallery: React.FC = () => {
     
     if (tabParam === 'contribute') {
       setActiveTab('contribute');
+      // Analytics: user landed directly on contribute tab
+      analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'url_param' });
     }
   }, [location]);
 
@@ -48,12 +51,16 @@ const CommunityGallery: React.FC = () => {
     const loadEntries = async () => {
       try {
         setLoading(true);
+        // Analytics: page view
+        analytics.trackPageView("/community", "Galerie Communautaire");
         const data = await fetchCommunityEntries();
         setEntries(data);
         setError(null);
       } catch (err) {
         console.error("Erreur lors du chargement des entrées:", err);
         setError("Impossible de charger la galerie communautaire. Veuillez réessayer plus tard.");
+        // Analytics: API error loading entries
+        analytics.trackError(EventAction.API_ERROR, 'fetchCommunityEntries failed', { page: 'community_gallery' });
       } finally {
         setLoading(false);
       }
@@ -96,7 +103,12 @@ const CommunityGallery: React.FC = () => {
       >
         <Tabs 
           value={activeTab} 
-          onValueChange={(value) => setActiveTab(value as "gallery" | "contribute")}
+          onValueChange={(value) => {
+            setActiveTab(value as "gallery" | "contribute");
+            if (value === 'contribute') {
+              analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'tab_click' });
+            }
+          }}
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -132,21 +144,21 @@ const CommunityGallery: React.FC = () => {
                     <Button 
                       variant={filter === "all" ? "default" : "outline"} 
                       size="sm" 
-                      onClick={() => setFilter("all")}
+                      onClick={() => { setFilter("all"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'all' }); }}
                     >
                       Tous
                     </Button>
                     <Button 
                       variant={filter === "photo" ? "default" : "outline"} 
                       size="sm" 
-                      onClick={() => setFilter("photo")}
+                      onClick={() => { setFilter("photo"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'photo' }); }}
                     >
                       Photos
                     </Button>
                     <Button 
                       variant={filter === "testimonial" ? "default" : "outline"} 
                       size="sm" 
-                      onClick={() => setFilter("testimonial")}
+                      onClick={() => { setFilter("testimonial"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'testimonial' }); }}
                     >
                       Témoignages
                     </Button>
@@ -157,12 +169,12 @@ const CommunityGallery: React.FC = () => {
                 {filteredEntries.length > 0 ? (
                   <GalleryGrid 
                     entries={filteredEntries} 
-                    onEntryClick={setSelectedEntry}
+                    onEntryClick={(entry) => { analytics.trackCommunityInteraction(EventAction.VIEW, { content_type: 'entry', entry_id: entry.id }); setSelectedEntry(entry); }}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-64 text-center">
                     <p className="text-gray-500 mb-4">Aucune contribution dans cette catégorie</p>
-                    <Button onClick={() => setActiveTab("contribute")}>Soyez le premier à contribuer</Button>
+                    <Button onClick={() => { analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'empty_state' }); setActiveTab("contribute"); }}>Soyez le premier à contribuer</Button>
                   </div>
                 )}
               </>

@@ -22,7 +22,7 @@ import { saveEvent, getSavedEvents, removeSavedEvent } from "@/services/savedEve
 import { type Event, getEventsByLocation } from "@/data/events";
 import { getLocationNameById } from "@/data/locations";
 import { artists } from "@/data/artists";
-import { trackFeatureUsage, trackEvent } from "@/services/analytics";
+import { analytics, EventAction, trackInteraction } from "@/services/firebaseAnalytics";
 import { InstagramCarousel } from "@/components/InstagramCarousel";
 import { TruncatedText } from "@/components/TruncatedText";
 import { addToCalendar, isCalendarSupported, CalendarErrorType } from "@/services/calendarService";
@@ -118,6 +118,17 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
   const [calendarSupported, setCalendarSupported] = useState<boolean>(false);
   const [relatedEvents, setRelatedEvents] = useState<Event[]>([]);
   
+  // Tracking: ouverture du panneau de détails
+  useEffect(() => {
+    if (isOpen && event) {
+      analytics.trackProgramInteraction(EventAction.EVENT_DETAILS, {
+        event_id: event.id,
+        event_title: event.title,
+        source
+      });
+    }
+  }, [isOpen, event, source]);
+  
   // Vérifier si l'événement est sauvegardé au chargement
   useEffect(() => {
     if (event) {
@@ -147,8 +158,13 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     console.log(`[EventDetails] Navigation vers la carte pour l'événement ${event.id} au lieu ${event.locationId}`);
     console.log(`[EventDetails] Source de navigation: ${source}`);
     
-    // Track event view in analytics
-    trackFeatureUsage.eventView(event.id, event.title);
+    // Tracking: clic "Voir sur la carte"
+    trackInteraction(EventAction.CLICK, 'view_on_map_button', {
+      from: 'event_details',
+      event_id: event.id,
+      location_id: event.locationId,
+      source
+    });
     
     // Fermer d'abord le dialogue pour éviter les problèmes de navigation
     onClose();
@@ -182,10 +198,11 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     navigate("/community?tab=contribute");
     onClose();
     
-    // Tracker l'utilisation de la fonctionnalité
-    trackFeatureUsage.contribute_from_event({
-      eventId: event.id,
-      eventName: event.title
+    // Tracking: contribution depuis un événement
+    analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, {
+      from: 'event_details',
+      event_id: event.id,
+      event_title: event.title
     });
   };
 
@@ -204,10 +221,10 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
       setSavedEvents(getSavedEvents());
 
       
-      // Analytics
-      trackFeatureUsage.unsave_event({
-        eventId: event.id,
-        eventName: event.title
+      // Analytics: unsave
+      analytics.trackContentInteraction(EventAction.UNSAVE, 'event', event.id, {
+        event_title: event.title,
+        source
       });
     } else {
       // Ajouter aux favoris
@@ -215,10 +232,10 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
       setSavedEvents(getSavedEvents());
       
       
-      // Analytics
-      trackFeatureUsage.save_event({
-        eventId: event.id,
-        eventName: event.title
+      // Analytics: save
+      analytics.trackContentInteraction(EventAction.SAVE, 'event', event.id, {
+        event_title: event.title,
+        source
       });
     }
   };
@@ -231,8 +248,8 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     if (!event) return;
     
     try {
-      // Tracker l'utilisation de la fonctionnalité
-      trackEvent('Calendar', 'Add To Calendar', event.title);
+      // Tracking: CTA ajouter au calendrier
+      analytics.trackProgramCTA('add_to_calendar', event.id);
       
       // Ajouter l'événement au calendrier
       const result = await addToCalendar(event);
@@ -256,6 +273,10 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
             description: result.errorMessage || "Une erreur est survenue lors de l'ajout au calendrier.",
             variant: "destructive"
           });
+          analytics.trackError(EventAction.API_ERROR, 'add_to_calendar', {
+            event_id: event.id,
+            error_message: result.errorMessage
+          });
         }
       }
     } catch (error) {
@@ -264,6 +285,10 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
         title: "Erreur",
         description: "Une erreur inattendue est survenue.",
         variant: "destructive"
+      });
+      analytics.trackError(EventAction.API_ERROR, 'add_to_calendar_exception', {
+        event_id: event?.id,
+        error_message: (error as Error)?.message
       });
     }
   };
@@ -633,6 +658,16 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                 variant="outline"
                 className="border-[#4a5d94] text-[#4a5d94] flex-1 text-xs sm:text-sm"
                 onClick={() => {
+                  if (event) {
+                    // Tracking: clic histoire du lieu
+                    trackInteraction(EventAction.CLICK, 'history_button', {
+                      from: 'event_details',
+                      event_id: event.id,
+                      location_id: event.locationId
+                    });
+                    // Tracking: vue de l'histoire du bâtiment (déclenchée depuis détails)
+                    analytics.trackBuildingHistoryView(event.locationId, 'from_event_details');
+                  }
                   navigate('/location-history', { 
                     state: { 
                       selectedLocationId: event.locationId,

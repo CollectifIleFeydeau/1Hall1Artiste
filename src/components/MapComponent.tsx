@@ -48,6 +48,10 @@ export interface MapComponentProps {
     targetLocation: Location | null;
     onClose: () => void;
   };
+  // Optional pan/drag callbacks (for analytics)
+  onPanStart?: (info: { x: number; y: number }) => void;
+  onPan?: (info: { dx: number; dy: number; x: number; y: number }) => void;
+  onPanEnd?: (info: { totalDx: number; totalDy: number; distance: number; durationMs: number }) => void;
 };
 
 /**
@@ -69,7 +73,10 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   readOnly = false,
   onScaleChange,
   userLocationProps,
-  navigationProps
+  navigationProps,
+  onPanStart,
+  onPan,
+  onPanEnd
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1); // Facteur d'échelle pour les coordonnées
@@ -78,6 +85,11 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
   const [userMapCoords, setUserMapCoords] = useState<{ x: number, y: number } | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  // Drag state (client coordinates)
+  const dragStartClient = useRef<{ x: number; y: number } | null>(null);
+  const lastClient = useRef<{ x: number; y: number } | null>(null);
+  const dragTotals = useRef<{ dx: number; dy: number }>({ dx: 0, dy: 0 });
+  const dragStartTime = useRef<number>(0);
 
   // Référence pour suivre si un avertissement de limite de carte a été affiché
   const outOfBoundsWarningShownRef = useRef(false);
@@ -144,6 +156,66 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       window.removeEventListener('resize', debouncedResize);
     };
   }, [onScaleChange]); // Ajouter onScaleChange comme dépendance
+
+  // Mouse drag handlers (basic analytics support without visual panning)
+  useEffect(() => {
+    if (readOnly) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !dragStartClient.current) return;
+      const current = { x: e.clientX, y: e.clientY };
+      if (!lastClient.current) {
+        lastClient.current = current;
+        return;
+      }
+      const dx = current.x - lastClient.current.x;
+      const dy = current.y - lastClient.current.y;
+      dragTotals.current.dx += dx;
+      dragTotals.current.dy += dy;
+      lastClient.current = current;
+      if (onPan) {
+        onPan({ dx, dy, x: current.x, y: current.y });
+      }
+    };
+    const handleMouseUp = () => {
+      if (!isDragging) return;
+      setIsDragging(false);
+      const durationMs = Date.now() - dragStartTime.current;
+      const { dx, dy } = dragTotals.current;
+      const distance = Math.hypot(dx, dy);
+      // Reset refs
+      dragStartClient.current = null;
+      lastClient.current = null;
+      dragTotals.current = { dx: 0, dy: 0 };
+      if (onPanEnd) {
+        onPanEnd({ totalDx: dx, totalDy: dy, distance, durationMs });
+      }
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+    const startDrag = (clientX: number, clientY: number) => {
+      setIsDragging(true);
+      dragStartClient.current = { x: clientX, y: clientY };
+      lastClient.current = { x: clientX, y: clientY };
+      dragTotals.current = { dx: 0, dy: 0 };
+      dragStartTime.current = Date.now();
+      if (onPanStart) onPanStart({ x: clientX, y: clientY });
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    };
+    const el = containerRef.current;
+    if (!el) return;
+    const onMouseDown = (e: MouseEvent) => {
+      // Ignore if primary button not pressed
+      if (e.button !== 0) return;
+      startDrag(e.clientX, e.clientY);
+    };
+    el.addEventListener('mousedown', onMouseDown);
+    return () => {
+      el.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, readOnly, onPanStart, onPan, onPanEnd]);
   
   // Log des coordonnées des points au chargement
   useEffect(() => {

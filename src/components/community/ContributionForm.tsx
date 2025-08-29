@@ -20,6 +20,7 @@ import { AnonymousSessionService } from "../../services/anonymousSessionService"
 import { getContributionContext, clearContributionContext, enrichSubmissionWithContext } from "../../services/contextualContributionService";
 import { events } from "../../data/events";
 import { locations } from "../../data/locations";
+import { analytics, EventAction } from "@/services/firebaseAnalytics";
 
 interface ContributionFormProps {
   onSubmit: (newEntry: CommunityEntry) => void;
@@ -73,6 +74,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
         }
       }
     }
+    // Analytics: user opened contribution form
+    analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'open_form' });
   }, [setValue]);
 
   // Gérer le changement d'image
@@ -124,8 +127,12 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
             console.log('[ContributionForm] Upload Cloudinary réussi:', data.secure_url);
             // Stocker l'URL Cloudinary pour la soumission
             setValue('cloudinaryUrl', data.secure_url);
+            // Analytics: image upload success
+            analytics.trackCommunityInteraction(EventAction.UPLOAD, { type: 'image', success: true, size: file.size, mime: file.type });
           } else {
             console.error('[ContributionForm] Pas de secure_url dans la réponse:', data);
+            // Analytics: image upload unexpected response
+            analytics.trackCommunityInteraction(EventAction.UPLOAD, { type: 'image', success: false, reason: 'no_secure_url' });
           }
         } else {
           const errorText = await response.text();
@@ -134,10 +141,14 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
             statusText: response.statusText,
             error: errorText
           });
+          // Analytics: image upload failure
+          analytics.trackCommunityInteraction(EventAction.UPLOAD, { type: 'image', success: false, status: response.status, statusText: response.statusText });
         }
       }
     } catch (error) {
       console.error('[ContributionForm] Erreur lors du changement d\'image:', error);
+      // Analytics: image upload exception
+      analytics.trackCommunityInteraction(EventAction.UPLOAD, { type: 'image', success: false, exception: true });
     }
   };
 
@@ -149,6 +160,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
     try {
       setIsSubmitting(true);
       console.log('[ContributionForm] État de soumission activé');
+      // Analytics: contribution submit start
+      analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'submit_start' });
 
       // Déterminer le type de contribution automatiquement
       const hasImage = data.cloudinaryUrl || fileInputRef.current?.files?.[0];
@@ -175,6 +188,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       // Soumettre la contribution
       const newEntry = await submitContribution(data);
       console.log('[ContributionForm] Contribution soumise avec succès:', newEntry);
+      // Analytics: contribution submit success
+      analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'success', entry_id: newEntry.id, type: newEntry.type });
       
       // Réinitialiser le formulaire
       console.log('[ContributionForm] Réinitialisation du formulaire...');
@@ -197,6 +212,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       console.error("[ContributionForm] Stack trace:", error instanceof Error ? error.stack : 'N/A');
       // Gérer l'erreur (pourrait être amélioré avec un système de notification)
       alert("Une erreur est survenue lors de l'envoi de votre contribution. Veuillez réessayer.");
+      // Analytics: contribution submit failure
+      analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'failure' });
     } finally {
       setIsSubmitting(false);
       console.log('[ContributionForm] État de soumission désactivé');

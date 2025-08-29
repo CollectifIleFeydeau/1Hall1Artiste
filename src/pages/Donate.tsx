@@ -1,31 +1,26 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Heart } from "lucide-react";
-import { trackFeatureUsage } from "../services/analytics";
-import X from "lucide-react/dist/esm/icons/x";
 import { useNavigate } from "react-router-dom";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { useEffect } from "react";
+import { analytics, EventAction } from "@/services/firebaseAnalytics";
 
 const Donate = () => {
   const navigate = useNavigate();
   
-  // HelloAsso URL without tracking parameters
-  const helloAssoUrl = "https://www.helloasso.com/associations/collectif-feydeau/formulaires/1";
-  
-  // Open HelloAsso in a new tab
-  const openHelloAsso = () => {
-    // Track donation button click
-    trackFeatureUsage.donationClick();
-    window.open(helloAssoUrl, "_blank");
-  };
+  // Track donation page view and open
+  useEffect(() => {
+    analytics.trackPageView("/donate", "Faire un don");
+    analytics.trackDonationPageOpen("app");
+  }, []);
 
   return (
     <div className="min-h-screen app-gradient pb-20 px-4 pt-4 overflow-x-hidden">
       <div className="max-w-screen-lg mx-auto">
         <header className="mb-2 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/map")}>
+          <Button variant="ghost" size="sm" onClick={() => { analytics.trackDonationInteraction(EventAction.DONATION_CANCEL, { method: "helloasso", reason: "back_click" }); navigate("/map"); }}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -38,12 +33,15 @@ const Donate = () => {
         
         <Card className="mb-6">
           <CardContent className="p-6">
+            {/*
             <div className="flex flex-col items-center text-center mb-6">
               <Heart className="h-12 w-12 text-red-500 mb-4" />
               <h2 className="text-xl font-bold mb-2">Soutenez notre association</h2>
             </div>
+            */}
             
             <div className="space-y-4">
+              {/*
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h3 className="font-medium mb-2">Pourquoi faire un don ?</h3>
                 <ul className="text-sm space-y-2">
@@ -53,18 +51,18 @@ const Donate = () => {
                   <li>• 66% de votre don est déductible de votre impôt sur le revenu</li>
                 </ul>
               </div>
-              
-              <Button 
-                className="w-full py-6 text-lg btn-animate btn-pulse" 
-                onClick={openHelloAsso}
-              >
-                <Heart className="h-5 w-5 mr-2" fill="white" />
-                Faire un don via HelloAsso
-              </Button>
-              
-              <p className="text-xs text-center text-gray-500 mt-2">
-                Vous serez redirigé vers notre page HelloAsso pour finaliser votre don en toute sécurité.
-              </p>
+              */}
+
+              {/* Intégration HelloAsso - widget intégré */}
+              <iframe
+                id="haWidget"
+                title="Formulaire de don HelloAsso"
+                scrolling="auto"
+                src="https://www.helloasso.com/associations/collectif-feydeau/formulaires/1/widget"
+                style={{ width: "100%", height: "750px", border: "none" }}
+                // Track widget load as a donation_start signal
+                onLoad={() => analytics.trackDonationInteraction(EventAction.DONATION_START, { method: "helloasso", widget_loaded: true })}
+              />
             </div>
           </CardContent>
         </Card>
@@ -78,8 +76,6 @@ const Donate = () => {
           </p>
         </div>
       </div>
-      
-      {/* No embedded iframe - using direct link approach instead */}
       
       {/* Bottom Navigation */}
       <BottomNavigation />

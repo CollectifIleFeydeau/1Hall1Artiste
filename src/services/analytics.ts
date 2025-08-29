@@ -1,7 +1,5 @@
-import ReactGA from 'react-ga4';
-
-// Google Analytics measurement ID
-const MEASUREMENT_ID = 'G-1KF31VN3RM';
+// NOTE: react-ga4 disabled. This file now only manages local usage statistics
+// and exposes the same API without sending data to GA4.
 
 // Stockage local pour les statistiques détaillées
 const LOCAL_STATS_KEY = 'app_usage_statistics';
@@ -61,41 +59,33 @@ const saveLocalStats = (stats: AppStats) => {
   }
 };
 
-// Initialize GA and local stats
+// Initialize local stats only (react-ga4 removed)
 export const initGA = () => {
-  ReactGA.initialize(MEASUREMENT_ID);
-  
-  // Initialiser la session
   const stats = getLocalStats();
   stats.lastSession.startTime = Date.now();
   stats.lastSession.currentPage = window.location.pathname;
   saveLocalStats(stats);
-  
-  // Enregistrer la durée de session quand l'utilisateur quitte l'app
+
   window.addEventListener('beforeunload', () => {
     const currentStats = getLocalStats();
     const sessionDuration = Date.now() - currentStats.lastSession.startTime;
-    
+
     currentStats.sessionDurations.push({
       date: new Date().toISOString().split('T')[0],
       duration: sessionDuration
     });
-    
-    // Limiter le nombre d'entrées
+
     if (currentStats.sessionDurations.length > 30) {
       currentStats.sessionDurations = currentStats.sessionDurations.slice(-30);
     }
-    
+
     saveLocalStats(currentStats);
   });
 };
 
 // Track page views
 export const trackPageView = (path: string) => {
-  // Google Analytics
-  ReactGA.send({ hitType: "pageview", page: path });
-  
-  // Statistiques locales
+  // Statistiques locales uniquement
   const stats = getLocalStats();
   
   // Enregistrer le changement de page
@@ -121,15 +111,7 @@ export const trackPageView = (path: string) => {
 
 // Track events
 export const trackEvent = (category: string, action: string, label?: string, value?: number) => {
-  // Google Analytics
-  ReactGA.event({
-    category,
-    action,
-    label,
-    value
-  });
-  
-  // Statistiques locales
+  // Statistiques locales uniquement
   const stats = getLocalStats();
   const featureKey = `${category}:${action}${label ? ':' + label : ''}`;
   stats.featureUsage[featureKey] = (stats.featureUsage[featureKey] || 0) + 1;

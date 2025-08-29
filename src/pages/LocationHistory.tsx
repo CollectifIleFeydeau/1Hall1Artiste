@@ -16,6 +16,7 @@ import { isOnline } from "@/utils/serviceWorkerRegistration";
 import { preloadSingleHistoryImage, isHistoryImageCached } from "@/services/offlineService";
 import { createLogger } from "@/utils/logger";
 import { Slider } from "@/components/ui/slider";
+import { analytics, EventAction } from "@/services/firebaseAnalytics";
 import {
   Select,
   SelectContent,
@@ -25,7 +26,6 @@ import {
 } from "@/components/ui/select";
 import { locations } from "@/data/locations";
 import { setLocationContributionContext } from "@/services/contextualContributionService";
-import { trackFeatureUsage } from "@/services/analytics";
 
 // Créer un logger pour le composant LocationHistory
 const logger = createLogger('LocationHistory');
@@ -99,8 +99,14 @@ export function LocationHistory() {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
+        if (selectedLocationData?.id) {
+          analytics.trackAudio('pause', selectedLocationData.id);
+        }
       } else {
         audioRef.current.play();
+        if (selectedLocationData?.id) {
+          analytics.trackAudio('play', selectedLocationData.id);
+        }
       }
       setIsPlaying(!isPlaying);
     }
@@ -123,6 +129,9 @@ export function LocationHistory() {
     if (audioRef.current) {
       audioRef.current.currentTime = value[0];
       setCurrentTime(value[0]);
+      if (selectedLocationData?.id) {
+        analytics.trackAudio('seek', selectedLocationData.id, value[0]);
+      }
     }
   };
 
@@ -134,6 +143,12 @@ export function LocationHistory() {
   };
   
   // Précharger l'image du lieu sélectionné pour le mode hors-ligne
+  useEffect(() => {
+    // Page view for history page
+    analytics.trackPageView("/history", "Histoire des lieux");
+  }, []);
+
+  // Track building selection and section view
   useEffect(() => {
     if (selectedLocationData?.image) {
       const imagePath = getImagePath(selectedLocationData.image);
@@ -153,6 +168,11 @@ export function LocationHistory() {
             setImagesLoading(prev => ({ ...prev, [imagePath]: false }));
           });
       }
+    }
+    // Track building viewed and main section visible
+    if (selectedLocationData) {
+      analytics.trackBuildingView(selectedLocationData.id, selectedLocationData.name);
+      analytics.trackBuildingHistoryView(selectedLocationData.id, 'Histoire complète');
     }
   }, [selectedLocationData]);
   
@@ -228,6 +248,10 @@ export function LocationHistory() {
                         fromHistory: true // Indiquer que la navigation vient de l'historique
                       } 
                     });
+                    analytics.trackMapInteraction(EventAction.LOCATION_VIEW, {
+                      building_id: selectedLocationData.id,
+                      from: 'history_page'
+                    });
                   }}
                 >
                   <MapPin className="h-3 w-3 mr-1" />
@@ -268,6 +292,11 @@ export function LocationHistory() {
                       // Log l'erreur
                       logger.error(`Erreur de chargement de l'image:`, { 
                         image: selectedLocationData.image,
+                        online: isOnline()
+                      });
+                      analytics.trackError(EventAction.RESOURCE_ERROR, 'history_image_load_failed', {
+                        image: selectedLocationData.image,
+                        building_id: selectedLocationData.id,
                         online: isOnline()
                       });
                     }}
@@ -326,7 +355,12 @@ export function LocationHistory() {
                     : ''}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
-                  onEnded={() => setIsPlaying(false)}
+                  onEnded={() => {
+                    setIsPlaying(false);
+                    if (selectedLocationData?.id) {
+                      analytics.trackAudio('pause', selectedLocationData.id);
+                    }
+                  }}
                   onCanPlay={() => setAudioLoading(false)}
                   onError={(e) => {
                     console.error("Erreur de chargement audio:", e, selectedLocationData.audio);
@@ -400,10 +434,9 @@ export function LocationHistory() {
                 // Naviguer vers la galerie communautaire, onglet contribution
                 navigate("/community?tab=contribute");
                 
-                // Tracker l'utilisation de la fonctionnalité
-                trackFeatureUsage.contribute_from_location({
-                  locationId: selectedLocationData.id,
-                  locationName: selectedLocationData.name
+                analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, {
+                  source: 'history_page',
+                  building_id: selectedLocationData.id
                 });
               }
             }}

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { trackFeatureUsage } from "../services/analytics";
+import { analytics, EventAction, trackInteraction } from "@/services/firebaseAnalytics";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,11 @@ const Program = () => {
   const [currentFilter, setCurrentFilter] = useState<string>("all");
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
   
+  // Page view
+  useEffect(() => {
+    analytics.trackPageView('/program', 'Programme');
+  }, []);
+
   useEffect(() => {
     // Charger les événements sauvegardés depuis le service
     const savedEvents = getSavedEvents();
@@ -47,6 +52,11 @@ const Program = () => {
       // });
       
       console.log(`[Program] Événement ${event.id} sauvegardé avec succès`);
+      // Analytics: save
+      analytics.trackContentInteraction(EventAction.SAVE, 'event', event.id, {
+        event_title: event.title,
+        source: 'program'
+      });
     } else {
       // Retirer l'événement des favoris en utilisant le service
       removeSavedEvent(event.id);
@@ -59,14 +69,24 @@ const Program = () => {
       // });
       
       console.log(`[Program] Événement ${event.id} retiré avec succès`);
+      // Analytics: unsave
+      analytics.trackContentInteraction(EventAction.UNSAVE, 'event', event.id, {
+        event_title: event.title,
+        source: 'program'
+      });
     }
   };
   
   const handleViewOnMap = (event: Event) => {
-    // Track event view in analytics
-    trackFeatureUsage.eventView(event.id, event.title);
-    // Pass the event ID directly - the Map component will handle the conversion
+    // Tracking: view on map from program
+    trackInteraction(EventAction.CLICK, 'program_view_on_map', { event_id: event.id });
     navigate(`/map?location=${event.id}`);
+  };
+
+  // Track filter changes
+  const handleFilterChange = (filter: string) => {
+    setCurrentFilter(filter);
+    analytics.trackProgramInteraction(EventAction.FILTER, { filter });
   };
   
   const filterEvents = (events: Event[], filter: string) => {
@@ -105,6 +125,7 @@ const Program = () => {
     className="flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-[#4a5d94] transition-all duration-200 hover:shadow-sm"
     onClick={async () => {
       try {
+        analytics.trackProgramCTA('add_to_calendar');
         const { addToCalendar } = await import("../services/calendarService");
         const allEvents = events;
         // Ajoute tous les événements du programme au calendrier
@@ -130,6 +151,7 @@ const Program = () => {
             description: `${errorCount} événement(s) n'ont pas pu être ajoutés.`,
             variant: "destructive",
           });
+          analytics.trackError(EventAction.API_ERROR, 'program_add_all_to_calendar_errors', { error_count: errorCount });
         }
       } catch (error) {
         toast({
@@ -137,6 +159,7 @@ const Program = () => {
           description: error instanceof Error ? error.message : "Impossible d'ajouter au calendrier.",
           variant: "destructive",
         });
+        analytics.trackError(EventAction.API_ERROR, 'program_add_all_to_calendar_exception', { message: (error as Error)?.message });
       }
     }}
   >
@@ -147,7 +170,7 @@ const Program = () => {
         
         {/* Event type filter */}
         <div className="mb-4 fade-in">
-          <EventFilter onFilterChange={setCurrentFilter} currentFilter={currentFilter} />
+          <EventFilter onFilterChange={handleFilterChange} currentFilter={currentFilter} />
         </div>
         
         <div className="text-center mb-4 text-sm text-[#ff7a45] slide-in-bottom">
@@ -181,7 +204,8 @@ const Program = () => {
                       isSaved={savedEventIds.includes(event.id)}
                       onEventClick={() => {
                         setSelectedEvent(event);
-                        trackFeatureUsage.eventView(event.id, event.title);
+                        // Analytics: event view from list
+                        analytics.trackConcertView(event.id, event.title);
                       }}
                       onSaveClick={(e) => handleSaveEvent(event, e)}
                     />
@@ -206,7 +230,8 @@ const Program = () => {
                       isSaved={savedEventIds.includes(event.id)}
                       onEventClick={() => {
                         setSelectedEvent(event);
-                        trackFeatureUsage.eventView(event.id, event.title);
+                        // Analytics: event view from list
+                        analytics.trackConcertView(event.id, event.title);
                       }}
                       onSaveClick={(e) => handleSaveEvent(event, e)}
                     />

@@ -120,12 +120,24 @@ class AnalyticsService {
 
       // Préparer les propriétés de l'événement
       const eventName = `${category}_${action}`;
-      const eventParams = {
+      const eventParams: Record<string, any> = {
         event_category: category,
         event_action: action,
         timestamp: new Date().toISOString(),
         ...properties
       };
+
+      // Forcer l'affichage en DebugView si activé
+      try {
+        const urlHasDebug = typeof window !== 'undefined' && window.location.search.includes('firebase_debug=1');
+        const lsDebug = typeof window !== 'undefined' && localStorage.getItem('analytics_debug') === '1';
+        const debugEnabled = import.meta.env.DEV || urlHasDebug || lsDebug;
+        if (debugEnabled) {
+          eventParams.debug_mode = true;
+        }
+      } catch (_) {
+        // ignore
+      }
 
       // Envoyer l'événement à Firebase Analytics
       logEvent(analytics, eventName, eventParams);
@@ -263,6 +275,86 @@ class AnalyticsService {
         session_duration: sessionDuration
       });
     }
+  }
+
+  // ===== Domain-specific helpers =====
+  // Bâtiment (lieux)
+  trackBuildingView(buildingId: string, buildingName: string): void {
+    this.trackEvent(EventCategory.CONTENT, EventAction.VIEW, {
+      content_type: 'building',
+      building_id: buildingId,
+      building_name: buildingName
+    });
+  }
+
+  trackBuildingHistoryView(buildingId: string, sectionTitle: string): void {
+    this.trackEvent(EventCategory.CONTENT, EventAction.VIEW, {
+      content_type: 'building_history',
+      building_id: buildingId,
+      section_title: sectionTitle
+    });
+  }
+
+  // Artiste
+  trackArtistView(artistId: string, artistName: string): void {
+    this.trackEvent(EventCategory.CONTENT, EventAction.VIEW, {
+      content_type: 'artist',
+      artist_id: artistId,
+      artist_name: artistName
+    });
+  }
+
+  // Concert / Event du programme
+  trackConcertView(eventId: string, title: string, isoDate?: string): void {
+    this.trackEvent(EventCategory.PROGRAM, EventAction.EVENT_VIEW, {
+      event_id: eventId,
+      event_title: title,
+      event_date: isoDate
+    });
+  }
+
+  trackProgramCTA(action: 'open_program' | 'open_event_details' | 'add_to_calendar' | 'get_directions', eventId?: string): void {
+    this.trackEvent(EventCategory.PROGRAM, EventAction.CLICK, {
+      cta_action: action,
+      event_id: eventId
+    });
+  }
+
+  // Page dons / tunnel dons
+  trackDonationPageOpen(source: string): void {
+    this.trackEvent(EventCategory.DONATION, EventAction.VIEW, {
+      page: 'donation',
+      source
+    });
+  }
+
+  // Vidéo d'introduction
+  trackIntroVideo(action: 'start' | 'complete' | 'skip'): void {
+    const map: Record<string, EventAction> = {
+      start: EventAction.PLAY,
+      complete: EventAction.COMPLETE,
+      skip: EventAction.PAUSE
+    };
+    const resolved = map[action] || EventAction.PLAY;
+    this.trackEvent(EventCategory.MEDIA, resolved, {
+      media_type: 'intro_video'
+    });
+  }
+
+  // Contrôles audio (lecteur des histoires)
+  trackAudio(action: 'play' | 'pause' | 'seek' | 'volume_change', trackId: string, value?: number): void {
+    const actionMap: Record<string, EventAction> = {
+      play: EventAction.PLAY,
+      pause: EventAction.PAUSE,
+      seek: EventAction.SEEK,
+      volume_change: EventAction.VOLUME_CHANGE
+    };
+    const evt = actionMap[action] || EventAction.PLAY;
+    this.trackEvent(EventCategory.MEDIA, evt, {
+      media_type: 'audio',
+      media_id: trackId,
+      value
+    });
   }
 }
 

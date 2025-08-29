@@ -10,7 +10,7 @@ import { MapComponent, MAP_WIDTH, MAP_HEIGHT } from "@/components/MapComponent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SettingsToggle } from "@/components/SettingsToggle";
-import { trackFeatureUsage } from "../services/analytics";
+import { analytics, EventAction } from "@/services/firebaseAnalytics";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import X from "lucide-react/dist/esm/icons/x";
@@ -67,9 +67,20 @@ const Map = ({ fullScreen = false }: MapProps) => {
     // Force à false pour les tests sur le terrain
     return false;
   }, []);
+
+  // Tracker les changements de zoom de la carte
+  useEffect(() => {
+    analytics.trackInteraction(EventAction.ZOOM, 'map', { scale: mapScale });
+  }, [mapScale]);
   
   // Initialiser les données des lieux en incluant l'état de visite
   useEffect(() => {
+    // Page view + map load
+    analytics.trackPageView('/map', 'Carte');
+    analytics.trackMapInteraction(EventAction.MAP_LOAD, {
+      total_locations: locations.length
+    });
+
     // Essayer de charger les lieux avec leur état de visite depuis le localStorage
     const savedLocations = localStorage.getItem("mapLocations");
     if (savedLocations) {
@@ -122,6 +133,8 @@ const Map = ({ fullScreen = false }: MapProps) => {
       saveEvent(event);
       // Mettre à jour l'état local
       setSavedEventIds([...savedEventIds, event.id]);
+      // Analytics: sauvegarde
+      analytics.trackContentInteraction(EventAction.SAVE, 'event', event.id, { source: 'map' });
       
       // toast({
       //   title: "Événement sauvegardé",
@@ -134,6 +147,8 @@ const Map = ({ fullScreen = false }: MapProps) => {
       removeSavedEvent(event.id);
       // Mettre à jour l'état local
       setSavedEventIds(savedEventIds.filter(id => id !== event.id));
+      // Analytics: désactivation de la sauvegarde
+      analytics.trackContentInteraction(EventAction.UNSAVE, 'event', event.id, { source: 'map' });
       
       // toast({
       //   title: "Événement retiré",
@@ -234,6 +249,15 @@ const Map = ({ fullScreen = false }: MapProps) => {
     const eventsData = getEventsByLocationId(locationId);
     logger.debug(`Récupération des événements pour le lieu ${locationId} via getEventsByLocationId`, eventsData);
     logger.debug(`Événements trouvés pour ${locationId}`, eventsData);
+    // Analytics: vue de lieu depuis la carte
+    const loc = mapLocations.find(l => l.id === locationId);
+    if (loc) {
+      analytics.trackBuildingView(loc.id, loc.name);
+    }
+    analytics.trackMapInteraction(EventAction.LOCATION_VIEW, {
+      building_id: locationId,
+      from: 'map'
+    });
     
     // Toujours afficher d'abord les informations du lieu, jamais directement l'événement
     setSelectedEvent(null);
@@ -246,6 +270,8 @@ const Map = ({ fullScreen = false }: MapProps) => {
     
     setMapLocations(updatedLocations);
     localStorage.setItem('mapLocations', JSON.stringify(updatedLocations));
+    // Analytics: marquage visité
+    analytics.trackFeatureUse('location_mark_visited', { location_id: locationId, visited });
     
     // Conserver la mise en évidence du lieu même après l'avoir marqué comme visité
     // Cela permet à l'utilisateur de voir le lieu mis en évidence lorsqu'il revient à la carte
@@ -366,25 +392,30 @@ const Map = ({ fullScreen = false }: MapProps) => {
               setShowLocationFeatures(true);
               setLocationPermissionRequested(true);
               logger.info('Localisation activée manuellement par l\'utilisateur');
+              analytics.trackMapInteraction(EventAction.USER_LOCATION, { granted: true });
             }}
             onLocationDenied={() => {
               setPermissionDenied(true);
               setShowLocationFeatures(false);
               logger.warn('Localisation refusée par l\'utilisateur');
+              analytics.trackMapInteraction(EventAction.USER_LOCATION, { granted: false });
             }}
             onLocationDisabled={() => {
               setShowLocationFeatures(false);
               setNavigationTarget(null); // Arrêter la navigation en cours
               logger.info('Localisation désactivée manuellement par l\'utilisateur');
+              analytics.trackMapInteraction(EventAction.USER_LOCATION, { granted: false, disabled: true });
             }}
           />
           
           <AudioActivator 
             onAudioEnabled={() => {
               logger.info('Son activé manuellement par l\'utilisateur');
+              analytics.trackFeatureUse('map_sound_toggle', { enabled: true });
             }}
             onAudioDisabled={() => {
               logger.info('Son désactivé par l\'utilisateur');
+              analytics.trackFeatureUse('map_sound_toggle', { enabled: false });
             }}
           />
         </div>
@@ -402,10 +433,21 @@ const Map = ({ fullScreen = false }: MapProps) => {
                   const locationId = e.currentTarget.dataset.locationId || e.currentTarget.id.replace('location-', '');
                   if (locationId) {
                     handleLocationClick(locationId);
+                  } else {
+                    // Clic sur l'arrière-plan de la carte
+                    analytics.trackInteraction(EventAction.CLICK, 'map_background');
                   }
                 }}
                 readOnly={false}
                 onScaleChange={setMapScale}
+                onPanEnd={({ totalDx, totalDy, distance, durationMs }) => {
+                  analytics.trackMapInteraction(EventAction.DRAG, {
+                    total_dx: Math.round(totalDx),
+                    total_dy: Math.round(totalDy),
+                    distance: Math.round(distance),
+                    duration_ms: Math.round(durationMs)
+                  });
+                }}
                 userLocationProps={showLocationFeatures ? {
                   onLocationUpdate: handleLocationUpdate,
                   showNavigation: false,
@@ -453,7 +495,12 @@ const Map = ({ fullScreen = false }: MapProps) => {
               <h2 className="text-xl font-bold text-[#4a5d94]">
                 {mapLocations.find(l => l.id === activeLocation)?.name}
               </h2>
-              <Button variant="ghost" size="sm" className="-mt-2 -mr-2" onClick={() => setActiveLocation(null)}>
+              <Button variant="ghost" size="sm" className="-mt-2 -mr-2" onClick={() => {
+                if (activeLocation) {
+                  analytics.trackInteraction(EventAction.BACK, 'location_details_close', { building_id: activeLocation });
+                }
+                setActiveLocation(null);
+              }}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -475,6 +522,11 @@ const Map = ({ fullScreen = false }: MapProps) => {
                 // S'assurer que activeLocation est défini avant de naviguer
                 if (activeLocation) {
                   logger.info(`Navigation vers l'histoire du lieu: ${activeLocation}`);
+                  const loc = mapLocations.find(l => l.id === activeLocation);
+                  if (loc) {
+                    analytics.trackBuildingHistoryView(loc.id, 'from_map');
+                  }
+                  analytics.trackInteraction(EventAction.CLICK, 'history_button', { from: 'map', building_id: activeLocation });
                   navigate('/location-history', { 
                     state: { selectedLocationId: activeLocation }
                   });
@@ -499,7 +551,10 @@ const Map = ({ fullScreen = false }: MapProps) => {
                       className={`bg-[#f0f5ff] p-3 rounded-lg cursor-pointer hover:bg-[#e0ebff] transition-colors ${savedEventIds.includes(event.id) ? 'border-l-4 border-l-[#ff7a45]' : ''}`}
                     >
                       <div className="flex justify-between items-start">
-                        <div className="flex-1" onClick={() => setSelectedEvent(event)}>
+                        <div className="flex-1" onClick={() => {
+                          analytics.trackProgramInteraction(EventAction.EVENT_DETAILS, { event_id: event.id, source: 'map' });
+                          setSelectedEvent(event);
+                        }}>
                           <p className="font-medium text-[#1a2138]">{event.title}</p>
                           <div className="flex items-center mt-1">
                             <Calendar className="h-3 w-3 mr-1 text-[#8c9db5]" />
@@ -540,6 +595,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
                 onClick={() => {
                   // Fermer la vue détaillée mais conserver la mise en évidence du lieu
                   // Le lieu reste en surbrillance grâce à highlightedLocation qui n'est pas réinitialisé
+                  if (activeLocation) {
+                    analytics.trackInteraction(EventAction.BACK, 'location_details_back', { building_id: activeLocation });
+                  }
                   setActiveLocation(null);
                 }}
               >
@@ -558,6 +616,10 @@ const Map = ({ fullScreen = false }: MapProps) => {
                     if (activeLocation) {
                       setNavigationTarget(activeLocation);
                       setActiveLocation(null); // Fermer la vue détaillée
+                      analytics.trackMapInteraction(EventAction.ROUTE_CALCULATE, {
+                        building_id: activeLocation,
+                        has_user_position: !!userPosition
+                      });
                     }
                   }}
                 >

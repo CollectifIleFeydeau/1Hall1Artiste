@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { initEmailJS, checkAndSendErrors, setupGlobalErrorHandler } from "./services/errorTracking";
-import { initAnalytics, trackEvent, synchronizeWithEmailJS } from "./services/analyticsService";
 import { initFirebaseAnalytics } from "./services/firebaseConfig";
-import { analytics, trackPageView, EventCategory, EventAction } from "./services/firebaseAnalytics";
+import { analytics, EventAction } from "./services/firebaseAnalytics";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
 import { Celebration } from "./components/Celebration";
@@ -60,6 +59,7 @@ interface RouteConfig {
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const prevPathRef = useRef<string>(location.pathname);
   
   // État pour suivre si l'utilisateur a déjà vu l'onboarding
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(() => {
@@ -134,6 +134,16 @@ const AnimatedRoutes: React.FC = () => {
       console.log('[App] Aucune action de navigation nécessaire');
     }
   }, [hasSeenOnboarding, location.pathname, navigate, showSplash]);
+
+  // Track route changes for analytics
+  useEffect(() => {
+    const previousPath = prevPathRef.current;
+    const currentPath = location.pathname;
+    if (previousPath !== currentPath) {
+      analytics.trackRouteChange(previousPath, currentPath);
+      prevPathRef.current = currentPath;
+    }
+  }, [location.pathname]);
   
   // Marquer l'onboarding comme vu
   const handleOnboardingComplete = () => {
@@ -317,10 +327,6 @@ const App: React.FC = () => {
     setupGlobalErrorHandler();
     initEmailJS();
     
-    // Initialiser le service d'analyse (ancien système)
-    const metadata = initAnalytics();
-    console.log('[App] Service d\'analyse initialisé', metadata);
-    
     // Initialiser Firebase Analytics (nouveau système)
     initFirebaseAnalytics();
     console.log('[App] Firebase Analytics initialisé');
@@ -328,8 +334,8 @@ const App: React.FC = () => {
     // Démarrer une nouvelle session analytics
     analytics.startSession();
     
-    // Suivre l'événement de démarrage de l'application
-    trackEvent('app_start', {
+    // Suivre l'événement de démarrage de l'application (Firebase)
+    analytics.trackFeatureUse('app_start', {
       timestamp: new Date().toISOString(),
       referrer: document.referrer || 'direct'
     });
@@ -338,7 +344,6 @@ const App: React.FC = () => {
     // Synchroniser également les données d'analyse
     const errorCheckInterval = setInterval(() => {
       checkAndSendErrors();
-      synchronizeWithEmailJS();
     }, 30 * 60 * 1000);
     
     // Vérifier et envoyer les erreurs stockées
@@ -357,6 +362,64 @@ const App: React.FC = () => {
     return () => {
       analytics.endSession();
     };
+  }, []);
+
+  // First-load performance metrics
+  useEffect(() => {
+    try {
+      // Load time (Navigation Timing)
+      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      if (navEntries && navEntries.length > 0) {
+        const nav = navEntries[0];
+        const loadTime = nav.loadEventEnd - nav.startTime;
+        if (isFinite(loadTime) && loadTime >= 0) {
+          analytics.trackPerformance(EventAction.LOAD_TIME, Math.round(loadTime));
+        }
+      } else if ((performance as any).timing) {
+        const t = (performance as any).timing as PerformanceTiming;
+        const loadTime = t.loadEventEnd - t.navigationStart;
+        if (isFinite(loadTime) && loadTime >= 0) {
+          analytics.trackPerformance(EventAction.LOAD_TIME, Math.round(loadTime));
+        }
+      }
+
+      // FP & FCP
+      if ('PerformanceObserver' in window) {
+        const paintObserver = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            const name = (entry as any).name;
+            if (name === 'first-paint') {
+              analytics.trackPerformance(EventAction.FIRST_PAINT, Math.round(entry.startTime));
+            } else if (name === 'first-contentful-paint') {
+              analytics.trackPerformance(EventAction.FIRST_CONTENTFUL_PAINT, Math.round(entry.startTime));
+            }
+          }
+        });
+        try {
+          paintObserver.observe({ type: 'paint', buffered: true } as PerformanceObserverInit);
+        } catch (_) { /* noop */ }
+
+        // FID
+        const fidObserver = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as PerformanceEventTiming[]) {
+            const fid = entry.processingStart - entry.startTime;
+            if (isFinite(fid) && fid >= 0) {
+              analytics.trackPerformance(EventAction.FIRST_INPUT_DELAY, Math.round(fid), {
+                name: entry.name,
+                duration: Math.round(entry.duration)
+              });
+            }
+          }
+        });
+        try {
+          fidObserver.observe({ type: 'first-input', buffered: true } as PerformanceObserverInit);
+        } catch (_) { /* noop */ }
+      }
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn('[Perf] metrics collection failed', err);
+      }
+    }
   }, []);
 
   // Fonction pour réinitialiser l'onboarding

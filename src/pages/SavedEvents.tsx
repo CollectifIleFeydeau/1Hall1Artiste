@@ -20,6 +20,7 @@ import { Event } from "@/data/events";
 import { addToCalendar, isCalendarSupported, CalendarErrorType } from "@/services/calendarService";
 import { createLogger } from "@/utils/logger";
 import { toast } from "@/components/ui/use-toast";
+import { analytics, EventAction } from "@/services/firebaseAnalytics";
 
 // Créer un logger pour la page des événements sauvegardés
 const logger = createLogger('SavedEvents');
@@ -49,6 +50,9 @@ export default function SavedEvents() {
     
     // Toujours activer le support calendrier
     setCalendarSupported(true);
+    
+    // Analytics: page view
+    analytics.trackPageView("/saved", "Événements enregistrés");
     
     // Vérifier si des réalisations ont été débloquées récemment
     // et si la célébration n'a pas encore été montrée
@@ -80,6 +84,8 @@ export default function SavedEvents() {
   const handleRemoveEvent = (eventId: string) => {
     const updatedEvents = removeSavedEvent(eventId);
     setSavedEvents(updatedEvents);
+    // Analytics: unsave
+    analytics.trackContentInteraction(EventAction.UNSAVE, "event", eventId, { source: "saved" });
   };
 
   const handleSetNotification = (eventId: string) => {
@@ -91,6 +97,8 @@ export default function SavedEvents() {
     setActiveEvent(null);
     setNotificationDate("");
     setNotificationTime("");
+    // Analytics: reminder set
+    analytics.trackProgramInteraction(EventAction.EVENT_REMINDER, { event_id: eventId, reminder_at: notificationDateTime.toISOString(), source: "saved" });
   };
   
   // Fonction pour ajouter un événement au calendrier
@@ -107,6 +115,8 @@ export default function SavedEvents() {
           variant: "default"
         });
         logger.info("Ajout au calendrier réussi", { eventId: event.id });
+        // Analytics: add to calendar success
+        analytics.trackProgramInteraction(EventAction.CLICK, { cta_action: "add_to_calendar", event_id: event.id, success: true, source: "saved" });
       } else {
         let errorMessage = "Une erreur est survenue lors de l'ajout au calendrier";
         
@@ -126,6 +136,8 @@ export default function SavedEvents() {
           errorType: result.errorType,
           errorMessage: result.errorMessage
         });
+        // Analytics: add to calendar failure
+        analytics.trackProgramInteraction(EventAction.CLICK, { cta_action: "add_to_calendar", event_id: event.id, success: false, error_type: result.errorType, source: "saved" });
       }
     } catch (error) {
       toast({
@@ -134,6 +146,8 @@ export default function SavedEvents() {
         variant: "destructive"
       });
       logger.error("Exception lors de l'ajout au calendrier", { error });
+      // Analytics: add to calendar exception
+      analytics.trackProgramInteraction(EventAction.CLICK, { cta_action: "add_to_calendar", event_id: event.id, success: false, exception: true, source: "saved" });
     }
   };
 
@@ -163,7 +177,7 @@ export default function SavedEvents() {
       
       <div className="max-w-md mx-auto px-4 pt-4">
         <header className="mb-4 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+          <Button variant="ghost" size="sm" onClick={() => { analytics.trackInteraction(EventAction.BACK, "button", { from: "saved_events" }); navigate("/"); }}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -242,6 +256,8 @@ export default function SavedEvents() {
                           // Ouvrir directement les détails de l'événement
                           setEventDetailsOpen(true);
                           setSelectedEvent(event);
+                          // Analytics: open event details
+                          analytics.trackProgramInteraction(EventAction.EVENT_DETAILS, { event_id: event.id, source: "saved" });
                         }}
                       >
                         <Info className="h-3 w-3 mr-1" />
