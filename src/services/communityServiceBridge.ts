@@ -13,6 +13,8 @@ export {
   deleteCommunityEntry 
 } from './cloudinaryService';
 
+// Export des fonctions locales définies ci-dessous
+
 // Fonctions utilitaires conservées pour compatibilité
 export function getStoredEntries(): CommunityEntry[] {
   try {
@@ -74,3 +76,6 @@ export async function restoreEntry(entryId: string): Promise<void> {
   saveEntries(updatedEntries);
   console.log(`[CommunityService] Entrée ${entryId} restaurée`);
 }
+
+// Alias pour compatibilité avec CommunityManagement
+export const restoreCommunityEntry = restoreEntry;

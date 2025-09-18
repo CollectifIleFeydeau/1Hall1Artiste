@@ -16,6 +16,15 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
   try {
     console.log('[CloudinaryService] 🚀 Récupération instantanée depuis Cloudinary !');
     
+    // 🗑️ TABLE RASE : Effacer toutes les anciennes contributions au premier chargement
+    const isFirstLoad = !localStorage.getItem('cloudinary_revolution_started');
+    if (isFirstLoad) {
+      console.log('[CloudinaryService] 🗑️ RÉVOLUTION : Première utilisation, nettoyage des anciennes données');
+      localStorage.removeItem('community_entries');
+      localStorage.setItem('cloudinary_revolution_started', 'true');
+      console.log('[CloudinaryService] ✅ TABLE RASE terminée ! Nouveau système activé !');
+    }
+    
     // Recherche toutes les photos communautaires
     const searchUrl = `${CLOUDINARY_API_URL}/resources/search`;
     
@@ -33,8 +42,8 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
     });
 
     if (!response.ok) {
-      console.log('[CloudinaryService] API non disponible, fallback localStorage');
-      return JSON.parse(localStorage.getItem('community_entries') || '[]');
+      console.log('[CloudinaryService] 🚀 RÉVOLUTION : Cloudinary non disponible, démarrage avec zéro photo !');
+      return []; // TABLE RASE : Commencer avec zéro photo !
     }
 
     const data = await response.json();
@@ -66,15 +75,24 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
         };
       });
 
-    // Cache local pour performance
-    localStorage.setItem('community_entries', JSON.stringify(entries));
+    console.log(`[CloudinaryService] 🎉 RÉVOLUTION : ${entries.length} photos Cloudinary pures !`);
     
     return entries;
     
   } catch (error) {
     console.error('[CloudinaryService] Erreur:', error);
-    return JSON.parse(localStorage.getItem('community_entries') || '[]');
+    console.log('[CloudinaryService] 🚀 RÉVOLUTION : Erreur Cloudinary, démarrage avec zéro photo !');
+    return []; // TABLE RASE : En cas d'erreur, commencer avec zéro !
   }
+}
+
+/**
+ * 🗑️ RÉVOLUTION : Effacer toutes les anciennes contributions
+ */
+export function clearAllContributions(): void {
+  console.log('[CloudinaryService] 🗑️ TABLE RASE : Suppression de toutes les contributions !');
+  localStorage.removeItem('community_entries');
+  console.log('[CloudinaryService] ✅ Toutes les contributions supprimées ! Nouveau départ !');
 }
 
 /**
