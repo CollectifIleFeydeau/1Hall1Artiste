@@ -6,8 +6,75 @@
 // Importer les types nécessaires
 import { CommunityEntry, SubmissionParams, ModerationResult, ModerationStatus } from "../types/communityTypes";
 
+// Configuration Cloudinary pur - RÉVOLUTION !
+const CLOUDINARY_CLOUD_NAME = 'dpatqkgsc';
+const CLOUDINARY_API_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}`;
+
 // URL du Worker Cloudflare qui sert de proxy pour les requêtes POST à l'API GitHub
 const WORKER_URL = 'https://github-contribution-proxy.collectifilefeydeau.workers.dev';
+
+/**
+ * RÉVOLUTION : Récupère les photos directement depuis Cloudinary
+ */
+async function fetchFromCloudinary(): Promise<CommunityEntry[]> {
+  try {
+    console.log('[CommunityService] 🚀 RÉVOLUTION : Récupération depuis Cloudinary pur !');
+    
+    // Utiliser l'API Cloudinary Search pour récupérer toutes les photos communautaires
+    const searchUrl = `${CLOUDINARY_API_URL}/resources/search`;
+    
+    const response = await fetch(searchUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        expression: 'folder:collectif_photos',
+        with_field: ['context', 'created_at'],
+        sort_by: [['created_at', 'desc']],
+        max_results: 100
+      })
+    });
+
+    if (!response.ok) {
+      console.log('[CommunityService] Cloudinary API non disponible, fallback sur localStorage');
+      return getStoredEntries();
+    }
+
+    const data = await response.json();
+    console.log(`[CommunityService] ✅ ${data.resources?.length || 0} photos récupérées depuis Cloudinary`);
+
+    // Convertir les ressources Cloudinary en CommunityEntry
+    const entries: CommunityEntry[] = (data.resources || []).map((resource: any) => {
+      const context = resource.context || {};
+      return {
+        id: resource.public_id,
+        type: 'photo',
+        displayName: context.displayName || 'Anonyme',
+        content: context.content || '',
+        imageUrl: resource.secure_url,
+        thumbnailUrl: resource.secure_url,
+        description: context.description || '',
+        createdAt: resource.created_at,
+        timestamp: resource.created_at,
+        moderation: {
+          status: (context.moderation_status || 'approved') as ModerationStatus,
+          moderatedAt: context.moderated_at || resource.created_at
+        }
+      };
+    });
+
+    // Sauvegarder dans localStorage pour le cache
+    saveEntries(entries);
+    
+    return entries;
+    
+  } catch (error) {
+    console.error('[CommunityService] Erreur Cloudinary:', error);
+    console.log('[CommunityService] Fallback sur localStorage');
+    return getStoredEntries();
+  }
+}
 
 // Fonction utilitaire pour obtenir le chemin de base en fonction de l'environnement
 const getBasePathInternal = () => {
@@ -112,75 +179,19 @@ function cleanupTemporaryContributions(localEntries: CommunityEntry[], serverEnt
   });
 }
 
+/**
+ * RÉVOLUTION : Récupère les photos directement depuis Cloudinary !
+ */
 export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
   try {
-    const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
-    const useAPI = (typeof process !== 'undefined' && process.env.VITE_USE_API === 'true');
-    const isProduction = (typeof process !== 'undefined' && process.env.NODE_ENV === 'production');
+    console.log('[CommunityService] 🚀 RÉVOLUTION : Cloudinary pur activé !');
     
-    console.log(`[CommunityService] Environment check:`, {
-      isGitHubPages,
-      useAPI,
-      isProduction,
-      hostname: typeof window !== 'undefined' ? window.location.hostname : 'undefined',
-      BASE_URL_INTERNAL
-    });
+    // Nouveau système : Cloudinary pur !
+    return await fetchFromCloudinary();
     
-    // En production, sur GitHub Pages, ou si l'API est explicitement activée
-    if (isGitHubPages || isProduction || useAPI) {
-      
-      console.log(`[CommunityService] Récupération des entrées depuis l'API GitHub`);
-      console.log(`[CommunityService] URL complète: ${BASE_URL_INTERNAL}/entries.json`);
-      
-      // Récupérer les données depuis le fichier JSON sur GitHub
-      const response = await fetch(`${BASE_URL_INTERNAL}/entries.json`);
-      
-      if (!response.ok) {
-        console.warn(`[CommunityService] Erreur HTTP ${response.status}, utilisation des données locales`);
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Le fichier peut contenir un objet avec une propriété 'entries' ou être un tableau direct
-      const entries = Array.isArray(data) ? data : (data.entries || []);
-      
-      console.log(`[CommunityService] ${entries.length} entrées récupérées depuis GitHub`);
-      console.log(`[CommunityService] Dernière mise à jour:`, data.lastUpdated || 'Non disponible');
-      
-      // Récupérer les entrées locales pour vérifier les contributions temporaires
-      const localEntries = getStoredEntries();
-      
-      // Nettoyer les contributions temporaires qui sont maintenant synchronisées
-      const cleanedLocalEntries = cleanupTemporaryContributions(localEntries, entries);
-      
-      // Fusionner les entrées du serveur avec les contributions temporaires nettoyées
-      // Éviter les doublons en créant un Set des IDs du serveur
-      const serverIds = new Set(entries.map(entry => entry.id));
-      
-      const mergedEntries = [
-        ...entries, // Entrées officielles du serveur
-        ...cleanedLocalEntries.filter(local => 
-          local.isTemporary && !serverIds.has(local.id)
-        ) // Contributions temporaires pas encore synchronisées
-      ];
-      
-      console.log(`[CommunityService] Fusion: ${entries.length} serveur + ${cleanedLocalEntries.filter(l => l.isTemporary && !serverIds.has(l.id)).length} temporaires = ${mergedEntries.length} total`);
-      
-      // Sauvegarder les entrées fusionnées dans le stockage local
-      saveEntries(mergedEntries);
-      
-      return mergedEntries;
-    }
-    
-    // En développement local, utiliser les données stockées localement
-    console.log(`[CommunityService] Mode développement local: utilisation des données locales`);
-    return getStoredEntries();
   } catch (error) {
-    console.error('Erreur lors de la récupération des entrées:', error);
-    
-    // En cas d'erreur, utiliser les données stockées localement
-    console.log(`[CommunityService] Erreur, utilisation des données locales de secours`);
+    console.error('[CommunityService] Erreur système Cloudinary:', error);
+    console.log('[CommunityService] Fallback sur localStorage');
     return getStoredEntries();
   }
 }
