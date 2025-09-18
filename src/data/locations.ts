@@ -1,4 +1,3 @@
-
 // Locations data for the map
 export type Location = {
   id: string;
@@ -197,6 +196,7 @@ export const locations: Location[] = [
     description: "Mur Le Chat Noir jusqu'à rue Kervégan. Située sur l'Île Feydeau, cette rue piétonne relie la rue Kervégan à l'allée Duguay Trouin. Elle est caractérisée par son architecture du XVIIIe siècle et abrite aujourd'hui des espaces d'exposition temporaires.",
     audio: "/audio/rue-duguayclin.mp3",
     history: "Cette rue piétonne de l'Île Feydeau porte le nom de Bertrand du Guesclin, connétable de France au XIVe siècle. Elle fait partie du lotissement original de l'Île, conçu au XVIIIe siècle. Aujourd'hui, elle accueille des expositions temporaires qui animent ce passage historique entre la rue Kervégan et l'allée Duguay Trouin.",
+    hasProgram: false,
     visited: false,
     gps: {
       latitude: 47.21299917260203,

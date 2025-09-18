@@ -518,11 +518,15 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                   {artist.photos.map((photo, index) => (
                     <div key={index} className="relative pb-[75%] overflow-hidden rounded-lg">
-                      <AppImage 
-                        src={photo} 
+                      <img 
+                        src={getImagePath(photo)} 
                         alt={`${event.artistName} - photo ${index + 1}`}
                         className="absolute top-0 left-0 object-cover w-full h-full"
-                        lazyLoad={true}
+                        loading="lazy"
+                        onError={(e) => {
+                          console.error(`Erreur de chargement de l'image: ${photo}`);
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   ))}
