@@ -99,11 +99,13 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
         };
         reader.readAsDataURL(file);
 
-        // Upload vers Cloudinary
+        // 🌩️ CLOUDINARY: Upload vers Cloudinary (système principal de gestion d'images)
+        // Account: dpatqkgsc | Preset: collectif_photos
+        // Cloudinary gère automatiquement l'optimisation et le redimensionnement
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'collectif_photos');
-        formData.append('cloud_name', 'dpatqkgsc');
+        formData.append('upload_preset', 'collectif_photos'); // Preset configuré dans Cloudinary
+        formData.append('cloud_name', 'dpatqkgsc'); // Nom du compte Cloudinary
 
         console.log('[ContributionForm] Requête Cloudinary:', {
           url: 'https://api.cloudinary.com/v1_1/dpatqkgsc/image/upload',
@@ -128,7 +130,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
           
           if (data.secure_url) {
             console.log('[ContributionForm] Upload Cloudinary réussi:', data.secure_url);
-            // Stocker l'URL Cloudinary pour la soumission
+            // 🌩️ CLOUDINARY: Stocker l'URL sécurisée pour la soumission
+            // Cette URL sera envoyée au Worker puis stockée dans GitHub Issues
             setValue('cloudinaryUrl', data.secure_url);
             // Analytics: image upload success
             analytics.trackCommunityInteraction(EventAction.UPLOAD, { type: 'image', success: true, size: file.size, mime: file.type });
