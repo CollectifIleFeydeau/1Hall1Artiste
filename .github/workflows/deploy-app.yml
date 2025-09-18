@@ -44,7 +44,7 @@ jobs:
           fi
       
       - name: Sync community data (data-only)
-        if: env.DEPLOY_TYPE == 'data-only'
+        if: github.event_name == 'repository_dispatch' && github.event.action == 'community-updated'
         run: |
           echo "🔄 Fast community data update..."
           
@@ -67,7 +67,7 @@ jobs:
           echo "⚡ Community data updated instantly!"
       
       - name: Full build and deploy
-        if: env.DEPLOY_TYPE == 'full-build'
+        if: github.event_name != 'repository_dispatch' || github.event.action != 'community-updated'
         run: |
           echo "🔄 Full application build..."
           
@@ -82,7 +82,7 @@ jobs:
           echo "✅ Full build completed"
       
       - name: Deploy to GitHub Pages (full build)
-        if: env.DEPLOY_TYPE == 'full-build'
+        if: github.event_name != 'repository_dispatch' || github.event.action != 'community-updated'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
