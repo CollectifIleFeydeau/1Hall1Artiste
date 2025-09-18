@@ -101,12 +101,11 @@ const AnimatedRoutes: React.FC = () => {
   // Gérer la fin de l'écran d'accueil
   const handleSplashComplete = () => {
     setShowSplash(false);
-    // Si c'est la première visite, aller à l'onboarding, sinon à la carte
+    // Si c'est la première visite, aller à l'onboarding
     if (!hasSeenOnboarding) {
       navigate('/onboarding');
-    } else {
-      navigate('/map');
     }
+    // Sinon, rester sur la page actuelle (ne pas forcer la redirection vers /map)
   };
   
   // Vérifier si c'est la première visite

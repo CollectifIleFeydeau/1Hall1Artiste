@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import X from "lucide-react/dist/esm/icons/x";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -13,10 +15,13 @@ import { LocalImage } from "./LocalImage";
 
 interface EntryDetailProps {
   entry: CommunityEntry;
+  entries: CommunityEntry[];
+  currentIndex: number;
   onClose: () => void;
+  onNavigate: (index: number) => void;
 }
 
-export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, onClose }) => {
+export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, currentIndex, onClose, onNavigate }) => {
   // Empêcher le défilement du corps lorsque le modal est ouvert
   React.useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -24,6 +29,38 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, onClose }) => {
       document.body.style.overflow = "auto";
     };
   }, []);
+
+  // Logique de navigation
+  const canGoPrevious = currentIndex > 0;
+  const canGoNext = currentIndex < entries.length - 1;
+
+  const handlePrevious = () => {
+    if (canGoPrevious) {
+      onNavigate(currentIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (canGoNext) {
+      onNavigate(currentIndex + 1);
+    }
+  };
+
+  // Gestion des touches clavier
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft' && canGoPrevious) {
+        handlePrevious();
+      } else if (event.key === 'ArrowRight' && canGoNext) {
+        handleNext();
+      } else if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [canGoPrevious, canGoNext, onClose]);
 
   // Animation pour le modal
   const overlayVariants = {
@@ -62,9 +99,37 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, onClose }) => {
                 {format(new Date(entry.timestamp), "d MMMM yyyy", { locale: fr })}
               </span>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X size={18} />
-            </Button>
+            <div className="flex items-center gap-1">
+              {/* Indicateur de position */}
+              <span className="text-xs text-slate-400 mr-2">
+                {currentIndex + 1} / {entries.length}
+              </span>
+              
+              {/* Boutons de navigation */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handlePrevious}
+                disabled={!canGoPrevious}
+                className="h-8 w-8"
+              >
+                <ChevronLeft size={16} />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleNext}
+                disabled={!canGoNext}
+                className="h-8 w-8"
+              >
+                <ChevronRight size={16} />
+              </Button>
+              
+              {/* Bouton fermer */}
+              <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+                <X size={16} />
+              </Button>
+            </div>
           </div>
 
           {/* Contenu */}

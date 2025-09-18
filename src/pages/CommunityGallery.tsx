@@ -32,6 +32,7 @@ const CommunityGallery: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"gallery" | "contribute">("gallery");
   const [selectedEntry, setSelectedEntry] = useState<CommunityEntry | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [filter, setFilter] = useState<EntryType | "all">("all");
   
   // Vérifier si un onglet est spécifié dans l'URL
@@ -169,7 +170,12 @@ const CommunityGallery: React.FC = () => {
                 {filteredEntries.length > 0 ? (
                   <GalleryGrid 
                     entries={filteredEntries} 
-                    onEntryClick={(entry) => { analytics.trackCommunityInteraction(EventAction.VIEW, { content_type: 'entry', entry_id: entry.id }); setSelectedEntry(entry); }}
+                    onEntryClick={(entry) => { 
+                      const index = filteredEntries.findIndex(e => e.id === entry.id);
+                      setSelectedIndex(index);
+                      setSelectedEntry(entry);
+                      analytics.trackCommunityInteraction(EventAction.VIEW, { content_type: 'entry', entry_id: entry.id });
+                    }}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -190,8 +196,14 @@ const CommunityGallery: React.FC = () => {
       {/* Modal de détail d'une entrée */}
       {selectedEntry && (
         <EntryDetail 
-          entry={selectedEntry} 
+          entry={selectedEntry}
+          entries={filteredEntries}
+          currentIndex={selectedIndex}
           onClose={() => setSelectedEntry(null)}
+          onNavigate={(index) => {
+            setSelectedIndex(index);
+            setSelectedEntry(filteredEntries[index]);
+          }}
         />
       )}
       
