@@ -28,13 +28,21 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
+  console.log(`[LazyImage] Initialisation: ${src}, priority: ${priority}, isInView: ${isInView}`);
+
   // Intersection Observer pour détecter quand l'image entre dans le viewport
   useEffect(() => {
-    if (priority) return; // Skip observer si priority=true
+    if (priority) {
+      console.log(`[LazyImage] Priority image, skip observer: ${src}`);
+      return; // Skip observer si priority=true
+    }
+
+    console.log(`[LazyImage] Setting up observer for: ${src}`);
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          console.log(`[LazyImage] Observer callback: ${src}, isIntersecting: ${entry.isIntersecting}`);
           if (entry.isIntersecting) {
             setIsInView(true);
             observer.unobserve(entry.target);
@@ -50,6 +58,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     observerRef.current = observer;
 
     if (imgRef.current) {
+      console.log(`[LazyImage] Observing element: ${src}`);
       observer.observe(imgRef.current);
     }
 
@@ -58,20 +67,24 @@ export const LazyImage: React.FC<LazyImageProps> = ({
         observerRef.current.disconnect();
       }
     };
-  }, [priority]);
+  }, [priority, src]);
 
   const handleLoad = () => {
+    console.log(`[LazyImage] Image loaded: ${src}`);
     setIsLoaded(true);
     onLoad?.();
   };
 
   const handleError = (error: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error(`[LazyImage] Image error: ${src}`, error);
     setHasError(true);
     onError?.(error.nativeEvent);
   };
 
   // Placeholder blur par défaut (base64 1x1 pixel gris)
   const defaultBlurDataURL = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q==';
+
+  console.log(`[LazyImage] Render state: isInView=${isInView}, isLoaded=${isLoaded}, hasError=${hasError}`);
 
   return (
     <div 

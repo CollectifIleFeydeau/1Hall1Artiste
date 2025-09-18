@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import { Button } from "@/components/ui/button";
-import { LazyImage } from "@/components/ui/LazyImage";
 import { AnimatedPageTransition } from "@/components/AnimatedPageTransition";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
 
@@ -186,8 +185,20 @@ const HistoricalGallery: React.FC = () => {
   };
 
   const handlers = useSwipeable({
-    onSwipedLeft: () => navigatePhoto('next'),
-    onSwipedRight: () => navigatePhoto('prev'),
+    onSwipedLeft: () => {
+      if (selectedPhoto) {
+        navigatePhoto('next');
+      }
+    },
+    onSwipedRight: () => {
+      if (selectedPhoto) {
+        navigatePhoto('prev');
+      }
+    },
+    trackMouse: true, // Permet le swipe avec la souris sur desktop
+    preventScrollOnSwipe: true, // Empêche le scroll pendant le swipe
+    delta: 50, // Distance minimum pour déclencher le swipe (50px)
+    swipeDuration: 500, // Durée maximum du swipe (500ms)
   });
 
   return (
@@ -237,11 +248,26 @@ const HistoricalGallery: React.FC = () => {
                   className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
                   onClick={() => openPhotoModal(photo, index)}
                 >
-                  <LazyImage 
+                  <img
                     src={photo.path} 
                     alt={`Photo historique ${index + 1}`}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    onError={() => handleImageError(index)}
+                    loading={index < 8 ? "eager" : "lazy"} // Native lazy loading
+                    onLoad={() => {
+                      setPhotos(prev => prev.map(p => 
+                        p.id === photo.id ? { ...p, loaded: true } : p
+                      ));
+                    }}
+                    onError={(e) => {
+                      console.warn(`Erreur chargement image ${photo.path}`);
+                      // Si l'image .jpg ne charge pas, essayer avec .png
+                      const target = e.target as HTMLImageElement;
+                      if (target.src.endsWith('.jpg')) {
+                        target.src = target.src.replace('.jpg', '.png');
+                      } else if (target.src.endsWith('.png')) {
+                        target.src = target.src.replace('.png', '.jpeg');
+                      }
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
                     <span className="text-white text-xs font-medium">

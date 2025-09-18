@@ -45,6 +45,7 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
                 src={entry.thumbnailUrl || entry.imageUrl}
                 alt={entry.description || "Photo communautaire"}
                 className="w-full h-full object-cover"
+                priority={index < 6} // Charger immédiatement les 6 premières images
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
