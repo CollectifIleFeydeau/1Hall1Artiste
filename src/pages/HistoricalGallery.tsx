@@ -16,6 +16,7 @@ const HistoricalGallery: React.FC = () => {
   const navigate = useNavigate();
   const [photos, setPhotos] = useState<HistoricalPhoto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 165 });
   const [selectedPhoto, setSelectedPhoto] = useState<HistoricalPhoto | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
@@ -30,40 +31,57 @@ const HistoricalGallery: React.FC = () => {
         ? '/1Hall1Artiste/images/historical'
         : '/images/historical';
       
-      // Extensions possibles (ordre de priorité)
-      const extensions = ['jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG', 'webp', 'WEBP'];
+      // Extensions par ordre de probabilité (optimisation)
+      const extensions = ['jpg', 'JPEG', 'jpeg', 'JPG', 'png', 'PNG'];
       
-      // Fonction pour tester si une image existe
+      // Cache des extensions trouvées pour optimiser les recherches suivantes
+      const extensionStats: { [key: string]: number } = {};
+      
+      // Fonction optimisée pour tester si une image existe
       const testImageExists = async (url: string): Promise<boolean> => {
         return new Promise((resolve) => {
           const img = new Image();
-          img.onload = () => resolve(true);
-          img.onerror = () => resolve(false);
-          img.src = url;
+          const timeout = setTimeout(() => resolve(false), 500); // Réduire timeout à 500ms
           
-          // Timeout après 2 secondes
-          setTimeout(() => resolve(false), 2000);
+          img.onload = () => {
+            clearTimeout(timeout);
+            resolve(true);
+          };
+          img.onerror = () => {
+            clearTimeout(timeout);
+            resolve(false);
+          };
+          
+          img.src = url;
         });
       };
       
-      // Chercher les photos de 1 à 200 (extensible automatiquement)
-      const maxPhotos = 200; // Augmentez ce nombre si vous avez plus de photos
+      // Chercher les photos de 1 à 165 (nombre réel d'images)
+      const maxPhotos = 165; // Réduire la plage de recherche
       
-      console.log(`[HistoricalGallery] Recherche de photos (1 à ${maxPhotos})...`);
+      console.log(`[HistoricalGallery] Recherche optimisée de photos (1 à ${maxPhotos})...`);
       
-      // Traitement par batch pour éviter de surcharger le navigateur
-      const batchSize = 10;
+      // Traitement par batch plus petit pour un feedback plus rapide
+      const batchSize = 5;
       for (let start = 1; start <= maxPhotos; start += batchSize) {
         const batch = [];
         
         for (let i = start; i < Math.min(start + batchSize, maxPhotos + 1); i++) {
-          // Tester chaque extension pour cette photo
+          // Tester chaque extension pour cette photo avec ordre optimisé
           const photoPromise = (async () => {
-            for (const ext of extensions) {
+            // Réorganiser les extensions selon les statistiques
+            const sortedExtensions = [...extensions].sort((a, b) => 
+              (extensionStats[b] || 0) - (extensionStats[a] || 0)
+            );
+            
+            for (const ext of sortedExtensions) {
               const photoPath = `${basePath}/photos-${i}.${ext}`;
               const exists = await testImageExists(photoPath);
               
               if (exists) {
+                // Mettre à jour les statistiques pour optimiser les prochaines recherches
+                extensionStats[ext] = (extensionStats[ext] || 0) + 1;
+                
                 console.log(`[HistoricalGallery] Photo trouvée: photos-${i}.${ext}`);
                 return {
                   id: `photos-${i}`,
@@ -88,8 +106,13 @@ const HistoricalGallery: React.FC = () => {
           }
         });
         
-        // Petite pause entre les batches
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Feedback de progression
+        const currentProgress = Math.min(start + batchSize - 1, maxPhotos);
+        setLoadingProgress({ current: currentProgress, total: maxPhotos });
+        console.log(`[HistoricalGallery] Progression: ${currentProgress}/${maxPhotos} (${photoList.length} trouvées)`);
+        
+        // Pause plus courte entre les batches
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
       
       // Trier par numéro pour avoir l'ordre correct
@@ -99,7 +122,13 @@ const HistoricalGallery: React.FC = () => {
         return numA - numB;
       });
       
-      console.log(`[HistoricalGallery] ${photoList.length} photos historiques trouvées`);
+      console.log(`[HistoricalGallery] ${photoList.length} photos trouvées en ${extensions.length} extensions testées`);
+      console.log(`[HistoricalGallery] Extensions les plus fréquentes:`, 
+        Object.entries(extensionStats)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 3)
+      );
+      
       setPhotos(photoList);
       setLoading(false);
       
@@ -293,8 +322,23 @@ const HistoricalGallery: React.FC = () => {
         {/* Contenu principal */}
         <div className="container mx-auto px-4 py-6">
           {loading ? (
-            <div className="flex items-center justify-center min-h-96">
+            <div className="flex flex-col items-center justify-center min-h-96 space-y-4">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+              <div className="text-center">
+                <p className="text-lg font-medium text-gray-700">Détection automatique des photos...</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {loadingProgress.current} / {loadingProgress.total} photos analysées
+                </p>
+                <div className="w-64 bg-gray-200 rounded-full h-2 mt-3">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${(loadingProgress.current / loadingProgress.total) * 100}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  {Math.round((loadingProgress.current / loadingProgress.total) * 100)}% terminé
+                </p>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -312,7 +356,7 @@ const HistoricalGallery: React.FC = () => {
                     src={photo.path} 
                     alt={`Photo historique ${index + 1}`}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    loading={index < 8 ? "eager" : "lazy"} // Native lazy loading
+                    loading={index < 12 ? "eager" : "lazy"} // Charger immédiatement les 12 premières (2 rangées)
                     onLoad={() => {
                       setPhotos(prev => prev.map(p => 
                         p.id === photo.id ? { ...p, loaded: true } : p
@@ -320,12 +364,14 @@ const HistoricalGallery: React.FC = () => {
                     }}
                     onError={(e) => {
                       console.warn(`Erreur chargement image ${photo.path}`);
-                      // Si l'image .jpg ne charge pas, essayer avec .png
+                      // Fallback intelligent basé sur les extensions trouvées
                       const target = e.target as HTMLImageElement;
                       if (target.src.endsWith('.jpg')) {
-                        target.src = target.src.replace('.jpg', '.png');
+                        target.src = target.src.replace('.jpg', '.JPEG');
+                      } else if (target.src.endsWith('.JPEG')) {
+                        target.src = target.src.replace('.JPEG', '.png');
                       } else if (target.src.endsWith('.png')) {
-                        target.src = target.src.replace('.png', '.jpeg');
+                        target.src = target.src.replace('.png', '.PNG');
                       }
                     }}
                   />
