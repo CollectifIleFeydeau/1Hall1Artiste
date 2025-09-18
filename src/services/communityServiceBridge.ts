@@ -155,12 +155,17 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
       const cleanedLocalEntries = cleanupTemporaryContributions(localEntries, entries);
       
       // Fusionner les entrées du serveur avec les contributions temporaires nettoyées
+      // Éviter les doublons en créant un Set des IDs du serveur
+      const serverIds = new Set(entries.map(entry => entry.id));
+      
       const mergedEntries = [
         ...entries, // Entrées officielles du serveur
         ...cleanedLocalEntries.filter(local => 
-          local.isTemporary && !entries.some(server => server.id === local.id)
+          local.isTemporary && !serverIds.has(local.id)
         ) // Contributions temporaires pas encore synchronisées
       ];
+      
+      console.log(`[CommunityService] Fusion: ${entries.length} serveur + ${cleanedLocalEntries.filter(l => l.isTemporary && !serverIds.has(l.id)).length} temporaires = ${mergedEntries.length} total`);
       
       // Sauvegarder les entrées fusionnées dans le stockage local
       saveEntries(mergedEntries);
@@ -271,9 +276,10 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     
     // Traitement de l'image si présente
     let imageUrl: string | undefined;
-    if (params.cloudinaryUrl) {
-      console.log('[CommunityService] URL Cloudinary disponible:', params.cloudinaryUrl);
-      imageUrl = params.cloudinaryUrl;
+    if (params.cloudinaryUrl || params.imageUrl) {
+      const finalImageUrl = params.cloudinaryUrl || params.imageUrl;
+      console.log('[CommunityService] URL Cloudinary disponible:', finalImageUrl);
+      imageUrl = finalImageUrl;
     } else {
       console.log('[CommunityService] Aucune URL Cloudinary fournie');
     }
@@ -311,6 +317,18 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
     console.log('[CommunityService] Récupération des entrées existantes...');
     const entries = getStoredEntries();
     console.log('[CommunityService] Nombre d\'entrées existantes:', entries.length);
+    
+    // Vérifier si cette entrée existe déjà pour éviter les doublons
+    const existingEntry = entries.find(entry => entry.id === newEntry.id);
+    if (existingEntry) {
+      console.log('[CommunityService] Entrée déjà existante, mise à jour:', newEntry.id);
+      const updatedEntries = entries.map(entry => 
+        entry.id === newEntry.id ? newEntry : entry
+      );
+      console.log('[CommunityService] Liste mise à jour:', updatedEntries.length, 'entrées');
+      saveEntries(updatedEntries);
+      return newEntry;
+    }
     
     const updatedEntries = [newEntry, ...entries];
     console.log('[CommunityService] Nouvelle liste après ajout:', updatedEntries.length, 'entrées');

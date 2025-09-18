@@ -1,0 +1,93 @@
+name: Deploy App
+
+on:
+  repository_dispatch:
+    types: [community-updated]  # Déclenché par community-manager
+  push:
+    branches: [main]  # Déploiement sur push
+  workflow_dispatch:  # Manuel si besoin
+
+# Éviter les déploiements concurrents
+concurrency:
+  group: deploy-app
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Determine deployment type
+        run: |
+          if [[ "${{ github.event_name }}" == "repository_dispatch" && "${{ github.event.action }}" == "community-updated" ]]; then
+            echo "DEPLOY_TYPE=data-only" >> $GITHUB_ENV
+            echo "🔄 Community data update - skipping full build"
+          else
+            echo "DEPLOY_TYPE=full-build" >> $GITHUB_ENV
+            echo "🔄 Full application deployment"
+          fi
+      
+      - name: Sync community data (data-only)
+        if: env.DEPLOY_TYPE == 'data-only'
+        run: |
+          echo "🔄 Fast community data update..."
+          
+          # Checkout gh-pages branch
+          git fetch origin gh-pages
+          git checkout gh-pages
+          
+          # Télécharger entries.json depuis community-content
+          curl -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/CollectifIleFeydeau/community-content/contents/entries.json \
+            | jq -r '.content' | base64 -d > data/community-content.json
+          
+          # Commit et push directement
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/community-content.json
+          git commit -m "Update community data [skip ci]" || echo "No changes"
+          git push origin gh-pages
+          
+          echo "⚡ Community data updated instantly!"
+      
+      - name: Full build and deploy
+        if: env.DEPLOY_TYPE == 'full-build'
+        run: |
+          echo "🔄 Full application build..."
+          
+          # Télécharger entries.json depuis community-content
+          curl -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/CollectifIleFeydeau/community-content/contents/entries.json \
+            | jq -r '.content' | base64 -d > public/data/community-content.json
+          
+          # Build complet
+          npm run build
+          
+          echo "✅ Full build completed"
+      
+      - name: Deploy to GitHub Pages (full build)
+        if: env.DEPLOY_TYPE == 'full-build'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
+      
+      - name: Deployment complete
+        run: echo "🚀 App deployed successfully!"
