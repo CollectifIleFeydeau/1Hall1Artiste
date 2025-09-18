@@ -28,7 +28,6 @@ export type Event = {
   // Fields from Artist (kept for compatibility)
   artistName: Artist['name'];
   type: Artist['type']; // 'exposition' or 'concert'
-  artistBio: Artist['bio'];
   image?: Artist['image'];
 };
 
@@ -338,7 +337,6 @@ export const events: Event[] = eventScheduleData.map(eventDetail => {
     // From Artist
     artistName: artist.name,
     type: artist.type,
-    artistBio: artist.bio,
     image: artist.image,
   };
 }).filter(event => event !== null) as Event[]; // Filter out any nulls if artists weren't found

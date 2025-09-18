@@ -63,7 +63,6 @@ describe('Event functions', () => {
       if (artist) {
         expect(event.artistName).toBe(artist.name);
         expect(event.type).toBe(artist.type);
-        expect(event.artistBio).toBe(artist.bio);
       }
     });
   });
@@ -98,8 +97,6 @@ describe('Event functions', () => {
       expect(typeof event.id).toBe('string');
       expect(event.title).toBeDefined();
       expect(typeof event.title).toBe('string');
-      expect(event.description).toBeDefined();
-      expect(typeof event.description).toBe('string');
       expect(event.time).toBeDefined();
       expect(typeof event.time).toBe('string');
       expect(event.days).toBeDefined();

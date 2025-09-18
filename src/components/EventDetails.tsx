@@ -388,24 +388,9 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           </div>
           
           <div className="bg-[#f0f5ff] p-3 rounded-lg mb-4">
-            {/* Afficher la bio de l'artiste si disponible */}
-            {artist?.bio && (
-              <ArtistDescription text={artist.bio} />
-            )}
-            
             {/* Afficher la présentation de l'artiste si disponible */}
             {artist?.presentation && (
-              <div className="mt-3 pt-3 border-t border-[#d8e3ff]">
-                <h4 className="text-sm font-medium mb-2 text-[#4a5d94]">Présentation:</h4>
-                <ArtistDescription text={artist.presentation} />
-              </div>
-            )}
-            
-            {/* Fallback: afficher le texte de présentation de l'événement si pas de bio artiste */}
-            {!artist?.bio && artist?.presentation && (
-              <div className="mt-3 pt-3 border-t border-[#d8e3ff]">
-                <ArtistDescription text={artist.presentation} />
-              </div>
+              <ArtistDescription text={artist.presentation} />
             )}
             
             {/* Afficher les informations complètes de l'artiste pour les concerts */}
