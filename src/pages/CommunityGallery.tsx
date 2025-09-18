@@ -29,13 +29,14 @@ const CommunityGallery: React.FC = () => {
   const { toast } = useToast();
   const location = useLocation();
   const [entries, setEntries] = useState<CommunityEntry[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "photo" | "testimonial">("all");
   const [activeTab, setActiveTab] = useState<"gallery" | "contribute">("gallery");
+  const [lastKnownCount, setLastKnownCount] = useState<number>(0);
   const [selectedEntry, setSelectedEntry] = useState<CommunityEntry | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const [filter, setFilter] = useState<EntryType | "all">("all");
-  
+
   // Vérifier si un onglet est spécifié dans l'URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -49,11 +50,23 @@ const CommunityGallery: React.FC = () => {
   }, [location]);
 
   // Charger les entrées au chargement de la page
-  const loadEntries = async () => {
+  const loadEntries = async (showNewNotification = false) => {
     try {
       setError(null);
       const data = await fetchCommunityEntries();
+      
+      // Vérifier s'il y a de nouvelles contributions
+      if (showNewNotification && lastKnownCount > 0 && data.length > lastKnownCount) {
+        const newCount = data.length - lastKnownCount;
+        toast({
+          title: "🎉 Nouvelles contributions !",
+          description: `${newCount} nouvelle${newCount > 1 ? 's' : ''} contribution${newCount > 1 ? 's' : ''} ajoutée${newCount > 1 ? 's' : ''}`,
+          duration: 5000
+        });
+      }
+      
       setEntries(data);
+      setLastKnownCount(data.length);
       
       // Analytics: successful load
       analytics.trackCommunityInteraction(EventAction.VIEW, { 
@@ -77,6 +90,18 @@ const CommunityGallery: React.FC = () => {
   useEffect(() => {
     loadEntries();
   }, []);
+
+  // Vérification périodique des nouvelles contributions (toutes les 2 minutes)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (activeTab === "gallery") {
+        console.log('[CommunityGallery] Vérification des nouvelles contributions...');
+        loadEntries(true);
+      }
+    }, 2 * 60 * 1000); // 2 minutes
+
+    return () => clearInterval(interval);
+  }, [activeTab, lastKnownCount]);
 
   // Fonction de rafraîchissement pour Pull-to-Refresh
   const handleRefresh = async () => {

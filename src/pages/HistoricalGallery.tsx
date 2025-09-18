@@ -30,17 +30,76 @@ const HistoricalGallery: React.FC = () => {
         ? '/1Hall1Artiste/images/historical'
         : '/images/historical';
       
-      // Ajouter les photos du dossier historical
-      // Comme nous avons 165 photos, nous allons les numéroter
-      for (let i = 1; i <= 165; i++) {
-        // Essayer d'abord avec l'extension .jpg
-        photoList.push({
-          id: `photos-${i}`,
-          path: `${basePath}/photos-${i}.jpg`, // Extension par défaut
-          loaded: false
+      // Extensions possibles (ordre de priorité)
+      const extensions = ['jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG', 'webp', 'WEBP'];
+      
+      // Fonction pour tester si une image existe
+      const testImageExists = async (url: string): Promise<boolean> => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = url;
+          
+          // Timeout après 2 secondes
+          setTimeout(() => resolve(false), 2000);
         });
+      };
+      
+      // Chercher les photos de 1 à 200 (extensible automatiquement)
+      const maxPhotos = 200; // Augmentez ce nombre si vous avez plus de photos
+      
+      console.log(`[HistoricalGallery] Recherche de photos (1 à ${maxPhotos})...`);
+      
+      // Traitement par batch pour éviter de surcharger le navigateur
+      const batchSize = 10;
+      for (let start = 1; start <= maxPhotos; start += batchSize) {
+        const batch = [];
+        
+        for (let i = start; i < Math.min(start + batchSize, maxPhotos + 1); i++) {
+          // Tester chaque extension pour cette photo
+          const photoPromise = (async () => {
+            for (const ext of extensions) {
+              const photoPath = `${basePath}/photos-${i}.${ext}`;
+              const exists = await testImageExists(photoPath);
+              
+              if (exists) {
+                console.log(`[HistoricalGallery] Photo trouvée: photos-${i}.${ext}`);
+                return {
+                  id: `photos-${i}`,
+                  path: photoPath,
+                  loaded: false
+                };
+              }
+            }
+            return null; // Photo non trouvée
+          })();
+          
+          batch.push(photoPromise);
+        }
+        
+        // Attendre que ce batch soit terminé
+        const batchResults = await Promise.all(batch);
+        
+        // Ajouter les photos trouvées
+        batchResults.forEach(result => {
+          if (result) {
+            photoList.push(result);
+          }
+        });
+        
+        // Petite pause entre les batches
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       
+      // Trier par numéro pour avoir l'ordre correct
+      photoList.sort((a, b) => {
+        const numA = parseInt(a.id.replace('photos-', ''));
+        const numB = parseInt(b.id.replace('photos-', ''));
+        return numA - numB;
+      });
+      
+      console.log(`[HistoricalGallery] ${photoList.length} photos historiques trouvées`);
       setPhotos(photoList);
       setLoading(false);
       
@@ -49,8 +108,9 @@ const HistoricalGallery: React.FC = () => {
         photo_count: photoList.length,
         timestamp: new Date().toISOString()
       });
+      
     } catch (error) {
-      console.error("Erreur lors du chargement des photos:", error);
+      console.error('Erreur lors du chargement des photos historiques:', error);
       setLoading(false);
     }
   }, []);
