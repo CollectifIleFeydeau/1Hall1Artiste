@@ -110,47 +110,12 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, curren
           onClick={(e) => e.stopPropagation()}
           {...swipeHandlers} // Ajouter les handlers de swipe
         >
-          {/* En-tête */}
-          <div className="p-4 border-b flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{entry.displayName}</span>
-              <span className="text-sm text-slate-500">
-                {format(new Date(entry.timestamp), "d MMMM yyyy", { locale: fr })}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              {/* Indicateur de position */}
-              <span className="text-xs text-slate-400 mr-2">
-                {currentIndex + 1} / {entries.length}
-              </span>
-              
-              {/* Boutons de navigation */}
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handlePrevious}
-                disabled={!canGoPrevious}
-                className="h-8 w-8"
-                title="Photo précédente (← ou swipe droite)"
-              >
-                <ChevronLeft size={16} />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleNext}
-                disabled={!canGoNext}
-                className="h-8 w-8"
-                title="Photo suivante (→ ou swipe gauche)"
-              >
-                <ChevronRight size={16} />
-              </Button>
-              
-              {/* Bouton fermer */}
-              <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8" title="Fermer (Échap)">
-                <X size={16} />
-              </Button>
-            </div>
+          {/* En-tête simplifié */}
+          <div className="p-3 border-b flex items-center justify-between">
+            <span className="font-medium">{entry.displayName}</span>
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+              <X size={16} />
+            </Button>
           </div>
 
           {/* Contenu */}
@@ -164,55 +129,35 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, curren
                     className="w-full h-auto"
                   />
                   
-                  {/* Indicateurs visuels de swipe sur mobile */}
-                  <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-black/20 to-transparent pointer-events-none md:hidden flex items-center justify-start pl-2">
-                    {canGoPrevious && (
-                      <ChevronLeft className="text-white/60" size={20} />
-                    )}
-                  </div>
-                  <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-black/20 to-transparent pointer-events-none md:hidden flex items-center justify-end pr-2">
-                    {canGoNext && (
-                      <ChevronRight className="text-white/60" size={20} />
-                    )}
-                  </div>
                 </div>
                 {entry.description && (
                   <p className="p-4 text-sm">{entry.description}</p>
                 )}
               </div>
             ) : (
-              <div className="p-4">
-                <p className="text-lg">{entry.content}</p>
+              <div className="p-6 min-h-[200px] flex items-center justify-center">
+                <div className="text-center space-y-4 max-w-md">
+                  {entry.content && entry.content.trim() ? (
+                    <p className="text-lg leading-relaxed text-left">{entry.content.trim()}</p>
+                  ) : entry.description && entry.description.trim() ? (
+                    <p className="text-lg leading-relaxed text-left">{entry.description.trim()}</p>
+                  ) : (
+                    <div>
+                      <p className="text-slate-500 italic">Aucun contenu disponible</p>
+                      <p className="text-xs text-slate-400 mt-2">Debug: content="{entry.content}", description="{entry.description}"</p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* Métadonnées */}
-            <div className="p-4 text-sm text-slate-500 space-y-2">
-              {entry.eventId && (
-                <div className="flex items-center gap-2">
-                  <Calendar size={16} />
-                  <span>{entry.eventId.replace(/-/g, " ")}</span>
-                </div>
-              )}
-              {entry.locationId && (
-                <div className="flex items-center gap-2">
-                  <MapPin size={16} />
-                  <span>{entry.locationId.replace(/-/g, " ")}</span>
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* Pied de page avec instructions */}
-          <div className="p-4 border-t">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-500">
-                Partagé le {format(new Date(entry.timestamp), "d MMMM yyyy à HH:mm", { locale: fr })}
-              </span>
-              <span className="text-xs text-slate-400 md:hidden">
-                Swipe ← → pour naviguer
-              </span>
-            </div>
+          {/* Pied de page simplifié */}
+          <div className="p-3 border-t text-center">
+            <span className="text-sm text-slate-500">
+              {format(new Date(entry.timestamp), "d MMMM yyyy", { locale: fr })}
+            </span>
           </div>
         </motion.div>
       </motion.div>

@@ -61,15 +61,16 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
             </div>
           ) : (
             // Affichage d'un témoignage
-            <div className="aspect-square bg-slate-100 dark:bg-slate-800 p-3 flex flex-col">
-              <p className="text-sm line-clamp-5 flex-grow">{entry.content}</p>
-              <div className="mt-2 text-xs text-slate-500">
-                {entry.eventId && (
-                  <span className="block truncate">
-                    {entry.eventId.replace(/-/g, " ")}
-                  </span>
-                )}
+            <div className="aspect-square bg-slate-100 dark:bg-slate-800 p-3 flex flex-col justify-center">
+              <div className="text-center mb-2">
+                <div className="text-2xl mb-1">💬</div>
+                <p className="text-xs text-slate-500 font-medium">Témoignage</p>
               </div>
+              <p className="text-sm line-clamp-4 text-center flex-grow">
+                {(entry.content && entry.content.trim()) || 
+                 (entry.description && entry.description.trim()) || 
+                 "Contenu disponible"}
+              </p>
             </div>
           )}
 

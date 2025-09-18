@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createLogger } from "@/utils/logger";
-import { fetchCommunityEntries, deleteCommunityEntry, restoreCommunityEntry } from "@/services/communityServiceBridge";
+import { fetchCommunityEntries, deleteCommunityEntry } from "@/services/cloudinaryService";
 import { CommunityEntry } from "@/types/communityTypes";
 import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
@@ -21,7 +21,6 @@ export function CommunityManagement() {
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [restoring, setRestoring] = useState<string | null>(null);
 
   // Charger les contributions au chargement du composant
   useEffect(() => {
@@ -75,33 +74,7 @@ export function CommunityManagement() {
     }
   };
 
-  // Fonction pour restaurer une contribution
-  const handleRestore = async (entryId: string) => {
-    try {
-      setRestoring(entryId);
-      logger.info(`Restauration de la contribution ${entryId}`);
-      
-      await restoreCommunityEntry(entryId);
-      
-      // Mettre à jour la liste des contributions
-      setEntries(prev => prev.map(entry => entry.id === entryId ? { ...entry, moderation: { status: 'pending' } } : entry));
-      
-      toast({
-        title: "Succès",
-        description: "Contribution restaurée avec succès",
-        variant: "default"
-      });
-    } catch (error) {
-      logger.error(`Erreur lors de la restauration de la contribution ${entryId}`, error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de restaurer la contribution",
-        variant: "destructive"
-      });
-    } finally {
-      setRestoring(null);
-    }
-  };
+  // Fonction restore supprimée - plus nécessaire avec Firebase
 
   // Fonction pour formater la date
   const formatDate = (dateString: string) => {
@@ -160,11 +133,9 @@ export function CommunityManagement() {
         </TabsContent>
 
         <TabsContent value="archived">
-          {renderArchivedEntries(
-            entries.filter(entry => entry.moderation?.status === 'rejected'),
-            restoring,
-            handleRestore
-          )}
+          <div className="text-center py-8 text-gray-500">
+            Fonction de restauration supprimée avec le nouveau système Firebase
+          </div>
         </TabsContent>
       </Tabs>
     </div>

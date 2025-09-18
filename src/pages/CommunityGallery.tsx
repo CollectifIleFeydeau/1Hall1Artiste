@@ -15,7 +15,7 @@ import { analytics, EventAction } from "@/services/firebaseAnalytics";
 import { CommunityEntry, EntryType } from "../types/communityTypes";
 
 // Services
-import { fetchCommunityEntries } from "../services/communityServiceBridge";
+import { fetchCommunityEntries } from "../services/cloudinaryService";
 
 // Composants
 import { PageContainer } from "../components/PageContainer";
