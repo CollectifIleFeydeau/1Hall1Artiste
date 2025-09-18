@@ -183,15 +183,15 @@ const eventScheduleData: EventDetails[] = [
     locationId: "quai-turenne-9",
 
   },
-  {
-    id: "expo-pauline-crusson", // Changed ID (was pauline-crusson)
-    artistId: "pauline-crusson",
-    title: "Cartes postales du vieux Nantes",
-    time: "12h00 - 19h00",
-    days: ["samedi", "dimanche"],
-    locationId: "rue-duguesclin",
+  // {
+  //   id: "expo-pauline-crusson", // Changed ID (was pauline-crusson)
+  //   artistId: "pauline-crusson",
+  //   title: "Cartes postales du vieux Nantes",
+  //   time: "12h00 - 19h00",
+  //   days: ["samedi", "dimanche"],
+  //   locationId: "rue-duguesclin",
 
-  },
+  // },
   {
     id: "expo-alain-gremillet",
     artistId: "alain-gremillet",

@@ -440,6 +440,13 @@ const Map = ({ fullScreen = false }: MapProps) => {
                 }}
                 readOnly={false}
                 onScaleChange={setMapScale}
+                onPanStart={({ x, y }) => {
+                  analytics.trackMapInteraction(EventAction.DRAG, {
+                    phase: 'start',
+                    x: Math.round(x),
+                    y: Math.round(y)
+                  });
+                }}
                 onPanEnd={({ totalDx, totalDy, distance, durationMs }) => {
                   analytics.trackMapInteraction(EventAction.DRAG, {
                     total_dx: Math.round(totalDx),

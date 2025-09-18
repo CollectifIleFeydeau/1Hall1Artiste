@@ -29,7 +29,7 @@ export const artists: Artist[] = [
     name: "Bruno Barbier",
     type: "exposition",
     title: "Peintures et dessins",
-    bio: "Artiste peintre et dessinateur installé à Nantes, explorant les thèmes du souvenir et de la nostalgie, Bruno Barbier, artiste peintre et dessinateur installé à Nantes, évoque des fragments de mémoire, entre émotions passées et traces du temps.",
+    bio: "Artiste peintre et dessinateur installé à Nantes, explorant les thèmes du souvenir et de la nostalgie, Bruno Barbier évoque des fragments de mémoire, entre émotions passées et traces du temps.",
     instagram: "https://www.instagram.com/brunobarbierpainter"
   },
   {
@@ -168,7 +168,7 @@ export const artists: Artist[] = [
     name: "Fabienne Choyau",
     type: "exposition",
     title: "Peinture contemporaine",
-    bio: "Guidée par sa passion pour la couleur, Fabienne Choyau puise son inspiration dan la nature et les instants du quotidien. Son regard se laisse porter par ce qui l'entoure, transformant émotions et impressions en toiles vibrantes",
+    bio: "Guidée par sa passion pour la couleur, Fabienne Choyau puise son inspiration dans la nature et les instants du quotidien. Son regard se laisse porter par ce qui l'entoure, transformant émotions et impressions en toiles vibrantes",
     email: "fabienne.choyau@laposte.net",
     instagram: "https://www.instagram.com/fabiennechoyau/"
   },
@@ -189,7 +189,7 @@ export const artists: Artist[] = [
     type: "concert",
     title: "Concert de Clarine Julienne",
     bio: "Après avoir sillonné l'Amérique Latine avec sa guitare, Clarine revient avec de nombreuses chansons de l'Argentine au Mexique, en passant par les Andes péruviennes. Elle propose un set doux, rythmé et coloré, mêlant musiques traditionnelles et compositions personnelles.",
-    email: "contact@notabene.fr",
+    email: "clarine.julienne@gmail.com",
     instagram: "https://www.instagram.com/clarinemusic",
     youtube: "https://www.youtube.com/clarinemusic",
     tiktok: "https://www.tiktok.com/@clarine.musica",
@@ -211,9 +211,9 @@ export const artists: Artist[] = [
     id: "philippe-peaud",
     name: "Philippe Peaud",
     type: "concert",
-    title: "Conteurs",
+    title: "Philippe Péaud - Conteur"",
     bio: "",
-    email: "contact@conteurs.fr",
+    email: "philippe.peaud@club-internet.fr",
     instagram: ""
   },
   {
@@ -301,15 +301,19 @@ export const artists: Artist[] = [
     photos: ["/concerts/Variabilis/Variabilis.jpg"],
     facebook: "https://www.facebook.com/EnsembleVariabilis",
     website: "https://www.variabilis.fr",
-    presentation: "VARIABILIS, C'EST 70 MUSICIENS AMATEURS.\n\nL'ambition de cet ensemble :\n\n- Vivre la musique dans un esprit d'ouverture et de partage.\n\n- Explorer la diversité du répertoire classique.\n\n- Présenter des concerts dans des formats et des lieux variés.\n\n- Aller au devant de publics parfois éloignés des scènes musicales classiques.\n\nContact et plus d'infos https://www.variabilis.fr"
+    presentation: "VARIABILIS, C'EST 70 MUSICIENS AMATEURS.\n\nL'ambition de cet ensemble :\n\n"
+    + "Vivre la musique dans un esprit d'ouverture et de partage.\n\n"
+    + "Explorer la diversité du répertoire classique.\n\n"
+    + "Présenter des concerts dans des formats et des lieux variés.\n\n"
+    + "Aller au devant de publics parfois éloignés des scènes musicales classiques."
   },
   {
     id: "Semaphore Omega",
     name: "Semaphore Omega",
     type: "concert",
     title: "Semaphore Omega",
-    bio: "Lectures poétiques en musique",
-    email: "",
+    bio: "Les lectures poétiques d'Olivier Bardoul résonnent aux vibrations profondes du didgeridoo de Jean-Yves Redor.",
+    email: "bardoul.olivier@netcourrier.com",
     instagram: ""
   }
   // Ajouter d'autres artistes au besoin

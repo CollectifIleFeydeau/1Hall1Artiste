@@ -26,6 +26,7 @@ import { analytics, EventAction, trackInteraction } from "@/services/firebaseAna
 import { InstagramCarousel } from "@/components/InstagramCarousel";
 import { TruncatedText } from "@/components/TruncatedText";
 import { addToCalendar, isCalendarSupported, CalendarErrorType } from "@/services/calendarService";
+import { AppImage } from "@/components/AppImage";
 
 interface EventDetailsProps {
   event: Event | null;
@@ -517,11 +518,11 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                   {artist.photos.map((photo, index) => (
                     <div key={index} className="relative pb-[75%] overflow-hidden rounded-lg">
-                      <img 
+                      <AppImage 
                         src={photo} 
                         alt={`${event.artistName} - photo ${index + 1}`}
                         className="absolute top-0 left-0 object-cover w-full h-full"
-                        loading="lazy"
+                        lazyLoad={true}
                       />
                     </div>
                   ))}
