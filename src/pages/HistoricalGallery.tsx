@@ -260,12 +260,13 @@ const HistoricalGallery: React.FC = () => {
                     }}
                     onError={(e) => {
                       console.warn(`Erreur chargement image ${photo.path}`);
-                      // Si l'image .jpg ne charge pas, essayer avec .png
+                      // Si l'image n'existe pas, on cache l'élément
                       const target = e.target as HTMLImageElement;
-                      if (target.src.endsWith('.jpg')) {
-                        target.src = target.src.replace('.jpg', '.png');
-                      } else if (target.src.endsWith('.png')) {
-                        target.src = target.src.replace('.png', '.jpeg');
+                      target.style.display = 'none';
+                      // Ou on peut masquer tout le container
+                      const container = target.closest('.aspect-square');
+                      if (container) {
+                        (container as HTMLElement).style.display = 'none';
                       }
                     }}
                   />
