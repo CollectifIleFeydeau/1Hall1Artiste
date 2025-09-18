@@ -5,6 +5,7 @@ import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Info from "lucide-react/dist/esm/icons/info";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Clock from "lucide-react/dist/esm/icons/clock";
+import Zap from "lucide-react/dist/esm/icons/zap";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 
@@ -15,6 +16,7 @@ import { Label } from "../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Progress } from "../../components/ui/progress";
 
 import { CommunityEntry, EntryType, SubmissionParams, ModerationResult } from "../../types/communityTypes";
 import { submitContribution, moderateContent, uploadImage } from "../../services/communityServiceBridge";
@@ -23,6 +25,7 @@ import { getContributionContext, clearContributionContext, enrichSubmissionWithC
 import { events } from "../../data/events";
 import { locations } from "../../data/locations";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
+import { compressImage, validateImageFile, formatFileSize, CompressionResult } from "../../utils/imageCompression";
 
 interface ContributionFormProps {
   onSubmit: (newEntry: CommunityEntry) => void;
@@ -35,6 +38,9 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
   const [contributionContext, setContributionContext] = useState<any>(null);
   const [selectedEventId, setSelectedEventId] = useState<string>("");
   const [selectedLocationId, setSelectedLocationId] = useState<string>("");
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [compressionProgress, setCompressionProgress] = useState(0);
+  const [compressionResult, setCompressionResult] = useState<CompressionResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<SubmissionParams>();
@@ -81,15 +87,51 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
     analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'open_form' });
   }, [setValue]);
 
-  // Gérer le changement d'image
+  // Gérer le changement d'image avec compression
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('🔥 [handleImageChange] FONCTION APPELÉE !', e.target.files?.length, 'fichier(s)');
     
     try {
       const file = e.target.files?.[0];
-      if (file) {
-        console.log('[ContributionForm] Début upload Cloudinary:', file.name);
-        
+      if (!file) return;
+
+      // Validation du fichier
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        alert(validation.error);
+        return;
+      }
+
+      console.log('[ContributionForm] Début compression:', file.name, formatFileSize(file.size));
+      setIsCompressing(true);
+      setCompressionProgress(0);
+
+      // Simulation de progression pour l'UX
+      const progressInterval = setInterval(() => {
+        setCompressionProgress(prev => Math.min(prev + 10, 90));
+      }, 100);
+
+      try {
+        // Compression de l'image
+        const compressionResult = await compressImage(file, {
+          maxWidth: 1920,
+          maxHeight: 1080,
+          quality: 0.8,
+          format: 'jpeg',
+          maxSizeKB: 1024 // 1MB max après compression
+        });
+
+        clearInterval(progressInterval);
+        setCompressionProgress(100);
+        setCompressionResult(compressionResult);
+
+        console.log('[ContributionForm] Compression terminée:', {
+          original: formatFileSize(compressionResult.originalSize),
+          compressed: formatFileSize(compressionResult.compressedSize),
+          ratio: compressionResult.compressionRatio + '%',
+          dimensions: `${compressionResult.width}x${compressionResult.height}`
+        });
+
         // Créer un aperçu local immédiatement
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -97,21 +139,19 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
             setImagePreview(event.target.result as string);
           }
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(compressionResult.file);
 
-        // 🌩️ CLOUDINARY: Upload vers Cloudinary (système principal de gestion d'images)
-        // Account: dpatqkgsc | Preset: collectif_photos
-        // Cloudinary gère automatiquement l'optimisation et le redimensionnement
+        // 🌩️ CLOUDINARY: Upload vers Cloudinary avec l'image compressée
         const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', 'collectif_photos'); // Preset configuré dans Cloudinary
-        formData.append('cloud_name', 'dpatqkgsc'); // Nom du compte Cloudinary
+        formData.append('file', compressionResult.file);
+        formData.append('upload_preset', 'collectif_photos');
+        formData.append('cloud_name', 'dpatqkgsc');
 
-        console.log('[ContributionForm] Requête Cloudinary:', {
+        console.log('[ContributionForm] Requête Cloudinary avec image compressée:', {
           url: 'https://api.cloudinary.com/v1_1/dpatqkgsc/image/upload',
           preset: 'collectif_photos',
-          fileSize: file.size,
-          fileType: file.type
+          fileSize: compressionResult.compressedSize,
+          fileType: compressionResult.file.type
         });
 
         const response = await fetch(
@@ -127,34 +167,33 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
         if (response.ok) {
           const data = await response.json();
           console.log('[ContributionForm] Cloudinary response data:', data);
+          setValue('imageUrl', data.secure_url);
           
-          if (data.secure_url) {
-            console.log('[ContributionForm] Upload Cloudinary réussi:', data.secure_url);
-            // 🌩️ CLOUDINARY: Stocker l'URL sécurisée pour la soumission
-            // Cette URL sera envoyée au Worker puis stockée dans GitHub Issues
-            setValue('cloudinaryUrl', data.secure_url);
-            // Analytics: image upload success
-            analytics.trackCommunityInteraction(EventAction.UPLOAD, { type: 'image', success: true, size: file.size, mime: file.type });
-          } else {
-            console.error('[ContributionForm] Pas de secure_url dans la réponse:', data);
-            // Analytics: image upload unexpected response
-            analytics.trackCommunityInteraction(EventAction.UPLOAD, { type: 'image', success: false, reason: 'no_secure_url' });
-          }
-        } else {
-          const errorText = await response.text();
-          console.error('[ContributionForm] Erreur upload Cloudinary:', {
-            status: response.status,
-            statusText: response.statusText,
-            error: errorText
+          // Analytics: successful image upload
+          analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { 
+            stage: 'image_uploaded',
+            compression_ratio: compressionResult.compressionRatio,
+            original_size: compressionResult.originalSize,
+            compressed_size: compressionResult.compressedSize
           });
-          // Analytics: image upload failure
-          analytics.trackCommunityInteraction(EventAction.UPLOAD, { type: 'image', success: false, status: response.status, statusText: response.statusText });
+        } else {
+          const errorData = await response.text();
+          console.error('[ContributionForm] Erreur Cloudinary:', errorData);
+          throw new Error(`Erreur Cloudinary: ${response.status}`);
         }
+
+      } catch (compressionError) {
+        clearInterval(progressInterval);
+        console.error('[ContributionForm] Erreur de compression:', compressionError);
+        alert('Erreur lors de la compression de l\'image. Veuillez réessayer.');
       }
+
     } catch (error) {
-      console.error('[ContributionForm] Erreur lors du changement d\'image:', error);
-      // Analytics: image upload exception
-      analytics.trackCommunityInteraction(EventAction.UPLOAD, { type: 'image', success: false, exception: true });
+      console.error('[ContributionForm] Erreur générale:', error);
+      alert('Erreur lors du traitement de l\'image. Veuillez réessayer.');
+    } finally {
+      setIsCompressing(false);
+      setCompressionProgress(0);
     }
   };
 
@@ -170,7 +209,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'submit_start' });
 
       // Déterminer le type de contribution automatiquement
-      const hasImage = data.cloudinaryUrl || fileInputRef.current?.files?.[0];
+      const hasImage = data.imageUrl || fileInputRef.current?.files?.[0];
       const type: EntryType = hasImage ? "photo" : "testimonial";
       console.log('[ContributionForm] Type déterminé automatiquement:', type, hasImage ? '(avec image)' : '(sans image)');
 
@@ -178,8 +217,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       data.type = type;
 
       // Log de l'URL Cloudinary si présente
-      if (data.cloudinaryUrl) {
-        console.log('[ContributionForm] URL Cloudinary disponible:', data.cloudinaryUrl);
+      if (data.imageUrl) {
+        console.log('[ContributionForm] URL Cloudinary disponible:', data.imageUrl);
       } else {
         console.log('[ContributionForm] Aucune URL Cloudinary disponible');
       }
@@ -397,6 +436,9 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
                   <p className="text-sm text-slate-500">
                     Cliquez pour sélectionner une image ou glissez-déposez
                   </p>
+                  {isCompressing && (
+                    <Progress value={compressionProgress} max={100} />
+                  )}
                 </div>
               )}
               <input 

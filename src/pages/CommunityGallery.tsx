@@ -23,6 +23,7 @@ import { PageHeader } from "../components/PageHeader";
 import { ContributionForm } from "../components/community/ContributionForm";
 import { GalleryGrid } from "../components/community/GalleryGrid";
 import { EntryDetail } from "../components/community/EntryDetail";
+import { PullToRefresh } from "../components/community/PullToRefresh";
 
 const CommunityGallery: React.FC = () => {
   const { toast } = useToast();
@@ -48,56 +49,86 @@ const CommunityGallery: React.FC = () => {
   }, [location]);
 
   // Charger les entrées au chargement de la page
-  useEffect(() => {
-    const loadEntries = async () => {
-      try {
-        setLoading(true);
-        // Analytics: page view
-        analytics.trackPageView("/community", "Galerie Communautaire");
-        const data = await fetchCommunityEntries();
-        setEntries(data);
-        setError(null);
-      } catch (err) {
-        console.error("Erreur lors du chargement des entrées:", err);
-        setError("Impossible de charger la galerie communautaire. Veuillez réessayer plus tard.");
-        // Analytics: API error loading entries
-        analytics.trackError(EventAction.API_ERROR, 'fetchCommunityEntries failed', { page: 'community_gallery' });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadEntries = async () => {
+    try {
+      setError(null);
+      const data = await fetchCommunityEntries();
+      setEntries(data);
+      
+      // Analytics: successful load
+      analytics.trackCommunityInteraction(EventAction.VIEW, { 
+        content_type: 'gallery', 
+        entries_count: data.length 
+      });
+    } catch (err) {
+      console.error('Erreur lors du chargement des entrées:', err);
+      setError('Impossible de charger les contributions. Veuillez réessayer.');
+      
+      // Analytics: load error
+      analytics.trackCommunityInteraction(EventAction.VIEW, { 
+        content_type: 'gallery', 
+        error: 'load_failed' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadEntries();
   }, []);
 
-  // Filtrer les entrées selon le type sélectionné et exclure les entrées supprimées
-  const filteredEntries = entries.filter(entry => 
-    (filter === "all" || entry.type === filter) &&
-    entry.moderation?.status !== "rejected"
-  );
-
-  // Gérer l'ajout d'une nouvelle contribution
-  const handleNewContribution = (newEntry: CommunityEntry) => {
-    setEntries([newEntry, ...entries]);
-    setActiveTab("gallery");
+  // Fonction de rafraîchissement pour Pull-to-Refresh
+  const handleRefresh = async () => {
+    await loadEntries();
+    
+    // Toast de confirmation
     toast({
-      title: "Contribution envoyée !",
-      description: "Votre contribution a été ajoutée à la galerie communautaire.",
+      title: "✅ Galerie actualisée",
+      description: "Les dernières contributions ont été chargées",
+      duration: 2000
+    });
+    
+    // Analytics: manual refresh
+    analytics.trackCommunityInteraction(EventAction.VIEW, { 
+      content_type: 'gallery', 
+      action: 'manual_refresh' 
     });
   };
 
-  // Animations
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.5 } }
+  // Gérer l'ajout d'une nouvelle contribution
+  const handleNewContribution = (newEntry: CommunityEntry) => {
+    setEntries(prevEntries => [newEntry, ...prevEntries]);
+    setActiveTab("gallery");
+    
+    // Toast de succès
+    toast({
+      title: "🎉 Contribution envoyée !",
+      description: "Votre contribution sera visible dans quelques minutes",
+      duration: 4000
+    });
+    
+    // Analytics: new contribution
+    analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { 
+      stage: 'completed', 
+      content_type: newEntry.type 
+    });
   };
+
+  // Filtrer les entrées selon le filtre actuel
+  const filteredEntries = entries.filter(entry => {
+    if (filter === "all") return true;
+    return entry.type === filter;
+  });
 
   return (
     <PageContainer>
-      <PageHeader title="Galerie Communautaire" />
+      <PageHeader 
+        title="Galerie Communautaire" 
+        subtitle="Partagez vos moments et découvrez ceux des autres"
+      />
       
       <motion.div
-        variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="flex flex-col h-full pb-32" // Augmentation du padding-bottom pour le menu
@@ -124,67 +155,72 @@ const CommunityGallery: React.FC = () => {
           </TabsList>
 
           <TabsContent value="gallery" className="h-full">
-            {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            ) : error ? (
-              <div className="flex flex-col items-center justify-center h-64 text-center">
-                <p className="text-red-500 mb-4">{error}</p>
-                <Button onClick={() => window.location.reload()}>Réessayer</Button>
-              </div>
-            ) : (
-              <>
-                {/* Filtres */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Filter size={16} />
-                    <span className="text-sm font-medium">Filtrer:</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant={filter === "all" ? "default" : "outline"} 
-                      size="sm" 
-                      onClick={() => { setFilter("all"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'all' }); }}
-                    >
-                      Tous
-                    </Button>
-                    <Button 
-                      variant={filter === "photo" ? "default" : "outline"} 
-                      size="sm" 
-                      onClick={() => { setFilter("photo"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'photo' }); }}
-                    >
-                      Photos
-                    </Button>
-                    <Button 
-                      variant={filter === "testimonial" ? "default" : "outline"} 
-                      size="sm" 
-                      onClick={() => { setFilter("testimonial"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'testimonial' }); }}
-                    >
-                      Témoignages
-                    </Button>
-                  </div>
+            <PullToRefresh 
+              onRefresh={handleRefresh}
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
-
-                {/* Grille de la galerie */}
-                {filteredEntries.length > 0 ? (
-                  <GalleryGrid 
-                    entries={filteredEntries} 
-                    onEntryClick={(entry) => { 
-                      const index = filteredEntries.findIndex(e => e.id === entry.id);
-                      setSelectedIndex(index);
-                      setSelectedEntry(entry);
-                      analytics.trackCommunityInteraction(EventAction.VIEW, { content_type: 'entry', entry_id: entry.id });
-                    }}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-64 text-center">
-                    <p className="text-gray-500 mb-4">Aucune contribution dans cette catégorie</p>
-                    <Button onClick={() => { analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'empty_state' }); setActiveTab("contribute"); }}>Soyez le premier à contribuer</Button>
+              ) : error ? (
+                <div className="flex flex-col items-center justify-center h-64 text-center">
+                  <p className="text-red-500 mb-4">{error}</p>
+                  <Button onClick={() => window.location.reload()}>Réessayer</Button>
+                </div>
+              ) : (
+                <>
+                  {/* Filtres */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Filter size={16} />
+                      <span className="text-sm font-medium">Filtrer:</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant={filter === "all" ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => { setFilter("all"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'all' }); }}
+                      >
+                        Tous
+                      </Button>
+                      <Button 
+                        variant={filter === "photo" ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => { setFilter("photo"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'photo' }); }}
+                      >
+                        Photos
+                      </Button>
+                      <Button 
+                        variant={filter === "testimonial" ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => { setFilter("testimonial"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'testimonial' }); }}
+                      >
+                        Témoignages
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </>
-            )}
+
+                  {/* Grille de la galerie */}
+                  {filteredEntries.length > 0 ? (
+                    <GalleryGrid 
+                      entries={filteredEntries} 
+                      onEntryClick={(entry) => { 
+                        const index = filteredEntries.findIndex(e => e.id === entry.id);
+                        setSelectedIndex(index);
+                        setSelectedEntry(entry);
+                        analytics.trackCommunityInteraction(EventAction.VIEW, { content_type: 'entry', entry_id: entry.id });
+                      }}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-64 text-center">
+                      <p className="text-gray-500 mb-4">Aucune contribution dans cette catégorie</p>
+                      <Button onClick={() => { analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'empty_state' }); setActiveTab("contribute"); }}>Soyez le premier à contribuer</Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </PullToRefresh>
           </TabsContent>
 
           <TabsContent value="contribute" className="h-full">
