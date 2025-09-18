@@ -28,7 +28,8 @@ jobs:
         
       - name: Build
         env:
-          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          # Firebase API key is optional - app works without it (analytics disabled)
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY || '' }}
         run: npm run build
         
       - name: Deploy to GitHub Pages
