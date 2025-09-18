@@ -46,8 +46,9 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
                 alt={entry.description || "Photo communautaire"}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
-                <p className="text-white text-sm line-clamp-2">{entry.description}</p>
+              {/* Overlay avec description - visible sur mobile, hover sur desktop */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
+                <p className="text-white text-sm line-clamp-2">{entry.description || entry.content}</p>
               </div>
             </div>
           ) : (
