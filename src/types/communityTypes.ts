@@ -36,6 +36,9 @@ export interface CommunityEntry {
   // Informations de contexte
   contextType?: string;
   contextId?: string;
+  
+  // Marqueur pour les contributions temporaires (preview avant synchronisation)
+  isTemporary?: boolean;
 }
 
 // Paramètres pour soumettre une nouvelle contribution

@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Progress } from "../../components/ui/progress";
+import { toast } from "../../components/ui/use-toast";
 
 import { CommunityEntry, EntryType, SubmissionParams, ModerationResult } from "../../types/communityTypes";
 import { submitContribution, moderateContent, uploadImage } from "../../services/communityServiceBridge";
@@ -261,6 +262,13 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       console.log('[ContributionForm] Contribution soumise avec succès:', newEntry);
       // Analytics: contribution submit success
       analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'success', entry_id: newEntry.id, type: newEntry.type });
+      
+      // Afficher le toast de confirmation
+      toast({
+        title: "✅ Contribution soumise !",
+        description: "Votre contribution est visible immédiatement et sera synchronisée dans quelques minutes.",
+        duration: 6000,
+      });
       
       // Afficher le message de succès
       setIsSubmitted(true);

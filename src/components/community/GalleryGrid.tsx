@@ -73,6 +73,14 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
             </div>
           )}
 
+          {/* Badge pour les contributions temporaires */}
+          {entry.isTemporary && (
+            <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              En cours de validation
+            </div>
+          )}
+
           {/* Informations communes */}
           <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-xs">
             <div className="truncate">

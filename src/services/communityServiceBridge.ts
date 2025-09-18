@@ -94,6 +94,24 @@ const saveEntries = (entries: CommunityEntry[]): void => {
 };
 
 // Exporter les fonctions du service communautaire avec les types TypeScript appropriés
+// Fonction pour nettoyer les contributions temporaires après synchronisation
+function cleanupTemporaryContributions(localEntries: CommunityEntry[], serverEntries: CommunityEntry[]): CommunityEntry[] {
+  const serverIds = new Set(serverEntries.map(entry => entry.id));
+  
+  return localEntries.map(entry => {
+    // Si une contribution temporaire existe maintenant sur le serveur, la marquer comme synchronisée
+    if (entry.isTemporary && serverIds.has(entry.id)) {
+      console.log(`[CommunityService] Contribution ${entry.id} synchronisée, suppression du flag temporaire`);
+      const { isTemporary, ...cleanEntry } = entry;
+      return {
+        ...cleanEntry,
+        moderation: { status: 'approved' as ModerationStatus, moderatedAt: new Date().toISOString() }
+      };
+    }
+    return entry;
+  });
+}
+
 export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
   try {
     const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
@@ -130,10 +148,24 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
       console.log(`[CommunityService] ${entries.length} entrées récupérées depuis GitHub`);
       console.log(`[CommunityService] Dernière mise à jour:`, data.lastUpdated || 'Non disponible');
       
-      // Sauvegarder les entrées dans le stockage local pour utilisation hors ligne
-      saveEntries(entries);
+      // Récupérer les entrées locales pour vérifier les contributions temporaires
+      const localEntries = getStoredEntries();
       
-      return entries;
+      // Nettoyer les contributions temporaires qui sont maintenant synchronisées
+      const cleanedLocalEntries = cleanupTemporaryContributions(localEntries, entries);
+      
+      // Fusionner les entrées du serveur avec les contributions temporaires nettoyées
+      const mergedEntries = [
+        ...entries, // Entrées officielles du serveur
+        ...cleanedLocalEntries.filter(local => 
+          local.isTemporary && !entries.some(server => server.id === local.id)
+        ) // Contributions temporaires pas encore synchronisées
+      ];
+      
+      // Sauvegarder les entrées fusionnées dans le stockage local
+      saveEntries(mergedEntries);
+      
+      return mergedEntries;
     }
     
     // En développement local, utiliser les données stockées localement
@@ -160,7 +192,7 @@ export async function deleteCommunityEntry(entryId: string): Promise<void> {
     
     try {
       // Appeler le Worker Cloudflare pour fermer l'issue GitHub
-      const response = await fetch('https://github-contribution-proxy.collectiffeydeau.workers.dev/delete-issue', {
+      const response = await fetch(`${WORKER_URL}/delete-issue`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -246,20 +278,23 @@ export async function submitContribution(params: SubmissionParams): Promise<Comm
       console.log('[CommunityService] Aucune URL Cloudinary fournie');
     }
 
-    // Créer la nouvelle entrée
+    // Créer la nouvelle entrée avec statut "pending" pour preview temporaire
     const newEntry: CommunityEntry = {
       id,
       type: params.type,
       displayName: params.displayName?.trim() || 'Anonyme',
       content: params.content?.trim() || '',
       imageUrl: imageUrl,
+      thumbnailUrl: imageUrl, // Utiliser la même URL pour le thumbnail
       description: params.description?.trim() || '',
       createdAt: new Date().toISOString(),
       timestamp: new Date().toISOString(),
       moderation: {
-        status: 'approved' as ModerationStatus,
-        moderatedAt: new Date().toISOString()
-      }
+        status: 'pending' as ModerationStatus, // Statut temporaire pour preview
+        moderatedAt: null
+      },
+      // Marquer comme contribution temporaire
+      isTemporary: true
     };
     
     console.log('[CommunityService] Nouvelle entrée créée:', {
