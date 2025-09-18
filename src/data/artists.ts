@@ -211,7 +211,7 @@ export const artists: Artist[] = [
     id: "philippe-peaud",
     name: "Philippe Peaud",
     type: "concert",
-    title: "Philippe Péaud - Conteur"",
+    title: "Philippe Péaud - Conteur",
     bio: "",
     email: "philippe.peaud@club-internet.fr",
     instagram: ""
