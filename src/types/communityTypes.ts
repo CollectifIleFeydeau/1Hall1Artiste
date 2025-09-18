@@ -19,6 +19,7 @@ export interface CommunityEntry {
   moderation: {
     status: ModerationStatus;
     moderatedAt: string | null;
+    reason?: string;
   };
   
   // Champs spécifiques aux photos
@@ -73,7 +74,7 @@ export interface CommunityContentData {
 
 // Résultat de modération
 export interface ModerationResult {
-  entryId: string;
-  status: ModerationStatus;
-  message?: string;
+  success: boolean;
+  entry?: CommunityEntry;
+  error?: string;
 }

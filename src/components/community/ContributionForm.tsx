@@ -20,7 +20,7 @@ import { Progress } from "../../components/ui/progress";
 import { toast } from "../../components/ui/use-toast";
 
 import { CommunityEntry, EntryType, SubmissionParams, ModerationResult } from "../../types/communityTypes";
-import { submitContribution, moderateContent, uploadImage } from "../../services/communityServiceBridge";
+import { submitContribution } from "../../services/communityServiceBridge";
 import { AnonymousSessionService } from "../../services/anonymousSessionService";
 import { getContributionContext, clearContributionContext, enrichSubmissionWithContext } from "../../services/contextualContributionService";
 import { events } from "../../data/events";
@@ -263,11 +263,11 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       // Analytics: contribution submit success
       analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'success', entry_id: newEntry.id, type: newEntry.type });
       
-      // Afficher le toast de confirmation
+      // Toast révolutionnaire instantané !
       toast({
-        title: "✅ Contribution soumise !",
-        description: "Votre contribution est visible immédiatement et sera synchronisée dans quelques minutes.",
-        duration: 6000,
+        title: "🚀 Photo ajoutée instantanément !",
+        description: "Votre photo est visible immédiatement sur tous les appareils. Révolution Cloudinary !",
+        duration: 4000,
       });
       
       // Afficher le message de succès
