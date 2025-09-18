@@ -7,7 +7,7 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import Zap from "lucide-react/dist/esm/icons/zap";
 import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -26,6 +26,7 @@ import { events } from "../../data/events";
 import { locations } from "../../data/locations";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
 import { compressImage, validateImageFile, formatFileSize, CompressionResult } from "../../utils/imageCompression";
+import { useAutoSave } from "../../hooks/useAutoSave";
 
 interface ContributionFormProps {
   onSubmit: (newEntry: CommunityEntry) => void;
@@ -41,9 +42,34 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
   const [isCompressing, setIsCompressing] = useState(false);
   const [compressionProgress, setCompressionProgress] = useState(0);
   const [compressionResult, setCompressionResult] = useState<CompressionResult | null>(null);
+  const [showDraftNotification, setShowDraftNotification] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<SubmissionParams>();
+  const { register, handleSubmit, reset, setValue, formState: { errors }, control } = useForm<SubmissionParams>();
+  
+  // Surveiller les changements du formulaire pour l'auto-save
+  const watchedFields = useWatch({ control });
+  
+  // Auto-save hook
+  const { loadDraft, clearDraft, hasDraft } = useAutoSave({
+    key: 'contribution_form',
+    data: {
+      ...watchedFields,
+      selectedEventId,
+      selectedLocationId,
+      imagePreview: imagePreview ? 'has_image' : null // Ne pas sauvegarder l'image elle-même
+    },
+    delay: 2000, // Sauvegarder 2 secondes après la dernière modification
+    enabled: !isSubmitted // Désactiver après soumission
+  });
+
+  // Récupérer le brouillon au chargement
+  useEffect(() => {
+    const draft = loadDraft();
+    if (draft && hasDraft()) {
+      setShowDraftNotification(true);
+    }
+  }, [loadDraft, hasDraft]);
   
   // Récupérer le contexte de contribution au chargement
   useEffect(() => {
@@ -313,6 +339,16 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
             <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription>
               Votre contribution sera associée à {contributionContext.type === "event" ? "l'événement" : "l'emplacement"} <strong>{contributionContext.name}</strong>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Afficher la notification de brouillon */}
+        {showDraftNotification && (
+          <Alert className="mt-4 bg-yellow-50 border-yellow-200">
+            <Info className="h-4 w-4 text-yellow-500" />
+            <AlertDescription>
+              Vous avez un brouillon enregistré. Souhaitez-vous le récupérer ?
             </AlertDescription>
           </Alert>
         )}

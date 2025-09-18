@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSwipeable } from "react-swipeable";
 import { Button } from "@/components/ui/button";
+import { LazyImage } from "@/components/ui/LazyImage";
 import { AnimatedPageTransition } from "@/components/AnimatedPageTransition";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
 
@@ -183,6 +185,11 @@ const HistoricalGallery: React.FC = () => {
     })
   };
 
+  const handlers = useSwipeable({
+    onSwipedLeft: () => navigatePhoto('next'),
+    onSwipedRight: () => navigatePhoto('prev'),
+  });
+
   return (
     <AnimatedPageTransition>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -230,12 +237,11 @@ const HistoricalGallery: React.FC = () => {
                   className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
                   onClick={() => openPhotoModal(photo, index)}
                 >
-                  <img 
+                  <LazyImage 
                     src={photo.path} 
                     alt={`Photo historique ${index + 1}`}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     onError={() => handleImageError(index)}
-                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
                     <span className="text-white text-xs font-medium">
@@ -257,6 +263,7 @@ const HistoricalGallery: React.FC = () => {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
               onClick={closePhotoModal}
+              {...handlers}
             >
               {/* Bouton fermer */}
               <Button
@@ -269,7 +276,7 @@ const HistoricalGallery: React.FC = () => {
                 <span className="text-2xl">&times;</span>
               </Button>
 
-              {/* Navigation */}
+              {/* Boutons de navigation */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -278,9 +285,9 @@ const HistoricalGallery: React.FC = () => {
                   e.stopPropagation();
                   navigatePhoto('prev');
                 }}
+                title="Photo précédente (← ou swipe droite)"
               >
                 ←
-                <span className="sr-only">Photo précédente</span>
               </Button>
 
               <Button
@@ -291,10 +298,20 @@ const HistoricalGallery: React.FC = () => {
                   e.stopPropagation();
                   navigatePhoto('next');
                 }}
+                title="Photo suivante (→ ou swipe gauche)"
               >
                 →
-                <span className="sr-only">Photo suivante</span>
               </Button>
+
+              {/* Indicateur de position */}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+                {selectedIndex + 1} / {photos.length}
+              </div>
+
+              {/* Instructions swipe sur mobile */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 text-white/70 text-xs bg-black/50 px-3 py-1 rounded-full md:hidden">
+                Swipe ← → pour naviguer
+              </div>
 
               {/* Image */}
               <motion.img
@@ -307,11 +324,6 @@ const HistoricalGallery: React.FC = () => {
                 className="max-h-full max-w-full object-contain"
                 onClick={(e) => e.stopPropagation()}
               />
-
-              {/* Indicateur */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
-                {selectedIndex + 1} / {photos.length}
-              </div>
             </motion.div>
           )}
         </AnimatePresence>

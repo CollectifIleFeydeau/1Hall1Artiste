@@ -5,7 +5,7 @@ import { fr } from "date-fns/locale";
 
 import { CommunityEntry } from "../../types/communityTypes";
 import { cn } from "../../lib/utils";
-import { LocalImage } from "./LocalImage";
+import { LazyImage } from "../ui/LazyImage";
 
 interface GalleryGridProps {
   entries: CommunityEntry[];
@@ -41,7 +41,7 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
           {entry.type === "photo" ? (
             // Affichage d'une photo
             <div className="aspect-square relative">
-              <LocalImage
+              <LazyImage
                 src={entry.thumbnailUrl || entry.imageUrl}
                 alt={entry.description || "Photo communautaire"}
                 className="w-full h-full object-cover"
