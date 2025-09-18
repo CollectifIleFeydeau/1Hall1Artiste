@@ -243,18 +243,23 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
         
         {/* Message de succès après soumission */}
         {isSubmitted && (
-          <Alert className="mt-4 bg-green-50 border-green-200">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <AlertDescription className="space-y-2">
-              <div className="font-medium text-green-800">
-                ✅ Votre contribution a été envoyée avec succès !
+          <Alert className="mt-4 bg-blue-50 border-blue-300 border-2">
+            <Clock className="h-5 w-5 text-blue-600" />
+            <AlertDescription className="space-y-3">
+              <div className="font-bold text-blue-900 text-lg">
+                📤 Contribution envoyée !
               </div>
-              <div className="flex items-center gap-2 text-sm text-green-700">
-                <Clock className="h-3 w-3" />
-                <span>Elle sera visible sur le site dans 1-2 minutes.</span>
+              <div className="bg-blue-100 p-3 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2 text-blue-800 font-medium">
+                  <Clock className="h-4 w-4" />
+                  <span>⏱️ Votre photo sera visible dans 1-2 minutes</span>
+                </div>
+                <div className="text-sm text-blue-700 mt-1">
+                  Le temps que notre système traite automatiquement votre contribution
+                </div>
               </div>
-              <div className="text-xs text-green-600">
-                Merci de contribuer à la mémoire collective de l'île Feydeau ! 🎉
+              <div className="text-sm text-blue-600">
+                ✨ Merci de contribuer à la mémoire collective de l'île Feydeau !
               </div>
             </AlertDescription>
           </Alert>
