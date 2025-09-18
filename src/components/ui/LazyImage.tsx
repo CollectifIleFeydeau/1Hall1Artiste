@@ -24,11 +24,16 @@ export const LazyImage: React.FC<LazyImageProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority); // Si priority=true, charger immédiatement
-  const [hasError, setHasError] = useState(false);
+  const [hasError, setHasError] = useState(!src); // Si pas de src, marquer comme erreur immédiatement
   const imgRef = useRef<HTMLImageElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   console.log(`[LazyImage] Initialisation: ${src}, priority: ${priority}, isInView: ${isInView}`);
+
+  // Si pas de src, ne pas essayer de charger
+  if (!src || src === 'undefined') {
+    console.warn(`[LazyImage] URL d'image invalide: ${src}`);
+  }
 
   // Intersection Observer pour détecter quand l'image entre dans le viewport
   useEffect(() => {
@@ -106,7 +111,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       )}
 
       {/* Image principale */}
-      {isInView && (
+      {isInView && src && src !== 'undefined' && (
         <img
           src={src}
           alt={alt}

@@ -151,7 +151,45 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
 export async function deleteCommunityEntry(entryId: string): Promise<void> {
   console.log(`[CommunityService] Suppression de l'entrée ${entryId}`);
   
-  // Pour l'instant, on simule la suppression en marquant l'entrée comme supprimée
+  // Extraire le numéro d'issue depuis l'ID (format: "issue-123" ou "contrib-123")
+  const issueMatch = entryId.match(/(?:issue-|contrib-)(\d+)/);
+  
+  if (issueMatch) {
+    const issueNumber = issueMatch[1];
+    console.log(`[CommunityService] Fermeture de l'issue GitHub #${issueNumber}`);
+    
+    try {
+      // Appeler le Worker Cloudflare pour fermer l'issue GitHub
+      const response = await fetch('https://github-contribution-proxy.collectiffeydeau.workers.dev/delete-issue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          issueNumber: issueNumber
+        })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[CommunityService] Erreur lors de la fermeture de l'issue #${issueNumber}:`, errorText);
+        throw new Error(`Erreur ${response.status}: ${errorText}`);
+      }
+      
+      console.log(`[CommunityService] Issue GitHub #${issueNumber} fermée avec succès`);
+      console.log(`[CommunityService] Le workflow de synchronisation va se déclencher automatiquement`);
+      
+    } catch (error) {
+      console.error(`[CommunityService] Erreur lors de la fermeture de l'issue GitHub:`, error);
+      // En cas d'erreur, on continue avec la suppression locale comme fallback
+      console.log(`[CommunityService] Fallback: suppression locale uniquement`);
+    }
+  } else {
+    console.warn(`[CommunityService] ID d'entrée non reconnu: ${entryId} (format attendu: issue-123 ou contrib-123)`);
+    console.log(`[CommunityService] Suppression locale uniquement`);
+  }
+  
+  // Marquer l'entrée comme supprimée localement (pour feedback immédiat à l'utilisateur)
   const entries = getStoredEntries();
   const updatedEntries = entries.map(entry => 
     entry.id === entryId 
@@ -160,7 +198,7 @@ export async function deleteCommunityEntry(entryId: string): Promise<void> {
   );
   
   saveEntries(updatedEntries);
-  console.log(`[CommunityService] Entrée ${entryId} marquée comme supprimée`);
+  console.log(`[CommunityService] Entrée ${entryId} marquée comme supprimée localement`);
 }
 
 export async function restoreCommunityEntry(entryId: string): Promise<void> {

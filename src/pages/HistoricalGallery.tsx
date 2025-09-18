@@ -16,11 +16,10 @@ const HistoricalGallery: React.FC = () => {
   const navigate = useNavigate();
   const [photos, setPhotos] = useState<HistoricalPhoto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 165 });
   const [selectedPhoto, setSelectedPhoto] = useState<HistoricalPhoto | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
-  // Fonction pour charger dynamiquement les photos du dossier
+  // Fonction pour charger les photos avec lazy loading natif
   const loadPhotos = useCallback(async () => {
     try {
       // Créer un tableau pour stocker les chemins des photos
@@ -31,104 +30,16 @@ const HistoricalGallery: React.FC = () => {
         ? '/1Hall1Artiste/images/historical'
         : '/images/historical';
       
-      // Extensions par ordre de probabilité (optimisation)
-      const extensions = ['jpg', 'JPEG', 'jpeg', 'JPG', 'png', 'PNG'];
-      
-      // Cache des extensions trouvées pour optimiser les recherches suivantes
-      const extensionStats: { [key: string]: number } = {};
-      
-      // Fonction optimisée pour tester si une image existe
-      const testImageExists = async (url: string): Promise<boolean> => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          const timeout = setTimeout(() => resolve(false), 500); // Réduire timeout à 500ms
-          
-          img.onload = () => {
-            clearTimeout(timeout);
-            resolve(true);
-          };
-          img.onerror = () => {
-            clearTimeout(timeout);
-            resolve(false);
-          };
-          
-          img.src = url;
+      // Ajouter les photos du dossier historical (151 photos connues)
+      for (let i = 1; i <= 151; i++) {
+        photoList.push({
+          id: `photos-${i}`,
+          path: `${basePath}/photos-${i}.jpg`, // Extension par défaut, le navigateur gère les erreurs
+          loaded: false
         });
-      };
-      
-      // Chercher les photos de 1 à 165 (nombre réel d'images)
-      const maxPhotos = 165; // Réduire la plage de recherche
-      
-      console.log(`[HistoricalGallery] Recherche optimisée de photos (1 à ${maxPhotos})...`);
-      
-      // Traitement par batch plus petit pour un feedback plus rapide
-      const batchSize = 5;
-      for (let start = 1; start <= maxPhotos; start += batchSize) {
-        const batch = [];
-        
-        for (let i = start; i < Math.min(start + batchSize, maxPhotos + 1); i++) {
-          // Tester chaque extension pour cette photo avec ordre optimisé
-          const photoPromise = (async () => {
-            // Réorganiser les extensions selon les statistiques
-            const sortedExtensions = [...extensions].sort((a, b) => 
-              (extensionStats[b] || 0) - (extensionStats[a] || 0)
-            );
-            
-            for (const ext of sortedExtensions) {
-              const photoPath = `${basePath}/photos-${i}.${ext}`;
-              const exists = await testImageExists(photoPath);
-              
-              if (exists) {
-                // Mettre à jour les statistiques pour optimiser les prochaines recherches
-                extensionStats[ext] = (extensionStats[ext] || 0) + 1;
-                
-                console.log(`[HistoricalGallery] Photo trouvée: photos-${i}.${ext}`);
-                return {
-                  id: `photos-${i}`,
-                  path: photoPath,
-                  loaded: false
-                };
-              }
-            }
-            return null; // Photo non trouvée
-          })();
-          
-          batch.push(photoPromise);
-        }
-        
-        // Attendre que ce batch soit terminé
-        const batchResults = await Promise.all(batch);
-        
-        // Ajouter les photos trouvées
-        batchResults.forEach(result => {
-          if (result) {
-            photoList.push(result);
-          }
-        });
-        
-        // Feedback de progression
-        const currentProgress = Math.min(start + batchSize - 1, maxPhotos);
-        setLoadingProgress({ current: currentProgress, total: maxPhotos });
-        console.log(`[HistoricalGallery] Progression: ${currentProgress}/${maxPhotos} (${photoList.length} trouvées)`);
-        
-        // Pause plus courte entre les batches
-        await new Promise(resolve => setTimeout(resolve, 50));
       }
       
-      // Trier par numéro pour avoir l'ordre correct
-      photoList.sort((a, b) => {
-        const numA = parseInt(a.id.replace('photos-', ''));
-        const numB = parseInt(b.id.replace('photos-', ''));
-        return numA - numB;
-      });
-      
-      console.log(`[HistoricalGallery] ${photoList.length} photos trouvées en ${extensions.length} extensions testées`);
-      console.log(`[HistoricalGallery] Extensions les plus fréquentes:`, 
-        Object.entries(extensionStats)
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 3)
-      );
-      
+      console.log(`[HistoricalGallery] ${photoList.length} photos chargées`);
       setPhotos(photoList);
       setLoading(false);
       
@@ -139,7 +50,7 @@ const HistoricalGallery: React.FC = () => {
       });
       
     } catch (error) {
-      console.error('Erreur lors du chargement des photos historiques:', error);
+      console.error('Erreur lors du chargement des photos:', error);
       setLoading(false);
     }
   }, []);
@@ -322,23 +233,8 @@ const HistoricalGallery: React.FC = () => {
         {/* Contenu principal */}
         <div className="container mx-auto px-4 py-6">
           {loading ? (
-            <div className="flex flex-col items-center justify-center min-h-96 space-y-4">
+            <div className="flex items-center justify-center min-h-96">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-              <div className="text-center">
-                <p className="text-lg font-medium text-gray-700">Détection automatique des photos...</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {loadingProgress.current} / {loadingProgress.total} photos analysées
-                </p>
-                <div className="w-64 bg-gray-200 rounded-full h-2 mt-3">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(loadingProgress.current / loadingProgress.total) * 100}%` }}
-                  />
-                </div>
-                <p className="text-xs text-gray-400 mt-2">
-                  {Math.round((loadingProgress.current / loadingProgress.total) * 100)}% terminé
-                </p>
-              </div>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -356,7 +252,7 @@ const HistoricalGallery: React.FC = () => {
                     src={photo.path} 
                     alt={`Photo historique ${index + 1}`}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    loading={index < 12 ? "eager" : "lazy"} // Charger immédiatement les 12 premières (2 rangées)
+                    loading={index < 8 ? "eager" : "lazy"} // Native lazy loading
                     onLoad={() => {
                       setPhotos(prev => prev.map(p => 
                         p.id === photo.id ? { ...p, loaded: true } : p
@@ -364,14 +260,12 @@ const HistoricalGallery: React.FC = () => {
                     }}
                     onError={(e) => {
                       console.warn(`Erreur chargement image ${photo.path}`);
-                      // Fallback intelligent basé sur les extensions trouvées
+                      // Si l'image .jpg ne charge pas, essayer avec .png
                       const target = e.target as HTMLImageElement;
                       if (target.src.endsWith('.jpg')) {
-                        target.src = target.src.replace('.jpg', '.JPEG');
-                      } else if (target.src.endsWith('.JPEG')) {
-                        target.src = target.src.replace('.JPEG', '.png');
+                        target.src = target.src.replace('.jpg', '.png');
                       } else if (target.src.endsWith('.png')) {
-                        target.src = target.src.replace('.png', '.PNG');
+                        target.src = target.src.replace('.png', '.jpeg');
                       }
                     }}
                   />

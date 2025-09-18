@@ -38,7 +38,7 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
           className="relative rounded-lg overflow-hidden"
           onClick={() => onEntryClick(entry)}
         >
-          {entry.type === "photo" ? (
+          {entry.type === "photo" && (entry.thumbnailUrl || entry.imageUrl) ? (
             // Affichage d'une photo
             <div className="aspect-square relative">
               <LazyImage
@@ -51,6 +51,13 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
                 <p className="text-white text-sm line-clamp-2">{entry.description || entry.content}</p>
               </div>
+            </div>
+          ) : entry.type === "photo" ? (
+            // Photo sans image (fallback)
+            <div className="aspect-square bg-slate-100 dark:bg-slate-800 p-3 flex flex-col items-center justify-center">
+              <div className="text-4xl mb-2">📷</div>
+              <p className="text-sm text-center text-slate-500">Image non disponible</p>
+              <p className="text-xs text-center text-slate-400 mt-1 line-clamp-2">{entry.content}</p>
             </div>
           ) : (
             // Affichage d'un témoignage
