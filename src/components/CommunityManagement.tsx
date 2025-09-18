@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createLogger } from "@/utils/logger";
-import { fetchCommunityEntries, deleteCommunityEntry } from "@/services/communityServiceBridge";
+import { fetchCommunityEntries, deleteCommunityEntry, restoreCommunityEntry } from "@/services/communityServiceBridge";
 import { CommunityEntry } from "@/types/communityTypes";
 import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
@@ -21,6 +21,7 @@ export function CommunityManagement() {
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState<string | null>(null);
 
   // Charger les contributions au chargement du composant
   useEffect(() => {
@@ -74,6 +75,34 @@ export function CommunityManagement() {
     }
   };
 
+  // Fonction pour restaurer une contribution
+  const handleRestore = async (entryId: string) => {
+    try {
+      setRestoring(entryId);
+      logger.info(`Restauration de la contribution ${entryId}`);
+      
+      await restoreCommunityEntry(entryId);
+      
+      // Mettre à jour la liste des contributions
+      setEntries(prev => prev.map(entry => entry.id === entryId ? { ...entry, moderation: { status: 'pending' } } : entry));
+      
+      toast({
+        title: "Succès",
+        description: "Contribution restaurée avec succès",
+        variant: "default"
+      });
+    } catch (error) {
+      logger.error(`Erreur lors de la restauration de la contribution ${entryId}`, error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de restaurer la contribution",
+        variant: "destructive"
+      });
+    } finally {
+      setRestoring(null);
+    }
+  };
+
   // Fonction pour formater la date
   const formatDate = (dateString: string) => {
     try {
@@ -107,6 +136,7 @@ export function CommunityManagement() {
           <TabsTrigger value="photos">Photos</TabsTrigger>
           <TabsTrigger value="testimonials">Témoignages</TabsTrigger>
           <TabsTrigger value="pending">En attente</TabsTrigger>
+          <TabsTrigger value="archived">Archivées</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
@@ -126,6 +156,14 @@ export function CommunityManagement() {
             entries.filter(entry => entry.moderation?.status === 'pending'),
             deleting,
             handleDelete
+          )}
+        </TabsContent>
+
+        <TabsContent value="archived">
+          {renderArchivedEntries(
+            entries.filter(entry => entry.moderation?.status === 'rejected'),
+            restoring,
+            handleRestore
           )}
         </TabsContent>
       </Tabs>
@@ -181,6 +219,88 @@ export function CommunityManagement() {
                       <Loader className="h-4 w-4 animate-spin" />
                     ) : (
                       <Trash className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {entry.type === 'photo' && entry.imageUrl && (
+                <div className="mt-3 relative pt-[56.25%]">
+                  <img 
+                    src={entry.imageUrl} 
+                    alt={`Contribution de ${entry.displayName}`}
+                    className="absolute top-0 left-0 w-full h-full object-cover rounded-md"
+                    onError={(e) => {
+                      const basePath = typeof window !== 'undefined' && window.location.hostname.includes('github.io')
+                        ? '/1Hall1Artiste'
+                        : '';
+                      e.currentTarget.src = `${basePath}/images/placeholder-image.jpg`;
+                    }}
+                  />
+                </div>
+              )}
+
+              {entry.type === 'testimonial' && entry.content && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                  <p className="text-gray-700">{entry.content}</p>
+                </div>
+              )}
+
+              <div className="mt-3 text-sm text-gray-500">
+                <p>ID: {entry.id}</p>
+                {entry.eventId && <p>Événement: {entry.eventId}</p>}
+                {entry.locationId && <p>Lieu: {entry.locationId}</p>}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  // Fonction pour afficher les contributions archivées
+  function renderArchivedEntries(entriesToRender: CommunityEntry[], restoringId: string | null, onRestore: (id: string) => void) {
+    if (loading) {
+      return (
+        <div className="flex justify-center items-center py-12">
+          <Loader className="h-8 w-8 animate-spin text-gray-500" />
+        </div>
+      );
+    }
+
+    if (entriesToRender.length === 0) {
+      return (
+        <div className="text-center py-12 text-gray-500">
+          Aucune contribution archivée trouvée
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {entriesToRender.map(entry => (
+          <Card key={entry.id} className="overflow-hidden">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-medium">{entry.displayName || "Anonyme"}</p>
+                  <p className="text-sm text-gray-500">
+                    {entry.type === 'photo' ? 'Photo' : 'Témoignage'} • {formatDate(entry.timestamp || entry.createdAt)}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <XCircle className="h-5 w-5 text-red-500" />
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                    onClick={() => onRestore(entry.id)}
+                    disabled={restoringId === entry.id}
+                  >
+                    {restoringId === entry.id ? (
+                      <Loader className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4" />
                     )}
                   </Button>
                 </div>

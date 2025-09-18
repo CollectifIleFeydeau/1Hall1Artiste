@@ -148,51 +148,34 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
   }
 }
 
-export async function deleteCommunityEntry(entryId: string): Promise<boolean> {
-  try {
-    console.log(`[CommunityService] Suppression de l'entrée: ${entryId}`);
-    
-    // Supprimer l'entrée du stockage local
-    const entries = getStoredEntries();
-    const updatedEntries = entries.filter(entry => entry.id !== entryId);
-    saveEntries(updatedEntries);
-    
-    // Extraire le numéro d'issue depuis l'ID (format "issue-XX")
-    const issueMatch = entryId.match(/^issue-(\d+)$/);
-    if (issueMatch && issueMatch[1]) {
-      const issueNumber = issueMatch[1];
-      console.log(`[CommunityService] Suppression de l'issue GitHub #${issueNumber}`);
-      
-      try {
-        // Appeler l'API Worker pour fermer l'issue GitHub
-        const response = await fetch(`${WORKER_URL}/delete-issue`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            issueNumber: issueNumber
-          })
-        });
-        
-        if (response.ok) {
-          console.log(`[CommunityService] Issue GitHub #${issueNumber} fermée avec succès`);
-        } else {
-          console.warn(`[CommunityService] Erreur lors de la fermeture de l'issue #${issueNumber}:`, response.status);
-        }
-      } catch (apiError) {
-        console.warn(`[CommunityService] Impossible de fermer l'issue GitHub #${issueNumber}:`, apiError);
-        // Ne pas faire échouer la suppression locale même si l'API échoue
-      }
-    } else {
-      console.log(`[CommunityService] ID d'entrée ne correspond pas au format issue-XX: ${entryId}`);
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Erreur lors de la suppression de l\'entrée:', error);
-    return false;
-  }
+export async function deleteCommunityEntry(entryId: string): Promise<void> {
+  console.log(`[CommunityService] Suppression de l'entrée ${entryId}`);
+  
+  // Pour l'instant, on simule la suppression en marquant l'entrée comme supprimée
+  const entries = getStoredEntries();
+  const updatedEntries = entries.map(entry => 
+    entry.id === entryId 
+      ? { ...entry, moderation: { status: 'rejected' as const, moderatedAt: new Date().toISOString() } }
+      : entry
+  );
+  
+  saveEntries(updatedEntries);
+  console.log(`[CommunityService] Entrée ${entryId} marquée comme supprimée`);
+}
+
+export async function restoreCommunityEntry(entryId: string): Promise<void> {
+  console.log(`[CommunityService] Restauration de l'entrée ${entryId}`);
+  
+  // Marquer l'entrée comme en attente de modération
+  const entries = getStoredEntries();
+  const updatedEntries = entries.map(entry => 
+    entry.id === entryId 
+      ? { ...entry, moderation: { status: 'pending' as const, moderatedAt: null } }
+      : entry
+  );
+  
+  saveEntries(updatedEntries);
+  console.log(`[CommunityService] Entrée ${entryId} restaurée et marquée comme en attente`);
 }
 
 // Fonction pour soumettre une nouvelle contribution

@@ -117,6 +117,12 @@ const CommunityGallery: React.FC = () => {
 
   // Filtrer les entrées selon le filtre actuel
   const filteredEntries = entries.filter(entry => {
+    // Exclure les entrées rejetées (supprimées par l'admin)
+    if (entry.moderation?.status === 'rejected') {
+      return false;
+    }
+    
+    // Filtrer par type
     if (filter === "all") return true;
     return entry.type === filter;
   });
