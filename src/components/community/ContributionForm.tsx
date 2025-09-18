@@ -3,6 +3,8 @@ import Camera from "lucide-react/dist/esm/icons/camera";
 import Upload from "lucide-react/dist/esm/icons/upload";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Info from "lucide-react/dist/esm/icons/info";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Clock from "lucide-react/dist/esm/icons/clock";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 
@@ -28,6 +30,7 @@ interface ContributionFormProps {
 
 export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [contributionContext, setContributionContext] = useState<any>(null);
   const [selectedEventId, setSelectedEventId] = useState<string>("");
@@ -191,15 +194,21 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
       // Analytics: contribution submit success
       analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'success', entry_id: newEntry.id, type: newEntry.type });
       
-      // Réinitialiser le formulaire
-      console.log('[ContributionForm] Réinitialisation du formulaire...');
-      reset();
-      setImagePreview(null);
-      clearContributionContext();
-      setContributionContext(null);
-      setSelectedEventId("");
-      setSelectedLocationId("");
-      console.log('[ContributionForm] Formulaire réinitialisé');
+      // Afficher le message de succès
+      setIsSubmitted(true);
+      
+      // Réinitialiser le formulaire après un délai
+      setTimeout(() => {
+        console.log('[ContributionForm] Réinitialisation du formulaire...');
+        reset();
+        setImagePreview(null);
+        clearContributionContext();
+        setContributionContext(null);
+        setSelectedEventId("");
+        setSelectedLocationId("");
+        setIsSubmitted(false);
+        console.log('[ContributionForm] Formulaire réinitialisé');
+      }, 5000); // Afficher le message pendant 5 secondes
       
       // Notifier le parent
       console.log('[ContributionForm] Notification du composant parent...');
@@ -232,8 +241,27 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
           Contribuez à la mémoire collective de l'île Feydeau en partageant vos photos et témoignages.
         </p>
         
+        {/* Message de succès après soumission */}
+        {isSubmitted && (
+          <Alert className="mt-4 bg-green-50 border-green-200">
+            <CheckCircle className="h-4 w-4 text-green-500" />
+            <AlertDescription className="space-y-2">
+              <div className="font-medium text-green-800">
+                ✅ Votre contribution a été envoyée avec succès !
+              </div>
+              <div className="flex items-center gap-2 text-sm text-green-700">
+                <Clock className="h-3 w-3" />
+                <span>Elle sera visible sur le site dans 1-2 minutes.</span>
+              </div>
+              <div className="text-xs text-green-600">
+                Merci de contribuer à la mémoire collective de l'île Feydeau ! 🎉
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Afficher le contexte de contribution s'il existe */}
-        {contributionContext && (
+        {contributionContext && !isSubmitted && (
           <Alert className="mt-4 bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription>
@@ -243,13 +271,14 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
         )}
       </div>
 
-      <form 
-        onSubmit={handleSubmit(processSubmit)} 
-        className="space-y-6"
-        autoComplete="off"
-        data-form-type="contribution"
-        noValidate
-      >
+      {!isSubmitted && (
+        <form 
+          onSubmit={handleSubmit(processSubmit)} 
+          className="space-y-6"
+          autoComplete="off"
+          data-form-type="contribution"
+          noValidate
+        >
         {/* Nom d'affichage */}
         <div className="space-y-2">
           <Label htmlFor="displayName">Nom d'affichage (optionnel)</Label>
@@ -402,7 +431,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
             "Partager"
           )}
         </Button>
-      </form>
+        </form>
+      )}
     </motion.div>
   );
 };

@@ -1,0 +1,51 @@
+name: Sync Community Content
+
+on:
+  repository_dispatch:
+    types: [community-content-updated]
+  schedule:
+    - cron: '*/3 * * * *'  # Vérifier toutes les 3 minutes (au lieu de 10)
+  workflow_dispatch:
+
+jobs:
+  sync-content:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout main app repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Download community content
+        run: |
+          # Télécharger entries.json depuis community-content
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3.raw" \
+               -o public/data/community-content.json \
+               https://api.github.com/repos/CollectifFeydeau/community-content/contents/entries.json
+
+          # Télécharger les images récentes
+          mkdir -p public/images/community
+          
+          # Script pour télécharger les images depuis community-content
+          node scripts/sync-community-images.js
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add public/data/community-content.json public/images/community/
+          if ! git diff --staged --quiet; then
+            git commit -m "Sync community content [skip ci]"
+            git push
+          else
+            echo "No changes to sync"
+          fi
