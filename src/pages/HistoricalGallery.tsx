@@ -27,9 +27,12 @@ const HistoricalGallery: React.FC = () => {
       const photoList: HistoricalPhoto[] = [];
       
       // Déterminer le préfixe de base en fonction de l'environnement
-      const basePath = window.location.hostname.includes('github.io')
+      const isGitHubPages = window.location.hostname.includes('github.io');
+      const basePath = isGitHubPages
         ? '/1Hall1Artiste/images/historical'
         : '/images/historical';
+      
+      console.log(`[HistoricalGallery] Environment: ${isGitHubPages ? 'GitHub Pages' : 'Local'}, basePath: ${basePath}`);
       
       // Ajouter les photos du dossier historical (151 photos connues)
       for (let i = 1; i <= 151; i++) {
@@ -260,14 +263,20 @@ const HistoricalGallery: React.FC = () => {
                       ));
                     }}
                     onError={(e) => {
-                      console.warn(`Erreur chargement image ${photo.path}`);
-                      // Si l'image n'existe pas, on cache l'élément
+                      console.error(`❌ Erreur chargement image: ${photo.path}`);
+                      console.error(`   - Index: ${index}, ID: ${photo.id}`);
+                      console.error(`   - URL complète: ${window.location.origin}${photo.path}`);
+                      
+                      // Essayer de charger l'image de placeholder
                       const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      // Ou on peut masquer tout le container
-                      const container = target.closest('.aspect-square');
-                      if (container) {
-                        (container as HTMLElement).style.display = 'none';
+                      if (!target.src.includes('placeholder')) {
+                        target.src = '/images/placeholder-image.jpg';
+                      } else {
+                        // Si même le placeholder échoue, cacher l'élément
+                        const container = target.closest('.aspect-square');
+                        if (container) {
+                          (container as HTMLElement).style.display = 'none';
+                        }
                       }
                     }}
                   />

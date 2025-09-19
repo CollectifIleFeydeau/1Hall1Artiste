@@ -191,7 +191,10 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
       </DropdownMenu>
       
       <Dialog open={showQrCode} onOpenChange={setShowQrCode}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent 
+          className="sm:max-w-[425px]"
+          aria-describedby="qr-code-description"
+        >
           <DialogHeader>
             <DialogTitle>Scannez ce QR code</DialogTitle>
           </DialogHeader>
@@ -202,10 +205,9 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
               bgColor={"#ffffff"}
               fgColor={"#4a5d94"}
               level={"H"}
-              includeMargin={true}
             />
-            <p className="text-sm text-gray-500 mt-4 text-center">
-              Partagez facilement cette page en scannant le code QR
+            <p id="qr-code-description" className="text-sm text-gray-600 mt-4 text-center">
+              Scannez ce code avec votre téléphone pour accéder directement à cette page
             </p>
           </div>
           <DialogFooter>
