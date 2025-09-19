@@ -194,7 +194,7 @@ export const artists: Artist[] = [
     name: "Nota Bene",
     type: "concert",
     title: "Choeur de femmes Nota Bene",
-    presentation: "",
+    presentation: "Notre chœur est dirigé par Nelly ABRAN-FEVAI depuis 2013. Le répertoire est varié (classique, extraits d’opéra, chanson française/étrangère...). Nous répétons tous les lundis de 20h à 22h au Restaurant Inter générationnel du Breil, rue de Malville à Nantes, ainsi que 5 dimanches par saison. Nous serons heureuses de vous accueillir !",
     email: "contact@notabene.fr",
     instagram: ""
   },

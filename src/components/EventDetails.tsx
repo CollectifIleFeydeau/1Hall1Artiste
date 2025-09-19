@@ -398,20 +398,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           <div className="bg-[#f0f5ff] p-3 rounded-lg mb-4">
             {/* Afficher la présentation de l'artiste si disponible */}
             {artist?.presentation && (
-              <div className="space-y-3">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <ArtistDescription text={artist.presentation} />
-                  </div>
-                  {/* Bouton de like pour l'artiste */}
-                  <LikeButton 
-                    entryId={`artist-${artist.id}`}
-                    variant="icon"
-                    showCount={true}
-                    className="ml-2 flex-shrink-0"
-                  />
-                </div>
-              </div>
+              <ArtistDescription text={artist.presentation} />
             )}
             
             {/* Afficher les informations complètes de l'artiste pour les concerts */}
