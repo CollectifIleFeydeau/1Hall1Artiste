@@ -80,14 +80,6 @@ export const artists: Artist[] = [
     instagram: "https://www.instagram.com/apolline.design"
   },
   {
-    id: "malou-tual",
-    name: "Malou Tual",
-    type: "exposition",
-    title: "Peinture et sculpture sur bois",
-    presentation: "Artiste peintre et sculptrice sur bois. Malou Tual crée des œuvres uniques autour de masques ethniques et de mandalas émotionnels. Ses sculptures, façonnées à la main, allient sensibilité et tradition dans une démarche artisanale profonde.",
-    instagram: "https://www.instagram.com/l_ame_agit_dans_les_mains"
-  },
-  {
     id: "gael-caudoux",
     name: "Gaël Caudoux",
     type: "exposition",
@@ -115,8 +107,8 @@ export const artists: Artist[] = [
     id: "andry-shango-rajoelina",
     name: "Andry Shango Rajoelina",
     type: "exposition",
-    title: "Art multidisciplinaire",
-    presentation: "Artiste multidisciplinaire mêlant peinture, design et art textile, Andry \"Shango\" Rajoelina explore les identités africaines à travers une esthétique vibrante et contemporaine. Son univers visuel, riche en symboles et en couleurs, reflète un profond engagement culturel et narratif.",
+    title: "Illustration pop culture",
+    presentation: "A travers ses \"Super Families\", Andry \"Shango\" Rajoelina, character designer dans l'animation, rend hommage aux personnages de ses films, jeux vidéos, comics, séries TV et dessins animés préférés, des années 80 à aujourd'hui. De \"Retour Vers le Futur\" aux \"Avengers\" en passant par \"Les Indestructibles\", il s'amuse à redessiner à sa manière les grandes familles de la pop culture. Une série d'illustration pour les petits et les grands enfants.",
     instagram: "https://www.instagram.com/andryshango",
     email: "rajoelina.a@gmail.com"
   },

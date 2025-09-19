@@ -24,3 +24,16 @@ Chaque fois que vous apportez des modifications à votre application et que vous
 - Testez localement avec npm run dev
 - Déployez avec npm run deploy
 Votre site sera automatiquement mis à jour en quelques minutes.
+
+## 📈 Évolution du Système
+
+**v2.0 (Sept 2025) - Révolution Cloudinary + Firebase :**
+- ⚡ Upload instantané (0 seconde)
+- 🔥 Synchronisation temps réel
+- 🌍 CDN mondial Cloudinary
+- 📱 Interface simplifiée
+
+**v1.0 (Archivé) - Système GitHub :**
+- Repository `community-content` (archivé)
+- Workflows GitHub complexes
+- 30-60 secondes de délai

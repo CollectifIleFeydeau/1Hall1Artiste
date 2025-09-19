@@ -211,9 +211,15 @@ export function CommunityManagement() {
                 </div>
               )}
 
-              {entry.type === 'testimonial' && entry.content && (
+              {entry.type === 'testimonial' && (
                 <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                  <p className="text-gray-700">{entry.content}</p>
+                                    {(entry.content && entry.content.trim()) ? (
+                    <p className="text-gray-700">{entry.content.trim()}</p>
+                  ) : (entry.description && entry.description.trim()) ? (
+                    <p className="text-gray-700">{entry.description.trim()}</p>
+                  ) : (
+                    <p className="text-gray-500 italic">Contenu non disponible</p>
+                  )}
                 </div>
               )}
 
@@ -293,9 +299,15 @@ export function CommunityManagement() {
                 </div>
               )}
 
-              {entry.type === 'testimonial' && entry.content && (
+              {entry.type === 'testimonial' && (
                 <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                  <p className="text-gray-700">{entry.content}</p>
+                                    {(entry.content && entry.content.trim()) ? (
+                    <p className="text-gray-700">{entry.content.trim()}</p>
+                  ) : (entry.description && entry.description.trim()) ? (
+                    <p className="text-gray-700">{entry.description.trim()}</p>
+                  ) : (
+                    <p className="text-gray-500 italic">Contenu non disponible</p>
+                  )}
                 </div>
               )}
 

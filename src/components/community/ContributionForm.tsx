@@ -349,16 +349,6 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
             </AlertDescription>
           </Alert>
         )}
-        
-        {/* Afficher la notification de brouillon */}
-        {showDraftNotification && (
-          <Alert className="mt-4 bg-yellow-50 border-yellow-200">
-            <Info className="h-4 w-4 text-yellow-500" />
-            <AlertDescription>
-              Vous avez un brouillon enregistré. Souhaitez-vous le récupérer ?
-            </AlertDescription>
-          </Alert>
-        )}
       </div>
 
       {!isSubmitted && (
@@ -369,6 +359,71 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
           data-form-type="contribution"
           noValidate
         >
+        {/* Upload d'image - EN PREMIER */}
+        <div className="space-y-2">
+          <Label htmlFor="image">Photo</Label>
+          <div 
+            className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {imagePreview ? (
+              <div className="relative">
+                <img 
+                  src={imagePreview} 
+                  alt="Aperçu" 
+                  className="max-h-64 mx-auto rounded" 
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setImagePreview(null);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = "";
+                    }
+                  }}
+                >
+                  Changer l'image
+                </Button>
+              </div>
+            ) : (
+              <div className="py-8 flex flex-col items-center gap-2">
+                <Upload className="h-8 w-8 text-slate-400" />
+                <p className="text-sm text-slate-500">
+                  Cliquez pour sélectionner une image ou glissez-déposez
+                </p>
+                {isCompressing && (
+                  <Progress value={compressionProgress} max={100} />
+                )}
+              </div>
+            )}
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              accept="image/*" capture="environment"
+              className="hidden"
+              onChange={handleImageChange}
+              data-form-type="contribution-image"
+              autoComplete="off"
+            />
+          </div>
+        </div>
+
+        {/* Description/Texte - APRÈS LA PHOTO */}
+        <div className="space-y-2">
+          <Label htmlFor="description">Description ou témoignage</Label>
+          <Textarea 
+            id="description" 
+            placeholder="Décrivez votre photo ou partagez votre témoignage..."
+            autoComplete="off"
+            data-form-type="contribution-description"
+            {...register("description")}
+          />
+        </div>
+
         {/* Nom d'affichage */}
         <div className="space-y-2">
           <Label htmlFor="displayName">Nom d'affichage (optionnel)</Label>
@@ -441,73 +496,6 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
           />
         </div>
 
-        {/* Champs spécifiques au type */}
-        <div className="space-y-4">
-          {/* Upload d'image */}
-          <div className="space-y-2">
-            <Label htmlFor="image">Photo</Label>
-            <div 
-              className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {imagePreview ? (
-                <div className="relative">
-                  <img 
-                    src={imagePreview} 
-                    alt="Aperçu" 
-                    className="max-h-64 mx-auto rounded" 
-                  />
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setImagePreview(null);
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = "";
-                      }
-                    }}
-                  >
-                    Changer l'image
-                  </Button>
-                </div>
-              ) : (
-                <div className="py-8 flex flex-col items-center gap-2">
-                  <Upload className="h-8 w-8 text-slate-400" />
-                  <p className="text-sm text-slate-500">
-                    Cliquez pour sélectionner une image ou glissez-déposez
-                  </p>
-                  {isCompressing && (
-                    <Progress value={compressionProgress} max={100} />
-                  )}
-                </div>
-              )}
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageChange}
-                data-form-type="contribution-image"
-                autoComplete="off"
-              />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (optionnel)</Label>
-            <Textarea 
-              id="description" 
-              placeholder="Décrivez votre photo..."
-              autoComplete="off"
-              data-form-type="contribution-description"
-              {...register("description")}
-            />
-          </div>
-        </div>
 
         {/* Bouton de soumission */}
         <Button 
@@ -529,3 +517,5 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
     </motion.div>
   );
 };
+
+

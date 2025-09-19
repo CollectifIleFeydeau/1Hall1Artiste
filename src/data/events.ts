@@ -224,7 +224,7 @@ const eventScheduleData: EventDetails[] = [
     title: "PaoaNaoned",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "quai-turenne-10",
+    locationId: "allee-duguay-trouin-11",
 
   },
   {
@@ -246,15 +246,6 @@ const eventScheduleData: EventDetails[] = [
 
   },
   {
-    id: "expo-malou-tual",
-    artistId: "malou-tual",
-    title: "Peinture et sculpture sur bois",
-    time: "12h00 - 19h00, samedi et dimanche",
-    days: ["samedi", "dimanche"],
-    locationId: "allee-duguay-trouin-11",
-
-  },
-  {
     id: "expo-gael-caudoux",
     artistId: "gael-caudoux",
     title: "Cartographies imaginaires",
@@ -266,7 +257,7 @@ const eventScheduleData: EventDetails[] = [
   {
     id: "expo-andry-shango-rajoelina",
     artistId: "andry-shango-rajoelina",
-    title: "Art multidisciplinaire",
+    title: "Illustration pop culture",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
     locationId: "allee-duguay-trouin-16",
