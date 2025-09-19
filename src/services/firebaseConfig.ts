@@ -6,6 +6,7 @@ import { getAnalytics } from 'firebase/analytics';
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
   authDomain: "collectif-ile-feydeau----app.firebaseapp.com",
+  databaseURL: "https://collectif-ile-feydeau----app-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "collectif-ile-feydeau----app",
   storageBucket: "collectif-ile-feydeau----app.firebasestorage.app",
   messagingSenderId: "705686402200",

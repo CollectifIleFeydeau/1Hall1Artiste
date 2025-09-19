@@ -15,6 +15,8 @@ import { EventForm } from "@/components/EventForm";
 import { AdminLogin } from "@/components/AdminLogin";
 import { toast } from "@/components/ui/use-toast";
 import { CommunityManagement } from "@/components/CommunityManagement";
+import { LikesTestComponent } from "@/components/test/LikesTestComponent";
+import { LikesStatsComponent } from "@/components/admin/LikesStatsComponent";
 
 // Créer un logger pour le composant Admin
 const logger = createLogger('Admin');
@@ -287,12 +289,14 @@ export default function Admin() {
       
       <div className="space-y-6">
         <Tabs defaultValue="coordinates" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="events">Événements</TabsTrigger>
-            <TabsTrigger value="locations">Lieux</TabsTrigger>
-            <TabsTrigger value="community">Contributions</TabsTrigger>
-            <TabsTrigger value="import-export">Import/Export</TabsTrigger>
-            <TabsTrigger value="reset">Réinitialisation</TabsTrigger>
+          <TabsList className="w-full flex flex-wrap justify-center gap-1 h-auto p-1">
+            <TabsTrigger value="events" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Événements</TabsTrigger>
+            <TabsTrigger value="locations" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Lieux</TabsTrigger>
+            <TabsTrigger value="community" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Contributions</TabsTrigger>
+            <TabsTrigger value="likes-stats" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">📊 Stats</TabsTrigger>
+            <TabsTrigger value="likes-test" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">🧪 Test</TabsTrigger>
+            <TabsTrigger value="import-export" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Import/Export</TabsTrigger>
+            <TabsTrigger value="reset" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Reset</TabsTrigger>
           </TabsList>
           
           {/* Onglet de gestion des coordonnées */}
@@ -401,6 +405,16 @@ export default function Admin() {
           {/* Onglet de gestion des contributions */}
           <TabsContent value="community" className="space-y-4">
             <CommunityManagement />
+          </TabsContent>
+          
+          {/* Onglet des statistiques de likes */}
+          <TabsContent value="likes-stats" className="space-y-4">
+            <LikesStatsComponent />
+          </TabsContent>
+          
+          {/* Onglet de test du système de likes */}
+          <TabsContent value="likes-test" className="space-y-4">
+            <LikesTestComponent />
           </TabsContent>
           
           {/* Onglet d'import/export */}

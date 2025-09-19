@@ -13,6 +13,7 @@ import { Button } from "../../components/ui/button";
 import { CommunityEntry } from "../../types/communityTypes";
 import { cn } from "../../lib/utils";
 import { LocalImage } from "./LocalImage";
+import { LikeButton } from "./LikeButton";
 
 interface EntryDetailProps {
   entry: CommunityEntry;
@@ -153,8 +154,12 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, curren
 
           </div>
 
-          {/* Pied de page simplifié */}
-          <div className="p-3 border-t text-center">
+          {/* Pied de page avec like et date */}
+          <div className="p-3 border-t flex items-center justify-between">
+            <LikeButton 
+              entryId={entry.id} 
+              variant="full"
+            />
             <span className="text-sm text-slate-500">
               {format(new Date(entry.timestamp), "d MMMM yyyy", { locale: fr })}
             </span>

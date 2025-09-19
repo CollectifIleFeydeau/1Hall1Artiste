@@ -124,7 +124,7 @@ export const checkAndSendErrors = async (): Promise<void> => {
   const errors = getStoredErrors();
   
   // Envoyer les erreurs si leur nombre dépasse un certain seuil
-  if (errors.length >= 5) {
+  if (errors.length >= 1) {
     await sendErrorsToTrackingService();
   } else if (errors.length > 0) {
     console.log(`${errors.length} erreur(s) en attente d'envoi`);
@@ -217,3 +217,31 @@ export const createErrorBoundaryHandler = (componentName: string) => {
     captureError(error, componentName, { componentStack: info.componentStack });
   };
 };
+
+/**
+ * Fonction de test pour déclencher manuellement l'envoi d'erreurs
+ * À utiliser dans la console pour tester le système
+ */
+export const testErrorReporting = async (): Promise<void> => {
+  console.log('🧪 Test du système de suivi d\'erreurs...');
+  
+  // Créer une erreur de test
+  captureError('Erreur de test pour vérifier le système de suivi', 'TestErrorReporting', {
+    testMode: true,
+    timestamp: new Date().toISOString()
+  });
+  
+  // Forcer l'envoi immédiat
+  const success = await sendErrorsToTrackingService();
+  
+  if (success) {
+    console.log('✅ Test réussi : Erreur envoyée par email');
+  } else {
+    console.log('❌ Test échoué : Erreur non envoyée');
+  }
+};
+
+// Exposer la fonction de test globalement pour la console
+if (typeof window !== 'undefined') {
+  (window as any).testErrorReporting = testErrorReporting;
+}

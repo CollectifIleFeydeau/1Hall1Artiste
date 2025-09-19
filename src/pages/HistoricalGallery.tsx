@@ -5,6 +5,7 @@ import { useSwipeable } from "react-swipeable";
 import { Button } from "@/components/ui/button";
 import { AnimatedPageTransition } from "@/components/AnimatedPageTransition";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
+import { LikeButton } from "@/components/community/LikeButton";
 
 interface HistoricalPhoto {
   id: string;
@@ -270,6 +271,13 @@ const HistoricalGallery: React.FC = () => {
                       }
                     }}
                   />
+                  {/* Bouton de like en overlay */}
+                  <LikeButton 
+                    entryId={`historical-${photo.id}`}
+                    variant="compact"
+                    className="absolute bottom-2 right-2"
+                  />
+                  
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
                     <span className="text-white text-xs font-medium">
                       Photo {index + 1}
@@ -333,6 +341,15 @@ const HistoricalGallery: React.FC = () => {
               {/* Indicateur de position */}
               <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
                 {selectedIndex + 1} / {photos.length}
+              </div>
+
+              {/* Bouton de like dans la modal */}
+              <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10">
+                <LikeButton 
+                  entryId={`historical-${selectedPhoto.id}`}
+                  variant="full"
+                  className="bg-black/60 backdrop-blur-sm text-white hover:bg-black/80"
+                />
               </div>
 
               {/* Instructions swipe sur mobile */}

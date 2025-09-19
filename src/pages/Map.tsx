@@ -28,6 +28,7 @@ import { type Event, events, getLocationIdForEvent } from "@/data/events";
 import { useData, useEvents, useLocations } from "@/hooks/useData";
 import { toast } from "@/components/ui/use-toast";
 import { saveEvent, removeSavedEvent, getSavedEvents } from "../services/savedEvents";
+import { LikeButton } from "@/components/community/LikeButton";
 import { unlockAchievement, AchievementType } from "../services/achievements";
 // Créer un logger pour le composant Map
 const logger = createLogger('Map');
@@ -502,14 +503,23 @@ const Map = ({ fullScreen = false }: MapProps) => {
               <h2 className="text-xl font-bold text-[#4a5d94]">
                 {mapLocations.find(l => l.id === activeLocation)?.name}
               </h2>
-              <Button variant="ghost" size="sm" className="-mt-2 -mr-2" onClick={() => {
-                if (activeLocation) {
-                  analytics.trackInteraction(EventAction.BACK, 'location_details_close', { building_id: activeLocation });
-                }
-                setActiveLocation(null);
-              }}>
-                <X className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center space-x-2">
+                {/* Bouton de like pour le bâtiment */}
+                <LikeButton 
+                  entryId={`building-${activeLocation}`}
+                  variant="icon"
+                  showCount={true}
+                />
+                
+                <Button variant="ghost" size="sm" className="-mt-2 -mr-2" onClick={() => {
+                  if (activeLocation) {
+                    analytics.trackInteraction(EventAction.BACK, 'location_details_close', { building_id: activeLocation });
+                  }
+                  setActiveLocation(null);
+                }}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             
             <p className="text-sm text-[#8c9db5] mb-3">

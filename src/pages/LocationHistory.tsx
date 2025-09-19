@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { locations } from "@/data/locations";
 import { setLocationContributionContext } from "@/services/contextualContributionService";
+import { LikeButton } from "@/components/community/LikeButton";
 
 // Créer un logger pour le composant LocationHistory
 const logger = createLogger('LocationHistory');
@@ -236,27 +237,36 @@ export function LocationHistory() {
                 <CardTitle className="text-xl font-bold text-[#4a5d94] mr-2">
                   {selectedLocationData.name}
                 </CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white whitespace-nowrap px-2 py-1 text-xs flex-shrink-0"
-                  onClick={() => {
-                    // Rediriger vers la carte avec le point mis en évidence
-                    navigate('/map', { 
-                      state: { 
-                        highlightLocationId: selectedLocationData.id,
-                        fromHistory: true // Indiquer que la navigation vient de l'historique
-                      } 
-                    });
-                    analytics.trackMapInteraction(EventAction.LOCATION_VIEW, {
-                      building_id: selectedLocationData.id,
-                      from: 'history_page'
-                    });
-                  }}
-                >
-                  <MapPin className="h-3 w-3 mr-1" />
-                  Voir sur la carte
-                </Button>
+                <div className="flex items-center space-x-2">
+                  {/* Bouton de like pour le lieu */}
+                  <LikeButton 
+                    entryId={`location-${selectedLocationData.id}`}
+                    variant="icon"
+                    showCount={true}
+                  />
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white whitespace-nowrap px-2 py-1 text-xs flex-shrink-0"
+                    onClick={() => {
+                      // Rediriger vers la carte avec le point mis en évidence
+                      navigate('/map', { 
+                        state: { 
+                          highlightLocationId: selectedLocationData.id,
+                          fromHistory: true // Indiquer que la navigation vient de l'historique
+                        } 
+                      });
+                      analytics.trackMapInteraction(EventAction.LOCATION_VIEW, {
+                        building_id: selectedLocationData.id,
+                        from: 'history_page'
+                      });
+                    }}
+                  >
+                    <MapPin className="h-3 w-3 mr-1" />
+                    Voir sur la carte
+                  </Button>
+                </div>
               </div>
               <CardDescription className="text-sm text-slate-600 mt-2 mb-2">
                 {selectedLocationData.description}

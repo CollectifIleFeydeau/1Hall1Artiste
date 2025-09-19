@@ -27,6 +27,7 @@ import { InstagramCarousel } from "@/components/InstagramCarousel";
 import { TruncatedText } from "@/components/TruncatedText";
 import { addToCalendar, isCalendarSupported, CalendarErrorType } from "@/services/calendarService";
 import { AppImage } from "@/components/AppImage";
+import { LikeButton } from "@/components/community/LikeButton";
 
 interface EventDetailsProps {
   event: Event | null;
@@ -315,6 +316,13 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
         {/* Barre d'icônes en haut */}
         <div className="absolute top-0 left-0 right-0 flex justify-end items-center p-3 bg-white z-10">
           <div className="flex space-x-4">
+            {/* Bouton de like */}
+            <LikeButton 
+              entryId={`event-${event.id}`}
+              variant="icon"
+              showCount={true}
+            />
+            
             <button
               className={`flex items-center justify-center h-10 w-10 rounded-full border ${isEventSaved ? "border-[#ff7a45] text-[#ff7a45]" : "border-gray-300 text-gray-500"} transition-all duration-200 hover:shadow-sm`}
               onClick={toggleSaveEvent}
@@ -390,12 +398,25 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
           <div className="bg-[#f0f5ff] p-3 rounded-lg mb-4">
             {/* Afficher la présentation de l'artiste si disponible */}
             {artist?.presentation && (
-              <ArtistDescription text={artist.presentation} />
+              <div className="space-y-3">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <ArtistDescription text={artist.presentation} />
+                  </div>
+                  {/* Bouton de like pour l'artiste */}
+                  <LikeButton 
+                    entryId={`artist-${artist.id}`}
+                    variant="icon"
+                    showCount={true}
+                    className="ml-2 flex-shrink-0"
+                  />
+                </div>
+              </div>
             )}
             
             {/* Afficher les informations complètes de l'artiste pour les concerts */}
             {event.type === "concert" && artist && (
-              <div className="space-y-4">
+              <div className="space-y-4 mt-4">
                 {/* Email de contact */}
                 {artist.email && (
                   <div>

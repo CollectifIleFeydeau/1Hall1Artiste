@@ -6,6 +6,7 @@ import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import { TruncatedText } from "@/components/TruncatedText";
+import { LikeButton } from "@/components/community/LikeButton";
 
 import React from "react";
 
@@ -66,18 +67,30 @@ export const EventCard = ({ event, isSaved, onEventClick, onSaveClick }: EventCa
             </div>
           </div>
           <div className="flex flex-col items-end space-y-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-1 h-auto"
-              onClick={onSaveClick}
-            >
-              {isSaved ? (
-                <BookmarkCheck className="h-5 w-5 text-[#ff7a45]" />
-              ) : (
-                <Bookmark className="h-5 w-5 text-[#8c9db5]" />
-              )}
-            </Button>
+            <div className="flex items-center space-x-1">
+              {/* Bouton de like */}
+              <LikeButton 
+                entryId={`event-${event.id}`}
+                variant="compact"
+                showCount={true}
+                className="scale-75 -mr-1"
+              />
+              
+              {/* Bouton bookmark */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-1 h-auto"
+                onClick={onSaveClick}
+              >
+                {isSaved ? (
+                  <BookmarkCheck className="h-5 w-5 text-[#ff7a45]" />
+                ) : (
+                  <Bookmark className="h-5 w-5 text-[#8c9db5]" />
+                )}
+              </Button>
+            </div>
+            
             <span className={`text-xs px-2 py-1 rounded-full ${
               event.type === "exposition" 
                 ? "bg-[#e0ebff] text-[#4a5d94]" 
