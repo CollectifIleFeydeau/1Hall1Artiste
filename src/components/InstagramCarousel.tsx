@@ -72,17 +72,32 @@ export function InstagramCarousel({ artists, events, title = "Découvrez les art
     return url.split('/').pop() || '';
   };
 
-  // Function to open Instagram profile in a new tab
+  // Function to open Instagram profile in a new tab with security
   const openInstagramProfile = (instagram: string) => {
     if (!instagram) return;
     
-    // Make sure the URL has the correct format
-    let url = instagram;
-    if (!url.startsWith('http')) {
-      url = 'https://' + url;
+    try {
+      // Validate Instagram URL for security
+      if (!instagram.includes('instagram.com')) {
+        console.warn('URL non Instagram détectée:', instagram);
+        return;
+      }
+      
+      // Make sure the URL has the correct format
+      let url = instagram;
+      if (!url.startsWith('http')) {
+        url = 'https://' + url;
+      }
+      
+      // Verify window.open is available
+      if (typeof window !== 'undefined' && window.open) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        console.warn('window.open non disponible');
+      }
+    } catch (error) {
+      console.error('Erreur ouverture profil Instagram:', error);
     }
-    
-    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   if (profiles.length === 0) {

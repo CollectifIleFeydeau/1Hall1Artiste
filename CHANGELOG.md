@@ -12,8 +12,15 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ### Modifié
 
 ### Corrigé
+- **Sécurité** : Résolution des erreurs CSP (Content Security Policy) et CORB (Cross-Origin Read Blocking)
+  - Remplacement du CDN EmailJS externe par le package npm @emailjs/browser
+  - Suppression du script externe `https://cdn.emailjs.com/sdk/4.1.0/email.min.js` de index.html
+  - Ajout d'en-têtes CSP sécurisés dans netlify.toml
+  - Mise à jour du Service Worker pour éviter la mise en cache des anciens scripts EmailJS
+  - Amélioration de la sécurité avec des en-têtes X-Frame-Options, X-Content-Type-Options, etc.
 
 ### Supprimé
+- **Dépendances externes** : Suppression du chargement CDN EmailJS pour éviter les problèmes CORB
 
 ## [1.3.4] - 2025-09-20
 

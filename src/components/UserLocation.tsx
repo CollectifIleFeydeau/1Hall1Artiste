@@ -51,39 +51,49 @@ const UserLocation: React.FC<UserLocationProps> = ({
   
   // Fonction pour vérifier si la localisation a été activée récemment
   const isRecentlyActivated = (): boolean => {
-    const activationTimestamp = localStorage.getItem(LOCATION_ACTIVATION_TIMESTAMP_KEY);
-    if (!activationTimestamp) return false;
-    
-    const timestamp = parseInt(activationTimestamp, 10);
-    const now = Date.now();
-    return now - timestamp < RECENT_ACTIVATION_THRESHOLD;
+    try {
+      const activationTimestamp = localStorage.getItem(LOCATION_ACTIVATION_TIMESTAMP_KEY);
+      if (!activationTimestamp) return false;
+      
+      const timestamp = parseInt(activationTimestamp, 10);
+      const now = Date.now();
+      return now - timestamp < RECENT_ACTIVATION_THRESHOLD;
+    } catch (storageError) {
+      console.warn('Erreur localStorage dans isRecentlyActivated:', storageError);
+      return false;
+    }
   };
   
   // Fonction pour vérifier si une notification peut être affichée
   const canShowNotification = (notificationKey: string): boolean => {
-    const now = Date.now();
-    const lastNotificationTimestamp = localStorage.getItem(LOCATION_NOTIFICATION_TIMESTAMP_KEY);
-    const lastNotificationKey = localStorage.getItem(LOCATION_NOTIFICATION_KEY);
-    
-    if (lastNotificationTimestamp) {
-      const lastTime = parseInt(lastNotificationTimestamp, 10);
+    try {
+      const now = Date.now();
+      const lastNotificationTimestamp = localStorage.getItem(LOCATION_NOTIFICATION_TIMESTAMP_KEY);
+      const lastNotificationKey = localStorage.getItem(LOCATION_NOTIFICATION_KEY);
       
-      // Si moins de 30 minutes se sont écoulées, ne pas afficher
-      if (now - lastTime < LOCATION_NOTIFICATION_COOLDOWN) {
-        return false;
+      if (lastNotificationTimestamp) {
+        const lastTime = parseInt(lastNotificationTimestamp, 10);
+        
+        // Si moins de 30 minutes se sont écoulées, ne pas afficher
+        if (now - lastTime < LOCATION_NOTIFICATION_COOLDOWN) {
+          return false;
+        }
+        
+        // Vérifier si c'est la même notification
+        if (lastNotificationKey === notificationKey) {
+          return false;
+        }
       }
       
-      // Vérifier si c'est la même notification
-      if (lastNotificationKey === notificationKey) {
-        return false;
-      }
+      // Mettre à jour le timestamp et la clé de la dernière notification
+      localStorage.setItem(LOCATION_NOTIFICATION_TIMESTAMP_KEY, now.toString());
+      localStorage.setItem(LOCATION_NOTIFICATION_KEY, notificationKey);
+      lastNotificationRef.current = notificationKey;
+      return true;
+    } catch (storageError) {
+      console.warn('Erreur localStorage dans canShowNotification:', storageError);
+      return false;
     }
-    
-    // Mettre à jour le timestamp et la clé de la dernière notification
-    localStorage.setItem(LOCATION_NOTIFICATION_TIMESTAMP_KEY, now.toString());
-    localStorage.setItem(LOCATION_NOTIFICATION_KEY, notificationKey);
-    lastNotificationRef.current = notificationKey;
-    return true;
   };
   
   // Fonction pour gérer la mise à jour de position
@@ -206,8 +216,12 @@ const UserLocation: React.FC<UserLocationProps> = ({
   
   // Démarrer le suivi de la position de l'utilisateur
   useEffect(() => {
-    // Enregistrer le timestamp d'activation
-    localStorage.setItem(LOCATION_ACTIVATION_TIMESTAMP_KEY, Date.now().toString());
+    // Enregistrer le timestamp d'activation avec protection
+    try {
+      localStorage.setItem(LOCATION_ACTIVATION_TIMESTAMP_KEY, Date.now().toString());
+    } catch (storageError) {
+      console.warn('Erreur localStorage dans useEffect:', storageError);
+    }
     
     // Créer une référence stable aux fonctions pour éviter les redémarrages
     const locationUpdateAdapter = (_: number, __: number, gpsPosition?: GeoPosition) => {

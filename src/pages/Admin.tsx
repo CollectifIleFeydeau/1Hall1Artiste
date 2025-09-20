@@ -19,6 +19,7 @@ import { LikesTestComponent } from "@/components/test/LikesTestComponent";
 import { LikesStatsComponent } from "@/components/admin/LikesStatsComponent";
 import { RealTimeStatsComponent } from "@/components/admin/RealTimeStatsComponent";
 import VersionInfo from "@/components/admin/VersionInfo";
+import { EventManagement } from "@/components/admin/EventManagement";
 
 // Créer un logger pour le composant Admin
 const logger = createLogger('Admin');
@@ -394,16 +395,7 @@ export default function Admin() {
           
           {/* Onglet de gestion des événements */}
           <TabsContent value="events">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-[#4a5d94]">Gestion des événements</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <EventForm onSuccess={() => {
-                  logger.info('Événement ajouté avec succès');
-                }} />
-              </CardContent>
-            </Card>
+            <EventManagement />
           </TabsContent>
           
           {/* Onglet de gestion des contributions */}

@@ -43,10 +43,15 @@ interface AudioPlayerProps {
 }
 
 export const AudioPlayer = ({ audioSrc, autoPlay = true }: AudioPlayerProps) => {
-  // Récupérer la préférence utilisateur depuis le localStorage
+  // Récupérer la préférence utilisateur depuis le localStorage avec protection
   const getSavedPreference = (): boolean => {
-    const saved = localStorage.getItem('audioPlayerState');
-    return saved !== null ? saved === 'playing' : autoPlay;
+    try {
+      const saved = localStorage.getItem('audioPlayerState');
+      return saved !== null ? saved === 'playing' : autoPlay;
+    } catch (storageError) {
+      console.warn('Erreur localStorage dans AudioPlayer:', storageError);
+      return autoPlay;
+    }
   };
 
   const [isPlaying, setIsPlaying] = useState(getSavedPreference());
@@ -88,8 +93,12 @@ export const AudioPlayer = ({ audioSrc, autoPlay = true }: AudioPlayerProps) => 
         setIsAnimating(false);
       }
       
-      // Sauvegarder la préférence utilisateur
-      localStorage.setItem('audioPlayerState', isPlaying ? 'playing' : 'paused');
+      // Sauvegarder la préférence utilisateur avec protection
+      try {
+        localStorage.setItem('audioPlayerState', isPlaying ? 'playing' : 'paused');
+      } catch (storageError) {
+        console.warn('Erreur sauvegarde localStorage dans AudioPlayer:', storageError);
+      }
     }
   }, [isPlaying]);
 

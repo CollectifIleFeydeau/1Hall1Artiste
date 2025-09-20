@@ -82,7 +82,7 @@ const eventScheduleData: EventDetails[] = [
     id: "concert-violoncelles",
     artistId: "violoncelles", // Same artist, different event
     title: "Ensemble de violoncelles du conservatoire",
-    time: "17h45 - 18h15",
+    time: "17h00 - 17h30",
     days: ["samedi"],
     locationId: "quai-turenne-9-concert",
   },

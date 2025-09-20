@@ -1,7 +1,7 @@
 // Service Worker for Collectif Feydeau App
-// Version 1.2.0
+// Version 1.2.1 - Fixed EmailJS CORB issue
 
-const CACHE_NAME = 'collectif-feydeau-cache-v1';
+const CACHE_NAME = 'collectif-feydeau-cache-v2';
 const SAVED_EVENTS_CACHE_NAME = 'collectif-feydeau-saved-events-v1';
 const IMAGES_CACHE_NAME = 'collectif-feydeau-images-v1';
 const NOTIFICATIONS_STORE = 'collectif-feydeau-notifications';
@@ -99,6 +99,11 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   // Skip cross-origin requests
   if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+  
+  // Skip EmailJS CDN requests (prevent CORB issues)
+  if (event.request.url.includes('cdn.emailjs.com') || event.request.url.includes('email.min.js')) {
     return;
   }
   
