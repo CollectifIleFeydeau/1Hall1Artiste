@@ -1,18 +1,10 @@
 // Configuration Firebase pour l'application Collectif Île Feydeau
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
+import { getFirebaseConfig } from '@/config/firebase-prod';
 
-// Configuration Firebase
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
-  authDomain: "collectif-ile-feydeau----app.firebaseapp.com",
-  databaseURL: "https://collectif-ile-feydeau----app-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "collectif-ile-feydeau----app",
-  storageBucket: "collectif-ile-feydeau----app.firebasestorage.app",
-  messagingSenderId: "705686402200",
-  appId: "1:705686402200:web:3e36a3b2c359a62be14ced",
-  measurementId: "G-D6K43TLW5Y" // ID Google Analytics
-};
+// Obtenir la configuration Firebase (env ou production)
+const firebaseConfig = getFirebaseConfig();
 
 // Variable pour stocker l'instance Firebase
 let firebaseApp: any = null;
@@ -22,6 +14,7 @@ const initializeFirebase = () => {
   // Vérifier si la clé API est disponible
   if (firebaseConfig.apiKey) {
     try {
+      console.log('🔥 [Firebase] Initialisation avec clé API:', firebaseConfig.apiKey.substring(0, 10) + '...');
       return initializeApp(firebaseConfig);
     } catch (error) {
       console.warn('Erreur lors de l\'initialisation de Firebase:', error);

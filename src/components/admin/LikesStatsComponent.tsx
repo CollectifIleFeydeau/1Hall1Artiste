@@ -99,6 +99,17 @@ export const LikesStatsComponent: React.FC = () => {
 
   useEffect(() => {
     loadStats();
+    
+    // Setup polling pour mise à jour temps réel (toutes les 10 secondes)
+    const interval = setInterval(() => {
+      console.log('🔄 Mise à jour automatique des statistiques likes');
+      loadStats();
+    }, 10000); // 10 secondes pour les stats (moins fréquent que les likes individuels)
+    
+    return () => {
+      console.log('🔇 Arrêt polling statistiques likes');
+      clearInterval(interval);
+    };
   }, []);
 
   if (loading) {
@@ -249,7 +260,7 @@ export const LikesStatsComponent: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
             <div className="space-y-2">
               <p><strong>Base de données :</strong> Firebase Realtime Database</p>
-              <p><strong>Synchronisation :</strong> Temps réel (polling 5s)</p>
+              <p><strong>Synchronisation :</strong> Temps réel (likes: 5s, stats: 10s)</p>
             </div>
             <div className="space-y-2">
               <p><strong>Prévention spam :</strong> 1 like par session utilisateur</p>

@@ -362,11 +362,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
         {/* Upload d'image - EN PREMIER */}
         <div className="space-y-2">
           <Label htmlFor="image">Photo</Label>
-          <div 
-            className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {imagePreview ? (
+          {imagePreview ? (
+            <div className="border-2 border-dashed rounded-lg p-4 text-center">
               <div className="relative">
                 <img 
                   src={imagePreview} 
@@ -378,8 +375,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
                   variant="outline" 
                   size="sm" 
                   className="mt-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={() => {
                     setImagePreview(null);
                     if (fileInputRef.current) {
                       fileInputRef.current.value = "";
@@ -389,27 +385,68 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
                   Changer l'image
                 </Button>
               </div>
-            ) : (
-              <div className="py-8 flex flex-col items-center gap-2">
+            </div>
+          ) : (
+            <div className="border-2 border-dashed rounded-lg p-4 text-center">
+              <div className="py-4 flex flex-col items-center gap-4">
                 <Upload className="h-8 w-8 text-slate-400" />
-                <p className="text-sm text-slate-500">
-                  Cliquez pour sélectionner une image ou glissez-déposez
+                <p className="text-sm text-slate-500 mb-2">
+                  Choisissez comment ajouter votre photo
                 </p>
+                
+                {/* Boutons pour mobile */}
+                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 flex items-center gap-2"
+                    onClick={() => {
+                      // Créer un input temporaire pour l'appareil photo
+                      const cameraInput = document.createElement('input');
+                      cameraInput.type = 'file';
+                      cameraInput.accept = 'image/*';
+                      cameraInput.capture = 'environment';
+                      cameraInput.onchange = (e) => {
+                        const event = e as any;
+                        handleImageChange(event);
+                      };
+                      cameraInput.click();
+                    }}
+                  >
+                    <Camera className="h-4 w-4" />
+                    Appareil photo
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 flex items-center gap-2"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4" />
+                    Galerie
+                  </Button>
+                </div>
+                
                 {isCompressing && (
-                  <Progress value={compressionProgress} max={100} />
+                  <div className="w-full max-w-sm mt-2">
+                    <Progress value={compressionProgress} max={100} />
+                  </div>
                 )}
               </div>
-            )}
-            <input 
-              type="file" 
-              ref={fileInputRef}
-              accept="image/*" capture="environment"
-              className="hidden"
-              onChange={handleImageChange}
-              data-form-type="contribution-image"
-              autoComplete="off"
-            />
-          </div>
+            </div>
+          )}
+          
+          {/* Input caché pour la galerie */}
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageChange}
+            data-form-type="contribution-image"
+            autoComplete="off"
+          />
         </div>
 
         {/* Description/Texte - APRÈS LA PHOTO */}

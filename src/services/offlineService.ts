@@ -274,7 +274,6 @@ export const preloadHistoryImages = async (): Promise<string[]> => {
           timestamp: Date.now()
         }, CACHE_EXPIRY);
         
-        console.log(`[OfflineService] Image d'historique préchargée: ${url} (${blob.size} octets)`);
         
         // Également mettre en cache dans le cache du navigateur via le service worker
         if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -294,7 +293,9 @@ export const preloadHistoryImages = async (): Promise<string[]> => {
     const results = await Promise.all(preloadPromises);
     const successfulUrls = results.filter(url => url !== null) as string[];
     
-    console.log(`[OfflineService] ${successfulUrls.length}/${imageUrls.length} images d'historique préchargées`);
+    if (successfulUrls.length < imageUrls.length) {
+      console.log(`[OfflineService] ${successfulUrls.length}/${imageUrls.length} images d'historique préchargées`);
+    }
     
     return successfulUrls;
   } catch (error) {
@@ -339,7 +340,6 @@ export const preloadMapImage = async (): Promise<boolean> => {
       timestamp: Date.now()
     }, CACHE_EXPIRY);
     
-    console.log(`[OfflineService] Image de la carte préchargée (${blob.size} octets)`);
     
     // Également mettre en cache dans le cache du navigateur via le service worker
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {

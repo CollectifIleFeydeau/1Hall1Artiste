@@ -17,6 +17,8 @@ import { toast } from "@/components/ui/use-toast";
 import { CommunityManagement } from "@/components/CommunityManagement";
 import { LikesTestComponent } from "@/components/test/LikesTestComponent";
 import { LikesStatsComponent } from "@/components/admin/LikesStatsComponent";
+import { RealTimeStatsComponent } from "@/components/admin/RealTimeStatsComponent";
+import VersionInfo from "@/components/admin/VersionInfo";
 
 // Créer un logger pour le composant Admin
 const logger = createLogger('Admin');
@@ -293,8 +295,10 @@ export default function Admin() {
             <TabsTrigger value="events" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Événements</TabsTrigger>
             <TabsTrigger value="locations" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Lieux</TabsTrigger>
             <TabsTrigger value="community" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Contributions</TabsTrigger>
-            <TabsTrigger value="likes-stats" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">📊 Stats</TabsTrigger>
+            <TabsTrigger value="likes-stats" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">👍 Likes</TabsTrigger>
+            <TabsTrigger value="analytics-stats" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">📊 Analytics</TabsTrigger>
             <TabsTrigger value="likes-test" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">🧪 Test</TabsTrigger>
+            <TabsTrigger value="version" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">📦 Version</TabsTrigger>
             <TabsTrigger value="import-export" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Import/Export</TabsTrigger>
             <TabsTrigger value="reset" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Reset</TabsTrigger>
           </TabsList>
@@ -412,9 +416,21 @@ export default function Admin() {
             <LikesStatsComponent />
           </TabsContent>
           
+          {/* Onglet des statistiques Analytics temps réel */}
+          <TabsContent value="analytics-stats" className="space-y-4">
+            <RealTimeStatsComponent />
+          </TabsContent>
+          
           {/* Onglet de test du système de likes */}
           <TabsContent value="likes-test" className="space-y-4">
             <LikesTestComponent />
+          </TabsContent>
+          
+          {/* Onglet des informations de version */}
+          <TabsContent value="version" className="space-y-4">
+            <div className="flex justify-center">
+              <VersionInfo />
+            </div>
           </TabsContent>
           
           {/* Onglet d'import/export */}

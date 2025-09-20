@@ -1,0 +1,106 @@
+name: 🚀 Version & Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Type de version à créer'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  version-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 🔧 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: 📦 Install dependencies
+      run: npm ci
+
+    - name: 🏷️ Auto-increment version (push to main)
+      if: github.event_name == 'push'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Vérifier s'il y a des changements dans CHANGELOG [Non publié]
+        if grep -q "### Ajouté" CHANGELOG.md && grep -A 20 "## \[Non publié\]" CHANGELOG.md | grep -q -E "(- |✨|🐛|🔧|🛡️)"; then
+          echo "📝 Changements détectés dans CHANGELOG, création d'une version patch"
+          npm run version:patch
+          
+          # Commit et push des changements de version
+          git add package.json CHANGELOG.md
+          git commit -m "chore: bump version to v$(node -p "require('./package.json').version")"
+          git push
+          
+          # Créer et pousser le tag
+          VERSION=$(node -p "require('./package.json').version")
+          git tag "v$VERSION"
+          git push --tags
+        else
+          echo "📝 Aucun changement significatif détecté dans CHANGELOG"
+        fi
+
+    - name: 🏷️ Manual version increment (workflow_dispatch)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        npm run version:${{ github.event.inputs.version_type }}
+        
+        # Commit et push des changements de version
+        git add package.json CHANGELOG.md
+        git commit -m "chore: bump version to v$(node -p "require('./package.json').version")"
+        git push
+        
+        # Créer et pousser le tag
+        VERSION=$(node -p "require('./package.json').version")
+        git tag "v$VERSION"
+        git push --tags
+
+    - name: 🔨 Build application
+      run: npm run build
+
+    - name: 📄 Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: 📤 Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './dist'
+
+    - name: 🚀 Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+    - name: 📊 Display version info
+      run: |
+        VERSION=$(node -p "require('./package.json').version")
+        echo "🎉 Déployé avec succès!"
+        echo "📦 Version: v$VERSION"
+        echo "🌐 URL: https://collectifilefeydeau.github.io/1Hall1Artiste/"
+        echo "📅 Date: $(date)"

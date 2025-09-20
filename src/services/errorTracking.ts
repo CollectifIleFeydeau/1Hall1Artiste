@@ -20,6 +20,36 @@ export interface ErrorInfo {
 const ERROR_STORAGE_KEY = 'app_errors';
 const MAX_STORED_ERRORS = 50;
 
+// Liste des erreurs à ignorer (ne pas envoyer par email)
+const IGNORED_ERROR_PATTERNS = [
+  // Erreurs CORS normales de Google Analytics
+  'https://www.google-analytics.com/mp/collect',
+  'Access to fetch at \'https://www.google-analytics.com',
+  'CORS policy: Response to preflight request doesn\'t pass access control check',
+  'No \'Access-Control-Allow-Origin\' header is present',
+  
+  // Autres erreurs à ignorer
+  'Failed to fetch',
+  'NetworkError',
+  'TypeError: Failed to fetch',
+  
+  // Erreurs de bloqueurs de publicités
+  'adblock',
+  'uBlock',
+  'AdGuard'
+];
+
+/**
+ * Vérifier si une erreur doit être ignorée
+ */
+const shouldIgnoreError = (message: string, stack?: string): boolean => {
+  const fullText = `${message} ${stack || ''}`;
+  
+  return IGNORED_ERROR_PATTERNS.some(pattern => 
+    fullText.toLowerCase().includes(pattern.toLowerCase())
+  );
+};
+
 /**
  * Capturer une erreur et la stocker localement
  */
@@ -31,6 +61,12 @@ export const captureError = (
   try {
     const message = typeof error === 'string' ? error : error.message;
     const stack = typeof error === 'string' ? undefined : error.stack;
+    
+    // Ignorer certaines erreurs normales
+    if (shouldIgnoreError(message, stack)) {
+      console.log(`[ErrorTracking] Erreur ignorée (normale): ${message}`);
+      return;
+    }
     
     const errorInfo: ErrorInfo = {
       message,
@@ -219,29 +255,62 @@ export const createErrorBoundaryHandler = (componentName: string) => {
 };
 
 /**
- * Fonction de test pour déclencher manuellement l'envoi d'erreurs
- * À utiliser dans la console pour tester le système
+ * Fonction de test pour vérifier le système de suivi d'erreurs
  */
-export const testErrorReporting = async (): Promise<void> => {
+export const testErrorReporting = (): void => {
   console.log('🧪 Test du système de suivi d\'erreurs...');
   
-  // Créer une erreur de test
+  // Test 1: Erreur normale (doit être capturée)
   captureError('Erreur de test pour vérifier le système de suivi', 'TestErrorReporting', {
     testMode: true,
     timestamp: new Date().toISOString()
   });
   
-  // Forcer l'envoi immédiat
-  const success = await sendErrorsToTrackingService();
+  // Test 2: Erreur CORS (doit être ignorée)
+  captureError('Access to fetch at \'https://www.google-analytics.com/mp/collect\' has been blocked by CORS policy', 'TestCORS');
   
-  if (success) {
-    console.log('✅ Test réussi : Erreur envoyée par email');
-  } else {
-    console.log('❌ Test échoué : Erreur non envoyée');
-  }
+  // Test 3: Erreur Failed to fetch (doit être ignorée)
+  captureError('TypeError: Failed to fetch', 'TestFetch');
+  
+  console.log('✅ Tests d\'erreurs exécutés. Seule la première erreur devrait être stockée.');
+  
+  // Afficher les erreurs stockées
+  const errors = getStoredErrors();
+  console.log(`📊 ${errors.length} erreur(s) stockée(s) (attendu: 1):`, errors);
 };
 
-// Exposer la fonction de test globalement pour la console
-if (typeof window !== 'undefined') {
+/**
+ * Fonction pour tester le filtrage des erreurs
+ */
+export const testErrorFiltering = (): void => {
+  console.log('🧪 Test du filtrage des erreurs...');
+  
+  const testCases = [
+    { message: 'Erreur normale', shouldBeIgnored: false },
+    { message: 'Access to fetch at \'https://www.google-analytics.com\' blocked', shouldBeIgnored: true },
+    { message: 'TypeError: Failed to fetch', shouldBeIgnored: true },
+    { message: 'CORS policy error', shouldBeIgnored: true },
+    { message: 'Autre erreur critique', shouldBeIgnored: false }
+  ];
+  
+  testCases.forEach(({ message, shouldBeIgnored }) => {
+    const beforeCount = getStoredErrors().length;
+    captureError(message, 'TestFiltering');
+    const afterCount = getStoredErrors().length;
+    
+    const wasIgnored = beforeCount === afterCount;
+    const result = wasIgnored === shouldBeIgnored ? '✅' : '❌';
+    
+    console.log(`${result} "${message}" - Ignoré: ${wasIgnored} (attendu: ${shouldBeIgnored})`);
+  });
+};
+
+// Exposer les fonctions de test globalement pour la console (dev uniquement)
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   (window as any).testErrorReporting = testErrorReporting;
+  (window as any).testErrorFiltering = testErrorFiltering;
+  
+  console.log('🔧 [ErrorTracking] Fonctions de test disponibles:');
+  console.log('- testErrorReporting() : Tester le système complet');
+  console.log('- testErrorFiltering() : Tester le filtrage des erreurs');
 }

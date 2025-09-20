@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import Info from "lucide-react/dist/esm/icons/info";
@@ -19,10 +20,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NotificationBadge } from "@/components/ui/notification-badge";
+import { useNewPhotosNotification } from "@/hooks/useNewPhotosNotification";
 
 export function BottomNavigation() {
   const location = useLocation();
   const currentPath = location.pathname;
+  const notificationHook = useNewPhotosNotification();
+  const { hasNewPhotos, newPhotosCount, markAsViewed } = notificationHook;
+  
+  
+  // Enregistrer le hook pour les tests globaux
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).registerNotificationHook) {
+      (window as any).registerNotificationHook(notificationHook);
+    }
+  }, [notificationHook]);
 
   const isActive = (path: string) => {
     return currentPath === path;
@@ -73,8 +86,16 @@ export function BottomNavigation() {
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
             isActive("/galleries") || isActive("/community") || isActive("/historical") ? "text-[#ff7a45] font-medium" : "text-gray-500"
           }`}
+          onClick={() => {
+            // Marquer les nouvelles photos comme vues quand l'utilisateur clique
+            if (hasNewPhotos) {
+              markAsViewed();
+            }
+          }}
         >
-          <Camera className={`${isActive("/galleries") || isActive("/community") || isActive("/historical") ? "h-7 w-7" : "h-6 w-6"}`} />
+          <NotificationBadge count={newPhotosCount} show={hasNewPhotos}>
+            <Camera className={`${isActive("/galleries") || isActive("/community") || isActive("/historical") ? "h-7 w-7" : "h-6 w-6"}`} />
+          </NotificationBadge>
           <span className={`mt-1 leading-tight ${isActive("/galleries") || isActive("/community") || isActive("/historical") ? "text-[11px]" : "text-[10px]"}`}>Galeries</span>
         </Link>
         

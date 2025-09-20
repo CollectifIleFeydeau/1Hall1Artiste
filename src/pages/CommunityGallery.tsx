@@ -68,6 +68,7 @@ const CommunityGallery: React.FC = () => {
       setEntries(data);
       setLastKnownCount(data.length);
       
+      
       // Analytics: successful load
       analytics.trackCommunityInteraction(EventAction.VIEW, { 
         content_type: 'gallery', 
@@ -89,6 +90,10 @@ const CommunityGallery: React.FC = () => {
 
   useEffect(() => {
     loadEntries();
+    
+    // Les notifications sont maintenant gérées par BottomNavigation
+    
+    return () => {};
   }, []);
 
   // Vérification périodique des nouvelles contributions (toutes les 2 minutes)
