@@ -161,7 +161,17 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, curren
               variant="full"
             />
             <span className="text-sm text-slate-500">
-              {format(new Date(entry.timestamp), "d MMMM yyyy", { locale: fr })}
+              {(() => {
+                try {
+                  if (!entry.timestamp) return "Date inconnue";
+                  const date = new Date(entry.timestamp);
+                  if (isNaN(date.getTime())) return "Date invalide";
+                  return format(date, "d MMMM yyyy", { locale: fr });
+                } catch (error) {
+                  console.warn('[EntryDetail] Invalid timestamp:', entry.timestamp, error);
+                  return "Date invalide";
+                }
+              })()}
             </span>
           </div>
         </motion.div>

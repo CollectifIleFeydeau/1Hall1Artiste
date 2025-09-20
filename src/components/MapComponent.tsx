@@ -97,7 +97,10 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   // Effet pour appliquer des dimensions responsives au conteneur principal
   useEffect(() => {
     const calculateScale = () => {
-      if (containerRef.current) {
+      try {
+        if (!containerRef.current || !containerRef.current.parentElement) {
+          return;
+        }
         // Obtenir la largeur du conteneur parent
         const parentWidth = containerRef.current.parentElement?.clientWidth || window.innerWidth;
         // Calculer le facteur d'échelle basé sur la largeur disponible
@@ -112,9 +115,11 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           onScaleChange(newScale);
         }
         
-        // Appliquer les dimensions mises à l'échelle
-        containerRef.current.style.width = `${MAP_WIDTH * newScale}px`;
-        containerRef.current.style.height = `${MAP_HEIGHT * newScale}px`;
+        // Appliquer les dimensions mises à l'échelle avec vérification
+        if (containerRef.current && containerRef.current.parentElement) {
+          containerRef.current.style.width = `${MAP_WIDTH * newScale}px`;
+          containerRef.current.style.height = `${MAP_HEIGHT * newScale}px`;
+        }
         
         // Appliquer une transformation d'échelle directe au conteneur
         // containerRef.current.style.transform = `scale(${newScale})`;
@@ -130,6 +135,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         //     newHeight: MAP_HEIGHT * newScale 
         //   });
         // }
+      } catch (error) {
+        console.warn('[MapComponent] Error in calculateScale:', error);
       }
     };
     
@@ -160,8 +167,10 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   // Mouse drag handlers (basic analytics support without visual panning)
   useEffect(() => {
     if (readOnly) return;
+    
+    let isCleanedUp = false;
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging || !dragStartClient.current) return;
+      if (isCleanedUp || !isDragging || !dragStartClient.current) return;
       const current = { x: e.clientX, y: e.clientY };
       if (!lastClient.current) {
         lastClient.current = current;
@@ -177,7 +186,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       }
     };
     const handleMouseUp = () => {
-      if (!isDragging) return;
+      if (isCleanedUp || !isDragging) return;
       setIsDragging(false);
       const durationMs = Date.now() - dragStartTime.current;
       const { dx, dy } = dragTotals.current;
@@ -203,7 +212,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       window.addEventListener('mouseup', handleMouseUp);
     };
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || isCleanedUp) return;
     const onMouseDown = (e: MouseEvent) => {
       // Ignore if primary button not pressed
       if (e.button !== 0) return;
@@ -211,9 +220,16 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     };
     el.addEventListener('mousedown', onMouseDown);
     return () => {
-      el.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      isCleanedUp = true;
+      try {
+        if (el && el.removeEventListener) {
+          el.removeEventListener('mousedown', onMouseDown);
+        }
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      } catch (error) {
+        console.warn('[MapComponent] Error cleaning up event listeners:', error);
+      }
     };
   }, [isDragging, readOnly, onPanStart, onPan, onPanEnd]);
   

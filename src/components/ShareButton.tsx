@@ -131,8 +131,9 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
   
   // Méthode alternative pour les navigateurs qui ne supportent pas l'API Clipboard
   const fallbackCopyToClipboard = (text: string) => {
+    let textArea: HTMLTextAreaElement | null = null;
     try {
-      const textArea = document.createElement('textarea');
+      textArea = document.createElement('textarea');
       textArea.value = text;
       textArea.style.position = 'fixed';
       textArea.style.left = '-999999px';
@@ -141,7 +142,6 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
       textArea.focus();
       textArea.select();
       const successful = document.execCommand('copy');
-      document.body.removeChild(textArea);
       if (successful) {
         alert('Lien copié dans le presse-papier');
       } else {
@@ -150,6 +150,15 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
     } catch (err) {
       console.error('Erreur lors de la copie fallback :', err);
       alert('Impossible de copier le lien. Veuillez le copier manuellement : ' + text);
+    } finally {
+      // Nettoyage sécurisé
+      if (textArea && document.body.contains(textArea)) {
+        try {
+          document.body.removeChild(textArea);
+        } catch (cleanupError) {
+          console.warn('[ShareButton] Error cleaning up textarea:', cleanupError);
+        }
+      }
     }
   };
   

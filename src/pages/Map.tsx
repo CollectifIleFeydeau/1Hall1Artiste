@@ -351,6 +351,39 @@ const Map = ({ fullScreen = false }: MapProps) => {
     // }
   };
 
+  // Protection contre les erreurs DOM
+  const [domError, setDomError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const handleDOMError = (error: ErrorEvent) => {
+      if (error.message && error.message.includes('insertBefore')) {
+        console.warn('[Map] DOM insertBefore error caught:', error);
+        setDomError('Erreur de rendu détectée, rechargement...');
+        // Auto-recovery après 2 secondes
+        setTimeout(() => {
+          setDomError(null);
+          // Force re-render en réinitialisant les états
+          setActiveLocation(null);
+          setSelectedEvent(null);
+        }, 2000);
+      }
+    };
+    
+    window.addEventListener('error', handleDOMError);
+    return () => window.removeEventListener('error', handleDOMError);
+  }, []);
+  
+  if (domError) {
+    return (
+      <div className="min-h-screen bg-white pb-20 overflow-x-hidden flex items-center justify-center">
+        <div className="text-center p-4">
+          <p className="text-red-500 mb-2">{domError}</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white pb-20 overflow-x-hidden">
       <div className="max-w-screen-lg mx-auto px-4 pt-4">

@@ -88,9 +88,17 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
             <div className="truncate">
               <span>{entry.displayName}</span>
               <span className="text-xs text-slate-300 ml-1">
-                {entry.timestamp && !isNaN(new Date(entry.timestamp).getTime()) 
-                  ? format(new Date(entry.timestamp), "d MMM", { locale: fr })
-                  : ""}
+                {(() => {
+                  try {
+                    if (!entry.timestamp) return "";
+                    const date = new Date(entry.timestamp);
+                    if (isNaN(date.getTime())) return "";
+                    return format(date, "d MMM", { locale: fr });
+                  } catch (error) {
+                    console.warn('[GalleryGrid] Invalid timestamp:', entry.timestamp, error);
+                    return "";
+                  }
+                })()}
               </span>
             </div>
           </div>

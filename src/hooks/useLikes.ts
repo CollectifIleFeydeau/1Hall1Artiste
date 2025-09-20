@@ -124,9 +124,12 @@ export function useLikes(entryId: string): UseLikesReturn {
       console.error('❌ Erreur toggle like:', err);
     } finally {
       // Débloquer après un délai minimum pour éviter les clics trop rapides
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         setIsToggling(false);
       }, 500); // 500ms de délai minimum entre les clics
+      
+      // Note: Ce timeout est volontairement non nettoyé car il doit se terminer
+      // même si le composant est démonté pour éviter les fuites d'état
     }
   }, [entryId, sessionId, liked, total, isToggling]);
 

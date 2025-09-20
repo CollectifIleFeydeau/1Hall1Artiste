@@ -113,12 +113,19 @@ export const LocalImage: React.FC<LocalImageProps> = ({
         className={className} 
         onError={(e) => {
           // Si même l'image de secours échoue, afficher un placeholder
-          e.currentTarget.style.display = 'none';
-          e.currentTarget.parentElement?.classList.add('bg-gray-200', 'flex', 'items-center', 'justify-center');
-          const span = document.createElement('span');
-          span.className = 'text-sm text-gray-500';
-          span.textContent = 'Image non disponible';
-          e.currentTarget.parentElement?.appendChild(span);
+          try {
+            e.currentTarget.style.display = 'none';
+            const parent = e.currentTarget.parentElement;
+            if (parent && !parent.querySelector('.image-placeholder')) {
+              parent.classList.add('bg-gray-200', 'flex', 'items-center', 'justify-center');
+              const span = document.createElement('span');
+              span.className = 'text-sm text-gray-500 image-placeholder';
+              span.textContent = 'Image non disponible';
+              parent.appendChild(span);
+            }
+          } catch (error) {
+            console.warn('[LocalImage] Error in fallback image error handler:', error);
+          }
         }}
       />
     );
@@ -136,16 +143,23 @@ export const LocalImage: React.FC<LocalImageProps> = ({
       className={className} 
       onError={(e) => {
         // En cas d'erreur de chargement, essayer l'image de secours
-        console.log(`Erreur de chargement de l'image, utilisation de l'image de secours`);
-        if (e.currentTarget.src !== absoluteFallbackSrc) {
-          e.currentTarget.src = absoluteFallbackSrc;
-        } else {
-          e.currentTarget.style.display = 'none';
-          e.currentTarget.parentElement?.classList.add('bg-gray-200', 'flex', 'items-center', 'justify-center');
-          const span = document.createElement('span');
-          span.className = 'text-sm text-gray-500';
-          span.textContent = 'Image non disponible';
-          e.currentTarget.parentElement?.appendChild(span);
+        try {
+          console.log(`Erreur de chargement de l'image, utilisation de l'image de secours`);
+          if (e.currentTarget.src !== absoluteFallbackSrc) {
+            e.currentTarget.src = absoluteFallbackSrc;
+          } else {
+            e.currentTarget.style.display = 'none';
+            const parent = e.currentTarget.parentElement;
+            if (parent && !parent.querySelector('.image-placeholder')) {
+              parent.classList.add('bg-gray-200', 'flex', 'items-center', 'justify-center');
+              const span = document.createElement('span');
+              span.className = 'text-sm text-gray-500 image-placeholder';
+              span.textContent = 'Image non disponible';
+              parent.appendChild(span);
+            }
+          }
+        } catch (error) {
+          console.warn('[LocalImage] Error in main image error handler:', error);
         }
       }}
     />  

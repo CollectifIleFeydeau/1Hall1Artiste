@@ -152,8 +152,15 @@ export default function SavedEvents() {
   };
 
   const formatEventDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return format(date, "EEEE d MMMM yyyy", { locale: fr });
+    try {
+      if (!dateString) return "Date inconnue";
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Date invalide";
+      return format(date, "EEEE d MMMM yyyy", { locale: fr });
+    } catch (error) {
+      console.warn('[SavedEvents] Invalid date string:', dateString, error);
+      return "Date invalide";
+    }
   };
 
   return (
