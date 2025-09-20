@@ -22,6 +22,16 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ### Supprimé
 - **Dépendances externes** : Suppression du chargement CDN EmailJS pour éviter les problèmes CORB
 
+## [1.3.5] - 2025-09-20
+
+### Ajouté
+
+### Modifié
+
+### Corrigé
+
+### Supprimé
+
 ## [1.3.4] - 2025-09-20
 
 ### Ajouté
