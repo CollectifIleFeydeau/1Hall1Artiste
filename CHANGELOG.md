@@ -12,6 +12,16 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ### Modifié
 
 ### Corrigé
+
+### Supprimé
+
+## [1.3.3] - 2025-09-20
+
+### Ajouté
+
+### Modifié
+
+### Corrigé
 - 🔧 Configuration GitHub Actions pour déploiement Pages (erreur d'environnement)
 - 🚀 Séparation workflow versioning et déploiement pour plus de fiabilité
 
