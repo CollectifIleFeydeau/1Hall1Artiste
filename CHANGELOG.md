@@ -12,6 +12,16 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ### Modifié
 
 ### Corrigé
+
+### Supprimé
+
+## [1.3.6] - 2025-09-20
+
+### Ajouté
+
+### Modifié
+
+### Corrigé
 - **Sécurité** : Résolution des erreurs CSP (Content Security Policy) et CORB (Cross-Origin Read Blocking)
   - Remplacement du CDN EmailJS externe par le package npm @emailjs/browser
   - Suppression du script externe `https://cdn.emailjs.com/sdk/4.1.0/email.min.js` de index.html
