@@ -1,8 +1,8 @@
-name: 🚀 Deploy to GitHub Pages
+name: 🚀 Deploy to GitHub Pages (DISABLED)
 
 on:
-  push:
-    branches: [ main ]
+  # push:
+  #   branches: [ main ]
   workflow_dispatch:
 
 permissions:
