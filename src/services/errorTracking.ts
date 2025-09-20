@@ -145,8 +145,9 @@ const EMAIL_TEMPLATE_ID = 'template_q7nh8h2';
 export const initEmailJS = async (): Promise<void> => {
   try {
     const emailjs = await import('@emailjs/browser');
-    // Vous n'avez pas besoin de spécifier le USER_ID ici
-    // EmailJS le récupérera depuis le script chargé dans index.html
+    // Initialiser EmailJS avec la clé publique
+    emailjs.init("HoNWMyqrINGzjeK6E");
+    console.log('EmailJS initialisé avec succès via npm package');
   } catch (error) {
     console.error('Erreur lors de l\'initialisation d\'EmailJS:', error);
   }

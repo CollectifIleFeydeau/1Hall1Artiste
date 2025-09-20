@@ -98,15 +98,47 @@ export const ImportExportPanel: React.FC = () => {
   };
 
   const downloadFile = (data: string, filename: string, type: string) => {
-    const blob = new Blob([data], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([data], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.style.display = 'none'; // Masquer l'élément
+      
+      // Vérification sécurisée avant manipulation DOM
+      if (document.body && document.contains(document.body)) {
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup sécurisé avec vérification
+        if (document.body.contains(a)) {
+          try {
+            document.body.removeChild(a);
+          } catch (removeError) {
+            console.warn('[ImportExportPanel] Error removing download element:', removeError);
+            // Fallback: essayer de supprimer via remove() si disponible
+            if (a.remove) {
+              a.remove();
+            }
+          }
+        }
+      } else {
+        console.warn('[ImportExportPanel] Document body not available for download');
+      }
+      
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('[ImportExportPanel] Error in downloadFile:', error);
+      // Fallback: essayer d'ouvrir dans une nouvelle fenêtre
+      try {
+        const dataUrl = `data:${type};charset=utf-8,${encodeURIComponent(data)}`;
+        window.open(dataUrl, '_blank');
+      } catch (fallbackError) {
+        console.error('[ImportExportPanel] Fallback download failed:', fallbackError);
+        alert('Impossible de télécharger le fichier. Veuillez réessayer.');
+      }
+    }
   };
 
   return (

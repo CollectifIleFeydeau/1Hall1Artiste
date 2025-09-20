@@ -223,6 +223,12 @@ class DataService {
     logger.info('Sauvegarde des données dans le localStorage');
     
     try {
+      // Vérifier la disponibilité de localStorage
+      if (typeof Storage === 'undefined' || !window.localStorage) {
+        logger.warn('localStorage non disponible, sauvegarde ignorée');
+        return;
+      }
+      
       // Log détaillé des données avant sauvegarde
       logger.debug('Détails des données à sauvegarder', {
         eventsCount: this.state.events.length,
@@ -235,23 +241,46 @@ class DataService {
         } : 'Aucun lieu'
       });
       
-      // Sauvegarde des données
-      localStorage.setItem('events', JSON.stringify(this.state.events));
-      localStorage.setItem('locations', JSON.stringify(this.state.locations));
+      // Sauvegarde des données avec protection
+      try {
+        localStorage.setItem('events', JSON.stringify(this.state.events));
+        localStorage.setItem('locations', JSON.stringify(this.state.locations));
+      } catch (storageError) {
+        // Gestion spécifique des erreurs de quota localStorage
+        if (storageError instanceof DOMException && storageError.code === 22) {
+          logger.error('Quota localStorage dépassé, tentative de nettoyage');
+          // Essayer de nettoyer d'anciennes données
+          try {
+            localStorage.removeItem('draft_contribution');
+            localStorage.removeItem('old_data');
+            // Réessayer la sauvegarde
+            localStorage.setItem('events', JSON.stringify(this.state.events));
+            localStorage.setItem('locations', JSON.stringify(this.state.locations));
+          } catch (retryError) {
+            throw new Error('Impossible de sauvegarder: espace de stockage insuffisant');
+          }
+        } else {
+          throw storageError;
+        }
+      }
       
       // Vérification de la sauvegarde
-      const savedLocations = localStorage.getItem('locations');
-      if (savedLocations) {
-        const parsedLocations = JSON.parse(savedLocations);
-        logger.debug('Vérification de la sauvegarde', {
-          savedLocationsCount: parsedLocations.length,
-          firstSavedLocation: parsedLocations[0] ? {
-            id: parsedLocations[0].id,
-            name: parsedLocations[0].name,
-            x: parsedLocations[0].x,
-            y: parsedLocations[0].y
-          } : 'Aucun lieu'
-        });
+      try {
+        const savedLocations = localStorage.getItem('locations');
+        if (savedLocations) {
+          const parsedLocations = JSON.parse(savedLocations);
+          logger.debug('Vérification de la sauvegarde', {
+            savedLocationsCount: parsedLocations.length,
+            firstSavedLocation: parsedLocations[0] ? {
+              id: parsedLocations[0].id,
+              name: parsedLocations[0].name,
+              x: parsedLocations[0].x,
+              y: parsedLocations[0].y
+            } : 'Aucun lieu'
+          });
+        }
+      } catch (verifyError) {
+        logger.warn('Erreur lors de la vérification de sauvegarde:', verifyError);
       }
       
       logger.info('Données sauvegardées avec succès dans le localStorage');
@@ -268,9 +297,23 @@ class DataService {
     logger.info('Chargement des données depuis le localStorage');
     
     try {
-      // Récupérer les données du localStorage
-      const eventsData = localStorage.getItem('events');
-      const locationsData = localStorage.getItem('locations');
+      // Vérifier la disponibilité de localStorage
+      if (typeof Storage === 'undefined' || !window.localStorage) {
+        logger.warn('localStorage non disponible, utilisation des données par défaut');
+        return null;
+      }
+      
+      // Récupérer les données du localStorage avec protection
+      let eventsData: string | null = null;
+      let locationsData: string | null = null;
+      
+      try {
+        eventsData = localStorage.getItem('events');
+        locationsData = localStorage.getItem('locations');
+      } catch (storageError) {
+        logger.warn('Erreur accès localStorage:', storageError);
+        return null;
+      }
       
       // Log des données récupérées
       logger.debug('Données récupérées du localStorage', {
@@ -285,9 +328,24 @@ class DataService {
         return null;
       }
       
-      // Parser les données
-      const parsedEvents = JSON.parse(eventsData);
-      const parsedLocations = JSON.parse(locationsData);
+      // Parser les données avec protection
+      let parsedEvents: Event[];
+      let parsedLocations: Location[];
+      
+      try {
+        parsedEvents = JSON.parse(eventsData);
+        parsedLocations = JSON.parse(locationsData);
+      } catch (parseError) {
+        logger.error('Erreur parsing données localStorage:', parseError);
+        // Nettoyer les données corrompues
+        try {
+          localStorage.removeItem('events');
+          localStorage.removeItem('locations');
+        } catch (cleanupError) {
+          logger.warn('Erreur nettoyage localStorage:', cleanupError);
+        }
+        return null;
+      }
       
       // Log des données parsées
       logger.debug('Données parsées du localStorage', {

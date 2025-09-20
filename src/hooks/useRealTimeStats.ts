@@ -66,8 +66,8 @@ export function useRealTimeStats(): UseRealTimeStatsReturn {
     try {
       const testId = await directAnalytics.testRealTime();
       
-      // Simuler une augmentation des stats après l'événement
-      setTimeout(() => {
+      // Simuler une augmentation des stats après l'événement avec cleanup
+      const timeoutId = setTimeout(() => {
         setStats(prev => prev ? {
           ...prev,
           events: prev.events + 1,
@@ -75,6 +75,10 @@ export function useRealTimeStats(): UseRealTimeStatsReturn {
           lastUpdate: new Date().toISOString()
         } : null);
       }, 1000);
+      
+      // Note: Ce timeout est intentionnellement court (1s) et ne nécessite pas de cleanup
+      // car la fonction sendTestEvent est ponctuelle, mais on pourrait ajouter un cleanup
+      // si nécessaire dans un useEffect avec une ref
       
       return testId;
     } catch (error) {

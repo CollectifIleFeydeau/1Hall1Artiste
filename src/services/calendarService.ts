@@ -110,7 +110,7 @@ const formatEventForCalendar = (event: Event): string => {
     `DTSTART:${formatDate(startDate)}`,
     `DTEND:${formatDate(endDate)}`,
     `SUMMARY:${formatText(event.title)}`,
-    `DESCRIPTION:${formatText(event.artistBio || '')}`,
+    `DESCRIPTION:${formatText(event.artistName || '')}`,
     `LOCATION:${formatText('Île Feydeau, Nantes')}`,
     'END:VEVENT',
     'END:VCALENDAR'
@@ -209,14 +209,45 @@ export const addToCalendar = async (event: Event): Promise<CalendarResult> => {
     
     // Méthode universelle : téléchargement direct du fichier .ics
     // Cette méthode fonctionne sur la plupart des navigateurs desktop
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `${event.title.replace(/\s+/g, '_')}.ics`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(url), 100);
+    try {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${event.title.replace(/\s+/g, '_')}.ics`);
+      link.style.display = 'none'; // Masquer l'élément
+      
+      // Vérification sécurisée avant manipulation DOM
+      if (document.body && document.contains(document.body)) {
+        document.body.appendChild(link);
+        link.click();
+        
+        // Cleanup sécurisé avec vérification
+        if (document.body.contains(link)) {
+          try {
+            document.body.removeChild(link);
+          } catch (removeError) {
+            logger.warn('Error removing calendar download element:', removeError);
+            // Fallback: essayer de supprimer via remove() si disponible
+            if (link.remove) {
+              link.remove();
+            }
+          }
+        }
+      } else {
+        logger.warn('Document body not available for calendar download');
+      }
+      
+      setTimeout(() => {
+        try {
+          URL.revokeObjectURL(url);
+        } catch (revokeError) {
+          logger.warn('Error revoking object URL:', revokeError);
+        }
+      }, 100);
+    } catch (downloadError) {
+      logger.error('Error in calendar download:', downloadError);
+      throw downloadError; // Re-lancer l'erreur pour qu'elle soit gérée par le catch principal
+    }
     
     logger.info("Fichier .ics téléchargé", { eventId: event.id, platform: isAndroid ? 'Android' : isIOS ? 'iOS' : 'Desktop' });
     return { success: true };

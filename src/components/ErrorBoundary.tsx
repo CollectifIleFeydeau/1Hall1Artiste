@@ -60,7 +60,23 @@ class ErrorBoundary extends React.Component<Props, State> {
           </p>
           <button
             className="mt-3 px-4 py-2 bg-red-100 text-red-800 rounded-md text-sm font-medium hover:bg-red-200"
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              try {
+                if (window.location && window.location.reload) {
+                  window.location.reload();
+                } else {
+                  window.location.href = window.location.origin + window.location.pathname;
+                }
+              } catch (error) {
+                console.error('[ErrorBoundary] Error reloading page:', error);
+                // Fallback: essayer de naviguer vers la page d'accueil
+                try {
+                  window.location.href = '/';
+                } catch (fallbackError) {
+                  console.error('[ErrorBoundary] Fallback navigation failed:', fallbackError);
+                }
+              }
+            }}
           >
             Rafraîchir la page
           </button>

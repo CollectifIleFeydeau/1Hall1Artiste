@@ -356,8 +356,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
   
   useEffect(() => {
     const handleDOMError = (error: ErrorEvent) => {
-      if (error.message && error.message.includes('insertBefore')) {
-        console.warn('[Map] DOM insertBefore error caught:', error);
+      // Détecter les erreurs DOM critiques (insertBefore et removeChild)
+      if (error.message && (error.message.includes('insertBefore') || error.message.includes('removeChild'))) {
+        console.warn('[Map] DOM manipulation error caught:', error.message);
         setDomError('Erreur de rendu détectée, rechargement...');
         // Auto-recovery après 2 secondes
         setTimeout(() => {
@@ -365,13 +366,36 @@ const Map = ({ fullScreen = false }: MapProps) => {
           // Force re-render en réinitialisant les états
           setActiveLocation(null);
           setSelectedEvent(null);
+          setHighlightedLocation(null);
+          // Forcer un re-render complet du composant carte
+          setMapLocations([...mapLocations]);
+        }, 2000);
+      }
+    };
+    
+    // Gérer aussi les erreurs non capturées par React
+    const handleUnhandledError = (event: PromiseRejectionEvent) => {
+      if (event.reason && typeof event.reason === 'string' && 
+          (event.reason.includes('removeChild') || event.reason.includes('insertBefore'))) {
+        console.warn('[Map] Unhandled DOM error caught:', event.reason);
+        event.preventDefault(); // Empêcher le crash
+        setDomError('Erreur de rendu détectée, rechargement...');
+        setTimeout(() => {
+          setDomError(null);
+          setActiveLocation(null);
+          setSelectedEvent(null);
+          setHighlightedLocation(null);
         }, 2000);
       }
     };
     
     window.addEventListener('error', handleDOMError);
-    return () => window.removeEventListener('error', handleDOMError);
-  }, []);
+    window.addEventListener('unhandledrejection', handleUnhandledError);
+    return () => {
+      window.removeEventListener('error', handleDOMError);
+      window.removeEventListener('unhandledrejection', handleUnhandledError);
+    };
+  }, [mapLocations]);
   
   if (domError) {
     return (

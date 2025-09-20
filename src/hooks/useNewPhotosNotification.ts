@@ -92,12 +92,16 @@ export function useNewPhotosNotification(): NewPhotosNotification {
       localStorage.setItem(STORAGE_KEY, newKnown.toString());
       console.log(`[NewPhotosNotification] 🧪 Test: Simulation de ${count} nouvelles photos (${currentKnown} -> ${newKnown})`);
       
-      // Forcer une vérification après la simulation
-      setTimeout(() => {
+      // Forcer une vérification après la simulation avec cleanup
+      const timeoutId = setTimeout(() => {
         checkForNewPhotos();
       }, 500);
+      
+      // Retourner une fonction de cleanup pour permettre l'annulation si nécessaire
+      return () => clearTimeout(timeoutId);
     } catch (error) {
       console.error('[NewPhotosNotification] Erreur simulation:', error);
+      return () => {}; // Retourner une fonction vide en cas d'erreur
     }
   }, [getLastKnownCount, checkForNewPhotos]);
   

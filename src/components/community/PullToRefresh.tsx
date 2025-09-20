@@ -118,15 +118,18 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
 
   // Nettoyage des événements souris globaux
   useEffect(() => {
+    let isCleanedUp = false;
+    
     if (isPulling) {
       const handleGlobalMouseMove = (e: MouseEvent) => {
-        if (!isPulling) return;
+        if (isCleanedUp || !isPulling) return;
         const distance = Math.max(0, e.clientY - startY);
         const resistance = Math.min(distance * 0.3, threshold * 1.5);
         setPullDistance(resistance);
       };
 
       const handleGlobalMouseUp = () => {
+        if (isCleanedUp) return;
         if (pullDistance >= threshold) {
           handleRefresh();
         } else {
@@ -135,12 +138,21 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
         }
       };
 
-      document.addEventListener('mousemove', handleGlobalMouseMove);
-      document.addEventListener('mouseup', handleGlobalMouseUp);
+      try {
+        document.addEventListener('mousemove', handleGlobalMouseMove);
+        document.addEventListener('mouseup', handleGlobalMouseUp);
+      } catch (error) {
+        console.warn('[PullToRefresh] Error adding global event listeners:', error);
+      }
 
       return () => {
-        document.removeEventListener('mousemove', handleGlobalMouseMove);
-        document.removeEventListener('mouseup', handleGlobalMouseUp);
+        isCleanedUp = true;
+        try {
+          document.removeEventListener('mousemove', handleGlobalMouseMove);
+          document.removeEventListener('mouseup', handleGlobalMouseUp);
+        } catch (error) {
+          console.warn('[PullToRefresh] Error removing global event listeners:', error);
+        }
       };
     }
   }, [isPulling, startY, pullDistance, threshold]);

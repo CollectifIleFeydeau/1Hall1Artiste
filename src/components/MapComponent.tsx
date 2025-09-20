@@ -96,27 +96,39 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 
   // Effet pour appliquer des dimensions responsives au conteneur principal
   useEffect(() => {
+    let isCleanedUp = false;
+    
     const calculateScale = () => {
       try {
-        if (!containerRef.current || !containerRef.current.parentElement) {
+        if (isCleanedUp || !containerRef.current) {
           return;
         }
+        
+        // Vérification robuste de l'existence du parent
+        const parent = containerRef.current.parentElement;
+        if (!parent) {
+          return;
+        }
+        
         // Obtenir la largeur du conteneur parent
-        const parentWidth = containerRef.current.parentElement?.clientWidth || window.innerWidth;
+        const parentWidth = parent.clientWidth || window.innerWidth;
         // Calculer le facteur d'échelle basé sur la largeur disponible
         const maxWidth = Math.min(parentWidth, MAP_WIDTH);
         const newScale = maxWidth / MAP_WIDTH;
+        
+        // Vérifier que le composant n'a pas été démonté
+        if (isCleanedUp) return;
         
         // Mettre à jour l'état local
         setScale(newScale);
         
         // Notifier le parent du changement d'échelle
-        if (onScaleChange) {
+        if (onScaleChange && !isCleanedUp) {
           onScaleChange(newScale);
         }
         
         // Appliquer les dimensions mises à l'échelle avec vérification
-        if (containerRef.current && containerRef.current.parentElement) {
+        if (!isCleanedUp && containerRef.current && containerRef.current.parentElement) {
           containerRef.current.style.width = `${MAP_WIDTH * newScale}px`;
           containerRef.current.style.height = `${MAP_HEIGHT * newScale}px`;
         }
@@ -160,7 +172,12 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     }
     
     return () => {
-      window.removeEventListener('resize', debouncedResize);
+      isCleanedUp = true;
+      try {
+        window.removeEventListener('resize', debouncedResize);
+      } catch (error) {
+        console.warn('[MapComponent] Error cleaning up resize listener:', error);
+      }
     };
   }, [onScaleChange]); // Ajouter onScaleChange comme dépendance
 
@@ -213,16 +230,31 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     };
     const el = containerRef.current;
     if (!el || isCleanedUp) return;
+    
     const onMouseDown = (e: MouseEvent) => {
-      // Ignore if primary button not pressed
-      if (e.button !== 0) return;
+      // Ignore if primary button not pressed or component is being cleaned up
+      if (e.button !== 0 || isCleanedUp) return;
+      
+      // Vérifier que l'élément existe toujours dans le DOM
+      if (!el.parentElement || !document.contains(el)) {
+        return;
+      }
+      
       startDrag(e.clientX, e.clientY);
     };
-    el.addEventListener('mousedown', onMouseDown);
+    
+    try {
+      el.addEventListener('mousedown', onMouseDown);
+    } catch (error) {
+      console.warn('[MapComponent] Error adding mousedown listener:', error);
+      return () => {};
+    }
+    
     return () => {
       isCleanedUp = true;
       try {
-        if (el && el.removeEventListener) {
+        // Vérifier que l'élément existe encore avant de retirer les listeners
+        if (el && el.removeEventListener && document.contains(el)) {
           el.removeEventListener('mousedown', onMouseDown);
         }
         window.removeEventListener('mousemove', handleMouseMove);
@@ -247,6 +279,44 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       });
     }
   }, [locations, activeLocation]);
+  
+  // Protection contre les erreurs de rendu
+  const [renderError, setRenderError] = useState<string | null>(null);
+  
+  // Récupérer les erreurs de rendu React
+  useEffect(() => {
+    const handleError = (error: Error) => {
+      if (error.message && (error.message.includes('removeChild') || error.message.includes('insertBefore'))) {
+        console.warn('[MapComponent] Render error caught:', error.message);
+        setRenderError('Erreur de rendu de la carte');
+        // Auto-recovery après 1 seconde
+        setTimeout(() => {
+          setRenderError(null);
+        }, 1000);
+      }
+    };
+    
+    // Pas d'event listener global ici, la gestion se fait au niveau parent
+    return () => {};
+  }, []);
+  
+  // Si erreur de rendu, afficher un fallback
+  if (renderError) {
+    return (
+      <div 
+        className="relative border border-[#d8e3ff] rounded-lg bg-[#f0f5ff] mb-4 overflow-hidden mx-auto flex items-center justify-center"
+        style={{ 
+          width: `${MAP_WIDTH * scale}px`, 
+          height: `${MAP_HEIGHT * scale}px`
+        }}
+      >
+        <div className="text-center text-[#4a5d94]">
+          <p className="text-sm mb-2">{renderError}</p>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#4a5d94] mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div 

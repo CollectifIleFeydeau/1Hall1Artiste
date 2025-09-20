@@ -46,14 +46,58 @@ function invalidateCache(entryId: string): void {
   console.log(`🗑️ Cache invalidé pour ${entryId}`);
 }
 
+// Configuration pour les requêtes réseau
+const FETCH_TIMEOUT = 10000; // 10 secondes
+const RETRY_ATTEMPTS = 2;
+
+// Fonction utilitaire pour fetch avec timeout
+async function fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Timeout: La requête a pris trop de temps');
+    }
+    throw error;
+  }
+}
+
+// Fonction utilitaire pour retry automatique
+async function fetchWithRetry(url: string, options: RequestInit = {}, attempts: number = RETRY_ATTEMPTS): Promise<Response> {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fetchWithTimeout(url, options);
+    } catch (error) {
+      if (i === attempts - 1) throw error; // Dernière tentative, relancer l'erreur
+      console.warn(`Tentative ${i + 1}/${attempts} échouée pour ${url}, retry...`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Délai progressif
+    }
+  }
+  throw new Error('Toutes les tentatives ont échoué');
+}
+
 // Génération d'un ID de session anonyme
 export function getSessionId(): string {
-  let sessionId = localStorage.getItem('user-session-id');
-  if (!sessionId) {
-    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem('user-session-id', sessionId);
+  try {
+    let sessionId = localStorage.getItem('user-session-id');
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('user-session-id', sessionId);
+    }
+    return sessionId;
+  } catch (storageError) {
+    console.warn('Erreur localStorage, génération session temporaire:', storageError);
+    return `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
-  return sessionId;
 }
 
 // Toggle like pour une contribution
@@ -62,8 +106,8 @@ export async function toggleLike(entryId: string, sessionId?: string): Promise<L
     const userSessionId = sessionId || getSessionId();
     console.log(`🔄 Toggle like pour ${entryId} par ${userSessionId}`);
 
-    // Récupérer les données actuelles
-    const response = await fetch(`${FIREBASE_URL}/${LIKES_PATH}/${entryId}.json`);
+    // Récupérer les données actuelles avec retry
+    const response = await fetchWithRetry(`${FIREBASE_URL}/${LIKES_PATH}/${entryId}.json`);
     const currentData = response.ok ? await response.json() : null;
     
     const data = currentData || {
@@ -95,7 +139,7 @@ export async function toggleLike(entryId: string, sessionId?: string): Promise<L
       lastLiked: new Date().toISOString()
     };
 
-    const updateResponse = await fetch(`${FIREBASE_URL}/${LIKES_PATH}/${entryId}.json`, {
+    const updateResponse = await fetchWithRetry(`${FIREBASE_URL}/${LIKES_PATH}/${entryId}.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedData)
@@ -131,7 +175,7 @@ export async function toggleLike(entryId: string, sessionId?: string): Promise<L
 // Récupérer le nombre de likes pour une entrée
 export async function getLikeCount(entryId: string): Promise<number> {
   try {
-    const response = await fetch(`${FIREBASE_URL}/likes-data/${entryId}/likes.json`);
+    const response = await fetchWithRetry(`${FIREBASE_URL}/likes-data/${entryId}/likes.json`);
     const count = response.ok ? await response.json() : 0;
     console.log(`📊 Likes pour ${entryId}: ${count || 0}`);
     return count || 0;
@@ -145,7 +189,7 @@ export async function getLikeCount(entryId: string): Promise<number> {
 export async function hasUserLiked(entryId: string, sessionId?: string): Promise<boolean> {
   try {
     const userSessionId = sessionId || getSessionId();
-    const response = await fetch(`${FIREBASE_URL}/likes-data/${entryId}/likedBy.json`);
+    const response = await fetchWithRetry(`${FIREBASE_URL}/likes-data/${entryId}/likedBy.json`);
     const likedBy = response.ok ? await response.json() : [];
     const hasLiked = Array.isArray(likedBy) && likedBy.includes(userSessionId);
     console.log(`🔍 User ${userSessionId} a liké ${entryId}: ${hasLiked}`);
@@ -171,7 +215,7 @@ export async function getLikeData(entryId: string, sessionId?: string): Promise<
       };
     }
     
-    const response = await fetch(`${FIREBASE_URL}/${LIKES_PATH}/${entryId}.json`);
+    const response = await fetchWithRetry(`${FIREBASE_URL}/${LIKES_PATH}/${entryId}.json`);
     const data = response.ok ? await response.json() : null;
     
     const likeData = data || {
@@ -205,7 +249,7 @@ export async function getLikeDataFresh(entryId: string, sessionId?: string): Pro
     
     console.log(`🔄 Récupération fraîche depuis Firebase pour ${entryId}`);
     
-    const response = await fetch(`${FIREBASE_URL}/${LIKES_PATH}/${entryId}.json`);
+    const response = await fetchWithRetry(`${FIREBASE_URL}/${LIKES_PATH}/${entryId}.json`);
     const data = response.ok ? await response.json() : null;
     
     const likeData = data || {
@@ -236,7 +280,7 @@ export async function getLikeDataFresh(entryId: string, sessionId?: string): Pro
 // Récupérer les statistiques globales
 export async function getLikeStats(): Promise<LikeStats> {
   try {
-    const response = await fetch(`${FIREBASE_URL}/likes-stats.json`);
+    const response = await fetchWithRetry(`${FIREBASE_URL}/likes-stats.json`);
     const stats = response.ok ? await response.json() : null;
     
     const statsData = stats || {
@@ -260,7 +304,7 @@ export async function getLikeStats(): Promise<LikeStats> {
 async function updateGlobalStats(): Promise<void> {
   try {
     // Récupérer tous les likes
-    const response = await fetch(`${FIREBASE_URL}/likes-data.json`);
+    const response = await fetchWithRetry(`${FIREBASE_URL}/likes-data.json`);
     const allLikes = response.ok ? await response.json() : {};
     
     let totalLikes = 0;
@@ -285,7 +329,7 @@ async function updateGlobalStats(): Promise<void> {
       lastUpdated: new Date().toISOString()
     };
 
-    await fetch(`${FIREBASE_URL}/likes-stats.json`, {
+    await fetchWithRetry(`${FIREBASE_URL}/likes-stats.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(statsData)
@@ -305,7 +349,7 @@ export async function testFirebaseConnection(): Promise<boolean> {
       message: 'Test de connexion likes'
     };
 
-    const response = await fetch(`${FIREBASE_URL}/test-connection.json`, {
+    const response = await fetchWithRetry(`${FIREBASE_URL}/test-connection.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(testData)

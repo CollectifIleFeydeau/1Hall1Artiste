@@ -300,8 +300,16 @@ const App: React.FC = () => {
     // Fonction de test globale pour réinitialiser l'onboarding
     (window as any).resetOnboardingTest = () => {
       console.log('[App] [TEST] Réinitialisation de l\'onboarding...');
-      localStorage.removeItem('hasSeenOnboarding');
-      window.location.reload();
+      try {
+        localStorage.removeItem('hasSeenOnboarding');
+        if (window.location && window.location.reload) {
+          window.location.reload();
+        } else {
+          console.warn('[App] window.location.reload not available');
+        }
+      } catch (error) {
+        console.error('[App] Error in resetOnboardingTest:', error);
+      }
     };
 
     console.log('[App] [TEST] Fonction resetOnboardingTest() disponible dans la console');
@@ -309,8 +317,12 @@ const App: React.FC = () => {
     // Nettoyer les écouteurs d'événements lors du démontage
     return () => {
       console.log('[App] Nettoyage des écouteurs d\'événements');
-      achievementEvent.removeEventListener('achievement', handleInternalAchievement);
-      window.removeEventListener('app-achievement', handleGlobalAchievement);
+      try {
+        achievementEvent.removeEventListener('achievement', handleInternalAchievement);
+        window.removeEventListener('app-achievement', handleGlobalAchievement);
+      } catch (error) {
+        console.warn('[App] Error cleaning up event listeners:', error);
+      }
     };
   }, []);
 
@@ -423,10 +435,20 @@ const App: React.FC = () => {
 
   // Fonction pour réinitialiser l'onboarding
   const resetOnboarding = () => {
-    localStorage.removeItem('hasSeenOnboarding');
-    console.log('[App] Onboarding réinitialisé, rechargement de la page...');
-    // Forcer l'affichage de l'écran d'accueil avant l'onboarding
-    window.location.reload();
+    try {
+      localStorage.removeItem('hasSeenOnboarding');
+      console.log('[App] Onboarding réinitialisé, rechargement de la page...');
+      // Forcer l'affichage de l'écran d'accueil avant l'onboarding
+      if (window.location && window.location.reload) {
+        window.location.reload();
+      } else {
+        console.warn('[App] window.location.reload not available, using navigate');
+        // Fallback: utiliser la navigation React Router
+        window.location.href = window.location.origin + window.location.pathname;
+      }
+    } catch (error) {
+      console.error('[App] Error in resetOnboarding:', error);
+    }
   };
   
   // Fonction pour tester les confettis
@@ -460,7 +482,17 @@ const App: React.FC = () => {
       description: "Toutes les données locales ont été effacées.",
       variant: "destructive"
     });
-    setTimeout(() => window.location.reload(), 1500);
+    setTimeout(() => {
+      try {
+        if (window.location && window.location.reload) {
+          window.location.reload();
+        } else {
+          window.location.href = window.location.origin + window.location.pathname;
+        }
+      } catch (error) {
+        console.error('[App] Error reloading page:', error);
+      }
+    }, 1500);
   };
 
   // Aucun code de gestion de localisation n'est nécessaire ici

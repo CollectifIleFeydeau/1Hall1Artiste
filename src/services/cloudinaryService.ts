@@ -15,12 +15,18 @@ const FIREBASE_CONFIG = {
 
 export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
   try {
-    // Nettoyage initial
-    const isFirstLoad = !localStorage.getItem('cloudinary_revolution_started');
-    if (isFirstLoad) {
-      localStorage.removeItem('community_entries');
-      localStorage.setItem('cloudinary_revolution_started', 'true');
-      console.log('[CloudinaryService] Système initialisé');
+    // Nettoyage initial avec protection localStorage
+    let isFirstLoad = false;
+    try {
+      isFirstLoad = !localStorage.getItem('cloudinary_revolution_started');
+      if (isFirstLoad) {
+        localStorage.removeItem('community_entries');
+        localStorage.setItem('cloudinary_revolution_started', 'true');
+        console.log('[CloudinaryService] Système initialisé');
+      }
+    } catch (storageError) {
+      console.warn('[CloudinaryService] Erreur localStorage:', storageError);
+      // Continuer sans localStorage si indisponible
     }
     
     const response = await fetch(`${FIREBASE_CONFIG.databaseURL}/community-photos.json`);
@@ -50,8 +56,12 @@ export async function fetchCommunityEntries(): Promise<CommunityEntry[]> {
  */
 export function clearAllContributions(): void {
   console.log('[CloudinaryService] 🗑️ TABLE RASE : Suppression de toutes les contributions !');
-  localStorage.removeItem('community_entries');
-  console.log('[CloudinaryService] ✅ Toutes les contributions supprimées ! Nouveau départ !');
+  try {
+    localStorage.removeItem('community_entries');
+    console.log('[CloudinaryService] ✅ Toutes les contributions supprimées ! Nouveau départ !');
+  } catch (storageError) {
+    console.warn('[CloudinaryService] Erreur suppression localStorage:', storageError);
+  }
 }
 
 /**
