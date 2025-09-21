@@ -43,6 +43,7 @@ import HistoricalGallery from "./pages/HistoricalGallery";
 import Galleries from "./pages/Galleries";
 import AnalyticsDebugger from "./debug/AnalyticsDebugger";
 import VersionBadge from "./components/VersionBadge";
+import Changelog from "./pages/Changelog";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,7 @@ const AnimatedRoutes: React.FC = () => {
     { path: '/admin', component: Admin },
     { path: '/location-history', component: LocationHistory },
     { path: '/analytics', component: Analytics },
+    { path: '/changelog', component: Changelog },
   ];
   
   // Vérifier si la page actuelle supporte la navigation par gestes

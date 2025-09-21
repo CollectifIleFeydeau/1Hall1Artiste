@@ -18,7 +18,6 @@ import { CommunityManagement } from "@/components/CommunityManagement";
 import { LikesTestComponent } from "@/components/test/LikesTestComponent";
 import { LikesStatsComponent } from "@/components/admin/LikesStatsComponent";
 import { RealTimeStatsComponent } from "@/components/admin/RealTimeStatsComponent";
-import VersionInfo from "@/components/admin/VersionInfo";
 import { EventManagement } from "@/components/admin/EventManagement";
 
 // Créer un logger pour le composant Admin
@@ -291,7 +290,6 @@ export default function Admin() {
             <TabsTrigger value="likes-stats" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">👍 Likes</TabsTrigger>
             <TabsTrigger value="analytics-stats" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">📊 Analytics</TabsTrigger>
             <TabsTrigger value="likes-test" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">🧪 Test</TabsTrigger>
-            <TabsTrigger value="version" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">📦 Version</TabsTrigger>
             <TabsTrigger value="import-export" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Import/Export</TabsTrigger>
             <TabsTrigger value="reset" className="text-xs md:text-sm px-2 py-1 flex-shrink-0">Reset</TabsTrigger>
           </TabsList>
@@ -410,12 +408,6 @@ export default function Admin() {
             <LikesTestComponent />
           </TabsContent>
           
-          {/* Onglet des informations de version */}
-          <TabsContent value="version" className="space-y-4">
-            <div className="flex justify-center">
-              <VersionInfo />
-            </div>
-          </TabsContent>
           
           {/* Onglet d'import/export */}
           <TabsContent value="import-export">

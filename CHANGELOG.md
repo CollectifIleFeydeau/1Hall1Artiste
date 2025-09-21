@@ -5,13 +5,15 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [1.4.2] - 2025-09-21
 
 ### Ajouté
 
 ### Modifié
+- Page changelog plutôt que bouton
 
 ### Corrigé
+- Vidéo collectif reparée
 
 ### Supprimé
 
