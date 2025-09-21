@@ -75,13 +75,12 @@ echo 🔄 Lancement de la release %version_type%...
 echo.
 
 :: Lancer le script Node.js avec le type de version
-echo %choice% | node scripts\release.js
+node scripts\release.js
 
 :: Vérifier le code de sortie
 if errorlevel 1 (
     echo.
     echo ❌ Erreur durant la release
-    pause
     exit /b 1
 ) else (
     echo.

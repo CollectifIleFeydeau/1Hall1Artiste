@@ -30,6 +30,8 @@ import { toast } from "@/components/ui/use-toast";
 import { saveEvent, removeSavedEvent, getSavedEvents } from "../services/savedEvents";
 import { LikeButton } from "@/components/community/LikeButton";
 import { unlockAchievement, AchievementType } from "../services/achievements";
+import { AudioGuideButton } from "@/components/AudioGuideButton";
+import { AudioGuidePlayer } from "@/components/AudioGuidePlayer";
 // Créer un logger pour le composant Map
 const logger = createLogger('Map');
 
@@ -561,6 +563,13 @@ const Map = ({ fullScreen = false }: MapProps) => {
                 {mapLocations.find(l => l.id === activeLocation)?.name}
               </h2>
               <div className="flex items-center space-x-2">
+                {/* Bouton audio guide */}
+                <AudioGuideButton 
+                  audioUrl={mapLocations.find(l => l.id === activeLocation)?.audio}
+                  locationName={mapLocations.find(l => l.id === activeLocation)?.name}
+                  variant="icon"
+                />
+                
                 {/* Bouton de like pour le bâtiment */}
                 <LikeButton 
                   entryId={`building-${activeLocation}`}
@@ -718,6 +727,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
       />
       
       {/* Boîte de dialogue de consentement de localisation retirée */}
+      
+      {/* Audio Guide Player Global */}
+      <AudioGuidePlayer />
       
       {/* Bottom Navigation */}
       <BottomNavigation />

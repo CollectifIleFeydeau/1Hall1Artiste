@@ -8,6 +8,20 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- ✨ Système de guide audio avec bouton flottant et lecteur dédié
+- 🎵 Service audioGuideService pour la gestion des pistes audio
+- 🎧 Composants AudioGuideButton et AudioGuidePlayer
+
+### Modifié
+
+### Corrigé
+- 🐛 Bug dans release.bat qui réutilisait la réponse pour plusieurs questions
+
+### Supprimé
+
+## [1.3.7] - 2025-09-20
+
+### Ajouté
 
 ### Modifié
 
