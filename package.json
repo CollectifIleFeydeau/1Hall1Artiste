@@ -1,6 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "vite_react_shadcn_ts",
+  "name": "collectif-feydeau-app",
+  "description": "Application web du Collectif Feydeau - Découverte interactive de l'Île Feydeau à Nantes",
   "private": true,
   "version": "1.4.1",
   "type": "module",
