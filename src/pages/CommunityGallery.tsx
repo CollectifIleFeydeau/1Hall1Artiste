@@ -17,6 +17,19 @@ import { CommunityEntry, EntryType } from "../types/communityTypes";
 // Services
 import { fetchCommunityEntries } from "../services/cloudinaryService";
 
+// Interface pour les photos historiques dans la galerie unifiée
+interface HistoricalPhoto {
+  id: string;
+  path: string;
+  type: 'historical';
+  displayName: string;
+  timestamp: string;
+  description: string;
+}
+
+// Type unifié pour toutes les entrées de la galerie
+type UnifiedGalleryEntry = CommunityEntry | HistoricalPhoto;
+
 // Composants
 import { PageContainer } from "../components/PageContainer";
 import { PageHeader } from "../components/PageHeader";
@@ -28,13 +41,15 @@ import { PullToRefresh } from "../components/community/PullToRefresh";
 const CommunityGallery: React.FC = () => {
   const { toast } = useToast();
   const location = useLocation();
-  const [entries, setEntries] = useState<CommunityEntry[]>([]);
+  const [communityEntries, setCommunityEntries] = useState<CommunityEntry[]>([]);
+  const [historicalPhotos, setHistoricalPhotos] = useState<HistoricalPhoto[]>([]);
+  const [allEntries, setAllEntries] = useState<UnifiedGalleryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "photo" | "testimonial">("all");
+  const [filter, setFilter] = useState<"all" | "photo" | "testimonial" | "historical">("all");
   const [activeTab, setActiveTab] = useState<"gallery" | "contribute">("gallery");
   const [lastKnownCount, setLastKnownCount] = useState<number>(0);
-  const [selectedEntry, setSelectedEntry] = useState<CommunityEntry | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<UnifiedGalleryEntry | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   // Vérifier si un onglet est spécifié dans l'URL
@@ -48,6 +63,39 @@ const CommunityGallery: React.FC = () => {
       analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'url_param' });
     }
   }, [location]);
+
+  // Fonction pour charger les photos historiques
+  const loadHistoricalPhotos = (): HistoricalPhoto[] => {
+    const photos: HistoricalPhoto[] = [];
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const basePath = isGitHubPages
+      ? '/1Hall1Artiste/images/historical'
+      : '/images/historical';
+    
+    // Ajouter les photos historiques (151 photos)
+    for (let i = 1; i <= 151; i++) {
+      photos.push({
+        id: `historical-${i}`,
+        path: `${basePath}/photos-${i}.jpg`,
+        type: 'historical',
+        displayName: 'Archives historiques',
+        timestamp: '1900-01-01T00:00:00.000Z', // Date ancienne pour les trier après les nouvelles
+        description: `Photo historique ${i} de l'Île Feydeau`
+      });
+    }
+    
+    return photos;
+  };
+
+  // Fonction pour fusionner et trier toutes les entrées
+  const mergeAllEntries = (community: CommunityEntry[], historical: HistoricalPhoto[]): UnifiedGalleryEntry[] => {
+    // Les nouvelles photos communautaires en premier, puis les photos historiques
+    const sortedCommunity = [...community].sort((a, b) => 
+      new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
+    );
+    
+    return [...sortedCommunity, ...historical];
+  };
 
   // Charger les entrées au chargement de la page
   const loadEntries = async (showNewNotification = false) => {
@@ -65,7 +113,15 @@ const CommunityGallery: React.FC = () => {
         });
       }
       
-      setEntries(data);
+      // Charger les photos historiques
+      const historical = loadHistoricalPhotos();
+      
+      // Fusionner toutes les entrées
+      const merged = mergeAllEntries(data, historical);
+      
+      setCommunityEntries(data);
+      setHistoricalPhotos(historical);
+      setAllEntries(merged);
       setLastKnownCount(data.length);
       
       
@@ -128,7 +184,11 @@ const CommunityGallery: React.FC = () => {
 
   // Gérer l'ajout d'une nouvelle contribution
   const handleNewContribution = (newEntry: CommunityEntry) => {
-    setEntries(prevEntries => [newEntry, ...prevEntries]);
+    const updatedCommunity = [newEntry, ...communityEntries];
+    const merged = mergeAllEntries(updatedCommunity, historicalPhotos);
+    
+    setCommunityEntries(updatedCommunity);
+    setAllEntries(merged);
     setActiveTab("gallery");
     
     // Toast de succès
@@ -146,22 +206,23 @@ const CommunityGallery: React.FC = () => {
   };
 
   // Filtrer les entrées selon le filtre actuel
-  const filteredEntries = entries.filter(entry => {
-    // Exclure les entrées rejetées (supprimées par l'admin)
-    if (entry.moderation?.status === 'rejected') {
+  const filteredEntries = allEntries.filter(entry => {
+    // Exclure les entrées rejetées (supprimées par l'admin) - seulement pour les entrées communautaires
+    if ('moderation' in entry && entry.moderation?.status === 'rejected') {
       return false;
     }
     
     // Filtrer par type
     if (filter === "all") return true;
+    if (filter === "historical") return entry.type === 'historical';
     return entry.type === filter;
   });
 
   return (
     <PageContainer>
       <PageHeader 
-        title="Galerie Communautaire" 
-        subtitle="Partagez vos moments et découvrez ceux des autres"
+        title="Galerie" 
+        subtitle="Photos communautaires et archives historiques de l'Île Feydeau"
       />
       
       <motion.div
@@ -212,7 +273,7 @@ const CommunityGallery: React.FC = () => {
                       <Filter size={16} />
                       <span className="text-sm font-medium">Filtrer:</span>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 flex-wrap">
                       <Button 
                         variant={filter === "all" ? "default" : "outline"} 
                         size="sm" 
@@ -233,6 +294,13 @@ const CommunityGallery: React.FC = () => {
                         onClick={() => { setFilter("testimonial"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'testimonial' }); }}
                       >
                         Témoignages
+                      </Button>
+                      <Button 
+                        variant={filter === "historical" ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => { setFilter("historical"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'historical' }); }}
+                      >
+                        Historiques
                       </Button>
                     </div>
                   </div>

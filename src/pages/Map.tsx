@@ -563,13 +563,6 @@ const Map = ({ fullScreen = false }: MapProps) => {
                 {mapLocations.find(l => l.id === activeLocation)?.name}
               </h2>
               <div className="flex items-center space-x-2">
-                {/* Bouton audio guide */}
-                <AudioGuideButton 
-                  audioUrl={mapLocations.find(l => l.id === activeLocation)?.audio}
-                  locationName={mapLocations.find(l => l.id === activeLocation)?.name}
-                  variant="icon"
-                />
-                
                 {/* Bouton de like pour le bâtiment */}
                 <LikeButton 
                   entryId={`building-${activeLocation}`}
@@ -597,30 +590,42 @@ const Map = ({ fullScreen = false }: MapProps) => {
               {mapLocations.find(l => l.id === activeLocation)?.description}
             </p>
             
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="text-xs border-[#4a5d94] text-[#4a5d94]"
-              onClick={() => {
-                // S'assurer que activeLocation est défini avant de naviguer
-                if (activeLocation) {
-                  logger.info(`Navigation vers l'histoire du lieu: ${activeLocation}`);
-                  const loc = mapLocations.find(l => l.id === activeLocation);
-                  if (loc) {
-                    analytics.trackBuildingHistoryView(loc.id, 'from_map');
+            <div className="flex gap-2 mb-4">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="text-xs border-[#4a5d94] text-[#4a5d94]"
+                onClick={() => {
+                  // S'assurer que activeLocation est défini avant de naviguer
+                  if (activeLocation) {
+                    logger.info(`Navigation vers l'histoire du lieu: ${activeLocation}`);
+                    const loc = mapLocations.find(l => l.id === activeLocation);
+                    if (loc) {
+                      analytics.trackBuildingHistoryView(loc.id, 'from_map');
+                    }
+                    analytics.trackInteraction(EventAction.CLICK, 'history_button', { from: 'map', building_id: activeLocation });
+                    navigate('/location-history', { 
+                      state: { selectedLocationId: activeLocation }
+                    });
+                  } else {
+                    logger.warn('Tentative de navigation vers l\'histoire d\'un lieu non sélectionné');
                   }
-                  analytics.trackInteraction(EventAction.CLICK, 'history_button', { from: 'map', building_id: activeLocation });
-                  navigate('/location-history', { 
-                    state: { selectedLocationId: activeLocation }
-                  });
-                } else {
-                  logger.warn('Tentative de navigation vers l\'histoire d\'un lieu non sélectionné');
-                }
-              }}
-            >
-              <Info className="h-3 w-3 mr-1" />
-              Histoire du lieu
-            </Button>
+                }}
+              >
+                <Info className="h-3 w-3 mr-1" />
+                Histoire du lieu
+              </Button>
+              
+              {/* Bouton audio guide à côté du bouton Histoire */}
+              {mapLocations.find(l => l.id === activeLocation)?.audio && (
+                <AudioGuideButton 
+                  audioUrl={mapLocations.find(l => l.id === activeLocation)?.audio}
+                  locationName={mapLocations.find(l => l.id === activeLocation)?.name}
+                  variant="button"
+                  className="border-[#4a5d94] text-[#4a5d94]"
+                />
+              )}
+            </div>
             
             <div className="mb-6"></div>
             

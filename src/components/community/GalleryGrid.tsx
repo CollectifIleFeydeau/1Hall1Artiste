@@ -8,9 +8,22 @@ import { cn } from "../../lib/utils";
 import { LazyImage } from "../ui/LazyImage";
 import { LikeButton } from "./LikeButton";
 
+// Interface pour les photos historiques
+interface HistoricalPhoto {
+  id: string;
+  path: string;
+  type: 'historical';
+  displayName: string;
+  timestamp: string;
+  description: string;
+}
+
+// Type unifié pour toutes les entrées
+type UnifiedGalleryEntry = CommunityEntry | HistoricalPhoto;
+
 interface GalleryGridProps {
-  entries: CommunityEntry[];
-  onEntryClick: (entry: CommunityEntry) => void;
+  entries: UnifiedGalleryEntry[];
+  onEntryClick: (entry: UnifiedGalleryEntry) => void;
 }
 
 export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick }) => {
@@ -39,7 +52,28 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
           className="relative rounded-lg overflow-hidden"
           onClick={() => onEntryClick(entry)}
         >
-          {entry.type === "photo" && (entry.thumbnailUrl || entry.imageUrl) ? (
+          {entry.type === "historical" ? (
+            // Affichage d'une photo historique
+            <div className="aspect-square relative">
+              <img
+                src={entry.path}
+                alt={entry.description}
+                className="w-full h-full object-cover"
+                loading={index < 6 ? "eager" : "lazy"}
+                onError={(e) => {
+                  // Fallback pour les photos historiques qui ne se chargent pas
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('placeholder')) {
+                    target.src = '/images/placeholder-image.jpg';
+                  }
+                }}
+              />
+              {/* Overlay avec description */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
+                <p className="text-white text-sm line-clamp-2">{entry.description}</p>
+              </div>
+            </div>
+          ) : entry.type === "photo" && ('thumbnailUrl' in entry || 'imageUrl' in entry) && (entry.thumbnailUrl || entry.imageUrl) ? (
             // Affichage d'une photo
             <div className="aspect-square relative">
               <LazyImage
@@ -93,6 +127,12 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
                     if (!entry.timestamp) return "";
                     const date = new Date(entry.timestamp);
                     if (isNaN(date.getTime())) return "";
+                    
+                    // Pour les photos historiques, afficher juste "Historique"
+                    if (entry.type === 'historical') {
+                      return "Historique";
+                    }
+                    
                     return format(date, "d MMM", { locale: fr });
                   } catch (error) {
                     console.warn('[GalleryGrid] Invalid timestamp:', entry.timestamp, error);

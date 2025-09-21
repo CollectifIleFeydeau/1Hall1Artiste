@@ -14,7 +14,7 @@ const logger = createLogger('AudioGuideButton');
 interface AudioGuideButtonProps {
   audioUrl?: string;
   locationName?: string;
-  variant?: 'icon' | 'compact' | 'full';
+  variant?: 'icon' | 'compact' | 'full' | 'button';
   className?: string;
 }
 
@@ -251,6 +251,88 @@ export const AudioGuideButton: React.FC<AudioGuideButtonProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.6 }}
               className="absolute inset-0 rounded-full border-2 border-orange-400"
+            />
+          )}
+        </AnimatePresence>
+      </motion.button>
+    );
+  }
+
+  if (variant === 'button') {
+    // Version bouton simple pour être à côté du bouton "Histoire du lieu"
+    return (
+      <motion.button
+        onClick={handleClick}
+        disabled={isToggling}
+        className={cn(
+          "flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-normal",
+          "bg-transparent hover:bg-[#4a5d94] hover:text-white transition-all duration-200",
+          "disabled:opacity-50 cursor-pointer",
+          isToggling && "animate-pulse",
+          showSuccess && "border-orange-400 text-orange-500",
+          error && "border-red-400 text-red-500",
+          isThisTrackPlaying && "border-orange-400 text-orange-500 bg-orange-50",
+          className
+        )}
+        whileTap={!isToggling ? { scale: 0.95 } : {}}
+        whileHover={!isToggling ? { scale: 1.02 } : {}}
+        animate={showSuccess ? { scale: [1, 1.05, 1] } : {}}
+      >
+        <AnimatePresence mode="wait">
+          {isToggling ? (
+            <motion.div
+              key="loading"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              className="relative"
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-3 h-3 border-2 border-current border-t-transparent rounded-full"
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="audio-icon"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              {error && isCurrentTrack ? (
+                <VolumeX
+                  size={14}
+                  className="text-red-500"
+                />
+              ) : isThisTrackPlaying ? (
+                <Pause
+                  size={14}
+                  className="text-orange-500"
+                />
+              ) : (
+                <Volume2
+                  size={14}
+                />
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        <span>
+          {isToggling ? "Chargement..." : isThisTrackPlaying ? "En pause" : "Audio guide"}
+        </span>
+
+        {/* Particules d'animation au clic */}
+        <AnimatePresence>
+          {showSuccess && (
+            <motion.div
+              initial={{ scale: 0, opacity: 1 }}
+              animate={{ scale: 2, opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6 }}
+              className="absolute inset-0 rounded-md border-2 border-orange-400"
             />
           )}
         </AnimatePresence>

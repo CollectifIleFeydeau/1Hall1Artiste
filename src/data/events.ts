@@ -242,7 +242,7 @@ const eventScheduleData: EventDetails[] = [
     title: "apolline.design",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "allee-duguay-trouin-15",
+    locationId: "quai-turenne-10",
 
   },
   {
@@ -296,7 +296,7 @@ const eventScheduleData: EventDetails[] = [
     title: "Peinture contemporaine",
     time: "12h00 - 19h00, samedi et dimanche",
     days: ["samedi", "dimanche"],
-    locationId: "allee-duguay-trouin-15",
+    locationId: "quai-turenne-10",
 
   }
 ];
