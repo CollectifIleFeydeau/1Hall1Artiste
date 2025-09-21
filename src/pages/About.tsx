@@ -12,7 +12,6 @@ import { teamMembers } from "@/data/team";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { getImagePath } from "@/utils/imagePaths";
-import VersionBadge from "@/components/VersionBadge";
 
 const About = () => {
   const navigate = useNavigate();
@@ -232,9 +231,6 @@ const About = () => {
       
       {/* Bottom Navigation */}
       <BottomNavigation />
-      
-      {/* Version Badge */}
-      <VersionBadge />
     </div>
   );
 };

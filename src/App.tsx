@@ -42,7 +42,6 @@ import CommunityGallery from "./pages/CommunityGallery";
 import HistoricalGallery from "./pages/HistoricalGallery";
 import Galleries from "./pages/Galleries";
 import AnalyticsDebugger from "./debug/AnalyticsDebugger";
-import VersionBadge from "./components/VersionBadge";
 import Changelog from "./pages/Changelog";
 
 const queryClient = new QueryClient();

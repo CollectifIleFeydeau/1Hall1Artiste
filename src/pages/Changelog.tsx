@@ -8,7 +8,7 @@ import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { useNavigate } from 'react-router-dom';
 
 // Version statique (sera mise à jour par le script de versioning)
-const APP_VERSION = '1.4.1';
+const APP_VERSION = '1.4.2';
 const APP_NAME = 'Collectif Île Feydeau';
 
 const Changelog: React.FC = () => {
