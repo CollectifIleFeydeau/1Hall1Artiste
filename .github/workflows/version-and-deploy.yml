@@ -90,12 +90,12 @@ jobs:
       run: |
         VERSION=$(node -p "require('./package.json').version")
         echo "🎉 Version v$VERSION créée avec succès!"
-        echo "🚀 Le déploiement sera effectué par le workflow deploy-pages.yml"
+        echo "🚀 Déclenchement du déploiement GitHub Pages..."
 
-    - name: 📊 Display version info
-      run: |
-        VERSION=$(node -p "require('./package.json').version")
-        echo "🎉 Déployé avec succès!"
-        echo "📦 Version: v$VERSION"
-        echo "🌐 URL: https://collectifilefeydeau.github.io/1Hall1Artiste/"
-        echo "📅 Date: $(date)"
+  deploy:
+    needs: version-and-deploy
+    uses: ./.github/workflows/deploy-pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
