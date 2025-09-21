@@ -13,7 +13,7 @@ interface VersionBadgeProps {
 
 export const VersionBadge: React.FC<VersionBadgeProps> = ({ className = '' }) => {
   // Récupération de la version depuis package.json
-  const version = '1.3.8'; // Sera mis à jour automatiquement par le script de release
+  const version = '1.4.0'; // Sera mis à jour automatiquement par le script de release
   
   const handleChangelogClick = () => {
     window.open('https://github.com/CollectifIleFeydeau/1Hall1Artiste/blob/main/CHANGELOG.md', '_blank');

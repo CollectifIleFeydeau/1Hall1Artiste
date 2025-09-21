@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAudioGuide } from '@/services/audioGuideService';
 import { createLogger } from '@/utils/logger';
 import { cn } from '@/lib/utils';
+import { getAssetPath } from '@/utils/assetUtils';
 import Volume2 from 'lucide-react/dist/esm/icons/volume-2';
 import VolumeX from 'lucide-react/dist/esm/icons/volume-x';
 import Pause from 'lucide-react/dist/esm/icons/pause';
@@ -66,8 +67,11 @@ export const AudioGuideButton: React.FC<AudioGuideButtonProps> = ({
   
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Utiliser getAssetPath pour corriger l'URL avec la base URL
+  const correctedAudioUrl = audioUrl ? getAssetPath(audioUrl) : null;
+  
   // Vérifier si ce bouton contrôle le track actuellement en cours
-  const isCurrentTrack = currentTrack === audioUrl;
+  const isCurrentTrack = currentTrack === correctedAudioUrl;
   const isThisTrackPlaying = isCurrentTrack && isPlaying;
   const isToggling = isLoading && isCurrentTrack;
 
@@ -75,30 +79,30 @@ export const AudioGuideButton: React.FC<AudioGuideButtonProps> = ({
     e.stopPropagation();
     e.preventDefault();
     
-    if (!audioUrl || isToggling) {
+    if (!correctedAudioUrl || isToggling) {
       return;
     }
 
     try {
       if (isThisTrackPlaying) {
         pause();
-        logger.info('Audio guide mis en pause', { audioUrl, locationName });
+        logger.info('Audio guide mis en pause', { audioUrl: correctedAudioUrl, locationName });
       } else if (isCurrentTrack && !isPlaying) {
         resume();
-        logger.info('Audio guide repris', { audioUrl, locationName });
+        logger.info('Audio guide repris', { audioUrl: correctedAudioUrl, locationName });
       } else {
-        await play(audioUrl, locationName);
-        logger.info('Audio guide démarré', { audioUrl, locationName });
+        await play(correctedAudioUrl, locationName);
+        logger.info('Audio guide démarré', { audioUrl: correctedAudioUrl, locationName });
       }
       
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 1000);
     } catch (error) {
-      logger.error('Erreur lors du contrôle de l\'audio guide', { error, audioUrl });
+      logger.error('Erreur lors du contrôle de l\'audio guide', { error, audioUrl: correctedAudioUrl });
     }
   };
 
-  if (!audioUrl) {
+  if (!correctedAudioUrl) {
     return null;
   }
 

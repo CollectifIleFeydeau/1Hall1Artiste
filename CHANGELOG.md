@@ -15,6 +15,24 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Supprimé
 
+## [1.4.0] - 2025-09-21
+
+### Ajouté
+- 🎵 **Audio Guide complet** : Système d'audio guide intégré dans la carte interactive
+  - Bouton audio dans chaque modal de bâtiment (style identique aux likes)
+  - Player audio global avec contrôles complets (play/pause/stop/volume)
+  - Service audioGuideService robuste avec gestion d'erreurs
+  - Support des fichiers MP3 existants dans `/public/audio/`
+  - Animations Framer Motion cohérentes avec l'interface
+
+### Modifié
+
+### Corrigé
+- 🔧 **URLs audio corrigées** : Utilisation de `getAssetPath()` pour gérer la base URL `/1Hall1Artiste/` en production
+- 🎧 **Erreurs 404 audio** : Les fichiers audio sont maintenant correctement trouvés sur GitHub Pages
+
+### Supprimé
+
 ## [1.3.9] - 2025-09-21
 
 ### Ajouté
