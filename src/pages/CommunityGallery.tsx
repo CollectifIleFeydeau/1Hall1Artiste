@@ -119,6 +119,7 @@ const CommunityGallery: React.FC = () => {
       // Fusionner toutes les entrées
       const merged = mergeAllEntries(data, historical);
       
+      
       setCommunityEntries(data);
       setHistoricalPhotos(historical);
       setAllEntries(merged);
@@ -215,6 +216,14 @@ const CommunityGallery: React.FC = () => {
     // Filtrer par type
     if (filter === "all") return true;
     if (filter === "historical") return entry.type === 'historical';
+    if (filter === "photo") {
+      // Inclure les photos communautaires ET les photos historiques
+      return entry.type === 'photo' || entry.type === 'historical';
+    }
+    if (filter === "testimonial") {
+      // Seulement les témoignages communautaires
+      return entry.type === 'testimonial';
+    }
     return entry.type === filter;
   });
 
@@ -252,79 +261,87 @@ const CommunityGallery: React.FC = () => {
           </TabsList>
 
           <TabsContent value="gallery" className="h-full">
-            <PullToRefresh 
-              onRefresh={handleRefresh}
-              disabled={loading}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center h-64">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              ) : error ? (
-                <div className="flex flex-col items-center justify-center h-64 text-center">
-                  <p className="text-red-500 mb-4">{error}</p>
-                  <Button onClick={() => window.location.reload()}>Réessayer</Button>
-                </div>
-              ) : (
-                <>
-                  {/* Filtres */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <Filter size={16} />
-                      <span className="text-sm font-medium">Filtrer:</span>
-                    </div>
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center h-64 text-center">
+                <p className="text-red-500 mb-4">{error}</p>
+                <Button onClick={() => window.location.reload()}>Réessayer</Button>
+              </div>
+            ) : (
+              <>
+                {/* Filtres */}
+                <div className="flex justify-end mb-4">
                     <div className="flex gap-1 flex-wrap">
                       <Button 
                         variant={filter === "all" ? "default" : "outline"} 
                         size="sm" 
-                        onClick={() => { setFilter("all"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'all' }); }}
+                        onClick={() => { 
+                          setFilter("all"); 
+                          analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'all' }); 
+                        }}
                       >
                         Tous
                       </Button>
                       <Button 
                         variant={filter === "photo" ? "default" : "outline"} 
                         size="sm" 
-                        onClick={() => { setFilter("photo"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'photo' }); }}
+                        onClick={() => { 
+                          setFilter("photo"); 
+                          analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'photo' }); 
+                        }}
                       >
                         Photos
                       </Button>
                       <Button 
                         variant={filter === "testimonial" ? "default" : "outline"} 
                         size="sm" 
-                        onClick={() => { setFilter("testimonial"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'testimonial' }); }}
+                        onClick={() => { 
+                          setFilter("testimonial"); 
+                          analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'testimonial' }); 
+                        }}
                       >
                         Témoignages
                       </Button>
                       <Button 
                         variant={filter === "historical" ? "default" : "outline"} 
                         size="sm" 
-                        onClick={() => { setFilter("historical"); analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'historical' }); }}
+                        onClick={() => { 
+                          setFilter("historical"); 
+                          analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'historical' }); 
+                        }}
                       >
                         Historiques
                       </Button>
                     </div>
                   </div>
 
-                  {/* Grille de la galerie */}
-                  {filteredEntries.length > 0 ? (
-                    <GalleryGrid 
-                      entries={filteredEntries} 
-                      onEntryClick={(entry) => { 
-                        const index = filteredEntries.findIndex(e => e.id === entry.id);
-                        setSelectedIndex(index);
-                        setSelectedEntry(entry);
-                        analytics.trackCommunityInteraction(EventAction.VIEW, { content_type: 'entry', entry_id: entry.id });
-                      }}
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-64 text-center">
-                      <p className="text-gray-500 mb-4">Aucune contribution dans cette catégorie</p>
-                      <Button onClick={() => { analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'empty_state' }); setActiveTab("contribute"); }}>Soyez le premier à contribuer</Button>
-                    </div>
-                  )}
+                  {/* Grille de la galerie avec PullToRefresh */}
+                  <PullToRefresh 
+                    onRefresh={handleRefresh}
+                    disabled={loading}
+                  >
+                    {filteredEntries.length > 0 ? (
+                      <GalleryGrid 
+                        entries={filteredEntries} 
+                        onEntryClick={(entry) => { 
+                          const index = filteredEntries.findIndex(e => e.id === entry.id);
+                          setSelectedIndex(index);
+                          setSelectedEntry(entry);
+                          analytics.trackCommunityInteraction(EventAction.VIEW, { content_type: 'entry', entry_id: entry.id });
+                        }}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-64 text-center">
+                        <p className="text-gray-500 mb-4">Aucune contribution dans cette catégorie</p>
+                        <Button onClick={() => { analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'empty_state' }); setActiveTab("contribute"); }}>Soyez le premier à contribuer</Button>
+                      </div>
+                    )}
+                  </PullToRefresh>
                 </>
               )}
-            </PullToRefresh>
           </TabsContent>
 
           <TabsContent value="contribute" className="h-full">
