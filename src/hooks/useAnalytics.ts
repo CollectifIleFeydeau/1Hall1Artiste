@@ -80,9 +80,6 @@ export function useAnalytics() {
     trackDonationInteraction: (action: EventAction, properties?: EventProperties) => 
       analytics.trackDonationInteraction(action, properties),
 
-    // Événements d'onboarding
-    trackOnboarding: (action: EventAction, properties?: EventProperties) => 
-      analytics.trackOnboarding(action, properties),
 
     // Erreurs
     trackError: (action: EventAction, message: string, properties?: EventProperties) => 

@@ -249,14 +249,6 @@ export default function Admin() {
     setTimeout(() => window.location.reload(), 1500);
   };
   
-  const resetOnboarding = () => {
-    localStorage.removeItem('hasSeenOnboarding');
-    toast({
-      title: "Onboarding réinitialisé",
-      description: "L'onboarding s'affichera au prochain chargement de l'application.",
-    });
-    logger.info('Onboarding réinitialisé par l\'administrateur');
-  };
 
   if (!isAuthenticated) {
     return (
@@ -468,16 +460,6 @@ export default function Admin() {
                   </div>
                   
                   <div>
-                    <h2 className="text-lg font-semibold mb-2">Réinitialisation de l'onboarding</h2>
-                    <p className="text-sm text-gray-500 mb-4">
-                      Cette action réinitialisera uniquement l'onboarding. L'écran d'accueil s'affichera au prochain chargement de l'application.
-                    </p>
-                    <Button 
-                      onClick={resetOnboarding}
-                      className="w-full bg-gray-800 hover:bg-gray-900 text-white"
-                    >
-                      Réinitialiser l'onboarding
-                    </Button>
                   </div>
                 </div>
               </CardContent>

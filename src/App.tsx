@@ -36,13 +36,13 @@ import NotFound from "./pages/NotFound";
 import SplashScreen from "./pages/SplashScreen";
 import Admin from "./pages/Admin";
 import SavedEvents from "./pages/SavedEvents";
-import Onboarding from "./pages/Onboarding";
 import { LocationHistory } from "./pages/LocationHistory";
 import Analytics from "./pages/Analytics";
 import CommunityGallery from "./pages/CommunityGallery";
 import HistoricalGallery from "./pages/HistoricalGallery";
 import Galleries from "./pages/Galleries";
 import AnalyticsDebugger from "./debug/AnalyticsDebugger";
+import VersionBadge from "./components/VersionBadge";
 
 const queryClient = new QueryClient();
 
@@ -61,39 +61,7 @@ const AnimatedRoutes: React.FC = () => {
   const navigate = useNavigate();
   const prevPathRef = useRef<string>(location.pathname);
   
-  // État pour suivre si l'utilisateur a déjà vu l'onboarding
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(() => {
-    const storedValue = localStorage.getItem('hasSeenOnboarding');
-    return storedValue === 'true';
-  });
   
-  // Surveiller les changements du localStorage pour hasSeenOnboarding
-  useEffect(() => {
-    console.log('[App] Initialisation des écouteurs d\'événements d\'onboarding');
-    
-    // Fonction pour vérifier les changements du localStorage
-    const handleStorageChange = () => {
-      const storedValue = localStorage.getItem('hasSeenOnboarding');
-      const newValue = storedValue === 'true';
-      
-      // Early return si la valeur n'a pas changé pour éviter des re-renders inutiles
-      if (newValue !== hasSeenOnboarding) {
-        console.log('[App] Mise à jour de hasSeenOnboarding depuis localStorage:', newValue);
-        setHasSeenOnboarding(newValue);
-      }
-    };
-
-    // Écouter les changements du localStorage
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Vérifier aussi périodiquement avec une fréquence réduite (500ms au lieu de 100ms)
-    const interval = setInterval(handleStorageChange, 500);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, [hasSeenOnboarding]);
 
   // État pour l'écran d'accueil
   const [showSplash, setShowSplash] = useState<boolean>(true);
@@ -101,38 +69,10 @@ const AnimatedRoutes: React.FC = () => {
   // Gérer la fin de l'écran d'accueil
   const handleSplashComplete = () => {
     setShowSplash(false);
-    // Si c'est la première visite, aller à l'onboarding
-    if (!hasSeenOnboarding) {
-      navigate('/onboarding');
-    }
-    // Sinon, rester sur la page actuelle (ne pas forcer la redirection vers /map)
+    // Aller directement à la carte après le splash screen
+    navigate('/map');
   };
   
-  // Vérifier si c'est la première visite
-  useEffect(() => {
-    console.log('[App] useEffect navigation - État actuel:', {
-      showSplash,
-      hasSeenOnboarding,
-      pathname: location.pathname
-    });
-    
-    // Ne rien faire si l'écran d'accueil est encore affiché
-    if (showSplash) {
-      console.log('[App] Écran d\'accueil encore affiché, aucune action');
-      return;
-    }
-    
-    // Si c'est la première visite et que l'utilisateur n'est pas déjà sur la page d'onboarding
-    if (!hasSeenOnboarding && location.pathname !== '/onboarding') {
-      console.log('[App] Redirection vers onboarding depuis:', location.pathname);
-      navigate('/onboarding');
-    } else if (hasSeenOnboarding && location.pathname === '/onboarding') {
-      console.log('[App] Onboarding terminé, redirection vers /map');
-      navigate('/map');
-    } else {
-      console.log('[App] Aucune action de navigation nécessaire');
-    }
-  }, [hasSeenOnboarding, location.pathname, navigate, showSplash]);
 
   // Track route changes for analytics
   useEffect(() => {
@@ -144,12 +84,6 @@ const AnimatedRoutes: React.FC = () => {
     }
   }, [location.pathname]);
   
-  // Marquer l'onboarding comme vu
-  const handleOnboardingComplete = () => {
-    localStorage.setItem('hasSeenOnboarding', 'true');
-    setHasSeenOnboarding(true);
-    navigate('/map');
-  };
   
   // Configuration des routes principales
   const mainRoutes: RouteConfig[] = [
@@ -168,7 +102,6 @@ const AnimatedRoutes: React.FC = () => {
   // Configuration des routes secondaires
   const secondaryRoutes: RouteConfig[] = [
     { path: '/admin', component: Admin },
-    { path: '/onboarding', component: Onboarding },
     { path: '/location-history', component: LocationHistory },
     { path: '/analytics', component: Analytics },
   ];
@@ -188,7 +121,6 @@ const AnimatedRoutes: React.FC = () => {
     return (
       <SplashScreen 
         onComplete={handleSplashComplete} 
-        isFirstVisit={!hasSeenOnboarding} 
       />
     );
   }
@@ -196,14 +128,8 @@ const AnimatedRoutes: React.FC = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Rediriger vers l'onboarding lors de la première visite, sinon vers la carte */}
-        <Route path="/" element={
-          hasSeenOnboarding ? (
-            <Navigate to="/map" replace />
-          ) : (
-            <Navigate to="/onboarding" replace />
-          )
-        } />
+        {/* Rediriger vers la carte */}
+        <Route path="/" element={<Navigate to="/map" replace />} />
         
 
         {/* Routes principales avec navigation par gestes */}
@@ -297,22 +223,6 @@ const App: React.FC = () => {
     console.log('[App] Ajout de l\'écouteur pour l\'événement global "app-achievement"');
     window.addEventListener('app-achievement', handleGlobalAchievement);
 
-    // Fonction de test globale pour réinitialiser l'onboarding
-    (window as any).resetOnboardingTest = () => {
-      console.log('[App] [TEST] Réinitialisation de l\'onboarding...');
-      try {
-        localStorage.removeItem('hasSeenOnboarding');
-        if (window.location && window.location.reload) {
-          window.location.reload();
-        } else {
-          console.warn('[App] window.location.reload not available');
-        }
-      } catch (error) {
-        console.error('[App] Error in resetOnboardingTest:', error);
-      }
-    };
-
-    console.log('[App] [TEST] Fonction resetOnboardingTest() disponible dans la console');
 
     // Nettoyer les écouteurs d'événements lors du démontage
     return () => {
@@ -433,23 +343,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Fonction pour réinitialiser l'onboarding
-  const resetOnboarding = () => {
-    try {
-      localStorage.removeItem('hasSeenOnboarding');
-      console.log('[App] Onboarding réinitialisé, rechargement de la page...');
-      // Forcer l'affichage de l'écran d'accueil avant l'onboarding
-      if (window.location && window.location.reload) {
-        window.location.reload();
-      } else {
-        console.warn('[App] window.location.reload not available, using navigate');
-        // Fallback: utiliser la navigation React Router
-        window.location.href = window.location.origin + window.location.pathname;
-      }
-    } catch (error) {
-      console.error('[App] Error in resetOnboarding:', error);
-    }
-  };
   
   // Fonction pour tester les confettis
   const testConfetti = () => {

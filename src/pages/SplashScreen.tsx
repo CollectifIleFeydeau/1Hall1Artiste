@@ -5,10 +5,9 @@ import { getImagePath } from "@/utils/imagePaths";
 
 interface SplashScreenProps {
   onComplete: () => void;
-  isFirstVisit: boolean;
 }
 
-const SplashScreen = ({ onComplete, isFirstVisit }: SplashScreenProps) => {
+const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   const [animationComplete, setAnimationComplete] = useState(false);
   const navigate = useNavigate();
 
@@ -93,9 +92,7 @@ const SplashScreen = ({ onComplete, isFirstVisit }: SplashScreenProps) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
         >
-          {isFirstVisit 
-            ? "Bienvenue dans l'application du Collectif Île Feydeau" 
-            : "Découvrez le patrimoine historique de l'Île Feydeau"}
+          "Découvrez le patrimoine historique de l'Île Feydeau"
         </motion.p>
       </motion.div>
     </motion.div>

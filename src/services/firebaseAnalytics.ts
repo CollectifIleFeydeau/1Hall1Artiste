@@ -11,7 +11,6 @@ export enum EventCategory {
   ERROR = 'error',
   USER = 'user',
   FEATURE = 'feature',
-  ONBOARDING = 'onboarding',
   COMMUNITY = 'community',
   PROGRAM = 'program',
   MAP = 'map',
@@ -77,11 +76,6 @@ export enum EventAction {
   FEATURE_DISABLE = 'feature_disable',
   FEATURE_USE = 'feature_use',
   
-  // Onboarding
-  ONBOARDING_START = 'onboarding_start',
-  ONBOARDING_COMPLETE = 'onboarding_complete',
-  ONBOARDING_SKIP = 'onboarding_skip',
-  ONBOARDING_SLIDE_VIEW = 'onboarding_slide_view',
   
   // Community
   CONTRIBUTION = 'contribution',
@@ -222,10 +216,6 @@ class AnalyticsService {
     });
   }
 
-  // Traquer les événements d'onboarding
-  trackOnboarding(action: EventAction, properties?: EventProperties): void {
-    this.trackEvent(EventCategory.ONBOARDING, action, properties);
-  }
 
   // Traquer les interactions avec la carte
   trackMapInteraction(action: EventAction, properties?: EventProperties): void {

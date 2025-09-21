@@ -62,15 +62,29 @@ ${nonPublishedContent}
 `;
 
 // Remplacer dans le changelog
-changelog = changelog.replace(
+const updatedChangelog = changelog.replace(
   nonPublishedRegex,
   newNonPublished + newVersionEntry
 );
 
 // Écrire le nouveau CHANGELOG
-fs.writeFileSync(changelogPath, changelog);
+fs.writeFileSync(changelogPath, updatedChangelog);
 
-// Mettre à jour le composant VersionInfo
+// Mettre à jour la version dans VersionBadge.tsx
+const versionBadgePath = 'src/components/VersionBadge.tsx';
+if (fs.existsSync(versionBadgePath)) {
+  let versionBadgeContent = fs.readFileSync(versionBadgePath, 'utf8');
+  
+  // Remplacer la version dans le composant
+  const versionRegex = /const version = '[^']+'/;
+  versionBadgeContent = versionBadgeContent.replace(versionRegex, `const version = '${newVersion}'`);
+  
+  fs.writeFileSync(versionBadgePath, versionBadgeContent);
+  console.log(`✅ Version mise à jour dans VersionBadge.tsx: ${newVersion}`);
+}
+
+console.log(`✅ CHANGELOG mis à jour avec la version ${newVersion}`);
+
 try {
   const versionInfoPath = 'src/components/admin/VersionInfo.tsx';
   let versionInfoContent = fs.readFileSync(versionInfoPath, 'utf8');
