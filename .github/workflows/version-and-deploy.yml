@@ -52,14 +52,14 @@ jobs:
           npm run version:patch
           
           # Commit et push des changements de version
-          git add package.json CHANGELOG.md
+          git add package.json CHANGELOG.md src/components/admin/VersionInfo.tsx
           git commit -m "chore: bump version to v$(node -p "require('./package.json').version")"
-          git push
+          git push origin main
           
           # Créer et pousser le tag
           VERSION=$(node -p "require('./package.json').version")
           git tag "v$VERSION"
-          git push --tags
+          git push origin --tags
         else
           echo "📝 Aucun changement significatif détecté dans CHANGELOG"
         fi
@@ -73,14 +73,14 @@ jobs:
         npm run version:${{ github.event.inputs.version_type }}
         
         # Commit et push des changements de version
-        git add package.json CHANGELOG.md
+        git add package.json CHANGELOG.md src/components/admin/VersionInfo.tsx
         git commit -m "chore: bump version to v$(node -p "require('./package.json').version")"
-        git push
+        git push origin main
         
         # Créer et pousser le tag
         VERSION=$(node -p "require('./package.json').version")
         git tag "v$VERSION"
-        git push --tags
+        git push origin --tags
 
     - name: ✅ Version updated successfully
       run: |
