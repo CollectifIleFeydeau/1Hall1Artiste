@@ -82,9 +82,9 @@ export function BottomNavigation() {
         </Link>
         
         <Link
-          to="/galleries"
+          to="/community"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/galleries") || isActive("/community") || isActive("/historical") ? "text-[#ff7a45] font-medium" : "text-gray-500"
+            isActive("/community") || isActive("/historical") ? "text-[#ff7a45] font-medium" : "text-gray-500"
           }`}
           onClick={() => {
             // Marquer les nouvelles photos comme vues quand l'utilisateur clique
@@ -94,9 +94,9 @@ export function BottomNavigation() {
           }}
         >
           <NotificationBadge count={newPhotosCount} show={hasNewPhotos}>
-            <Camera className={`${isActive("/galleries") || isActive("/community") || isActive("/historical") ? "h-7 w-7" : "h-6 w-6"}`} />
+            <Camera className={`${isActive("/community") || isActive("/historical") ? "h-7 w-7" : "h-6 w-6"}`} />
           </NotificationBadge>
-          <span className={`mt-1 leading-tight ${isActive("/galleries") || isActive("/community") || isActive("/historical") ? "text-[11px]" : "text-[10px]"}`}>Galeries</span>
+          <span className={`mt-1 leading-tight ${isActive("/community") || isActive("/historical") ? "text-[11px]" : "text-[10px]"}`}>Galerie</span>
         </Link>
         
         <Link

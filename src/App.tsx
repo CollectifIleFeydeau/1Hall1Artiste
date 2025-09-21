@@ -40,7 +40,6 @@ import { LocationHistory } from "./pages/LocationHistory";
 import Analytics from "./pages/Analytics";
 import CommunityGallery from "./pages/CommunityGallery";
 import HistoricalGallery from "./pages/HistoricalGallery";
-import Galleries from "./pages/Galleries";
 import AnalyticsDebugger from "./debug/AnalyticsDebugger";
 import Changelog from "./pages/Changelog";
 
@@ -93,7 +92,6 @@ const AnimatedRoutes: React.FC = () => {
     { path: '/program', component: Program, swipeable: true },
     { path: '/saved', component: SavedEvents, swipeable: true },
     { path: '/community', component: CommunityGallery, swipeable: true },
-    { path: '/galleries', component: Galleries, swipeable: false },
     { path: '/historical', component: HistoricalGallery, swipeable: false },
     { path: '/about', component: About, swipeable: true },
     { path: '/donate', component: Donate, swipeable: true },
@@ -132,6 +130,8 @@ const AnimatedRoutes: React.FC = () => {
         {/* Rediriger vers la carte */}
         <Route path="/" element={<Navigate to="/map" replace />} />
         
+        {/* Rediriger l'ancienne page galleries vers la galerie unifiée */}
+        <Route path="/galleries" element={<Navigate to="/community" replace />} />
 
         {/* Routes principales avec navigation par gestes */}
         {mainRoutes.map(route => (

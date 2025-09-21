@@ -5,6 +5,27 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.4.3] - 2025-09-21
+
+### Ajouté
+- 🖼️ **Galerie unifiée** : Fusion des galeries historique et communautaire en une seule interface
+- 🎛️ **Nouveau filtre "Historiques"** : Permet de filtrer uniquement les photos d'époque (151 photos)
+- 🎵 **Bouton audio guide amélioré** : Nouvelle variante "button" avec texte "Audio guide"
+
+### Modifié
+- 📍 **Interface de la carte** : Bouton audio guide repositionné à côté du bouton "Histoire du lieu"
+- 🏛️ **Emplacements d'artistes** : Correction des artistes du 15 Duguay Trouin déplacés vers 10 quai Turenne
+  - Clotilde Debar Zablocki (apolline.design)
+  - Fabienne Choyau (Peinture contemporaine)
+- 🎨 **Titre de la galerie** : "Galerie Communautaire" → "Galerie" avec nouveau sous-titre
+- 📱 **UX améliorée** : Bouton audio guide plus visible et accessible
+
+### Corrigé
+- 🔧 **Types TypeScript** : Gestion unifiée des entrées historiques et communautaires
+- 🎯 **Filtrage des galeries** : Logique de filtrage adaptée aux nouveaux types d'entrées
+
+### Supprimé
+
 ## [1.4.2] - 2025-09-21
 
 ### Ajouté
