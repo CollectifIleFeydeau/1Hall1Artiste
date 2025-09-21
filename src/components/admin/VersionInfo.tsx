@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Info } from 'lucide-react';
 
 // Version statique (sera mise à jour par le script de versioning)
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.4.1';
 const APP_NAME = 'Collectif Île Feydeau';
 
 const VersionInfo: React.FC = () => {
