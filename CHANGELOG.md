@@ -15,6 +15,16 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Supprimé
 
+## [1.3.9] - 2025-09-21
+
+### Ajouté
+
+### Modifié
+
+### Corrigé
+
+### Supprimé
+
 ## [1.3.8] - 2025-09-21
 
 ### Ajouté
