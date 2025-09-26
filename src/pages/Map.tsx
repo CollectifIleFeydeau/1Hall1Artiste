@@ -411,7 +411,12 @@ const Map = ({ fullScreen = false }: MapProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-20 overflow-x-hidden">
+    <div className="min-h-screen pb-20 overflow-x-hidden relative" style={{
+      backgroundImage: `url('/images/background/Historical Parchment Background Portrait.jpg')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
       <div className="max-w-screen-lg mx-auto px-4 pt-4">
         <header className="mb-2 flex items-center justify-between">
           <div className="w-1/4"></div>
@@ -445,7 +450,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
 
         
         {/* Boutons d'activation de la localisation et du son */}
-        <div className="flex justify-center gap-2 my-2">
+        <div className="flex justify-center gap-2 my-4">
           <LocationActivator 
             onLocationEnabled={() => {
               setPermissionDenied(false);
@@ -482,7 +487,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
         
         <div className="relative">
           {/* Map container */}
-          <div className="bg-white rounded-lg mb-4 border-0 transition-all duration-300 hover:shadow-lg w-full">
+          <div className="bg-transparent rounded-lg mb-4 border-0 transition-all duration-300 w-full">
             <div className="relative h-full">
               <MapComponent 
                 locations={mapLocations}

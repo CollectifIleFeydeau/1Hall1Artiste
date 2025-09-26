@@ -36,7 +36,10 @@ export function useLikes(entryId: string): UseLikesReturn {
       setLiked(data.liked);
       setTotal(data.total);
       
-      console.log(`🔄 Données likes chargées pour ${entryId}:`, data);
+      // Log seulement pour les entrées non-historiques ou en cas d'erreur
+      if (!entryId.startsWith('historical-')) {
+        console.log(`🔄 Données likes chargées pour ${entryId}:`, data);
+      }
     } catch (err) {
       console.error('❌ Erreur chargement likes:', err);
       setError(err instanceof Error ? err.message : 'Erreur de chargement');
@@ -54,7 +57,10 @@ export function useLikes(entryId: string): UseLikesReturn {
       setLiked(data.liked);
       setTotal(data.total);
       
-      console.log(`🔄 Données likes fraîches pour ${entryId}:`, data);
+      // Log seulement pour les entrées non-historiques
+      if (!entryId.startsWith('historical-')) {
+        console.log(`🔄 Données likes fraîches pour ${entryId}:`, data);
+      }
     } catch (err) {
       console.error('❌ Erreur chargement likes fresh:', err);
       setError(err instanceof Error ? err.message : 'Erreur de chargement');
@@ -65,20 +71,29 @@ export function useLikes(entryId: string): UseLikesReturn {
   useEffect(() => {
     if (!entryId) return;
 
-    console.log(`🎧 Chargement initial pour ${entryId}`);
+    // Log seulement pour les entrées non-historiques
+    if (!entryId.startsWith('historical-')) {
+      console.log(`🎧 Chargement initial pour ${entryId}`);
+    }
     
     // Charger les données initiales
     loadLikeData();
     
     // Setup polling avec données fraîches (toutes les 5 secondes)
     const interval = setInterval(() => {
-      console.log(`⏰ Polling automatique pour ${entryId}`);
+      // Log seulement pour les entrées non-historiques
+      if (!entryId.startsWith('historical-')) {
+        console.log(`⏰ Polling automatique pour ${entryId}`);
+      }
       loadFreshLikeData();
     }, 5000);
 
     // Cleanup
     return () => {
-      console.log(`🔇 Arrêt polling pour ${entryId}`);
+      // Log seulement pour les entrées non-historiques
+      if (!entryId.startsWith('historical-')) {
+        console.log(`🔇 Arrêt polling pour ${entryId}`);
+      }
       clearInterval(interval);
     };
   }, [entryId, sessionId, loadLikeData, loadFreshLikeData]);

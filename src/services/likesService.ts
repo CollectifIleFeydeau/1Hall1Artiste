@@ -29,7 +29,10 @@ function getCachedData(entryId: string): LikeData | null {
     return null;
   }
   
-  console.log(`📦 Cache hit pour ${entryId}:`, cached.data);
+  // Log seulement pour les entrées non-historiques
+  if (!entryId.startsWith('historical-')) {
+    console.log(`📦 Cache hit pour ${entryId}:`, cached.data);
+  }
   return cached.data;
 }
 
@@ -38,12 +41,18 @@ function setCachedData(entryId: string, data: LikeData): void {
     data,
     timestamp: Date.now()
   });
-  console.log(`💾 Cache mis à jour pour ${entryId}:`, data);
+  // Log seulement pour les entrées non-historiques
+  if (!entryId.startsWith('historical-')) {
+    console.log(`💾 Cache mis à jour pour ${entryId}:`, data);
+  }
 }
 
 function invalidateCache(entryId: string): void {
   likesCache.delete(entryId);
-  console.log(`🗑️ Cache invalidé pour ${entryId}`);
+  // Log seulement pour les entrées non-historiques
+  if (!entryId.startsWith('historical-')) {
+    console.log(`🗑️ Cache invalidé pour ${entryId}`);
+  }
 }
 
 // Configuration pour les requêtes réseau

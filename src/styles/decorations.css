@@ -1,0 +1,29 @@
+.brush-stroke-left {
+  position: fixed;
+  top: 20vh;
+  left: -50px;
+  width: 150px;
+  height: 300px;
+  background-image: url('/images/background/Pinceaux-Touche.png'); /* Assurez-vous que ce fichier existe */
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.1;
+  transform: rotate(-10deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.brush-stroke-left-2 {
+  position: fixed;
+  top: 60vh;
+  left: -60px;
+  width: 180px;
+  height: 250px;
+  background-image: url('/images/background/Pinceaux-Touche.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.08;
+  transform: rotate(15deg) scaleX(-1);
+  pointer-events: none;
+  z-index: 1;
+}

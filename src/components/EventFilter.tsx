@@ -10,31 +10,29 @@ interface EventFilterProps {
 
 export function EventFilter({ onFilterChange, currentFilter }: EventFilterProps) {
   return (
-    <div className="flex space-x-2 mb-4">
+    <div className="flex justify-center space-x-2 mb-4">
       <Button
-        variant={currentFilter === "all" ? "default" : "outline"}
-        size="sm"
-        onClick={() => onFilterChange("all")}
-        className={currentFilter === "all" ? "bg-[#ff7a45] hover:bg-[#ff9d6e]" : ""}
-      >
-        Tous
-      </Button>
-      <Button
-        variant={currentFilter === "exposition" ? "default" : "outline"}
+        variant={currentFilter === "exposition" ? "default" : "ghost"}
         size="sm"
         onClick={() => onFilterChange("exposition")}
-        className={currentFilter === "exposition" ? "bg-[#ff7a45] hover:bg-[#ff9d6e]" : ""}
+        className={`rounded-full px-4 py-2 border ${
+          currentFilter === "exposition" 
+            ? "bg-[#ff7a45] hover:bg-[#ff9d6e] text-white border-[#ff7a45]"
+            : "bg-transparent text-gray-700 hover:bg-gray-100 border-gray-300"
+        }`}
       >
-        <ImageIcon className="h-4 w-4 mr-2" />
         Expositions
       </Button>
       <Button
-        variant={currentFilter === "concert" ? "default" : "outline"}
+        variant={currentFilter === "concert" ? "default" : "ghost"}
         size="sm"
         onClick={() => onFilterChange("concert")}
-        className={currentFilter === "concert" ? "bg-[#ff7a45] hover:bg-[#ff9d6e]" : ""}
+        className={`rounded-full px-4 py-2 border ${
+          currentFilter === "concert" 
+            ? "bg-[#ff7a45] hover:bg-[#ff9d6e] text-white border-[#ff7a45]"
+            : "bg-transparent text-gray-700 hover:bg-gray-100 border-gray-300"
+        }`}
       >
-        <Music className="h-4 w-4 mr-2" />
         Concerts
       </Button>
     </div>

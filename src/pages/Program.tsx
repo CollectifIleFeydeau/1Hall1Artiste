@@ -1,104 +1,56 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { analytics, EventAction, trackInteraction } from "@/services/firebaseAnalytics";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
+import "@/styles/decorations.css"; // Import des décorations
 import { useNavigate } from "react-router-dom";
 import { events, getEventsByDay, type Event } from "@/data/events";
 import { EventFilter } from "@/components/EventFilter";
 import { ShareButton } from "@/components/ShareButton";
-import { toast } from "@/components/ui/use-toast";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { EventDetails } from "@/components/EventDetails";
-import { EventCard } from "@/components/EventCard";
+import { EventCardModern } from "@/components/EventCardModern";
 import { getSavedEvents, saveEvent, removeSavedEvent } from "../services/savedEvents";
 
 const Program = () => {
   const navigate = useNavigate();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [currentFilter, setCurrentFilter] = useState<string>("all");
+  const [currentFilter, setCurrentFilter] = useState<string>("exposition");
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
   
-  // Page view
   useEffect(() => {
     analytics.trackPageView('/program', 'Programme');
-  }, []);
-
-  useEffect(() => {
-    // Charger les événements sauvegardés depuis le service
-    const savedEvents = getSavedEvents();
-    // Extraire les IDs des événements sauvegardés
-    const savedIds = savedEvents.map(event => event.id);
-    setSavedEventIds(savedIds);
+    const saved = getSavedEvents();
+    setSavedEventIds(saved.map(e => e.id));
   }, []);
 
   const handleSaveEvent = (event: Event, e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log(`[Program] Tentative de sauvegarde de l'événement: ${event.id}`);
-    
-    const isEventSaved = savedEventIds.includes(event.id);
-    
-    if (!isEventSaved) {
-      // Ajouter l'événement aux favoris en utilisant le service
-      saveEvent(event);
-      // Mettre à jour l'état local
-      setSavedEventIds([...savedEventIds, event.id]);
-      
-      // toast({
-      //   title: "Événement sauvegardé",
-      //   description: `${event.title} a été ajouté à vos favoris.`,
-      // });
-      
-      console.log(`[Program] Événement ${event.id} sauvegardé avec succès`);
-      // Analytics: save
-      analytics.trackContentInteraction(EventAction.SAVE, 'event', event.id, {
-        event_title: event.title,
-        source: 'program'
-      });
-    } else {
-      // Retirer l'événement des favoris en utilisant le service
+    const isCurrentlySaved = savedEventIds.includes(event.id);
+    if (isCurrentlySaved) {
       removeSavedEvent(event.id);
-      // Mettre à jour l'état local
       setSavedEventIds(savedEventIds.filter(id => id !== event.id));
-      
-      // toast({
-      //   title: "Événement retiré",
-      //   description: `${event.title} a été retiré de vos favoris.`,
-      // });
-      
-      console.log(`[Program] Événement ${event.id} retiré avec succès`);
-      // Analytics: unsave
-      analytics.trackContentInteraction(EventAction.UNSAVE, 'event', event.id, {
-        event_title: event.title,
-        source: 'program'
-      });
+      analytics.trackContentInteraction(EventAction.UNSAVE, 'event', event.id, { event_title: event.title, source: 'program' });
+    } else {
+      saveEvent(event);
+      setSavedEventIds([...savedEventIds, event.id]);
+      analytics.trackContentInteraction(EventAction.SAVE, 'event', event.id, { event_title: event.title, source: 'program' });
     }
   };
-  
-  const handleViewOnMap = (event: Event) => {
-    // Tracking: view on map from program
-    trackInteraction(EventAction.CLICK, 'program_view_on_map', { event_id: event.id });
-    navigate(`/map?location=${event.id}`);
-  };
 
-  // Track filter changes
   const handleFilterChange = (filter: string) => {
     setCurrentFilter(filter);
     analytics.trackProgramInteraction(EventAction.FILTER, { filter });
   };
   
   const filterEvents = (events: Event[], filter: string) => {
-    if (filter === "all") return events;
+    if (filter === "all") return events; // Gardé pour la logique, même si le bouton est retiré
     return events.filter(event => event.type === filter);
   };
   
-  // Parse "HHhMM - HHhMM" and return minutes since midnight for the start time
   const startMinutes = (timeRange: string): number => {
-    // Examples: "14h00 - 14h30", "12h00 - 19h00"
     const match = timeRange.match(/(\d{1,2})h(\d{2})/);
-    if (!match) return Number.MAX_SAFE_INTEGER; // place unknowns at the end
+    if (!match) return Number.MAX_SAFE_INTEGER;
     const h = parseInt(match[1], 10);
     const m = parseInt(match[2], 10);
     return h * 60 + m;
@@ -109,145 +61,96 @@ const Program = () => {
   };
   
   return (
-    <div className="min-h-screen app-gradient pb-20">
-      <div className="max-w-md mx-auto px-4 pt-4">
-        <header className="mb-2 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className="min-h-screen bg-textured-cream pb-20 relative">
+      {/* Touches de pinceau décoratives */}
+      <div className="brush-stroke-left"></div>
+      <div className="brush-stroke-left-2"></div>
+
+      {/* Pinceaux en bas à droite, au-dessus du menu (agrandis) */}
+      <div 
+        className="fixed bottom-14 right-[-120px] w-[360px] h-[360px] opacity-90 pointer-events-none z-20"
+        style={{
+          backgroundImage: 'url(/images/background/Pinceaux.png)',
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          transform: 'rotate(20deg)'
+        }}
+      />
+      
+      <div className="container mx-auto px-4 py-6 max-w-4xl relative z-10">
+        <header className="mb-6 flex items-center justify-between">
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={() => navigate("/")}
+            className="bg-[#1a2138] hover:bg-[#2a3148] text-white rounded-full px-6 py-2 font-medium"
+          >
             Retour
           </Button>
-          <h1 className="text-xl font-bold text-[#ff7a45]">Programme</h1>
+          <h1 className="text-2xl font-bold text-[#1a2138]">Programme</h1>
           <div className="flex items-center space-x-2">
-  <Button
-    variant="ghost"
-    size="icon"
-    aria-label="Ajouter au calendrier"
-    className="flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-[#4a5d94] transition-all duration-200 hover:shadow-sm"
-    onClick={async () => {
-      try {
-        analytics.trackProgramCTA('add_to_calendar');
-        const { addToCalendar } = await import("../services/calendarService");
-        const allEvents = events;
-        // Ajoute tous les événements du programme au calendrier
-        let successCount = 0;
-        let errorCount = 0;
-        for (const event of allEvents) {
-          const result = await addToCalendar(event);
-          if (result.success) {
-            successCount++;
-          } else {
-            errorCount++;
-          }
-        }
-        if (successCount > 0) {
-          toast({
-            title: "Événements ajoutés au calendrier",
-            description: `${successCount} événement(s) ajouté(s) avec succès.`,
-          });
-        }
-        if (errorCount > 0) {
-          toast({
-            title: "Erreur lors de l'ajout au calendrier",
-            description: `${errorCount} événement(s) n'ont pas pu être ajoutés.`,
-            variant: "destructive",
-          });
-          analytics.trackError(EventAction.API_ERROR, 'program_add_all_to_calendar_errors', { error_count: errorCount });
-        }
-      } catch (error) {
-        toast({
-          title: "Erreur inattendue",
-          description: error instanceof Error ? error.message : "Impossible d'ajouter au calendrier.",
-          variant: "destructive",
-        });
-        analytics.trackError(EventAction.API_ERROR, 'program_add_all_to_calendar_exception', { message: (error as Error)?.message });
-      }
-    }}
-  >
-    <Calendar className="h-5 w-5" />
-  </Button>
-</div>
+            <div className="relative">
+              <ShareButton 
+                title="Programme - Collectif Île Feydeau"
+                text="Découvrez le programme des événements du Collectif Île Feydeau"
+                url={typeof window !== 'undefined' ? window.location.href : ''}
+              />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+            </div>
+          </div>
         </header>
         
-        {/* Event type filter */}
         <div className="mb-4 fade-in">
           <EventFilter onFilterChange={handleFilterChange} currentFilter={currentFilter} />
         </div>
         
-        <div className="text-center mb-4 text-sm text-[#ff7a45] slide-in-bottom">
-        </div>
-        
-        <Tabs defaultValue="samedi" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4 bg-[#e0ebff]">
-            <TabsTrigger 
-              value="samedi" 
-              className="data-[state=active]:bg-[#ff7a45] data-[state=active]:text-white"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Samedi
-            </TabsTrigger>
-            <TabsTrigger 
-              value="dimanche"
-              className="data-[state=active]:bg-[#ff7a45] data-[state=active]:text-white"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Dimanche
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="dimanche" className="w-full">
+          <div className="flex justify-center gap-2 mb-4">
+            <TabsList className="bg-transparent p-0 h-auto gap-2">
+              <TabsTrigger 
+                value="samedi"
+                className="bg-transparent text-gray-700 data-[state=active]:bg-[#ff7a45] data-[state=active]:text-white data-[state=active]:border-[#ff7a45] rounded-full px-4 py-2 border border-gray-300"
+              >
+                Samedi
+              </TabsTrigger>
+              <TabsTrigger 
+                value="dimanche"
+                className="bg-transparent text-gray-700 data-[state=active]:bg-[#ff7a45] data-[state=active]:text-white data-[state=active]:border-[#ff7a45] rounded-full px-4 py-2 border border-gray-300"
+              >
+                Dimanche
+              </TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="samedi" className="space-y-4">
-            {sortByStartTime(filterEvents(getEventsByDay("samedi"), currentFilter)).map((event, index) => {
-                const eventKey = `samedi-${event.id}-${index}`;
-                return (
-                  <div key={eventKey}>
-                    <EventCard
-                      event={event}
-                      isSaved={savedEventIds.includes(event.id)}
-                      onEventClick={() => {
-                        setSelectedEvent(event);
-                        // Analytics: event view from list
-                        analytics.trackConcertView(event.id, event.title);
-                      }}
-                      onSaveClick={(e) => handleSaveEvent(event, e)}
-                    />
-                  </div>
-                );
-              })}
-              
-            {filterEvents(getEventsByDay("samedi"), currentFilter).length === 0 && (
-              <div className="text-center py-8 text-[#8c9db5]">
-                <p>Aucun événement ne correspond à ce filtre pour ce jour.</p>
+            {sortByStartTime(filterEvents(getEventsByDay("samedi"), currentFilter)).map((event, index) => (
+              <div key={`samedi-${event.id}`}>
+                <EventCardModern
+                  event={event}
+                  isSaved={savedEventIds.includes(event.id)}
+                  cardIndex={index}
+                  onEventClick={() => setSelectedEvent(event)}
+                  onSaveClick={(e) => handleSaveEvent(event, e)}
+                />
               </div>
-            )}
+            ))}
           </TabsContent>
           
           <TabsContent value="dimanche" className="space-y-4">
-            {sortByStartTime(filterEvents(getEventsByDay("dimanche"), currentFilter)).map((event, index) => {
-                const eventKey = `dimanche-${event.id}-${index}`;
-                return (
-                  <div key={eventKey}>
-                    <EventCard
-                      event={event}
-                      isSaved={savedEventIds.includes(event.id)}
-                      onEventClick={() => {
-                        setSelectedEvent(event);
-                        // Analytics: event view from list
-                        analytics.trackConcertView(event.id, event.title);
-                      }}
-                      onSaveClick={(e) => handleSaveEvent(event, e)}
-                    />
-                  </div>
-                );
-              })}
-              
-            {filterEvents(getEventsByDay("dimanche"), currentFilter).length === 0 && (
-              <div className="text-center py-8 text-[#8c9db5]">
-                <p>Aucun événement ne correspond à ce filtre pour ce jour.</p>
+            {sortByStartTime(filterEvents(getEventsByDay("dimanche"), currentFilter)).map((event, index) => (
+              <div key={`dimanche-${event.id}`}>
+                <EventCardModern
+                  event={event}
+                  isSaved={savedEventIds.includes(event.id)}
+                  cardIndex={index}
+                  onEventClick={() => setSelectedEvent(event)}
+                  onSaveClick={(e) => handleSaveEvent(event, e)}
+                />
               </div>
-            )}
+            ))}
           </TabsContent>
         </Tabs>
 
-        {/* Utiliser le composant EventDetails unifié */}
         <EventDetails 
           event={selectedEvent}
           isOpen={!!selectedEvent}
@@ -256,7 +159,6 @@ const Program = () => {
         />
       </div>
       
-      {/* Bottom Navigation */}
       <BottomNavigation />
     </div>
   );
