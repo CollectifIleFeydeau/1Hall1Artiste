@@ -45,11 +45,11 @@ export const IMAGE_PATHS = {
     SVG: '/placeholder.svg',
   },
   
-  // Cartes et plans
+  // Cartes et plans (seulement celle utilisée)
   MAPS: {
-    FEYDEAU_OLD: '/carte-feydeau - ancienne.png',
-    FEYDEAU: '/carte-feydeau.png',
-    PLAN_ILE: '/Plan Île Feydeau.png',
+    get FEYDEAU_OLD() { 
+      return getImagePathWithLogs('/carte-feydeau - ancienne.png', 'FEYDEAU_OLD'); 
+    },
   },
   
   // Images d'événements par défaut
