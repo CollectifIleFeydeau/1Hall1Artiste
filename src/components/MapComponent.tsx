@@ -5,6 +5,7 @@ import { getImagePath } from "@/utils/imagePaths";
 import { isOnline } from "@/utils/serviceWorkerRegistration";
 import UserLocation, { UserLocationProps } from "./UserLocation";
 import { toast } from "@/components/ui/use-toast";
+import { IMAGE_PATHS } from "@/constants/paths";
 
 // Créer un logger pour le composant Map avec filtrage
 const originalLogger = createLogger('MapComponent');
@@ -339,7 +340,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         <div
           className="w-full h-full"
           style={{
-            backgroundImage: `url(${getImagePath('/carte-feydeau - ancienne.png')})`,
+            backgroundImage: `url(${IMAGE_PATHS.MAPS.FEYDEAU_OLD})`,
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'contain',
@@ -349,7 +350,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         >
           {/* Image cachée pour détecter les erreurs de chargement */}
           <img 
-            src={getImagePath('/carte-feydeau - ancienne.png')} 
+            src={IMAGE_PATHS.MAPS.FEYDEAU_OLD} 
             alt="Plan de l'Île Feydeau" 
             className="hidden"
             onError={(e) => {

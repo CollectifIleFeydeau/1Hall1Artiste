@@ -7,6 +7,7 @@ import { CommunityEntry } from "../../types/communityTypes";
 import { cn } from "../../lib/utils";
 import { LazyImage } from "../ui/LazyImage";
 import { LikeButton } from "./LikeButton";
+import { IMAGE_PATHS } from "../../constants/paths";
 
 // Interface pour les photos historiques
 interface HistoricalPhoto {
@@ -64,7 +65,7 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
                   // Fallback pour les photos historiques qui ne se chargent pas
                   const target = e.target as HTMLImageElement;
                   if (!target.src.includes('placeholder')) {
-                    target.src = '/images/placeholder-image.jpg';
+                    target.src = IMAGE_PATHS.PLACEHOLDERS.IMAGE;
                   }
                 }}
               />

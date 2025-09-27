@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { createLogger } from "@/utils/logger";
 import { fetchCommunityEntries, deleteCommunityEntry } from "@/services/cloudinaryService";
 import { CommunityEntry } from "@/types/communityTypes";
@@ -15,6 +15,7 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import XCircle from "lucide-react/dist/esm/icons/x-circle";
 import Heart from "lucide-react/dist/esm/icons/heart";
 import { LikesCounter } from "@/components/admin/LikesCounter";
+import { IMAGE_PATHS } from "@/constants/paths";
 
 // Créer un logger pour le composant
 const logger = createLogger('CommunityManagement');
@@ -205,10 +206,7 @@ export function CommunityManagement() {
                     alt={`Contribution de ${entry.displayName}`}
                     className="absolute top-0 left-0 w-full h-full object-cover rounded-md"
                     onError={(e) => {
-                      const basePath = typeof window !== 'undefined' && window.location.hostname.includes('github.io')
-                        ? '/1Hall1Artiste'
-                        : '';
-                      e.currentTarget.src = `${basePath}/images/placeholder-image.jpg`;
+                      e.currentTarget.src = IMAGE_PATHS.PLACEHOLDERS.IMAGE;
                     }}
                   />
                 </div>

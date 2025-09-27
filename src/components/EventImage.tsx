@@ -1,5 +1,6 @@
 import React from 'react';
 import { ImageWithFallback } from './ui/ImageWithFallback';
+import { IMAGE_PATHS } from '../constants/paths';
 
 interface EventImageProps {
   event: {
@@ -29,7 +30,7 @@ export const EventImage: React.FC<EventImageProps> = ({
     }
 
     // Utiliser imageExemple.jpg pour tous les événements
-    return '/events/expositions/imageExemple.jpg';
+    return IMAGE_PATHS.EVENTS.DEFAULT_EXAMPLE;
   };
 
   // Images de fallback par type
