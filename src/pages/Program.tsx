@@ -10,6 +10,8 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { EventDetailsNew as EventDetails } from "@/components/EventDetailsModern";
 import { EventCardModern } from "@/components/EventCardModern";
 import { getSavedEvents, saveEvent, removeSavedEvent } from "../services/savedEvents";
+import { IMAGE_PATHS } from "../constants/imagePaths";
+import { getImagePath } from "@/utils/imagePaths";
 
 const Program = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -59,7 +61,12 @@ const Program = () => {
   };
   
   return (
-    <div className="min-h-screen bg-textured-cream pb-20 relative">
+    <div className="min-h-screen pb-20 relative" style={{
+      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.TEXTURED_CREAM}')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
       {/* Touches de pinceau décoratives */}
       <div className="brush-stroke-left"></div>
       <div className="brush-stroke-left-2"></div>
@@ -68,7 +75,7 @@ const Program = () => {
       <div 
         className="fixed bottom-14 right-[-120px] w-[360px] h-[360px] opacity-90 pointer-events-none z-20"
         style={{
-          backgroundImage: 'url(/images/background/small/Pinceau.png)',
+          backgroundImage: `url('${getImagePath('/images/background/Pinceaux.png')}')`,
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
           transform: 'rotate(20deg)'
@@ -78,7 +85,11 @@ const Program = () => {
       {/* Tabs englobant header + contenu pour que TabsList réside dans le header */}
       <Tabs defaultValue="dimanche" className="w-full">
         {/* Header fixe en haut */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-textured-cream border-b border-gray-200/50">
+        <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200/50" style={{
+          backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.TEXTURED_CREAM}')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}>
           <div className="container mx-auto px-4 py-4 max-w-4xl">
             <header className="mb-4 flex items-center justify-between">
               <BackButton to="/" />
