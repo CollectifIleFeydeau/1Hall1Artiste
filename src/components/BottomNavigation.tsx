@@ -30,6 +30,7 @@ export function BottomNavigation() {
   const { hasNewPhotos, newPhotosCount, markAsViewed } = notificationHook;
   
   
+  
   // Enregistrer le hook pour les tests globaux
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).registerNotificationHook) {
@@ -46,12 +47,12 @@ export function BottomNavigation() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-center h-16 z-[9999] shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-amber-50/95 backdrop-blur-sm border-t border-amber-600/30 flex justify-center h-16 z-[9999] shadow-lg">
       <div className="w-full max-w-screen-lg grid grid-cols-6 gap-0 px-1 mx-auto">
         <Link
           to="/map"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/") || isActive("/map") ? "text-[#ff7a45] font-medium" : "text-gray-500"
+            isActive("/") || isActive("/map") ? "text-[#1a2138] font-bold" : "text-amber-800/70"
           }`}
         >
           <MapPin className={`${isActive("/") || isActive("/map") ? "h-7 w-7" : "h-6 w-6"}`} />
@@ -62,7 +63,7 @@ export function BottomNavigation() {
         <Link
           to="/program"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/program") ? "text-[#ff7a45] font-medium" : "text-gray-500"
+            isActive("/program") ? "text-[#1a2138] font-bold" : "text-amber-800/70"
           }`}
         >
           <Calendar className={`${isActive("/program") ? "h-7 w-7" : "h-6 w-6"}`} />
@@ -73,7 +74,7 @@ export function BottomNavigation() {
         <Link
           to="/saved"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/saved") ? "text-[#ff7a45] font-medium" : "text-gray-500"
+            isActive("/saved") ? "text-[#1a2138] font-bold" : "text-amber-800/70"
           }`}
         >
           <Bookmark className={`${isActive("/saved") ? "h-7 w-7" : "h-6 w-6"}`} />
@@ -84,7 +85,7 @@ export function BottomNavigation() {
         <Link
           to="/community"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/community") || isActive("/historical") ? "text-[#ff7a45] font-medium" : "text-gray-500"
+            isActive("/community") || isActive("/historical") ? "text-[#1a2138] font-bold" : "text-amber-800/70"
           }`}
           onClick={() => {
             // Marquer les nouvelles photos comme vues quand l'utilisateur clique
@@ -102,7 +103,7 @@ export function BottomNavigation() {
         <Link
           to="/about"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/about") ? "text-[#ff7a45] font-medium" : "text-gray-500"
+            isActive("/about") ? "text-[#1a2138] font-bold" : "text-amber-800/70"
           }`}
         >
           <Info className={`${isActive("/about") ? "h-7 w-7" : "h-6 w-6"}`} />
@@ -113,7 +114,7 @@ export function BottomNavigation() {
         <Link
           to="/donate"
           className={`flex flex-col items-center justify-center w-full h-full nav-item-hover ${
-            isActive("/donate") ? "text-[#ff7a45] font-medium" : "text-gray-500"
+            isActive("/donate") ? "text-[#1a2138] font-bold" : "text-amber-800/70"
           }`}
         >
           <Gift className={`${isActive("/donate") ? "h-7 w-7" : "h-6 w-6"}`} />

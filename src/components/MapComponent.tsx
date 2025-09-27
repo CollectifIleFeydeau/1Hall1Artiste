@@ -321,7 +321,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   return (
     <div 
       ref={containerRef}
-      className="relative border border-[#d8e3ff] rounded-lg bg-[#f0f5ff] mb-4 overflow-hidden mx-auto"
+      className="relative border-0 rounded-lg bg-transparent mb-4 overflow-hidden mx-auto"
       style={{ 
         width: `${MAP_WIDTH * scale}px`, 
         height: `${MAP_HEIGHT * scale}px`
@@ -329,7 +329,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     >
       {/* Fond de carte avec image */}
       <div 
-        className="absolute inset-0 bg-white flex items-center justify-center"
+        className="absolute inset-0 bg-transparent flex items-center justify-center"
         onClick={!readOnly ? onClick : undefined}
         style={{ 
           cursor: !readOnly ? 'pointer' : 'default'
@@ -339,7 +339,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         <div
           className="w-full h-full"
           style={{
-            backgroundImage: `url(${getImagePath('/map-feydeau.png')})`,
+            backgroundImage: `url(${getImagePath('/carte-feydeau - ancienne.png')})`,
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'contain',
@@ -349,7 +349,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         >
           {/* Image cachée pour détecter les erreurs de chargement */}
           <img 
-            src={getImagePath('/map-feydeau.png')} 
+            src={getImagePath('/carte-feydeau - ancienne.png')} 
             alt="Plan de l'Île Feydeau" 
             className="hidden"
             onError={(e) => {

@@ -30,18 +30,16 @@ import { preloadAllOfflineData } from "./services/offlineService";
 // Pages
 import Map from "./pages/Map";
 import Program from "./pages/Program";
-import About from "./pages/About";
 import Donate from "./pages/Donate";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./pages/SplashScreen";
 import Admin from "./pages/Admin";
 import SavedEvents from "./pages/SavedEvents";
-import { LocationHistory } from "./pages/LocationHistory";
+import { LocationHistory } from "@/pages/LocationHistory";
 import Analytics from "./pages/Analytics";
-import CommunityGallery from "./pages/CommunityGallery";
-import HistoricalGallery from "./pages/HistoricalGallery";
+import Gallery from "./pages/Gallery";
 import AnalyticsDebugger from "./debug/AnalyticsDebugger";
-import Changelog from "./pages/Changelog";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -91,8 +89,7 @@ const AnimatedRoutes: React.FC = () => {
     { path: '/debug-analytics', component: AnalyticsDebugger },
     { path: '/program', component: Program, swipeable: true },
     { path: '/saved', component: SavedEvents, swipeable: true },
-    { path: '/community', component: CommunityGallery, swipeable: true },
-    { path: '/historical', component: HistoricalGallery, swipeable: false },
+    { path: '/community', component: Gallery, swipeable: true },
     { path: '/about', component: About, swipeable: true },
     { path: '/donate', component: Donate, swipeable: true },
   ];
@@ -102,7 +99,6 @@ const AnimatedRoutes: React.FC = () => {
     { path: '/admin', component: Admin },
     { path: '/location-history', component: LocationHistory },
     { path: '/analytics', component: Analytics },
-    { path: '/changelog', component: Changelog },
   ];
   
   // Vérifier si la page actuelle supporte la navigation par gestes

@@ -1,8 +1,4 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import Music from "lucide-react/dist/esm/icons/music";
-import ImageIcon from "lucide-react/dist/esm/icons/image";
-
+// EventFilter renders two textual filter buttons with proper accessibility
 interface EventFilterProps {
   onFilterChange: (filter: string) => void;
   currentFilter: string;
@@ -10,33 +6,31 @@ interface EventFilterProps {
 
 export function EventFilter({ onFilterChange, currentFilter }: EventFilterProps) {
   return (
-    <div className="flex space-x-2 mb-4">
-      <Button
-        variant={currentFilter === "all" ? "default" : "outline"}
-        size="sm"
-        onClick={() => onFilterChange("all")}
-        className={currentFilter === "all" ? "bg-[#ff7a45] hover:bg-[#ff9d6e]" : ""}
-      >
-        Tous
-      </Button>
-      <Button
-        variant={currentFilter === "exposition" ? "default" : "outline"}
-        size="sm"
+    <div className="flex justify-center gap-2 mb-4 px-2">
+      <button
+        type="button"
         onClick={() => onFilterChange("exposition")}
-        className={currentFilter === "exposition" ? "bg-[#ff7a45] hover:bg-[#ff9d6e]" : ""}
+        className={`rounded-full px-4 py-2 border font-medium text-sm flex-1 max-w-[140px] transition-colors ${
+          currentFilter === "exposition"
+            ? "bg-[#ff7a45] hover:bg-[#ff9d6e] text-white border-[#ff7a45] shadow-md"
+            : "bg-white/80 text-gray-700 hover:bg-white border-gray-300 shadow-sm"
+        }`}
+        aria-pressed={currentFilter === "exposition"}
       >
-        <ImageIcon className="h-4 w-4 mr-2" />
         Expositions
-      </Button>
-      <Button
-        variant={currentFilter === "concert" ? "default" : "outline"}
-        size="sm"
+      </button>
+      <button
+        type="button"
         onClick={() => onFilterChange("concert")}
-        className={currentFilter === "concert" ? "bg-[#ff7a45] hover:bg-[#ff9d6e]" : ""}
+        className={`rounded-full px-4 py-2 border font-medium text-sm flex-1 max-w-[140px] transition-colors ${
+          currentFilter === "concert"
+            ? "bg-[#ff7a45] hover:bg-[#ff9d6e] text-white border-[#ff7a45] shadow-md"
+            : "bg-white/80 text-gray-700 hover:bg-white border-gray-300 shadow-sm"
+        }`}
+        aria-pressed={currentFilter === "concert"}
       >
-        <Music className="h-4 w-4 mr-2" />
         Concerts
-      </Button>
+      </button>
     </div>
   );
 }

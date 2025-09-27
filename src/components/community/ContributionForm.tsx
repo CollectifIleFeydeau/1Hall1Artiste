@@ -9,7 +9,7 @@ import Zap from "lucide-react/dist/esm/icons/zap";
 import { motion } from "framer-motion";
 import { useForm, useWatch } from "react-hook-form";
 
-import { Button } from "../../components/ui/button";
+import { ActionButton } from "../../components/ui/ActionButton";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import { Label } from "../../components/ui/label";
@@ -370,8 +370,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
                   alt="Aperçu" 
                   className="max-h-64 mx-auto rounded" 
                 />
-                <Button 
-                  type="button" 
+                <ActionButton 
                   variant="outline" 
                   size="sm" 
                   className="mt-2"
@@ -383,7 +382,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
                   }}
                 >
                   Changer l'image
-                </Button>
+                </ActionButton>
               </div>
             </div>
           ) : (
@@ -396,8 +395,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
                 
                 {/* Boutons pour mobile */}
                 <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-                  <Button
-                    type="button"
+                  <ActionButton
                     variant="outline"
                     className="flex-1 flex items-center gap-2"
                     onClick={() => {
@@ -415,17 +413,16 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
                   >
                     <Camera className="h-4 w-4" />
                     Appareil photo
-                  </Button>
+                  </ActionButton>
                   
-                  <Button
-                    type="button"
+                  <ActionButton
                     variant="outline"
                     className="flex-1 flex items-center gap-2"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload className="h-4 w-4" />
                     Galerie
-                  </Button>
+                  </ActionButton>
                 </div>
                 
                 {isCompressing && (
@@ -535,10 +532,11 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
 
 
         {/* Bouton de soumission */}
-        <Button 
-          type="submit" 
+        <ActionButton 
+          variant="primary"
           className="w-full" 
           disabled={isSubmitting}
+          type="submit"
         >
           {isSubmitting ? (
             <>
@@ -548,7 +546,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit }) 
           ) : (
             "Partager"
           )}
-        </Button>
+        </ActionButton>
         </form>
       )}
     </motion.div>

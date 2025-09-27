@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/ui/ActionButton';
 import { exportAllData, exportEvents, exportEventsToCSV, importData, importEventsFromCSV } from '@/services/importExportService';
 
 export const ImportExportPanel: React.FC = () => {
@@ -148,15 +148,15 @@ export const ImportExportPanel: React.FC = () => {
       <div className="space-y-2">
         <h3 className="text-md font-medium">Exportation</h3>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={handleExportAll}>
+          <ActionButton variant="primary" onClick={handleExportAll}>
             Exporter toutes les données
-          </Button>
-          <Button onClick={handleExportEvents}>
+          </ActionButton>
+          <ActionButton variant="outline" onClick={handleExportEvents}>
             Exporter les événements
-          </Button>
-          <Button onClick={handleExportEventsCSV}>
+          </ActionButton>
+          <ActionButton variant="outline" onClick={handleExportEventsCSV}>
             Exporter les événements (CSV)
-          </Button>
+          </ActionButton>
         </div>
       </div>
       
@@ -164,9 +164,9 @@ export const ImportExportPanel: React.FC = () => {
         <h3 className="text-md font-medium">Importation</h3>
         <div className="flex flex-col gap-2">
           <div>
-            <Button onClick={() => fileInputRef.current?.click()}>
+            <ActionButton variant="secondary" onClick={() => fileInputRef.current?.click()}>
               Importer depuis JSON
-            </Button>
+            </ActionButton>
             <input
               type="file"
               ref={fileInputRef}
@@ -177,9 +177,9 @@ export const ImportExportPanel: React.FC = () => {
           </div>
           
           <div>
-            <Button onClick={() => csvInputRef.current?.click()}>
+            <ActionButton variant="secondary" onClick={() => csvInputRef.current?.click()}>
               Importer événements depuis CSV
-            </Button>
+            </ActionButton>
             <input
               type="file"
               ref={csvInputRef}

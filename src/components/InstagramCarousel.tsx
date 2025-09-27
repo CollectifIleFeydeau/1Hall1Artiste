@@ -116,7 +116,7 @@ export function InstagramCarousel({ artists, events, title = "Découvrez les art
               className="flex-[0_0_80%] sm:flex-[0_0_40%] md:flex-[0_0_33%] lg:flex-[0_0_25%] min-w-0 px-2"
             >
               <div 
-                className="bg-white rounded-lg shadow-md p-4 h-full flex flex-col items-center cursor-pointer"
+                className="bg-white/90 backdrop-blur-sm border-2 border-amber-300 shadow-lg rounded-lg p-4 h-full flex flex-col items-center cursor-pointer"
                 onClick={() => openInstagramProfile(profile.instagram)}
               >
                 <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 flex items-center justify-center mb-3">

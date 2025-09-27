@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAudioGuide } from '@/services/audioGuideService';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/ui/ActionButton';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import Play from 'lucide-react/dist/esm/icons/play';
@@ -86,12 +86,12 @@ export const AudioGuidePlayer: React.FC<AudioGuidePlayerProps> = ({
           
           <div className="flex items-center space-x-2 ml-2">
             {/* Bouton Play/Pause */}
-            <Button
+            <ActionButton
               variant="ghost"
               size="sm"
               onClick={handlePlayPause}
               disabled={isLoading || !!error}
-              className="p-1 h-8 w-8"
+              className="p-1 h-8 w-8 text-[#8c9db5] hover:text-[#4a5d94]"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -100,17 +100,17 @@ export const AudioGuidePlayer: React.FC<AudioGuidePlayerProps> = ({
               ) : (
                 <Play className="h-4 w-4" />
               )}
-            </Button>
+            </ActionButton>
             
             {/* Bouton Stop */}
-            <Button
+            <ActionButton
               variant="ghost"
               size="sm"
               onClick={stop}
               className="p-1 h-8 w-8 text-[#8c9db5] hover:text-[#4a5d94]"
             >
               <Square className="h-3 w-3" />
-            </Button>
+            </ActionButton>
           </div>
         </div>
 
@@ -132,7 +132,7 @@ export const AudioGuidePlayer: React.FC<AudioGuidePlayerProps> = ({
 
         {/* Contrôle du volume */}
         <div className="flex items-center space-x-2">
-          <Button
+          <ActionButton
             variant="ghost"
             size="sm"
             onClick={() => setVolume(volume > 0 ? 0 : 0.8)}
@@ -143,7 +143,7 @@ export const AudioGuidePlayer: React.FC<AudioGuidePlayerProps> = ({
             ) : (
               <Volume2 className="h-3 w-3" />
             )}
-          </Button>
+          </ActionButton>
           
           <div className="flex-1 max-w-20">
             <Slider

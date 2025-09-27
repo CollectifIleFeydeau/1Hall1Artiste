@@ -113,7 +113,7 @@ export const AudioGuideButton: React.FC<AudioGuideButtonProps> = ({
         disabled={isToggling}
         className={cn(
           "flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-gray-500",
-          "bg-white hover:shadow-sm transition-all duration-200",
+          "bg-white/90 backdrop-blur-sm hover:bg-white/95 hover:shadow-sm transition-all duration-200",
           "disabled:opacity-50 cursor-pointer relative",
           isToggling && "animate-pulse",
           showSuccess && "border-orange-400 text-orange-500",
