@@ -5,7 +5,7 @@ import { getImagePath } from "@/utils/imagePaths";
 import { isOnline } from "@/utils/serviceWorkerRegistration";
 import UserLocation, { UserLocationProps } from "./UserLocation";
 import { toast } from "@/components/ui/use-toast";
-import { IMAGE_PATHS } from "@/constants/paths";
+import { IMAGE_PATHS } from '../constants/imagePaths';
 
 // Créer un logger pour le composant Map avec filtrage
 const originalLogger = createLogger('MapComponent');
@@ -483,4 +483,5 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     </div>
   );
 };
+
 

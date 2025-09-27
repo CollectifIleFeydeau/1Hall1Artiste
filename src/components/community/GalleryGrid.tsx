@@ -1,3 +1,4 @@
+import { getImagePath } from '@/utils/imagePaths';
 import React from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -7,7 +8,7 @@ import { CommunityEntry } from "../../types/communityTypes";
 import { cn } from "../../lib/utils";
 import { LazyImage } from "../ui/LazyImage";
 import { LikeButton } from "./LikeButton";
-import { IMAGE_PATHS } from "../../constants/paths";
+import { IMAGE_PATHS } from '../constants/imagePaths';
 
 // Interface pour les photos historiques
 interface HistoricalPhoto {
@@ -148,4 +149,5 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
     </div>
   );
 };
+
 

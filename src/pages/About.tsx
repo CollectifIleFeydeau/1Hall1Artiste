@@ -1,4 +1,3 @@
-import { IMAGE_PATHS } from '../constants/paths';
 import { useState } from "react";
 import { NavigationButton } from "@/components/ui/NavigationButton";
 import { BackButton } from "@/components/ui/BackButton";
@@ -15,13 +14,14 @@ import { teamMembers } from "@/data/team";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { getImagePath } from "@/utils/imagePaths";
+import { IMAGE_PATHS } from "../constants/imagePaths";
 
 const About = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
-      backgroundImage: `url('/images/background/small/Historical_Parchment_Background_Portrait.jpg')`,
+      backgroundImage: `url('${getImagePath(IMAGE_PATHS.BACKGROUNDS.PARCHMENT)}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'

@@ -1,6 +1,7 @@
+import { getImagePath } from '@/utils/imagePaths';
 import React from 'react';
 import { ImageWithFallback } from './ui/ImageWithFallback';
-import { IMAGE_PATHS } from '../constants/paths';
+import { IMAGE_PATHS } from '../constants/imagePaths';
 
 interface EventImageProps {
   event: {
@@ -97,4 +98,5 @@ export const EventImage: React.FC<EventImageProps> = ({
 };
 
 export default EventImage;
+
 

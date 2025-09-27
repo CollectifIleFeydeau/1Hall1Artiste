@@ -1,4 +1,5 @@
-import { IMAGE_PATHS } from '../constants/paths';
+import { getImagePath } from '@/utils/imagePaths';
+import { IMAGE_PATHS } from '../constants/imagePaths';
 import { useState, useEffect, useRef, useMemo } from "react";
 import UserLocation, { GeoPosition } from "@/components/UserLocation";
 import ProximityGuide from "@/components/ProximityGuide";
@@ -405,7 +406,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
   if (domError) {
     return (
       <div className="min-h-screen pb-20 overflow-x-hidden flex items-center justify-center" style={{
-        backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
+        backgroundImage: `url('${getImagePath(IMAGE_PATHS.BACKGROUNDS.PARCHMENT)}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
@@ -420,7 +421,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
 
   return (
     <div className="min-h-screen pb-20 overflow-x-hidden relative" style={{
-      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
+      backgroundImage: `url('${getImagePath(IMAGE_PATHS.BACKGROUNDS.PARCHMENT)}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'

@@ -1,5 +1,6 @@
+import { getImagePath } from '@/utils/imagePaths';
 import React, { useState, useEffect } from 'react';
-import { IMAGE_PATHS } from '../../constants/paths';
+import { IMAGE_PATHS } from '../constants/imagePaths';
 
 interface LocalImageProps {
   src: string;
@@ -158,4 +159,5 @@ export const LocalImage: React.FC<LocalImageProps> = ({
     />  
   );
 };
+
 

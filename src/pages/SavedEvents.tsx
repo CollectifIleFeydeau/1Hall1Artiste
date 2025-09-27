@@ -1,4 +1,5 @@
-import { IMAGE_PATHS } from '../constants/paths';
+import { getImagePath } from '@/utils/imagePaths';
+import { IMAGE_PATHS } from '../constants/imagePaths';
 import { useState, useEffect } from "react";
 import { BackButton } from "@/components/ui/BackButton";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -485,6 +486,7 @@ export default function SavedEvents() {
     </div>
   );
 }
+
 
 
 

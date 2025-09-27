@@ -34,6 +34,20 @@ export function getImagePath(path: string): string {
   ).join('/');
   
   // Utiliser la fonction getBasePath pour obtenir le préfixe dynamique
-  return `${getBasePath()}${encodedPath}`;
+  const basePath = getBasePath();
+  const fullPath = `${basePath}${encodedPath}`;
+  
+  // Log détaillé pour debug
+  console.log('🔧 [getImagePath] Processing:', {
+    input: path,
+    normalizedPath,
+    encodedPath,
+    basePath,
+    fullPath,
+    appConfig: typeof window !== 'undefined' ? window.APP_CONFIG : 'undefined',
+    isProd: import.meta.env.PROD
+  });
+  
+  return fullPath;
 }
 

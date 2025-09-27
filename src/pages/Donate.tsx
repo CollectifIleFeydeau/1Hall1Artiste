@@ -1,4 +1,5 @@
-import { IMAGE_PATHS } from '../constants/paths';
+import { getImagePath } from '@/utils/imagePaths';
+import { IMAGE_PATHS } from '../constants/imagePaths';
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/ui/BackButton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -91,6 +92,7 @@ const Donate = () => {
 };
 
 export default Donate;
+
 
 
 
