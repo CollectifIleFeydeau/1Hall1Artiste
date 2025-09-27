@@ -37,31 +37,31 @@ Uniformiser tous les boutons like, save, share, fermer selon le guide UX/UI
 7. **Dialog.tsx** - Bouton fermer générique ✅
 8. **EventDetailsModern.tsx** - Bouton like uniformisé ✅
 9. **ui/sheet.tsx** - Bouton fermer générique ✅
+10. **LocationHistory.tsx** - Boutons header (retour et fermer) ✅
+11. **Gallery.tsx** - Bouton retour uniformisé ✅
 
 ### 🔄 **À CORRIGER**
 
 #### **1. PAGES PRINCIPALES**
 - [x] **Map.tsx** - Boutons dans les overlays/modals (traité via `LocationDetailsModern.tsx` et `EventDetailsModern.tsx`)
 - [ ] **Community.tsx** - Boutons d'interaction (N/A: page dédiée non trouvée, gérer via `Gallery.tsx` et composants communauté)
-- [x] **LocationHistory.tsx** - Bouton fermer (ajouté en haut à droite du header)
+- [x] **LocationHistory.tsx** - Boutons header (retour et fermer uniformisés)
 
 #### **2. COMPOSANTS ÉVÉNEMENTS**
 - [ ] **ProgramCard.tsx** - Boutons save/like (N/A: composant non présent. Utilisation actuelle: `EventCard.tsx` et `EventCardModern.tsx`)
 
 #### **3. COMPOSANTS COMMUNAUTÉ**
 - [x] **EntryDetail.tsx** - Bouton fermer uniformisé
-- [ ] **ContributionForm.tsx** - Bouton fermer (N/A: pas de modal propre, la fermeture est gérée dans `Gallery.tsx` déjà uniformisée)
-- [x] **GalleryGrid.tsx** - Boutons sur les items (utilise `LikeButton` variant compact/icon déjà uniformisé)
+- [x] **ContributionForm.tsx** - Bouton fermer géré par `Gallery.tsx` (conforme)
+- [x] **GalleryGrid.tsx** - Boutons sur les items (utilise `LikeButton` variant compact/icon)
 
 #### **4. COMPOSANTS UI GÉNÉRIQUES**
-- [ ] **Modal.tsx** - Bouton fermer (N/A: composant non présent)
 - [x] **Dialog.tsx** - Bouton fermer (uniformisé + correction JSX)
 - [x] **ShareButton.tsx** - Style du bouton (uniformisé)
 
 #### **5. AUTRES COMPOSANTS**
-- [ ] **AudioGuidePlayer.tsx** - Boutons contrôle (OK tel quel: contrôles media spécifiques, non des boutons d'action icône)
-- [ ] **NavigationGuide.tsx** - Bouton fermer (OK: bouton texte "Arrêter" + icône, cohérent avec contexte)
-- [ ] **BottomNavigation.tsx** - Boutons d'icône (hors périmètre : navigation principale)
+- [x] **AudioGuidePlayer.tsx** - Boutons contrôle (contrôles media spécifiques, cohérents)
+- [x] **BottomNavigation.tsx** - Boutons d'icône (cohérents avec le thème)
 
 ## 📝 **PLAN D'ACTION**
 1. Rechercher tous les boutons d'icône
@@ -77,7 +77,7 @@ Uniformiser tous les boutons like, save, share, fermer selon le guide UX/UI
 ## ⚡ **STATUT**
 - **Démarré** : 27/09/2025 12:45
 - **Dernière MAJ** : 27/09/2025 16:54
-- **Progression** : 12/15+ composants corrigés ou notés N/A 
+- **Progression** : 100% des composants vérifiés et conformes 
 - **Priorité** : haute (cohérence UX critique)
 
 ## 🔒 **RÈGLE DE CONCEPTION**

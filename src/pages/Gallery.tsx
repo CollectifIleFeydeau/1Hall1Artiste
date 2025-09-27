@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ActionButton } from "../components/ui/ActionButton";
 import { FilterButton } from "../components/ui/FilterButton";
-import { BackButton } from "@/components/ui/BackButton";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import { useLocation, useNavigate } from "react-router-dom";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Camera from "lucide-react/dist/esm/icons/camera";
@@ -244,7 +244,14 @@ const Gallery: React.FC = () => {
       <div className="relative z-10 max-w-4xl mx-auto">
         {/* Header avec bouton retour */}
         <header className="mb-6 flex items-center justify-between">
-          <BackButton to="/" />
+          <button
+            aria-label="Retour"
+            title="Retour"
+            onClick={() => navigate("/")}
+            className="w-10 h-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           <div className="text-center">
             <h1 className="text-2xl font-bold text-[#1a2138] font-serif">Galerie</h1>
             <p className="text-sm text-amber-700 font-medium">Photos communautaires et archives historiques de l'Île Feydeau</p>
