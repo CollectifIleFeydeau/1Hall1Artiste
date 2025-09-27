@@ -194,7 +194,7 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
                     <div 
                       className="absolute inset-0 opacity-60 z-0"
                       style={{
-                        backgroundImage: `url('${getBackgroundFallback('Historical Parchment Background Portrait.jpg')}')`,
+                        backgroundImage: `url('${getBackgroundFallback('Historical_Parchment_Background_Portrait.jpg')}')`,
                         backgroundSize: 'cover',
                         backgroundPosition: index % 2 === 0 ? 'top left' : 'top right',
                         transform: index % 2 === 1 ? 'scaleX(-1)' : 'none',

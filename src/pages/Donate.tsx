@@ -19,7 +19,7 @@ const Donate = () => {
 
   return (
     <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
-      backgroundImage: `url('/images/background/small/Historical Parchment Background Portrait.jpg')`,
+      backgroundImage: `url('/images/background/small/Historical_Parchment_Background_Portrait.jpg')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'

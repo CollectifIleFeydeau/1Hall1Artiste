@@ -45,7 +45,7 @@ export const EventCardSimple: React.FC<EventCardSimpleProps> = ({
       content: '""',
       position: 'absolute',
       top: 0, right: 0, bottom: 0, left: 0,
-      backgroundImage: `url('${getBackgroundFallback('Historical Parchment Background Portrait.jpg')}')`,
+      backgroundImage: `url('${getBackgroundFallback('Historical_Parchment_Background_Portrait.jpg')}')`,
       backgroundSize: 'cover',
       backgroundPosition: positions[intensity],
       opacity: 0.6,
