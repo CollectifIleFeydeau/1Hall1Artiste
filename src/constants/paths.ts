@@ -1,33 +1,4 @@
-// Détection automatique du chemin de base selon l'environnement
-const getBasePath = () => {
-  if (typeof window !== 'undefined') {
-    const pathname = window.location.pathname;
-    const hostname = window.location.hostname;
-    const isGitHubPages = hostname.includes('github.io');
-    const hasSubPath = pathname.includes('1Hall1Artiste');
-    
-    console.log('🔍 [IMAGE_PATHS] Debug info:', {
-      hostname,
-      pathname,
-      isGitHubPages,
-      hasSubPath,
-      fullUrl: window.location.href
-    });
-    
-    // En production sur GitHub Pages, le chemin contient '1Hall1Artiste'
-    const basePath = (isGitHubPages || hasSubPath) ? '/1Hall1Artiste' : '';
-    console.log('🔍 [IMAGE_PATHS] Base path determined:', basePath);
-    return basePath;
-  }
-  return '';
-};
-
-// Fonction pour obtenir un chemin d'image avec le bon préfixe
-const getImagePath = (relativePath: string) => {
-  const fullPath = `${getBasePath()}${relativePath}`;
-  console.log('🔍 [IMAGE_PATHS] Generated path:', { relativePath, fullPath });
-  return fullPath;
-};
+import { getImagePath } from '../utils/imagePaths';
 
 export const IMAGE_PATHS = {
   BACKGROUNDS: {
