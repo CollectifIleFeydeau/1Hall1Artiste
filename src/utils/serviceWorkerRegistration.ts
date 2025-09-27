@@ -78,3 +78,4 @@ export const cacheMapImageInServiceWorker = (): void => {
   // Désactivé temporairement
   return;
 };
+

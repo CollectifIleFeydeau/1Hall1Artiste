@@ -106,3 +106,4 @@ const AudioActivator: React.FC<AudioActivatorProps> = ({
 };
 
 export default AudioActivator;
+

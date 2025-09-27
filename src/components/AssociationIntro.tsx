@@ -28,3 +28,4 @@ const AssociationIntro = () => {
 };
 
 export default AssociationIntro;
+

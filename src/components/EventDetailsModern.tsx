@@ -669,3 +669,4 @@ export const EventDetailsNew = ({ event, isOpen, onClose, source }: EventDetails
     </div>
   );
 };
+

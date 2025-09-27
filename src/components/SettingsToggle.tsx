@@ -29,3 +29,4 @@ export function SettingsToggle() {
     setTimeout(() => window.location.href = mapFirstExperience ? '/map' : '/', 300);
   };
 }
+

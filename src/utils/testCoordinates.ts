@@ -10,3 +10,4 @@ const testLongitude = -1.557369;
 
 // Exécuter le test
 console.log(testGPSConversion(testLatitude, testLongitude));
+

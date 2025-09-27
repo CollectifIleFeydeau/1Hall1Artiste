@@ -34,3 +34,4 @@ export function EventFilter({ onFilterChange, currentFilter }: EventFilterProps)
     </div>
   );
 }
+

@@ -145,3 +145,4 @@ export const AudioPlayer = ({ audioSrc, autoPlay = true }: AudioPlayerProps) => 
     </>
   );
 };
+

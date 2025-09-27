@@ -109,3 +109,4 @@ referencePoints.forEach(point => {
 // Conclusion
 console.log("\nConclusion: Les coordonnées les plus probables pour la maison Jules Verne sont:");
 console.log(`x: ${Math.round(weightedX)}, y: ${Math.round(weightedY)}`);
+

@@ -99,3 +99,4 @@ export const TreasureButton: React.FC<TreasureButtonProps> = ({
 };
 
 export default TreasureButton;
+

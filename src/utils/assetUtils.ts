@@ -50,3 +50,4 @@ export const getAssetPath = (path: string): string => {
   
   return fullPath;
 };
+

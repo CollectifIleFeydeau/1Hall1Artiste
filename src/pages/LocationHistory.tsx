@@ -1,3 +1,4 @@
+import { IMAGE_PATHS } from '../constants/paths';
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -496,3 +497,6 @@ export function LocationHistory() {
     </div>
   );
 };
+
+
+

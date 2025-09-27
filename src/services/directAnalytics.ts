@@ -242,3 +242,4 @@ declare global {
     dataLayer: any[];
   }
 }
+

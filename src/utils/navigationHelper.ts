@@ -182,3 +182,4 @@ export function generateNavigationInstructions(
     return `${targetLocation.name} est à ${Math.round(distance / 10) * 10} mètres, direction ${direction}`;
   }
 }
+

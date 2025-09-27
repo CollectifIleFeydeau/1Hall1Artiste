@@ -1,3 +1,4 @@
+import { IMAGE_PATHS } from '../constants/paths';
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { TreasureButton } from "@/components/ui/TreasureButton";
@@ -236,7 +237,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
       <DialogContent 
         className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:max-w-lg max-h-[90vh] overflow-y-auto p-0 bg-white/85 backdrop-blur-sm border-2 border-amber-300 shadow-2xl rounded-2xl"
         style={{
-          backgroundImage: `url('${getBackgroundFallback('Historical_Parchment_Background_Portrait.jpg')}')`,
+          backgroundImage: `url('${getBackgroundFallback('images/background/small/Historical_Parchment_Background_Portrait.jpg')}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
@@ -389,3 +390,5 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     </Dialog>
   );
 };
+
+

@@ -47,3 +47,4 @@ export function useSettings(): SettingsContextType {
   const context = useContext(SettingsContext);
   return context;
 }
+

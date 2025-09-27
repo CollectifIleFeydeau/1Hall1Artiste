@@ -17,3 +17,4 @@ export interface Achievement {
   unlocked: boolean;
   unlockedAt?: Date;
 }
+

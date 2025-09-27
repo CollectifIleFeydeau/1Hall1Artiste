@@ -369,3 +369,4 @@ export const trackFeatureUse = (featureName: string, properties?: EventPropertie
 
 export const trackError = (action: EventAction, message: string, properties?: EventProperties) => 
   analytics.trackError(action, message, properties);
+

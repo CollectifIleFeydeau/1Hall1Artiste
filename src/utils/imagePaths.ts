@@ -36,3 +36,4 @@ export function getImagePath(path: string): string {
   // Utiliser la fonction getBasePath pour obtenir le préfixe dynamique
   return `${getBasePath()}${encodedPath}`;
 }
+

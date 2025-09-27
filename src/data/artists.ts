@@ -319,3 +319,4 @@ export function getAllArtists(): Artist[] {
 export function getArtistsByType(type: "exposition" | "concert"): Artist[] {
   return artists.filter(artist => artist.type === type);
 }
+

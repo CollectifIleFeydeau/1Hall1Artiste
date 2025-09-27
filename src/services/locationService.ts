@@ -410,3 +410,4 @@ class LocationService implements LocationServiceInterface {
 
 // Exporter une instance unique du service
 export const locationService = new LocationService();
+

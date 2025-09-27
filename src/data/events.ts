@@ -442,3 +442,4 @@ export function getLocationIdForEvent(eventId: string): string | null {
   
   return event.locationId;
 }
+

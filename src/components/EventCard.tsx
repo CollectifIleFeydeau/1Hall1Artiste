@@ -107,3 +107,4 @@ export const EventCard = ({ event, isSaved, onEventClick, onSaveClick }: EventCa
     </Card>
   );
 };
+

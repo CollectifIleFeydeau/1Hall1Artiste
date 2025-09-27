@@ -475,3 +475,4 @@ export const preloadSingleHistoryImage = async (url: string): Promise<boolean> =
     return false;
   }
 };
+

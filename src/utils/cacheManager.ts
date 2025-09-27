@@ -112,3 +112,4 @@ class CacheManager {
 
 // Exporter une instance unique du gestionnaire de cache
 export const cacheManager = new CacheManager();
+

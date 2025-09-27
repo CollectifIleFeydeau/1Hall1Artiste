@@ -182,3 +182,4 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, curren
     </AnimatePresence>
   );
 };
+

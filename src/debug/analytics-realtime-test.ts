@@ -162,3 +162,4 @@ if (typeof window !== 'undefined' && import.meta.env.DEV) {
   console.log('- testAnalyticsRealTime() : Test unique');
   console.log('- testAnalyticsRealTimeSequence() : Séquence de tests');
 }
+

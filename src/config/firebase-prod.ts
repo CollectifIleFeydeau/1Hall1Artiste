@@ -32,3 +32,4 @@ export function getFirebaseConfig() {
   console.log('🔥 [Firebase] Utilisation de la configuration production');
   return FIREBASE_PROD_CONFIG;
 }
+

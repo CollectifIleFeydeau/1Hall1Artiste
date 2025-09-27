@@ -72,3 +72,4 @@ export const sendGtagTestEvent = () => {
     console.error('[GtagDebug] Erreur lors de l\'envoi de l\'événement de test:', error);
   }
 };
+

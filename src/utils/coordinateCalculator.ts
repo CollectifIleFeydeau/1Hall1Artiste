@@ -45,3 +45,4 @@ export function calculateMapCoordinates(latitude: number, longitude: number): {x
     y: calculateYFromLatitude(latitude)
   };
 }
+

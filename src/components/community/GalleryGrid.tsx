@@ -147,3 +147,4 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
     </div>
   );
 };
+

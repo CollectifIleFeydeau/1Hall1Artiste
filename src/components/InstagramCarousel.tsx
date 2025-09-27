@@ -160,3 +160,4 @@ export function InstagramCarousel({ artists, events, title = "Découvrez les art
     </div>
   );
 }
+

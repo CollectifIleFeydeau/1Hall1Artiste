@@ -1,3 +1,4 @@
+import { IMAGE_PATHS } from '../constants/paths';
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ActionButton } from "../components/ui/ActionButton";
@@ -406,3 +407,6 @@ const Gallery: React.FC = () => {
 };
 
 export default Gallery;
+
+
+

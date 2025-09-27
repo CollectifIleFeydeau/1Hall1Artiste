@@ -264,3 +264,4 @@ export class StorageManager {
 
 // Exporter une instance par défaut pour une utilisation facile
 export const storageManager = new StorageManager();
+

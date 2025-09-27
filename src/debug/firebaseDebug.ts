@@ -88,3 +88,4 @@ export const sendTestEvent = () => {
     console.error("[FirebaseDebug] Erreur lors de l'envoi de l'événement de test:", error);
   }
 };
+

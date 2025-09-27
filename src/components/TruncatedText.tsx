@@ -57,3 +57,4 @@ export const TruncatedText: React.FC<TruncatedTextProps> = ({
     </TooltipProvider>
   );
 };
+

@@ -16,3 +16,4 @@ export function getAssetPath(path: string): string {
   // En développement, utiliser le chemin tel quel
   return path;
 }
+

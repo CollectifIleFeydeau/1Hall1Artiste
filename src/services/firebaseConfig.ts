@@ -53,3 +53,4 @@ export const initFirebaseAnalytics = () => {
 };
 
 export const getFirebaseAnalytics = () => analyticsInstance;
+

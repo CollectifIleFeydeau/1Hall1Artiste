@@ -216,3 +216,4 @@ export function mapToGpsCoordinates(
   
   return { latitude, longitude };
 }
+

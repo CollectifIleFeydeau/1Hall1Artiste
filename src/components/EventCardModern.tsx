@@ -1,3 +1,4 @@
+import { IMAGE_PATHS } from '../constants/paths';
 import React from 'react';
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Card } from "@/components/ui/card";
@@ -54,7 +55,7 @@ export const EventCardModern: React.FC<EventCardModernProps> = ({
       content: '""',
       position: 'absolute',
       top: 0, right: 0, bottom: 0, left: 0,
-      backgroundImage: `url('${getBackgroundFallback('Historical_Parchment_Background_Portrait.jpg')}')`,
+      backgroundImage: `url('${getBackgroundFallback('images/background/small/Historical_Parchment_Background_Portrait.jpg')}')`,
       backgroundSize: 'cover',
       backgroundPosition: positions[intensity],
       opacity: 0.6,
@@ -137,3 +138,4 @@ export const EventCardModern: React.FC<EventCardModernProps> = ({
 };
 
 export default EventCardModern;
+

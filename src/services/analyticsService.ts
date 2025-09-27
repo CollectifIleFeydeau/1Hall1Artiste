@@ -682,3 +682,4 @@ export function clearAnalyticsData(): void {
   localStorage.removeItem(USAGE_STORAGE_KEY);
   logger.info("Données d'analyse effacées");
 }
+

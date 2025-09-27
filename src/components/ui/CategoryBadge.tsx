@@ -69,3 +69,4 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
 };
 
 export default CategoryBadge;
+

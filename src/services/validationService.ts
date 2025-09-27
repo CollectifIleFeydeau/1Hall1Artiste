@@ -126,3 +126,4 @@ export const validateLocation = (location: Location): ValidationResult => {
 export const formatValidationErrors = (errors: ValidationError[]): string => {
   return errors.map(error => `${error.field}: ${error.message}`).join('\n');
 };
+

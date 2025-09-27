@@ -86,3 +86,4 @@ export function useAnalytics() {
       analytics.trackError(action, message, properties),
   };
 }
+

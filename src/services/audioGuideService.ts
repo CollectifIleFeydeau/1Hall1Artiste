@@ -446,3 +446,4 @@ export function useAudioGuide() {
     seekTo: audioGuideService.seekTo.bind(audioGuideService)
   };
 }
+

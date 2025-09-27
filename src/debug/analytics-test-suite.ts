@@ -147,3 +147,4 @@ export const runQuickTests = () => {
   
   console.log('Tests rapides exécutés. Vérifiez la console Firebase.');
 };
+

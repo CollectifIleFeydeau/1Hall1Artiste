@@ -36,3 +36,4 @@ export const useWindowSize = (): WindowSize => {
 
   return windowSize;
 };
+

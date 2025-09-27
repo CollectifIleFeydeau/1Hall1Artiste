@@ -96,3 +96,4 @@ export const EventImage: React.FC<EventImageProps> = ({
 };
 
 export default EventImage;
+

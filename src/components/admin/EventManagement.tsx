@@ -248,3 +248,4 @@ export function EventManagement() {
     </div>
   );
 }
+

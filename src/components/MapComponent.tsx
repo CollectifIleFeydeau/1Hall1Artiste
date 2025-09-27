@@ -482,3 +482,4 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     </div>
   );
 };
+

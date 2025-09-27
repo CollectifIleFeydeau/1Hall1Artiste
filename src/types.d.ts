@@ -62,3 +62,4 @@ declare module '@/components/ui/*' {
   export const DialogHeader: any;
   export const DialogTitle: any;
 }
+

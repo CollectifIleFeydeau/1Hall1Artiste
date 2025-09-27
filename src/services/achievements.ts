@@ -192,3 +192,4 @@ export const getAchievementCelebrationMessage = (achievementId: AchievementType)
   const achievement = achievementsList.find(a => a.id === achievementId);
   return achievement ? achievement.celebrationMessage : null;
 };
+

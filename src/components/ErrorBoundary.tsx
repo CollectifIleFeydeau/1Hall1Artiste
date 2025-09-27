@@ -89,3 +89,4 @@ class ErrorBoundary extends React.Component<Props, State> {
 }
 
 export default ErrorBoundary;
+

@@ -470,3 +470,4 @@ export const getLocationById = (id: string): Location | undefined => {
 export const getLocationIdForEvent = (event: Event): string => {
   return event.locationId;
 };
+

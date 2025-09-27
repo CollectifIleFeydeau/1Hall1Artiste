@@ -100,3 +100,4 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
 };
 
 export default SplashScreen;
+

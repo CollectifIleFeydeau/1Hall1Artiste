@@ -185,3 +185,4 @@ export function AnimatedPageTransition({
 export function isSwipeableRoute(pathname: string): boolean {
   return swipeableRoutes.includes(pathname);
 }
+

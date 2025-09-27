@@ -45,3 +45,4 @@ export function useVisitedLocations() {
     visitedCount: visitedLocations.length
   };
 }
+

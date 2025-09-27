@@ -128,3 +128,4 @@ export function generateRandomPositionOffset(): { latOffset: number, lngOffset: 
     lngOffset: (Math.random() - 0.5) * 0.0002  // Environ ±10 mètres en longitude
   };
 }
+

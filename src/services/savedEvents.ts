@@ -247,3 +247,4 @@ export const markNotificationAsRead = (eventId: string): SavedEvent[] => {
     return getSavedEvents();
   }
 };
+

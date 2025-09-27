@@ -376,3 +376,4 @@ export async function testFirebaseConnection(): Promise<boolean> {
     return false;
   }
 }
+

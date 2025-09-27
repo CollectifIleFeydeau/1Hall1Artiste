@@ -27,3 +27,4 @@ export function TreasureCounter({ count, label, show = true }: TreasureCounterPr
     </div>
   );
 }
+

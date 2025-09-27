@@ -78,3 +78,4 @@ export interface ModerationResult {
   entry?: CommunityEntry;
   error?: string;
 }
+

@@ -31,3 +31,4 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
     </div>
   );
 };
+

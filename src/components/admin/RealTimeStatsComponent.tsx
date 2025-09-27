@@ -184,3 +184,4 @@ export const RealTimeStatsComponent: React.FC = () => {
     </div>
   );
 };
+

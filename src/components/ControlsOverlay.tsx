@@ -57,3 +57,4 @@ export const ControlsOverlay: React.FC<ControlsOverlayProps> = ({
 };
 
 export default ControlsOverlay;
+

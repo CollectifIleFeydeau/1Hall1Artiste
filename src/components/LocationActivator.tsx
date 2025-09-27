@@ -116,3 +116,4 @@ const LocationActivator: React.FC<LocationActivatorProps> = ({
 };
 
 export default LocationActivator;
+

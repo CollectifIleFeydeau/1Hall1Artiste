@@ -181,3 +181,4 @@ const events = await cacheManager.getOrSet(
 - Mise en cache des données avec expiration
 - Récupération des données du cache ou génération si absentes
 - Nettoyage automatique des entrées expirées
+

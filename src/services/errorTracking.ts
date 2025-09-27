@@ -315,3 +315,4 @@ if (typeof window !== 'undefined' && import.meta.env.DEV) {
   console.log('- testErrorReporting() : Tester le système complet');
   console.log('- testErrorFiltering() : Tester le filtrage des erreurs');
 }
+

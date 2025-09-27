@@ -101,3 +101,4 @@ class ToastService {
 
 // Exporter une instance unique du service
 export const toastService = new ToastService();
+

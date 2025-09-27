@@ -364,3 +364,4 @@ export function EventForm({ onSuccess, editingEvent }: EventFormProps) {
     </Card>
   );
 }
+

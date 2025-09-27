@@ -82,3 +82,4 @@ Pour retrouver rapidement un composant ou une fonctionnalité:
 1. Consultez ce document pour identifier le fichier concerné
 2. Utilisez la recherche dans le code avec des termes spécifiques
 3. Les composants principaux sont documentés avec des commentaires JSDoc
+

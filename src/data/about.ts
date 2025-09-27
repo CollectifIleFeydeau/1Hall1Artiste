@@ -16,3 +16,4 @@ export const aboutInfo: AboutInfo = {
   
   event: "Notre événement annuel transforme le quartier en une galerie d'art vivante où les visiteurs peuvent découvrir des expositions dans les halls historiques et profiter de concerts dans notre cour intérieure. C'est l'occasion de rencontrer des artistes locaux et de vivre une expérience culturelle unique dans un cadre exceptionnel."
 };
+

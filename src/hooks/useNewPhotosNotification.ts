@@ -207,3 +207,4 @@ if (typeof window !== 'undefined') {
     console.log('- checkPhotoNotifications() : Forcer une vérification');
   }
 }
+

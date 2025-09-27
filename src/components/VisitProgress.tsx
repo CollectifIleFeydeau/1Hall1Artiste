@@ -31,3 +31,4 @@ export function VisitProgress({ visitedCount, totalCount }: VisitProgressProps) 
     </div>
   );
 }
+

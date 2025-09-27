@@ -332,3 +332,4 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
     </motion.button>
   );
 };
+

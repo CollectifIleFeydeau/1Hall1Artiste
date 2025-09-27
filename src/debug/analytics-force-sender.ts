@@ -150,3 +150,4 @@ export const getDebugEvents = () => {
 export const clearDebugEvents = () => {
   localStorage.setItem('debug_analytics_events', '[]');
 };
+

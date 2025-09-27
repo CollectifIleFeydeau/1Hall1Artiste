@@ -27,3 +27,4 @@ export const teamMembers: TeamMember[] = [
     description: "Fondation de l'association."
   }
 ];
+

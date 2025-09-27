@@ -118,3 +118,4 @@ declare global {
     __WEBP_SUPPORT?: boolean;
   }
 }
+

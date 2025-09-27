@@ -50,3 +50,4 @@ export const LikesCounter: React.FC<LikesCounterProps> = ({ entryId, className }
     </div>
   );
 };
+

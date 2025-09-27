@@ -1,3 +1,4 @@
+import { IMAGE_PATHS } from '../constants/paths';
 import { useState } from "react";
 import { NavigationButton } from "@/components/ui/NavigationButton";
 import { BackButton } from "@/components/ui/BackButton";
@@ -263,3 +264,6 @@ const About = () => {
 };
 
 export default About;
+
+
+

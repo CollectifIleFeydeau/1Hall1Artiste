@@ -1,3 +1,4 @@
+import { IMAGE_PATHS } from '../constants/paths';
 
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -62,3 +63,6 @@ const Team = () => {
 };
 
 export default Team;
+
+
+

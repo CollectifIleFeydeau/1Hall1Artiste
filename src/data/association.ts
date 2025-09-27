@@ -20,3 +20,4 @@ export const associationInfo: AssociationInfo = {
   contactEmail: "collectif.ile.feydeau@gmail.com",
   instagram: "https://www.instagram.com/collectif_ile_feydeau"
 };
+

@@ -1,3 +1,4 @@
+import { IMAGE_PATHS } from '../constants/paths';
 import { useState, useEffect, useRef, useMemo } from "react";
 import UserLocation, { GeoPosition } from "@/components/UserLocation";
 import ProximityGuide from "@/components/ProximityGuide";
@@ -625,3 +626,6 @@ const Map = ({ fullScreen = false }: MapProps) => {
 };
 
 export default Map;
+
+
+

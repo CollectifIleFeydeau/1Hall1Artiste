@@ -67,3 +67,4 @@ export const Celebration: React.FC<CelebrationProps> = ({
 };
 
 export default Celebration;
+

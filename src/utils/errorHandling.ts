@@ -54,3 +54,4 @@ export function logApiError(endpoint: string, error: any) {
     data: error.data
   });
 }
+

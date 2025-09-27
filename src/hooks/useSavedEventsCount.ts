@@ -36,3 +36,4 @@ export function useSavedEventsCount() {
 
   return count;
 }
+
