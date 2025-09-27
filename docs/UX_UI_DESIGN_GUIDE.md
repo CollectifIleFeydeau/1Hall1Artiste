@@ -1,16 +1,176 @@
 # 🎨 GUIDE UX/UI - COLLECTIF ÎLE FEYDEAU
 
-## 📋 **ANALYSE DES COMPOSANTS EXISTANTS**
+## 📋 **SOMMAIRE**
+1. [🎨 Guide de style](#-guide-de-style)
+   - [Boutons d'interface](#-boutons-dinterface)
+   - [Typographie](#-typographie)
+   - [Couleurs](#-palette-de-couleurs)
+2. [🧩 Composants](#-composants)
+   - [Fiches bâtiments](#-fiches-bâtiments)
+   - [Cartes événements](#-cartes-événements)
+3. [📱 Responsive](#-responsive)
+4. [🔍 Accessibilité](#-accessibilité)
 
-### 🗺️ **MAP - Fiches Bâtiments (LocationDetailsModern)**
+---
 
-**✅ Points forts identifiés :**
-- **Header structuré** : Titre + sous-titre + boutons alignés à droite
-- **Hiérarchie claire** : Titre principal (2xl), sous-titre (sm), sections distinctes
-- **Boutons cohérents** : Forme ronde, tailles standardisées, couleurs harmonieuses
-- **Espacement rythmé** : Sections séparées par des marges consistantes (mb-6)
-- **Actions groupées** : Boutons d'action regroupés logiquement
-- **Fond unifié** : Parchemin historique avec overlay blanc/85 pour lisibilité
+## 🎨 **GUIDE DE STYLE**
+
+### 🎯 **Boutons d'interface**
+
+#### Styles de base
+```css
+/* Boutons d'icône inactifs */
+.btn-icon {
+  @apply w-10 h-10 flex items-center justify-center rounded-full 
+         border-2 bg-white/70 border-gray-300 text-gray-600 
+         hover:border-amber-500 hover:text-amber-500 
+         transition-colors duration-200;
+}
+
+/* Boutons d'icône actifs */
+.btn-icon-active {
+  @apply bg-amber-50 border-amber-500 text-amber-600;
+}
+
+/* Variantes spéciales */
+.btn-like-active { 
+  @apply bg-red-50 border-red-500 text-red-500;
+}
+
+.btn-save-active {
+  @apply bg-amber-50 border-amber-500 text-amber-600;
+}
+```
+
+#### Tailles standardisées
+| Type | Taille | Usage |
+|------|--------|-------|
+| Normal | `w-10 h-10` | Headers, modaux |
+| Compact | `w-8 h-8` | Espace limité |
+| Grand | `w-12 h-12` | Actions principales |
+| Icônes | `h-5 w-5` | Pour boutons de 10x10 |
+
+#### Règles d'utilisation
+- ✅ Utiliser les composants partagés (`LikeButton`, `ShareButton`)
+- ❌ Ne pas créer de boutons personnalisés sans validation
+- 🎨 Couleur de survol : `hover:border-amber-500 hover:text-amber-500`
+- ⚡ Transition : `transition-colors duration-200`
+
+### ✒️ **Typographie**
+- **Titres** : `font-serif text-2xl font-bold text-[#1a2138]`
+- **Sous-titres** : `text-sm text-amber-700`
+- **Corps de texte** : `text-base text-gray-700`
+- **Texte secondaire** : `text-sm text-gray-500`
+
+### 🎨 **Palette de couleurs**
+| Utilisation | Couleur | Classe |
+|-------------|---------|--------|
+| Primaire | Bleu foncé | `#1a2138` |
+| Secondaire | Ambre | `#f59e0b` |
+| Succès | Vert | `#10b981` |
+| Avertissement | Orange | `#f59e0b` |
+| Erreur | Rouge | `#ef4444` |
+| Texte principal | Gris foncé | `#1f2937` |
+| Texte secondaire | Gris | `#6b7280` |
+
+## 🧩 **COMPOSANTS**
+
+### 🏢 **Fiches Bâtiments**
+
+#### Structure recommandée
+```jsx
+<LocationDetailsModern>
+  {/* En-tête avec boutons d'action */}
+  <Header>
+    <Title>Nom du bâtiment</Title>
+    <Subtitle>Adresse</Subtitle>
+    <ButtonGroup>
+      <LikeButton />
+      <ShareButton />
+      <CloseButton />
+    </ButtonGroup>
+  </Header>
+
+  {/* Contenu principal */}
+  <Content>
+    <Section>
+      <h3>Description</h3>
+      <p>Texte descriptif...</p>
+    </Section>
+    
+    <Section>
+      <h3>Événements à venir</h3>
+      <EventList />
+    </Section>
+  </Content>
+
+  {/* Actions principales */}
+  <ActionBar>
+    <Button>Histoire</Button>
+    <Button>Audio guide</Button>
+    <Button>Témoignages</Button>
+    <Button variant="secondary">Retour</Button>
+  </ActionBar>
+</LocationDetailsModern>
+```
+
+#### Règles de style
+- **Fond** : `bg-amber-50/95 backdrop-blur-sm`
+- **Ombre** : `shadow-2xl`
+- **Espacement** : `p-6` (contenu principal)
+- **Boutons header** : `w-10 h-10` sans bordure ni fond
+- **Boutons d'action** : `h-12 border-2 border-[#1a2138]`
+
+### 🎭 **Cartes Événements**
+
+#### Structure recommandée
+```jsx
+<EventCard>
+  <Image src="/events/event.jpg" alt="Événement" />
+  <DateBadge>27 SEP</DateBadge>
+  
+  <Content>
+    <h3>Nom de l'événement</h3>
+    <p className="text-sm text-gray-600">Lieu • 18h30</p>
+    
+    <Tags>
+      <Tag>Concert</Tag>
+      <Tag>Gratuit</Tag>
+    </Tags>
+    
+    <Button>En savoir plus</Button>
+  </Content>
+</EventCard>
+```
+
+## 📱 **RESPONSIVE**
+
+### Points de rupture
+- `sm`: 640px
+- `md`: 768px
+- `lg`: 1024px
+- `xl`: 1280px
+- `2xl`: 1536px
+
+### Comportements
+- **Mobile** : Pleine largeur, espacement réduit
+- **Tablette** : Grille 2 colonnes pour les listes
+- **Desktop** : Mise en page complète avec barre latérale
+
+## 🔍 **ACCESSIBILITÉ**
+
+### Principes clés
+- **Contraste** : Minimum 4.5:1 pour le texte
+- **Navigation** : Accessible au clavier (tabindex)
+- **ARIA** : Attributs pour les composants interactifs
+- **Texte alternatif** : Pour toutes les images
+- **Focus visible** : Toujours visible pour la navigation au clavier
+
+### Vérifications
+- [ ] Test avec lecteur d'écran
+- [ ] Navigation au clavier complète
+- [ ] Contraste des couleurs validé
+- [ ] Taille de texte adaptable
 
 **🎯 Structure type :**
 ```
@@ -200,37 +360,44 @@
 - ✅ Même adaptation mobile/desktop
 - ✅ Même gestion du scroll et des hauteurs max
 
-### **3. Système de boutons UNIFIÉ**
+## 🎨 **PALETTE DE COULEURS**
 
-```css
-/* Boutons header (4 boutons identiques) */
-.btn-header {
-  width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
-  /* Pas de bordure, pas de fond, icônes gris foncé */
-}
+### Couleurs principales
+| Utilisation | Couleur | Classe |
+|-------------|---------|--------|
+| Primaire | Bleu foncé | `#1a2138` |
+| Secondaire | Ambre | `#f59e0b` |
+| Arrière-plan | Blanc cassé | `#f8f5f0` |
+| Texte principal | Noir | `#1a202c` |
+| Texte secondaire | Gris foncé | `4a5568` |
 
-/* Boutons d'action (liseré bleu) */
-.btn-action {
-  height: 48px; /* h-12 */
-  border: 2px solid #1a2138;
-  color: #1a2138;
-  background: transparent;
-  border-radius: 9999px; /* rounded-full */
-  font-weight: 500; /* font-medium */
-  font-size: 0.875rem; /* text-sm */
-  transition: colors 150ms;
-}
-.btn-action:hover {
-  background: #1a2138;
-  color: white;
-}
+### États et rétroactions
+| État | Couleur | Utilisation |
+|------|---------|-------------|
+| Succès | Vert émeraude | `#10b981` |
+| Avertissement | Orange | `#f59e0b` |
+| Erreur | Rouge | `#ef4444` |
+| Désactivé | Gris clair | `#e2e8f0` |
+| Survol | Bleu foncé +10% | `#0f172a` |
 
-/* Bouton Retour (fond bleu) */
-.btn-return {
-  height: 48px; /* h-12 */
-  background: #1a2138;
-  color: white;
+## 🧠 **PRINCIPES DE CONCEPTION**
+
+### 1. Hiérarchie visuelle
+- **Niveau 1** : Titres principaux (h1, 2rem, 2.25rem)
+- **Niveau 2** : Sous-titres (1.5rem, 1.75rem)
+- **Niveau 3** : En-têtes de section (1.25rem, 1.5rem)
+- **Corps de texte** : 1rem (16px) avec interlignage 1.5
+
+### 2. Espacement
+- **Unité de base** : 0.25rem (4px)
+- **Espacement standard** : 1rem (16px)
+- **Grands espaces** : 2rem (32px)
+- **Petits espaces** : 0.5rem (8px)
+
+### 3. Animations
+- **Durée standard** : 200ms
+- **Courbe d'accélération** : `cubic-bezier(0.4, 0, 0.2, 1)`
+- **Transitions** : Uniquement sur les propriétés transform et opacity pour la performance
   border-radius: 9999px; /* rounded-full */
   font-weight: 500; /* font-medium */
   font-size: 0.875rem; /* text-sm */

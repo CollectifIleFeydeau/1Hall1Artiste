@@ -23,25 +23,29 @@ export const supportsWebP = (): Promise<boolean> => {
 
 // Mapping des backgrounds disponibles
 const backgroundMap = {
-  'Historical Parchment Background Portrait.jpg': {
-    webp: '/images/background/webp/Historical Parchment Background Portrait.webp',
-    fallback: '/images/background/small/Historical Parchment Background Portrait.jpg'
+  'historical-parchment-background-portrait.jpg': {
+    webp: '/images/background/webp/historical-parchment-background-portrait.webp',
+    fallback: '/images/background/small/historical-parchment-background-portrait.jpg'
   },
-  'Historical Parchment Background.jpg': {
-    webp: '/images/background/webp/Historical Parchment Background.webp',
-    fallback: '/images/background/small/Historical Parchment Background.jpg'
+  'historical-parchment-background.jpg': {
+    webp: '/images/background/webp/historical-parchment-background.webp',
+    fallback: '/images/background/small/historical-parchment-background.jpg'
   },
-  'Artistic Brush Stroke Background.jpg': {
-    webp: '/images/background/webp/Artistic Brush Stroke Background.webp',
-    fallback: '/images/background/small/Artistic Brush Stroke Background.jpg'
+  'artistic-brush-stroke-background.jpg': {
+    webp: '/images/background/webp/artistic-brush-stroke-background.webp',
+    fallback: '/images/background/small/artistic-brush-stroke-background.jpg'
   },
-  'Detailed Historical Background.jpg': {
-    webp: '/images/background/webp/Detailed Historical Background.webp',
-    fallback: '/images/background/small/Detailed Historical Background.jpg'
+  'detailed-historical-background.jpg': {
+    webp: '/images/background/webp/detailed-historical-background.webp',
+    fallback: '/images/background/small/detailed-historical-background.jpg'
   },
-  'Textured Cream Background.jpg': {
-    webp: '/images/background/webp/Textured Cream Background.webp',
-    fallback: '/images/background/small/Textured Cream Background.jpg'
+  'detailed-historical-background-portrait.jpg': {
+    webp: '/images/background/webp/detailed-historical-background-portrait.webp',
+    fallback: '/images/background/small/detailed-historical-background-portrait.jpg'
+  },
+  'textured-cream-background.jpg': {
+    webp: '/images/background/webp/textured-cream-background.webp',
+    fallback: '/images/background/small/textured-cream-background.jpg'
   }
 };
 
@@ -66,7 +70,12 @@ export const getOptimizedBackground = async (filename: string): Promise<string> 
  */
 export const getBackgroundFallback = (filename: string): string => {
   const mapping = backgroundMap[filename as keyof typeof backgroundMap];
-  return mapping ? mapping.fallback : `/images/background/small/${filename}`;
+  if (mapping) {
+    return mapping.fallback;
+  }
+  // Encoder les espaces dans le nom de fichier pour l'URL
+  const encodedFilename = encodeURIComponent(filename);
+  return `/images/background/small/${encodedFilename}`;
 };
 
 /**

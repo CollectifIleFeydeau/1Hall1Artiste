@@ -17,6 +17,7 @@
 
 - [ ] **Images de fallback** : `concert-default.jpg`, `exposition-default.jpg`
 - [ ] **Images d'événements principaux** : 5-10 événements phares (400x300px, <50KB)
+- [ ] **Batiment pas ouvert**: indiquer que c'est pas ouvert
 
 ###### Spécifications techniques :
 
