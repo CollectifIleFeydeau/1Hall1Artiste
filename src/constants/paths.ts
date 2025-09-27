@@ -7,25 +7,28 @@ const getBasePath = () => {
   return '';
 };
 
+// Fonction pour obtenir un chemin d'image avec le bon préfixe
+const getImagePath = (relativePath: string) => `${getBasePath()}${relativePath}`;
+
 export const IMAGE_PATHS = {
   BACKGROUNDS: {
-    PARCHMENT: `${getBasePath()}/images/background/small/Historical_Parchment_Background_Portrait.jpg`,
-    PARCHMENT_LANDSCAPE: `${getBasePath()}/images/background/small/Historical_Parchment_Background.jpg`,
-    DETAILED_HISTORICAL: `${getBasePath()}/images/background/small/Detailed_Historical_Background.jpg`,
-    DETAILED_HISTORICAL_PORTRAIT: `${getBasePath()}/images/background/small/Detailed_Historical_Background_Portrait.jpg`,
-    ARTISTIC_BRUSH: `${getBasePath()}/images/background/small/Artistic_Brush_Stroke_Background.jpg`,
-    TEXTURED_CREAM: `${getBasePath()}/images/background/small/Textured_Cream_Background.jpg`,
+    get PARCHMENT() { return getImagePath('/images/background/small/Historical_Parchment_Background_Portrait.jpg'); },
+    get PARCHMENT_LANDSCAPE() { return getImagePath('/images/background/small/Historical_Parchment_Background.jpg'); },
+    get DETAILED_HISTORICAL() { return getImagePath('/images/background/small/Detailed_Historical_Background.jpg'); },
+    get DETAILED_HISTORICAL_PORTRAIT() { return getImagePath('/images/background/small/Detailed_Historical_Background_Portrait.jpg'); },
+    get ARTISTIC_BRUSH() { return getImagePath('/images/background/small/Artistic_Brush_Stroke_Background.jpg'); },
+    get TEXTURED_CREAM() { return getImagePath('/images/background/small/Textured_Cream_Background.jpg'); },
   },
   PLACEHOLDERS: {
-    IMAGE: `${getBasePath()}/images/placeholder-image.jpg`,
-    SVG: `${getBasePath()}/placeholder.svg`,
+    get IMAGE() { return getImagePath('/images/placeholder-image.jpg'); },
+    get SVG() { return getImagePath('/placeholder.svg'); },
   },
   MAPS: {
-    FEYDEAU_OLD: `${getBasePath()}/carte-feydeau - ancienne.png`,
-    FEYDEAU: `${getBasePath()}/carte-feydeau.png`,
-    PLAN_ILE: `${getBasePath()}/Plan Île Feydeau.png`,
+    get FEYDEAU_OLD() { return getImagePath('/carte-feydeau - ancienne.png'); },
+    get FEYDEAU() { return getImagePath('/carte-feydeau.png'); },
+    get PLAN_ILE() { return getImagePath('/Plan Île Feydeau.png'); },
   },
   EVENTS: {
-    DEFAULT_EXAMPLE: `${getBasePath()}/events/expositions/imageExemple.jpg`,
+    get DEFAULT_EXAMPLE() { return getImagePath('/events/expositions/imageExemple.jpg'); },
   }
 };
