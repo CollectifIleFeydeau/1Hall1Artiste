@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "start": "powershell -ExecutionPolicy Bypass -File ./start-dev.ps1",
-    "build": "vite build && powershell -Command \"Copy-Item -Path 'public/images/background' -Destination 'dist/images/' -Recurse -Force\"",
+    "build": "vite build && node -e \"const fs=require('fs'); const path=require('path'); if(fs.existsSync('public/images/background')){fs.cpSync('public/images/background', 'dist/images/background', {recursive:true}); console.log('✅ Background images copied');}\"",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
