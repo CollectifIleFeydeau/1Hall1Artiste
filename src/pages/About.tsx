@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { NavigationButton } from "@/components/ui/NavigationButton";
+import { BackButton } from "@/components/ui/BackButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Users, Heart } from "lucide-react";
 import Instagram from "lucide-react/dist/esm/icons/instagram";
 import Twitter from "lucide-react/dist/esm/icons/twitter";
+import Mail from "lucide-react/dist/esm/icons/mail";
 import { useNavigate } from "react-router-dom";
 import { aboutInfo } from "@/data/about";
 import { associationInfo } from "@/data/association";
@@ -17,13 +19,18 @@ const About = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen app-gradient pb-20 px-4 pt-4 overflow-x-hidden">
-      <div className="max-w-screen-lg mx-auto">
+    <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
+      backgroundImage: `url('/images/background/small/Historical Parchment Background Portrait.jpg')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      {/* Overlay pour améliorer la lisibilité */}
+      <div className="absolute inset-0 bg-white/20" />
+      
+      <div className="relative z-10 max-w-screen-lg mx-auto">
         <header className="mb-2 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/map")}> 
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
-          </Button>
+          <BackButton to="/map" />
           <h1 className="text-xl font-bold text-[#4a5d94]">À propos</h1>
           <ShareButton 
             title="À propos du Collectif Île Feydeau" 
@@ -31,16 +38,37 @@ const About = () => {
           />
         </header>
         
-        <Tabs defaultValue="association" className="w-full mb-6">
-          <TabsList className="grid grid-cols-4 mb-4">
-            <TabsTrigger value="association">Association</TabsTrigger>
-            <TabsTrigger value="history">Histoire</TabsTrigger>
-            <TabsTrigger value="team">Équipes</TabsTrigger>
-            <TabsTrigger value="support">Nous aider</TabsTrigger>
-          </TabsList>
+        <div className="bg-transparent rounded-xl p-4 mb-6">
+          <Tabs defaultValue="association" className="w-full">
+            <TabsList className="bg-transparent p-0 h-auto gap-2 mb-4 flex flex-wrap justify-center">
+              <TabsTrigger 
+                value="association" 
+                className="bg-white/70 text-[#1a2138] data-[state=active]:bg-[#1a2138] data-[state=active]:text-white data-[state=active]:border-[#1a2138] rounded-full px-4 py-2 border border-gray-300 hover:bg-white transition-all duration-200 text-sm font-medium shadow-sm"
+              >
+                Association
+              </TabsTrigger>
+              <TabsTrigger 
+                value="history" 
+                className="bg-white/70 text-[#1a2138] data-[state=active]:bg-[#1a2138] data-[state=active]:text-white data-[state=active]:border-[#1a2138] rounded-full px-4 py-2 border border-gray-300 hover:bg-white transition-all duration-200 text-sm font-medium shadow-sm"
+              >
+                Histoire
+              </TabsTrigger>
+              <TabsTrigger 
+                value="team" 
+                className="bg-white/70 text-[#1a2138] data-[state=active]:bg-[#1a2138] data-[state=active]:text-white data-[state=active]:border-[#1a2138] rounded-full px-4 py-2 border border-gray-300 hover:bg-white transition-all duration-200 text-sm font-medium shadow-sm"
+              >
+                Équipes
+              </TabsTrigger>
+              <TabsTrigger 
+                value="support" 
+                className="bg-white/70 text-[#1a2138] data-[state=active]:bg-[#1a2138] data-[state=active]:text-white data-[state=active]:border-[#1a2138] rounded-full px-4 py-2 border border-gray-300 hover:bg-white transition-all duration-200 text-sm font-medium shadow-sm"
+              >
+                Nous aider
+              </TabsTrigger>
+            </TabsList>
           
           <TabsContent value="history" className="space-y-4">
-            <div className="bg-white rounded-lg p-6 shadow-md">
+            <div className="bg-transparent rounded-lg p-6">
               <h2 className="text-lg font-semibold mb-3">Histoire de l'Île Feydeau</h2>
               <p className="text-gray-700 mb-4">
                 L'Île Feydeau est un quartier historique de Nantes, construit au XVIIIe siècle sur une île de la Loire. 
@@ -49,13 +77,12 @@ const About = () => {
               </p>
               
               <div className="mt-4 flex justify-center">
-                <Button 
+                <NavigationButton 
                   variant="outline" 
-                  className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white"
-                  onClick={() => navigate("/location-history")}
+                  to="/location-history"
                 >
                   Voir l'histoire détaillée des lieux 
-                </Button>
+                </NavigationButton>
               </div>
 
               
@@ -82,26 +109,36 @@ const About = () => {
           </TabsContent>
           
           <TabsContent value="association" className="space-y-4">
-          <div className="flex flex-col md:flex-row items-center justify-center md:space-x-4 space-y-3 md:space-y-0 mt-4 mb-2 p-4 bg-white rounded-lg shadow-md">
-                <a href="https://www.instagram.com/ilefeydeau/" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-700 hover:text-[#E1306C] transition-colors w-full md:w-auto justify-center">
-                  <Instagram className="h-5 w-5 mr-2" />
-                  <span>@ilefeydeau</span>
+          <div className="flex items-center justify-center space-x-6 mt-1 mb-2 p-1 bg-transparent rounded-lg">
+                <a 
+                  href="https://www.instagram.com/ilefeydeau/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-gray-700 hover:text-[#E1306C] transition-colors duration-200"
+                  title="Suivez-nous sur Instagram"
+                >
+                  <Instagram size={28} />
                 </a>
-                <a href="https://x.com/Ilefeydeau" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-700 hover:text-[#1DA1F2] transition-colors w-full md:w-auto justify-center">
-                  <Twitter className="h-5 w-5 mr-2" />
-                  <span>@Ilefeydeau</span>
+                <a 
+                  href="https://x.com/Ilefeydeau" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-gray-700 hover:text-[#1DA1F2] transition-colors duration-200"
+                  title="Suivez-nous sur Twitter"
+                >
+                  <Twitter size={28} />
                 </a>
-                <a href={`mailto:${associationInfo.contactEmail}`} className="flex items-center text-gray-700 hover:text-[#4285F4] transition-colors w-full md:w-auto justify-center break-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2 flex-shrink-0">
-                    <rect width="20" height="16" x="2" y="4" rx="2" />
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                  </svg>
-                  <span className="truncate">{associationInfo.contactEmail}</span>
+                <a 
+                  href={`mailto:${associationInfo.contactEmail}`} 
+                  className="text-gray-700 hover:text-[#4285F4] transition-colors duration-200"
+                  title="Contactez-nous par email"
+                >
+                  <Mail size={28} />
                 </a>
               </div>
-            <div className="bg-white rounded-lg p-6 shadow-md mb-4">
-              <h2 className="text-lg font-semibold mb-3">Découvrez notre collectif en vidéo</h2>
-              <div className="aspect-video w-full mb-4 bg-gray-100 rounded overflow-hidden">
+            <div className="bg-transparent rounded-lg p-1 mb-1">
+              <h2 className="text-lg font-semibold mb-1">Découvrez notre collectif en vidéo</h2>
+              <div className="aspect-video w-full bg-gray-100 rounded overflow-hidden">
                 <video 
                   className="w-full h-full object-contain" 
                   controls 
@@ -111,13 +148,10 @@ const About = () => {
                   aria-label="Vidéo de présentation du Collectif Île Feydeau"
                 />
               </div>
-              <p className="text-gray-700 text-sm italic text-center">
-                Vidéo d'introduction du Collectif Île Feydeau (45 secondes)
-              </p>
             </div>
 
              
-            <div className="bg-white rounded-lg p-6 shadow-md">
+            <div className="bg-transparent rounded-lg p-6">
               
               <h2 className="text-lg font-semibold mb-3">Notre histoire</h2>
               <p className="text-gray-700 mb-4">
@@ -142,37 +176,35 @@ const About = () => {
           </TabsContent>
           
           <TabsContent value="team" className="space-y-4">
-            <div className="bg-white rounded-lg p-6 shadow-md mb-4">
+            <div className="bg-transparent rounded-lg p-6 mb-4">
               <p className="text-gray-700">
                 Notre association compte {associationInfo.memberCount} membres actifs, tous habitants du quartier et passionnés 
                 par sa valorisation. Voici quelques-uns des membres du bureau qui coordonnent nos actions.
               </p>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               {teamMembers.map((member) => (
-                <Card key={member.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="min-w-[48px] w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center overflow-hidden">
-                        <span className="text-purple-600 font-semibold text-center">
-                          {member.name.split(' ').map(n => n[0]).join('')}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium truncate">{member.name}</h3>
-                        <p className="text-sm text-purple-600">{member.role}</p>
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{member.description}</p>
-                      </div>
+                <div key={member.id} className="bg-white/70 rounded-xl p-4 border border-gray-200/50 shadow-sm hover:shadow-md hover:bg-white transition-all duration-200">
+                  <div className="flex items-center space-x-4">
+                    <div className="min-w-[48px] w-12 h-12 bg-gradient-to-br from-[#1a2138] to-[#4a5d94] rounded-full flex items-center justify-center overflow-hidden shadow-sm">
+                      <span className="text-white font-semibold text-center text-sm">
+                        {member.name.split(' ').map(n => n[0]).join('')}
+                      </span>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-[#1a2138] truncate">{member.name}</h3>
+                      <p className="text-sm text-[#f59e0b] font-medium">{member.role}</p>
+                      <p className="text-sm text-gray-600 mt-1 line-clamp-2 leading-relaxed">{member.description}</p>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </TabsContent>
           
           <TabsContent value="support" className="space-y-4">
-            <div className="bg-white rounded-lg p-6 shadow-md mb-4">
+            <div className="bg-transparent rounded-lg p-6 mb-4">
               <h2 className="text-lg font-semibold mb-3">Comment nous aider ?</h2>
               <p className="text-gray-700 mb-4">
                 Plusieurs façons s'offrent à vous pour soutenir notre association et contribuer 
@@ -181,27 +213,25 @@ const About = () => {
               
               <div className="space-y-4 mt-6">
                 <div className="border-l-4 border-red-500 pl-4 py-2">
-                  <h3 className="font-medium flex items-center">
-                    <Heart className="h-5 w-5 mr-2 text-red-500" />
+                  <h3 className="font-medium">
                     Faire un don
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
                     Soutenez financièrement nos actions de préservation et de valorisation du patrimoine.
                   </p>
-                  <Button 
+                  <NavigationButton 
                     variant="outline" 
                     size="sm" 
-                    className="mt-2" 
-                    onClick={() => navigate("/donate")}
+                    to="/donate"
+                    icon={<Heart className="h-4 w-4 text-red-500" />}
+                    className="mt-2"
                   >
-                    <Heart className="h-4 w-4 mr-2 text-red-500" />
                     Accéder à la page de don
-                  </Button>
+                  </NavigationButton>
                 </div>
                 
                 <div className="border-l-4 border-blue-500 pl-4 py-2">
-                  <h3 className="font-medium flex items-center">
-                    <Users className="h-5 w-5 mr-2 text-blue-500" />
+                  <h3 className="font-medium">
                     Devenir membre
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
@@ -211,11 +241,7 @@ const About = () => {
                 </div>
                 
                 <div className="border-l-4 border-green-500 pl-4 py-2">
-                  <h3 className="font-medium flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2 text-green-500">
-                      <rect width="20" height="16" x="2" y="4" rx="2" />
-                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                    </svg>
+                  <h3 className="font-medium">
                     Proposer une idée
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
@@ -226,7 +252,8 @@ const About = () => {
               </div>
             </div>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </div>
       </div>
       
       {/* Bottom Navigation */}

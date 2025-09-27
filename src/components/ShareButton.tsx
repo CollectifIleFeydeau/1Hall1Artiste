@@ -1,7 +1,7 @@
 import React from "react";
 import Share2 from "lucide-react/dist/esm/icons/share-2";
 import QrCode from "lucide-react/dist/esm/icons/qr-code";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ui/ActionButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,9 +22,10 @@ interface ShareButtonProps {
   title: string;
   text: string;
   url?: string;
+  className?: string;
 }
 
-export function ShareButton({ title, text, url }: ShareButtonProps) {
+export function ShareButton({ title, text, url, className }: ShareButtonProps) {
   // Utiliser une référence pour s'assurer que l'URL est disponible après le rendu
   const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
   const [showQrCode, setShowQrCode] = React.useState(false);
@@ -166,13 +167,14 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-[#4a5d94] transition-all duration-200 hover:shadow-sm"
+          <button
+            className={className || "flex items-center justify-center h-10 w-10 rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"}
+            aria-label="Partager"
+            title="Partager"
+            type="button"
           >
             <Share2 className="h-5 w-5" />
-          </Button>
+          </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[150px]">
           {typeof navigator !== 'undefined' && navigator.share && (
@@ -220,7 +222,7 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
             </p>
           </div>
           <DialogFooter>
-            <Button onClick={() => setShowQrCode(false)}>Fermer</Button>
+            <ActionButton variant="primary" onClick={() => setShowQrCode(false)}>Fermer</ActionButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

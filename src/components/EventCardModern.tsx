@@ -1,11 +1,12 @@
 import React from 'react';
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { Card } from "@/components/ui/card";
 import { Event } from "@/data/events";
 import Heart from "lucide-react/dist/esm/icons/heart";
 import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
 import { EventImage } from "@/components/EventImage";
+import { getBackgroundFallback } from "@/utils/backgroundUtils";
 
 export interface EventCardModernProps {
   event: Event;
@@ -53,7 +54,7 @@ export const EventCardModern: React.FC<EventCardModernProps> = ({
       content: '""',
       position: 'absolute',
       top: 0, right: 0, bottom: 0, left: 0,
-      backgroundImage: `url('/images/background/Historical Parchment Background Portrait.jpg')`,
+      backgroundImage: `url('${getBackgroundFallback('Historical Parchment Background Portrait.jpg')}')`,
       backgroundSize: 'cover',
       backgroundPosition: positions[intensity],
       opacity: 0.6,
@@ -97,12 +98,20 @@ export const EventCardModern: React.FC<EventCardModernProps> = ({
             )}
           </div>
           <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-            <Button variant="ghost" size="icon" className="p-1 h-auto text-[#1a2138] hover:bg-blue-50 rounded-full" onClick={(e) => handleActionClick(e, () => setIsLiked(!isLiked))}>
-              <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
-            </Button>
-            <Button variant="ghost" size="icon" className="p-1 h-auto text-[#1a2138] hover:bg-blue-50 rounded-full" onClick={(e) => handleActionClick(e, onSaveClick)}>
-              {isSaved ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
-            </Button>
+            <ActionButton 
+              variant="like" 
+              active={isLiked}
+              icon={<Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />}
+              onClick={(e) => handleActionClick(e, () => setIsLiked(!isLiked))}
+              tooltip="J'aime cet événement"
+            />
+            <ActionButton 
+              variant="save" 
+              active={isSaved}
+              icon={isSaved ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
+              onClick={(e) => handleActionClick(e, onSaveClick)}
+              tooltip={isSaved ? "Retirer des favoris" : "Ajouter aux favoris"}
+            />
           </div>
         </div>
 

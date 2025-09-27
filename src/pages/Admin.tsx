@@ -368,7 +368,7 @@ export default function Admin() {
                     <h2 className="text-lg font-semibold mb-2">Carte</h2>
                     <p className="text-sm text-gray-500 mb-2">Cliquez sur la carte pour définir la position du lieu sélectionné</p>
                     
-                    <div className="bg-white rounded-lg mb-4 border-0 transition-all duration-300 hover:shadow-lg w-full">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-lg mb-4 border-2 border-amber-300 shadow-lg transition-all duration-300 hover:shadow-xl w-full">
                       <div className="flex justify-center">
                         <MapComponent 
                           locations={mapLocations} 

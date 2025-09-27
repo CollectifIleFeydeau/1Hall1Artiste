@@ -94,7 +94,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         return `
           ${baseClasses} rounded-md
           ${isActive 
-            ? 'bg-white text-blue-600 shadow-sm' 
+            ? 'bg-white/90 backdrop-blur-sm text-blue-600 shadow-sm border border-amber-300' 
             : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
           }
         `;

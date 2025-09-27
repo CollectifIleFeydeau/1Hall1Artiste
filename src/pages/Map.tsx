@@ -7,7 +7,7 @@ import AudioActivator from "@/components/AudioActivator";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createLogger } from "@/utils/logger";
 import { MapComponent, MAP_WIDTH, MAP_HEIGHT } from "@/components/MapComponent";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
@@ -23,7 +23,8 @@ import Navigation from "lucide-react/dist/esm/icons/navigation";
 import { VisitProgress } from "@/components/VisitProgress";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { EventDetails } from "@/components/EventDetails";
+import { EventDetailsNew as EventDetails } from "@/components/EventDetailsModern";
+import { LocationDetailsModern } from "@/components/LocationDetailsModern";
 import { type Event, events, getLocationIdForEvent } from "@/data/events";
 import { useData, useEvents, useLocations } from "@/hooks/useData";
 import { toast } from "@/components/ui/use-toast";
@@ -32,6 +33,7 @@ import { LikeButton } from "@/components/community/LikeButton";
 import { unlockAchievement, AchievementType } from "../services/achievements";
 import { AudioGuideButton } from "@/components/AudioGuideButton";
 import { AudioGuidePlayer } from "@/components/AudioGuidePlayer";
+import { MapHeader } from "@/components/MapHeader";
 // Créer un logger pour le composant Map
 const logger = createLogger('Map');
 
@@ -401,7 +403,12 @@ const Map = ({ fullScreen = false }: MapProps) => {
   
   if (domError) {
     return (
-      <div className="min-h-screen bg-white pb-20 overflow-x-hidden flex items-center justify-center">
+      <div className="min-h-screen pb-20 overflow-x-hidden flex items-center justify-center" style={{
+        backgroundImage: `url('/images/background/small/Historical Parchment Background Portrait.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}>
         <div className="text-center p-4">
           <p className="text-red-500 mb-2">{domError}</p>
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -412,78 +419,33 @@ const Map = ({ fullScreen = false }: MapProps) => {
 
   return (
     <div className="min-h-screen pb-20 overflow-x-hidden relative" style={{
-      backgroundImage: `url('/images/background/Historical Parchment Background Portrait.jpg')`,
+      backgroundImage: `url('/images/background/small/Historical Parchment Background Portrait.jpg')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'
     }}>
       <div className="max-w-screen-lg mx-auto px-4 pt-4">
-        <header className="mb-2 flex items-center justify-between">
+        {/* Header avec compteur style "carte au trésor" */}
+        <div className="flex items-center justify-between mb-4">
           <div className="w-1/4"></div>
-          <h1 className="text-xl font-bold text-[#4a5d94] text-center">Carte</h1>
+          <div className="flex-1">
+            <MapHeader 
+              visitedCount={visitedCount}
+              totalCount={totalCount}
+              showLocationButton={false}
+              showAmbianceButton={false}
+            />
+          </div>
           <div className="flex items-center space-x-2 w-1/4 justify-end">
             <ShareButton 
               title="Parcours Île Feydeau" 
               text="Découvrez mon parcours sur l'Île Feydeau à Nantes!" 
             />
           </div>
-        </header>
-        
-        {/* Légende sous le titre - toujours visible */}
-        <div className="flex items-center justify-center mb-4 text-sm text-[#4a5d94] fade-in">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <div className="flex items-center justify-center w-5 h-5 bg-[#4CAF50] rounded-full mr-1 text-white text-xs font-medium">
-                {visitedCount}
-              </div>
-              <span className="text-xs">{visitedCount > 1 ? 'Visités' : 'Visité'}</span>
-            </div>
-            <div className="flex items-center">
-              <div className="flex items-center justify-center w-5 h-5 bg-[#4a5d94] rounded-full mr-1 text-white text-xs font-medium">
-                {totalCount - visitedCount}
-              </div>
-              <span className="text-xs">À découvrir</span>
-            </div>
-          </div>
         </div>
         
 
         
-        {/* Boutons d'activation de la localisation et du son */}
-        <div className="flex justify-center gap-2 my-4">
-          <LocationActivator 
-            onLocationEnabled={() => {
-              setPermissionDenied(false);
-              setShowLocationFeatures(true);
-              setLocationPermissionRequested(true);
-              logger.info('Localisation activée manuellement par l\'utilisateur');
-              analytics.trackMapInteraction(EventAction.USER_LOCATION, { granted: true });
-            }}
-            onLocationDenied={() => {
-              setPermissionDenied(true);
-              setShowLocationFeatures(false);
-              logger.warn('Localisation refusée par l\'utilisateur');
-              analytics.trackMapInteraction(EventAction.USER_LOCATION, { granted: false });
-            }}
-            onLocationDisabled={() => {
-              setShowLocationFeatures(false);
-              setNavigationTarget(null); // Arrêter la navigation en cours
-              logger.info('Localisation désactivée manuellement par l\'utilisateur');
-              analytics.trackMapInteraction(EventAction.USER_LOCATION, { granted: false, disabled: true });
-            }}
-          />
-          
-          <AudioActivator 
-            onAudioEnabled={() => {
-              logger.info('Son activé manuellement par l\'utilisateur');
-              analytics.trackFeatureUse('map_sound_toggle', { enabled: true });
-            }}
-            onAudioDisabled={() => {
-              logger.info('Son désactivé par l\'utilisateur');
-              analytics.trackFeatureUse('map_sound_toggle', { enabled: false });
-            }}
-          />
-        </div>
         
         <div className="relative">
           {/* Map container */}
@@ -537,192 +499,103 @@ const Map = ({ fullScreen = false }: MapProps) => {
               {permissionDenied && !isDevelopmentEnvironment && (
                 <div className="absolute top-0 left-0 right-0 z-50 bg-red-500 text-white p-2 text-center">
                   <div className="mb-2">Accès refusé - Vous avez refusé l'accès à votre position.</div>
-                  <Button
+                  <ActionButton
+                    variant="secondary"
                     size="sm"
                     onClick={reactivateLocation}
                     className="bg-white text-red-500 hover:bg-gray-100 text-xs"
                   >
                     Activer la localisation
-                  </Button>
+                  </ActionButton>
                 </div>
               )}
             </div>
           </div>
           
-          {/* La légende a été déplacée sous le titre */}
+          {/* Boutons Localisation et Ambiance - Style cohérent avec l'app */}
+          <div className="flex justify-center gap-4 mt-4">
+            <button
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200 border-2 ${
+                showLocationFeatures 
+                  ? 'bg-[#1a2138] text-white border-[#1a2138]' 
+                  : 'bg-transparent text-[#1a2138] border-[#1a2138] hover:bg-[#1a2138] hover:text-white'
+              }`}
+              onClick={() => {
+                if (!showLocationFeatures) {
+                  // Activer la localisation
+                  setPermissionDenied(false);
+                  setShowLocationFeatures(true);
+                  setLocationPermissionRequested(true);
+                  logger.info('Localisation activée manuellement par l\'utilisateur');
+                  analytics.trackMapInteraction(EventAction.USER_LOCATION, { granted: true });
+                } else {
+                  // Désactiver la localisation
+                  setShowLocationFeatures(false);
+                  setNavigationTarget(null);
+                  logger.info('Localisation désactivée manuellement par l\'utilisateur');
+                  analytics.trackMapInteraction(EventAction.USER_LOCATION, { granted: false, disabled: true });
+                }
+              }}
+            >
+              Localisation
+            </button>
+
+            <button
+              className="px-6 py-2 rounded-full text-sm font-medium bg-transparent text-[#1a2138] border-2 border-[#1a2138] hover:bg-[#1a2138] hover:text-white transition-colors duration-200"
+              onClick={() => {
+                // Toggle ambiance/audio features  
+                analytics.trackFeatureUse('ambiance_toggle', { enabled: true });
+                // Pour l'instant, juste un feedback visuel
+                toast({
+                  title: "Ambiance",
+                  description: "Fonctionnalité à venir - Sons d'ambiance de l'Île Feydeau",
+                });
+              }}
+            >
+              Ambiance
+            </button>
+          </div>
         </div>
         
-
-        
-      
       </div>
       
       {/* Removed visit confirmation dialog */}
       
-      {/* Location details overlay */}
+      {/* Location details overlay - Version modernisée */}
       {activeLocation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setActiveLocation(null)}>
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-bold text-[#4a5d94]">
-                {mapLocations.find(l => l.id === activeLocation)?.name}
-              </h2>
-              <div className="flex items-center space-x-2">
-                {/* Bouton de like pour le bâtiment */}
-                <LikeButton 
-                  entryId={`building-${activeLocation}`}
-                  variant="icon"
-                  showCount={true}
-                />
-                
-                <Button variant="ghost" size="sm" className="-mt-2 -mr-2" onClick={() => {
-                  if (activeLocation) {
-                    analytics.trackInteraction(EventAction.BACK, 'location_details_close', { building_id: activeLocation });
-                  }
-                  setActiveLocation(null);
-                }}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            
-            <p className="text-sm text-[#8c9db5] mb-3">
-              {/* Display location if available */}
-              Île Feydeau, Nantes
-            </p>
-            
-            <p className="text-sm text-[#4a5d94] mb-4">
-              {mapLocations.find(l => l.id === activeLocation)?.description}
-            </p>
-            
-            <div className="flex gap-2 mb-4">
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="text-xs border-[#4a5d94] text-[#4a5d94]"
-                onClick={() => {
-                  // S'assurer que activeLocation est défini avant de naviguer
-                  if (activeLocation) {
-                    logger.info(`Navigation vers l'histoire du lieu: ${activeLocation}`);
-                    const loc = mapLocations.find(l => l.id === activeLocation);
-                    if (loc) {
-                      analytics.trackBuildingHistoryView(loc.id, 'from_map');
-                    }
-                    analytics.trackInteraction(EventAction.CLICK, 'history_button', { from: 'map', building_id: activeLocation });
-                    navigate('/location-history', { 
-                      state: { selectedLocationId: activeLocation }
-                    });
-                  } else {
-                    logger.warn('Tentative de navigation vers l\'histoire d\'un lieu non sélectionné');
-                  }
-                }}
-              >
-                <Info className="h-3 w-3 mr-1" />
-                Histoire du lieu
-              </Button>
-              
-              {/* Bouton audio guide à côté du bouton Histoire */}
-              {mapLocations.find(l => l.id === activeLocation)?.audio && (
-                <AudioGuideButton 
-                  audioUrl={mapLocations.find(l => l.id === activeLocation)?.audio}
-                  locationName={mapLocations.find(l => l.id === activeLocation)?.name}
-                  variant="button"
-                  className="border-[#4a5d94] text-[#4a5d94]"
-                />
-              )}
-            </div>
-            
-            <div className="mb-6"></div>
-            
-            {getLocationEvents(activeLocation).length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-medium text-[#1a2138] mb-2">Événements à cet endroit:</h3>
-                <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-2 -mr-2">
-                  {getLocationEvents(activeLocation).map((event) => (
-                    <div 
-                      key={event.id} 
-                      className={`bg-[#f0f5ff] p-3 rounded-lg cursor-pointer hover:bg-[#e0ebff] transition-colors ${savedEventIds.includes(event.id) ? 'border-l-4 border-l-[#ff7a45]' : ''}`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1" onClick={() => {
-                          analytics.trackProgramInteraction(EventAction.EVENT_DETAILS, { event_id: event.id, source: 'map' });
-                          setSelectedEvent(event);
-                        }}>
-                          <p className="font-medium text-[#1a2138]">{event.title}</p>
-                          <div className="flex items-center mt-1">
-                            <Calendar className="h-3 w-3 mr-1 text-[#8c9db5]" />
-                            <p className="text-xs text-[#8c9db5]">{event.days.map(day => day === "samedi" ? "Sa" : "Di").join("/")}, {event.time}</p>
-                          </div>
-                          <p className="text-xs text-[#4a5d94] mt-1">{event.artistName}</p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="p-1 h-auto"
-                          onClick={(e) => handleSaveEvent(event, e)}
-                        >
-                          {savedEventIds.includes(event.id) ? (
-                            <BookmarkCheck className="h-5 w-5 text-[#ff7a45]" />
-                          ) : (
-                            <Bookmark className="h-5 w-5 text-[#8c9db5]" />
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-between mb-4">
-              <Button
-                variant="outline"
-                className="border-[#4a5d94] text-[#4a5d94] text-xs sm:text-sm px-1 sm:px-2 min-h-[44px]"
-                onClick={() => activeLocation && markLocationAsVisited(activeLocation, !mapLocations.find(l => l.id === activeLocation)?.visited)}
-              >
-                {mapLocations.find(l => l.id === activeLocation)?.visited ? 'Non visité' : 'Marquer visité'}
-              </Button>
-              
-              <Button 
-                className="bg-[#ff7a45] hover:bg-[#ff9d6e] text-sm min-h-[44px]"
-                onClick={() => {
-                  // Fermer la vue détaillée mais conserver la mise en évidence du lieu
-                  // Le lieu reste en surbrillance grâce à highlightedLocation qui n'est pas réinitialisé
-                  if (activeLocation) {
-                    analytics.trackInteraction(EventAction.BACK, 'location_details_back', { building_id: activeLocation });
-                  }
-                  setActiveLocation(null);
-                }}
-              >
-                Retour à la carte
-              </Button>
-            </div>
-            
-            {/* Bouton de navigation - visible uniquement si la géolocalisation est active */}
-            {showLocationFeatures && (
-              <div className="mb-16">
-                <Button 
-                  variant="secondary" 
-                  className="w-full text-sm bg-[#f0f5ff] text-[#4a5d94] hover:bg-[#d8e3ff] min-h-[44px]"
-                  onClick={() => {
-                    // Utiliser l'ID du lieu actif
-                    if (activeLocation) {
-                      setNavigationTarget(activeLocation);
-                      setActiveLocation(null); // Fermer la vue détaillée
-                      analytics.trackMapInteraction(EventAction.ROUTE_CALCULATE, {
-                        building_id: activeLocation,
-                        has_user_position: !!userPosition
-                      });
-                    }
-                  }}
-                >
-                  <Navigation className="h-4 w-4 mr-2" />
-                  Me guider vers ce lieu
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+        <LocationDetailsModern
+          location={mapLocations.find(l => l.id === activeLocation)!}
+          events={getLocationEvents(activeLocation)}
+          savedEventIds={savedEventIds}
+          showLocationFeatures={showLocationFeatures}
+          onClose={() => {
+            if (activeLocation) {
+              analytics.trackInteraction(EventAction.BACK, 'location_details_close', { building_id: activeLocation });
+            }
+            setActiveLocation(null);
+          }}
+          onSaveEvent={handleSaveEvent}
+          onSelectEvent={(event) => {
+            analytics.trackProgramInteraction(EventAction.EVENT_DETAILS, { event_id: event.id, source: 'map' });
+            setSelectedEvent(event);
+          }}
+          onMarkVisited={(visited) => {
+            if (activeLocation) {
+              markLocationAsVisited(activeLocation, visited);
+            }
+          }}
+          onNavigate={() => {
+            if (activeLocation) {
+              setNavigationTarget(activeLocation);
+              setActiveLocation(null);
+              analytics.trackMapInteraction(EventAction.ROUTE_CALCULATE, {
+                building_id: activeLocation,
+                has_user_position: !!userPosition
+              });
+            }
+          }}
+          isVisited={mapLocations.find(l => l.id === activeLocation)?.visited || false}
+        />
       )}
       
       {/* Event details using the unified component */}

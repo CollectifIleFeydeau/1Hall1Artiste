@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/BackButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -17,13 +18,18 @@ const Donate = () => {
   }, []);
 
   return (
-    <div className="min-h-screen app-gradient pb-20 px-4 pt-4 overflow-x-hidden">
-      <div className="max-w-screen-lg mx-auto">
+    <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
+      backgroundImage: `url('/images/background/small/Historical Parchment Background Portrait.jpg')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      {/* Overlay pour améliorer la lisibilité */}
+      <div className="absolute inset-0 bg-white/20" />
+      
+      <div className="relative z-10 max-w-screen-lg mx-auto">
         <header className="mb-2 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => { analytics.trackDonationInteraction(EventAction.DONATION_CANCEL, { method: "helloasso", reason: "back_click" }); navigate("/map"); }}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
-          </Button>
+          <BackButton onClick={() => { analytics.trackDonationInteraction(EventAction.DONATION_CANCEL, { method: "helloasso", reason: "back_click" }); navigate("/map"); }} />
           <h1 className="text-xl font-bold text-[#ff7a45]">Faire un don</h1>
           <ShareButton 
             title="Faire un don au Collectif Île Feydeau" 
@@ -31,7 +37,7 @@ const Donate = () => {
           />
         </header>
         
-        <Card className="mb-6">
+        <Card className="bg-white/90 backdrop-blur-sm border-2 border-amber-300 shadow-lg mb-6">
           <CardContent className="p-6">
             {/*
             <div className="flex flex-col items-center text-center mb-6">

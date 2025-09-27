@@ -92,24 +92,16 @@ const AudioActivator: React.FC<AudioActivatorProps> = ({
   };
 
   return (
-    <Button
-      variant={isActive ? "destructive" : "default"}
-      size="sm"
-      className="flex items-center gap-1 font-medium"
+    <button
+      className={`h-12 border-2 ${
+        isActive 
+          ? "bg-[#1a2138] text-white border-[#1a2138]" 
+          : "border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white"
+      } rounded-full font-medium text-sm transition-colors px-4`}
       onClick={handleToggleAudio}
     >
-      {isActive ? (
-        <>
-          <Volume2 className="h-4 w-4" />
-          Désactiver son
-        </>
-      ) : (
-        <>
-          <VolumeX className="h-4 w-4" />
-          Activer son
-        </>
-      )}
-    </Button>
+      Ambiance
+    </button>
   );
 };
 

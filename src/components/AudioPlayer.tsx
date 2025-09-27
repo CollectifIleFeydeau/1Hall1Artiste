@@ -123,7 +123,7 @@ export const AudioPlayer = ({ audioSrc, autoPlay = true }: AudioPlayerProps) => 
         variant="outline"
         size="icon"
         className={cn(
-          "rounded-full bg-white/90 hover:bg-white shadow-md relative",
+          "rounded-full bg-white/90 backdrop-blur-sm hover:bg-white/95 shadow-md relative border border-amber-300",
           isAnimating && "overflow-visible"
         )}
         onClick={togglePlayback}

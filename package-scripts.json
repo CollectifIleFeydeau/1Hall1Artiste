@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "optimize-backgrounds": "node scripts/optimize-backgrounds.js"
+  }
+}

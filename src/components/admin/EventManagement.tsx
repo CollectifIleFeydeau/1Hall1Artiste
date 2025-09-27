@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Event } from "@/data/events";
@@ -67,13 +67,13 @@ export function EventManagement() {
           <h2 className="text-xl font-semibold text-[#4a5d94]">
             {editingEvent ? "Modifier l'événement" : "Ajouter un événement"}
           </h2>
-          <Button
+          <ActionButton
             variant="outline"
             onClick={handleCancelEdit}
             className="text-gray-600"
           >
             Annuler
-          </Button>
+          </ActionButton>
         </div>
         
         <EventForm 
@@ -96,12 +96,12 @@ export function EventManagement() {
             {dayFilter !== 'all' && ` - ${dayFilter}`}
           </p>
         </div>
-        <Button
+        <ActionButton
+          variant="primary"
           onClick={() => setShowAddForm(true)}
-          className="bg-[#4a5d94] hover:bg-[#3a4d84]"
         >
           ➕ Ajouter un événement
-        </Button>
+        </ActionButton>
       </div>
 
       {/* Filtres */}
@@ -110,58 +110,52 @@ export function EventManagement() {
           <div className="flex flex-wrap gap-4">
             <div className="flex gap-2">
               <span className="text-sm font-medium text-gray-700">Type:</span>
-              <Button
-                variant={filter === 'all' ? 'default' : 'outline'}
+              <ActionButton
+                variant={filter === 'all' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setFilter('all')}
-                className={filter === 'all' ? 'bg-[#4a5d94]' : ''}
               >
                 Tous
-              </Button>
-              <Button
-                variant={filter === 'exposition' ? 'default' : 'outline'}
+              </ActionButton>
+              <ActionButton
+                variant={filter === 'exposition' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setFilter('exposition')}
-                className={filter === 'exposition' ? 'bg-[#4a5d94]' : ''}
               >
                 Expositions
-              </Button>
-              <Button
-                variant={filter === 'concert' ? 'default' : 'outline'}
+              </ActionButton>
+              <ActionButton
+                variant={filter === 'concert' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setFilter('concert')}
-                className={filter === 'concert' ? 'bg-[#4a5d94]' : ''}
               >
                 Concerts
-              </Button>
+              </ActionButton>
             </div>
             
             <div className="flex gap-2">
               <span className="text-sm font-medium text-gray-700">Jour:</span>
-              <Button
-                variant={dayFilter === 'all' ? 'default' : 'outline'}
+              <ActionButton
+                variant={dayFilter === 'all' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setDayFilter('all')}
-                className={dayFilter === 'all' ? 'bg-[#4a5d94]' : ''}
               >
                 Tous
-              </Button>
-              <Button
-                variant={dayFilter === 'samedi' ? 'default' : 'outline'}
+              </ActionButton>
+              <ActionButton
+                variant={dayFilter === 'samedi' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setDayFilter('samedi')}
-                className={dayFilter === 'samedi' ? 'bg-[#4a5d94]' : ''}
               >
                 Samedi
-              </Button>
-              <Button
-                variant={dayFilter === 'dimanche' ? 'default' : 'outline'}
+              </ActionButton>
+              <ActionButton
+                variant={dayFilter === 'dimanche' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setDayFilter('dimanche')}
-                className={dayFilter === 'dimanche' ? 'bg-[#4a5d94]' : ''}
               >
                 Dimanche
-              </Button>
+              </ActionButton>
             </div>
           </div>
         </CardContent>
@@ -191,9 +185,9 @@ export function EventManagement() {
                       </span>
                       <div className="flex gap-1">
                         {event.days.map(day => (
-                          <Badge key={day} variant="outline" className="text-xs">
+                          <div key={day} className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-foreground">
                             {day === 'samedi' ? 'Sam' : 'Dim'}
-                          </Badge>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -201,22 +195,22 @@ export function EventManagement() {
                   </div>
                   
                   <div className="flex gap-2 flex-col sm:flex-row">
-                    <Button
+                    <ActionButton
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(event)}
                       className="text-blue-600 hover:text-blue-700"
                     >
                       ✏️ Modifier
-                    </Button>
-                    <Button
+                    </ActionButton>
+                    <ActionButton
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(event)}
                       className="text-red-600 hover:text-red-700"
                     >
                       🗑️ Supprimer
-                    </Button>
+                    </ActionButton>
                   </div>
                 </div>
               </CardHeader>

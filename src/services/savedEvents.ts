@@ -66,6 +66,9 @@ export const saveEvent = (event: Event): SavedEvent[] => {
       localStorage.setItem('savedEvents', JSON.stringify(updatedIds));
       console.log(`[savedEvents] Événement sauvegardé, nouveau total: ${updatedIds.length}`);
       
+      // Déclencher l'événement personnalisé pour mettre à jour les compteurs
+      window.dispatchEvent(new CustomEvent('savedEventsChanged'));
+      
       // Débloquer des réalisations avec un délai pour assurer que l'interface est prête
       console.log(`[savedEvents] Planification du déclenchement des achievements dans 500ms`);
       setTimeout(() => {
@@ -114,6 +117,9 @@ export const removeSavedEvent = (eventId: string): SavedEvent[] => {
     
     const updatedIds = savedEventIds.filter(id => id !== eventId);
     localStorage.setItem('savedEvents', JSON.stringify(updatedIds));
+    
+    // Déclencher l'événement personnalisé pour mettre à jour les compteurs
+    window.dispatchEvent(new CustomEvent('savedEventsChanged'));
     
     return getSavedEvents();
   } catch (error) {

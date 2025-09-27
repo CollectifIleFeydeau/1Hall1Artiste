@@ -1,5 +1,5 @@
 
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -10,17 +10,26 @@ const Team = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 p-4">
-      <div className="max-w-md mx-auto">
-        <header className="mb-4 flex items-center">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/map")}>
+    <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
+      backgroundImage: `url('/images/background/small/Historical Parchment Background Portrait.jpg')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      {/* Overlay pour améliorer la lisibilité */}
+      <div className="absolute inset-0 bg-white/20" />
+      
+      <div className="relative z-10 max-w-md mx-auto">
+        <header className="mb-4 flex items-center justify-between">
+          <ActionButton variant="ghost" size="sm" onClick={() => navigate("/map")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
-          </Button>
-          <h1 className="text-xl font-bold ml-2">Notre équipe</h1>
+          </ActionButton>
+          <h1 className="text-xl font-bold text-[#4a5d94]">Notre équipe</h1>
+          <div className="w-20"></div>
         </header>
         
-        <div className="bg-white rounded-lg p-6 shadow-md mb-6">
+        <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6 border-2 border-amber-300 shadow-lg mb-6">
           <p className="text-gray-700 mb-4">
             Notre association compte {associationInfo.memberCount} membres actifs, tous habitants du quartier et passionnés 
             par sa valorisation. Voici quelques-uns des membres du bureau qui coordonnent nos actions.
@@ -29,7 +38,7 @@ const Team = () => {
         
         <div className="space-y-4">
           {teamMembers.map((member) => (
-            <Card key={member.id}>
+            <Card key={member.id} className="bg-white/90 backdrop-blur-sm border-2 border-amber-300 shadow-lg">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">

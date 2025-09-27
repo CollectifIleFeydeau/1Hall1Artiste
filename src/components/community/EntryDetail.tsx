@@ -9,7 +9,6 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useSwipeable } from "react-swipeable";
 
-import { Button } from "../../components/ui/button";
 import { CommunityEntry } from "../../types/communityTypes";
 import { cn } from "../../lib/utils";
 import { LocalImage } from "./LocalImage";
@@ -103,7 +102,7 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, curren
         onClick={onClose}
       >
         <motion.div
-          className="bg-white dark:bg-slate-900 rounded-lg w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col"
+          className="bg-white/90 backdrop-blur-sm border-2 border-amber-300 shadow-lg dark:bg-slate-900 rounded-lg w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
@@ -114,9 +113,13 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, curren
           {/* En-tête simplifié */}
           <div className="p-3 border-b flex items-center justify-between">
             <span className="font-medium">{entry.displayName}</span>
-            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
-              <X size={16} />
-            </Button>
+            <button
+              aria-label="Fermer"
+              onClick={onClose}
+              className="h-8 w-8 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
 
           {/* Contenu */}

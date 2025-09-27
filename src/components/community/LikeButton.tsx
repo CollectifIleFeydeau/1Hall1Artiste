@@ -164,13 +164,14 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
         onClick={handleClick}
         disabled={loading || isToggling}
         className={cn(
-          "flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-gray-500",
-          "bg-white hover:shadow-sm transition-all duration-200",
+          "flex items-center justify-center h-10 w-10 rounded-full border-2 transition-colors",
           "disabled:opacity-50 cursor-pointer relative",
           isToggling && "animate-pulse",
           showSuccess && "border-green-400 text-green-500",
           error && "border-red-400 text-red-500",
-          liked && "border-red-400 text-red-500",
+          liked 
+            ? "bg-red-50 border-red-500 text-red-500" 
+            : "bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500",
           className
         )}
         whileTap={!isToggling ? { scale: 0.95 } : {}}

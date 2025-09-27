@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Event } from "@/data/events";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
@@ -77,18 +77,21 @@ export const EventCard = ({ event, isSaved, onEventClick, onSaveClick }: EventCa
               />
               
               {/* Bouton bookmark */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-1 h-auto"
+              <button
+                className={`w-8 h-8 flex items-center justify-center rounded-full border-2 transition-colors ${
+                  isSaved 
+                    ? 'bg-amber-50 border-amber-500 text-amber-500' 
+                    : 'bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500'
+                }`}
                 onClick={onSaveClick}
+                title={isSaved ? "Retirer des favoris" : "Ajouter aux favoris"}
               >
                 {isSaved ? (
-                  <BookmarkCheck className="h-5 w-5 text-[#ff7a45]" />
+                  <BookmarkCheck className="h-4 w-4" />
                 ) : (
-                  <Bookmark className="h-5 w-5 text-[#8c9db5]" />
+                  <Bookmark className="h-4 w-4" />
                 )}
-              </Button>
+              </button>
             </div>
             
             <span className={`text-xs px-2 py-1 rounded-full ${

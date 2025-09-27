@@ -1,39 +1,36 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { TreasureButton } from "@/components/ui/TreasureButton";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { getImagePath } from "@/utils/imagePaths";
 import { setEventContributionContext } from "@/services/contextualContributionService";
 import ReactMarkdown from "react-markdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Event } from "@/data/events";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
-import Info from "lucide-react/dist/esm/icons/info";
 import X from "lucide-react/dist/esm/icons/x";
-import Instagram from "lucide-react/dist/esm/icons/instagram";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import Share2 from "lucide-react/dist/esm/icons/share-2";
-import Camera from "lucide-react/dist/esm/icons/camera";
-import { ShareButton } from "@/components/ShareButton";
-import { saveEvent, getSavedEvents, removeSavedEvent } from "@/services/savedEvents";
-import { type Event, getEventsByLocation } from "@/data/events";
-import { getLocationNameById } from "@/data/locations";
-import { artists } from "@/data/artists";
 import { analytics, EventAction, trackInteraction } from "@/services/firebaseAnalytics";
-import { InstagramCarousel } from "@/components/InstagramCarousel";
-import { TruncatedText } from "@/components/TruncatedText";
 import { addToCalendar, isCalendarSupported, CalendarErrorType } from "@/services/calendarService";
-import { AppImage } from "@/components/AppImage";
+import { toast } from "@/components/ui/use-toast";
+import { createLogger } from "@/utils/logger";
+import { getBackgroundFallback } from "@/utils/backgroundUtils";
 import { LikeButton } from "@/components/community/LikeButton";
+import { getSavedEvents, saveEvent, removeSavedEvent } from "@/services/savedEvents";
+import { artists } from "@/data/artists";
+import { ShareButton } from "@/components/ShareButton";
+import { getLocationNameById } from "@/data/locations";
 
 interface EventDetailsProps {
   event: Event | null;
   isOpen: boolean;
   onClose: () => void;
-  source: "map" | "program" | "saved"; // Pour savoir d'où vient l'utilisateur
+  source: "map" | "program" | "saved";
 }
 
 // Composant pour afficher la description de l'artiste avec un teaser et une option pour développer
@@ -44,17 +41,11 @@ interface ArtistDescriptionProps {
 const ArtistDescription = ({ text }: ArtistDescriptionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // Créer un teaser en prenant les premiers caractères du texte
   const createTeaser = (fullText: string): string => {
-    // Environ 100-120 caractères pour 1-2 lignes
     const maxLength = 120;
-    
     if (fullText.length <= maxLength) return fullText;
-    
-    // Trouver le dernier espace avant la limite pour ne pas couper un mot
     const truncated = fullText.substring(0, maxLength);
     const lastSpaceIndex = truncated.lastIndexOf(' ');
-    
     return truncated.substring(0, lastSpaceIndex) + '...';
   };
   
@@ -66,33 +57,21 @@ const ArtistDescription = ({ text }: ArtistDescriptionProps) => {
   };
   
   return (
-    <div className="text-sm text-[#4a5d94]">
-      {/* Afficher soit le teaser, soit le texte complet */}
+    <div className="text-sm text-gray-700">
       <div 
         onClick={showExpandOption ? toggleExpand : undefined}
-        onKeyDown={(e) => {
-          if (showExpandOption && (e.key === 'Enter' || e.key === ' ')) {
-            e.preventDefault();
-            toggleExpand();
-          }
-        }}
-        tabIndex={showExpandOption ? 0 : undefined}
-        role={showExpandOption ? "button" : undefined}
-        aria-expanded={isExpanded}
         className={showExpandOption ? "cursor-pointer" : ""}
       >
         <ReactMarkdown components={{
           p: ({node, ...props}) => <p className="mb-3" {...props} />,
           h2: ({node, ...props}) => <h2 className="text-lg font-bold mb-2" {...props} />,
           h3: ({node, ...props}) => <h3 className="text-md font-semibold mb-2" {...props} />,
-          hr: ({node, ...props}) => <hr className="my-4 border-t border-[#d8e3ff]" {...props} />
         }}>
           {isExpanded ? text : teaser}
         </ReactMarkdown>
         
-        {/* Indicateur visuel pour développer/réduire */}
         {showExpandOption && (
-          <div className="flex items-center text-xs text-[#8c9db5] mt-1">
+          <div className="flex items-center text-xs text-gray-500 mt-1">
             {isExpanded ? (
               <>
                 <ChevronUp className="h-3 w-3 mr-1" />
@@ -101,7 +80,7 @@ const ArtistDescription = ({ text }: ArtistDescriptionProps) => {
             ) : (
               <>
                 <ChevronDown className="h-3 w-3 mr-1" />
-                <span>(pour voir +)</span>
+                <span>Voir plus</span>
               </>
             )}
           </div>
@@ -115,10 +94,8 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // État pour les événements sauvegardés
   const [savedEvents, setSavedEvents] = useState<Event[]>([]);
   const [calendarSupported, setCalendarSupported] = useState<boolean>(false);
-  const [relatedEvents, setRelatedEvents] = useState<Event[]>([]);
   
   // Tracking: ouverture du panneau de détails
   useEffect(() => {
@@ -136,16 +113,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     if (event) {
       const currentSavedEvents = getSavedEvents();
       setSavedEvents(currentSavedEvents);
-      
-      // Vérifier si le calendrier est supporté
       setCalendarSupported(isCalendarSupported());
-      
-      // Charger les événements liés au même lieu
-      if (event.locationId) {
-        const eventsAtSameLocation = getEventsByLocation(event.locationId)
-          .filter(e => e.id !== event.id); // Exclure l'événement actuel
-        setRelatedEvents(eventsAtSameLocation);
-      }
     }
   }, [event]);
   
@@ -156,11 +124,6 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
   const navigateToMap = () => {
     if (!event) return;
     
-    // Ajouter des logs pour déboguer
-    console.log(`[EventDetails] Navigation vers la carte pour l'événement ${event.id} au lieu ${event.locationId}`);
-    console.log(`[EventDetails] Source de navigation: ${source}`);
-    
-    // Tracking: clic "Voir sur la carte"
     trackInteraction(EventAction.CLICK, 'view_on_map_button', {
       from: 'event_details',
       event_id: event.id,
@@ -168,39 +131,30 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
       source
     });
     
-    // Fermer d'abord le dialogue pour éviter les problèmes de navigation
     onClose();
     
-    // Utiliser setTimeout pour s'assurer que le dialogue est fermé avant la navigation
     setTimeout(() => {
-      // Naviguer vers la carte avec un paramètre fromEvent pour indiquer que nous venons des détails d'un événement
-      console.log(`[EventDetails] Redirection vers /map avec highlightLocationId=${event.locationId}`);
-      
       navigate(`/map`, { 
         state: { 
           highlightLocationId: event.locationId,
           fromEvent: true,
-          timestamp: new Date().getTime() // Ajouter un timestamp pour garantir que l'état est considéré comme nouveau
+          timestamp: new Date().getTime()
         } 
       });
     }, 100);
   };
   
-  // Fonction pour contribuer à la galerie communautaire avec le contexte de l'événement
+  // Fonction pour contribuer à la galerie communautaire
   const handleContribute = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
     if (!event) return;
     
-    // Enregistrer le contexte de contribution
     setEventContributionContext(event);
-    
-    // Naviguer vers la galerie communautaire, onglet contribution
     navigate("/community?tab=contribute");
     onClose();
     
-    // Tracking: contribution depuis un événement
     analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, {
       from: 'event_details',
       event_id: event.id,
@@ -218,23 +172,15 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     const isCurrentlySaved = savedEvents.some(saved => saved.id === event.id);
     
     if (isCurrentlySaved) {
-      // Retirer des favoris
       removeSavedEvent(event.id);
       setSavedEvents(getSavedEvents());
-
-      
-      // Analytics: unsave
       analytics.trackContentInteraction(EventAction.UNSAVE, 'event', event.id, {
         event_title: event.title,
         source
       });
     } else {
-      // Ajouter aux favoris
       saveEvent(event);
       setSavedEvents(getSavedEvents());
-      
-      
-      // Analytics: save
       analytics.trackContentInteraction(EventAction.SAVE, 'event', event.id, {
         event_title: event.title,
         source
@@ -250,47 +196,31 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     if (!event) return;
     
     try {
-      // Tracking: CTA ajouter au calendrier
-      analytics.trackProgramCTA('add_to_calendar', event.id);
+      await addToCalendar(event);
+      toast({
+        title: "Événement ajouté",
+        description: "L'événement a été ajouté à votre calendrier.",
+      });
       
-      // Ajouter l'événement au calendrier
-      const result = await addToCalendar(event);
+      analytics.trackProgramInteraction(EventAction.CLICK, {
+        action: 'calendar_add',
+        event_id: event.id,
+        event_title: event.title,
+        source
+      });
+    } catch (error: any) {
+      let errorMessage = "Impossible d'ajouter l'événement au calendrier.";
       
-      if (result.success) {
-        toast({
-          title: "Événement ajouté au calendrier",
-          description: `${event.title} a été ajouté à votre calendrier.`,
-        });
-      } else {
-        // Gérer les différents types d'erreurs
-        if (result.errorType === CalendarErrorType.NOT_SUPPORTED) {
-          toast({
-            title: "Fonctionnalité non supportée",
-            description: "Votre appareil ne supporte pas l'ajout au calendrier.",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "Erreur",
-            description: result.errorMessage || "Une erreur est survenue lors de l'ajout au calendrier.",
-            variant: "destructive"
-          });
-          analytics.trackError(EventAction.API_ERROR, 'add_to_calendar', {
-            event_id: event.id,
-            error_message: result.errorMessage
-          });
-        }
+      if (error.type === CalendarErrorType.NOT_SUPPORTED) {
+        errorMessage = "Votre navigateur ne supporte pas cette fonctionnalité.";
+      } else if (error.cancelled) {
+        return; // L'utilisateur a annulé, pas d'erreur à afficher
       }
-    } catch (error) {
-      console.error("Erreur lors de l'ajout au calendrier:", error);
+      
       toast({
         title: "Erreur",
-        description: "Une erreur inattendue est survenue.",
+        description: errorMessage,
         variant: "destructive"
-      });
-      analytics.trackError(EventAction.API_ERROR, 'add_to_calendar_exception', {
-        event_id: event?.id,
-        error_message: (error as Error)?.message
       });
     }
   };
@@ -298,425 +228,160 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
   // Si pas d'événement ou si le dialogue n'est pas ouvert, ne rien afficher
   if (!event || !isOpen) return null;
   
-  // Déterminer si l'événement est sauvegardé
-  const isEventSaved = isSaved;
-  
   // Récupérer l'artiste correspondant à l'événement
   const artist = artists.find(artist => artist.id === event.artistId);
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
-        className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:max-w-md max-h-[85vh] overflow-y-auto pt-14"
+        className="w-[95vw] sm:w-[90vw] md:w-[80vw] lg:max-w-lg max-h-[90vh] overflow-y-auto p-0 bg-white/85 backdrop-blur-sm border-2 border-amber-300 shadow-2xl rounded-2xl"
+        style={{
+          backgroundImage: `url('${getBackgroundFallback('Historical Parchment Background Portrait.jpg')}')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
         aria-describedby="event-details-description"
       >
         <div id="event-details-description" className="sr-only">
           Détails de l'événement sélectionné
         </div>
-        {/* Barre d'icônes en haut */}
-        <div className="absolute top-0 left-0 right-0 flex justify-end items-center p-3 bg-white z-10">
-          <div className="flex space-x-4">
-            {/* Bouton de like */}
-            <LikeButton 
-              entryId={`event-${event.id}`}
-              variant="icon"
-              showCount={true}
-            />
-            
-            <button
-              className={`flex items-center justify-center h-10 w-10 rounded-full border ${isEventSaved ? "border-[#ff7a45] text-[#ff7a45]" : "border-gray-300 text-gray-500"} transition-all duration-200 hover:shadow-sm`}
-              onClick={toggleSaveEvent}
-              title={isEventSaved ? "Retirer des favoris" : "Ajouter aux favoris"}
-              type="button"
-            >
-              {isEventSaved ? (
-                <BookmarkCheck className="h-5 w-5" />
-              ) : (
-                <Bookmark className="h-5 w-5" />
-              )}
-            </button>
-            
-            <ShareButton
-              title={`${event.title} - Île Feydeau`}
-              text={`Découvrez ${event.title} par ${event.artistName} sur l'Île Feydeau à Nantes!`}
-              url={window.location.href}
-            />
-            
-            <button
-              className="flex items-center justify-center h-10 w-10 rounded-full border border-gray-300 text-gray-500 transition-all duration-200 hover:shadow-sm"
-              onClick={onClose}
-              title="Fermer"
-              type="button"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
         
-        <div className={`h-1 ${event.type === "exposition" ? "bg-[#4a5d94]" : "bg-[#ff7a45]"}`} />
+        {/* Overlay pour améliorer la lisibilité */}
+        <div className="absolute inset-0 bg-white/85 rounded-2xl" />
         
-        <DialogHeader className="sr-only">
-          <DialogTitle>{event.title}</DialogTitle>
-        </DialogHeader>
-        
-        <div className="py-2 px-1 overflow-x-hidden">
-          {event.type === "exposition" ? (
-            <>
-              <div className="bg-[#e0ebff] p-3 rounded-lg mb-2">
-                <h3 className="text-lg font-medium text-[#1a2138] break-words">
-                  {/* Pas de troncature pour le titre principal, mais utilisation de break-words */}
-                  {event.title}
-                </h3>
-              </div>
-              <p className="text-sm text-[#4a5d94] mb-2">
-                <TruncatedText 
-                  text={event.artistName} 
-                  maxLength={40} 
-                  className="text-sm text-[#4a5d94]"
-                />
-              </p>
-            </>
-          ) : (
-            <div className="bg-[#f9f2ee] p-3 rounded-lg mb-3">
-              <h3 className="text-lg font-medium text-[#1a2138] break-words">
-                {/* Pas de troncature pour le titre principal, mais utilisation de break-words */}
+        <div className="relative z-10 p-6">
+          {/* Header avec titre et boutons - Style LocationDetailsModern */}
+          <div className="flex justify-between items-start mb-6 pb-4 border-b-2 border-amber-200">
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-[#1a2138] font-serif mb-2">
                 {event.title}
-              </h3>
+              </h2>
+              <p className="text-sm text-amber-700 font-medium">
+                {event.artistName} • {event.type === 'exposition' ? 'Exposition' : 'Concert'}
+              </p>
             </div>
-          )}
-          <div className="flex items-center mb-4">
-            <MapPin className="h-3 w-3 mr-1 text-[#8c9db5]" />
-            <p className="text-xs text-[#8c9db5]">
-              <TruncatedText 
-                text={`${getLocationNameById(event.locationId)} • ${event.time}`} 
-                maxLength={40} 
-                className="text-xs text-[#8c9db5]"
+            
+            <div className="flex items-center gap-2 ml-4">
+              {/* Bouton de like */}
+              <LikeButton 
+                entryId={`event-${event.id}`}
+                variant="icon"
+                showCount={true}
+                className="bg-white/80 backdrop-blur-sm hover:bg-white/90 rounded-full shadow-md"
               />
-            </p>
+              
+              {/* Bouton save */}
+              <ActionButton
+                variant="save"
+                active={isSaved}
+                icon={isSaved ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
+                onClick={toggleSaveEvent}
+                tooltip={isSaved ? "Retirer des favoris" : "Ajouter aux favoris"}
+                className="bg-white/80 backdrop-blur-sm hover:bg-white/90 rounded-full shadow-md"
+              />
+              
+              {/* Bouton share */}
+              <ShareButton
+                title={`${event.title} - Île Feydeau`}
+                text={`Découvrez ${event.title} par ${event.artistName} sur l'Île Feydeau à Nantes!`}
+                url={window.location.href}
+              />
+              
+              {/* Bouton fermer */}
+              <ActionButton
+                variant="ghost"
+                icon={<X className="h-5 w-5" />}
+                onClick={onClose}
+                tooltip="Fermer"
+                className="bg-white/80 backdrop-blur-sm hover:bg-white/90 rounded-full shadow-md"
+              />
+            </div>
           </div>
           
-          <div className="bg-[#f0f5ff] p-3 rounded-lg mb-4">
-            {/* Afficher la présentation de l'artiste si disponible */}
-            {artist?.presentation && (
-              <ArtistDescription text={artist.presentation} />
-            )}
+          {/* Informations pratiques */}
+          <div className="mb-6 p-4 bg-amber-50/70 rounded-xl border border-amber-200">
+            <div className="space-y-2">
+              <div className="flex items-center text-sm text-gray-700">
+                <Calendar className="h-4 w-4 mr-2 text-amber-600" />
+                <span>{event.days.map(day => day === "samedi" ? "Samedi" : "Dimanche").join("/")} • {event.time}</span>
+              </div>
+              <div className="flex items-center text-sm text-gray-700">
+                <MapPin className="h-4 w-4 mr-2 text-amber-600" />
+                <span>{getLocationNameById(event.locationId) || event.locationName}</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Boutons d'action principaux */}
+          <div className="flex gap-3 mb-6">
+            <TreasureButton 
+              variant="secondary"
+              size="md"
+              onClick={navigateToMap}
+              className="flex-1"
+            >
+              Voir sur la carte
+            </TreasureButton>
             
-            {/* Afficher les informations complètes de l'artiste pour les concerts */}
-            {event.type === "concert" && artist && (
-              <div className="space-y-4 mt-4">
-                {/* Email de contact */}
+            <TreasureButton 
+              variant="secondary"
+              size="md"
+              onClick={handleAddToCalendar}
+              className="flex-1"
+            >
+              Ajouter au calendrier
+            </TreasureButton>
+          </div>
+          
+          {/* Description de l'artiste */}
+          {artist?.presentation && (
+            <div className="mb-6 p-4 bg-amber-50/70 rounded-xl border border-amber-200">
+              <h3 className="font-semibold text-[#1a2138] mb-3 font-serif text-lg">
+                À propos de l'artiste
+              </h3>
+              <ArtistDescription text={artist.presentation} />
+            </div>
+          )}
+
+          {/* Informations de contact pour les concerts */}
+          {event.type === "concert" && artist && (artist.email || artist.website) && (
+            <div className="mb-6 p-4 bg-amber-50/70 rounded-xl border border-amber-200">
+              <h3 className="font-semibold text-[#1a2138] mb-3 font-serif text-lg">
+                Contact
+              </h3>
+              <div className="space-y-2">
                 {artist.email && (
-                  <div>
-                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Contact email:</h4>
-                    <a 
-                      href={`mailto:${artist.email}`} 
-                      className="text-sm text-blue-600 hover:underline"
-                    >
+                  <div className="flex items-center text-sm text-gray-700">
+                    <span className="font-medium mr-2">Email:</span>
+                    <a href={`mailto:${artist.email}`} className="text-blue-600 hover:underline">
                       {artist.email}
                     </a>
                   </div>
                 )}
-
-                {/* Site web */}
                 {artist.website && (
-                  <div>
-                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Site web:</h4>
+                  <div className="flex items-center text-sm text-gray-700">
+                    <span className="font-medium mr-2">Site web:</span>
                     <a 
                       href={artist.website} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="text-sm text-blue-600 hover:underline"
+                      className="text-blue-600 hover:underline"
                     >
                       {artist.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
                     </a>
                   </div>
                 )}
-
-                {/* Téléphone */}
-                {artist.phone && (
-                  <div>
-                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Téléphone:</h4>
-                    <a 
-                      href={`tel:${artist.phone}`} 
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      {artist.phone}
-                    </a>
-                  </div>
-                )}
-
-                {/* Facebook */}
-                {artist.facebook && (
-                  <div>
-                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">Facebook:</h4>
-                    <span className="text-sm text-gray-700">{artist.facebook}</span>
-                  </div>
-                )}
-
-                {/* YouTube */}
-                {artist.youtube && (
-                  <div>
-                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">YouTube:</h4>
-                    <a 
-                      href={artist.youtube} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      {artist.youtube.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                    </a>
-                  </div>
-                )}
-
-                {/* TikTok */}
-                {artist.tiktok && (
-                  <div>
-                    <h4 className="text-xs font-medium mb-1 text-[#4a5d94]">TikTok:</h4>
-                    <a 
-                      href={artist.tiktok} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      {artist.tiktok.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                    </a>
-                  </div>
-                )}
-
-                {/* Directeur/Chef */}
-                {artist.director && (
-                  <div className="flex items-center mb-2">
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mr-2">Direction:</span>
-                    <span className="text-sm text-gray-700">{artist.director}</span>
-                  </div>
-                )}
-
-                {/* Membres */}
-                {artist.members && (
-                  <div className="flex items-center mb-2">
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mr-2">Membres:</span>
-                    <span className="text-sm text-gray-700">{artist.members}</span>
-                  </div>
-                )}
               </div>
-            )}
-
-            {/* Afficher les photos pour les concerts si disponibles */}
-            {event.type === "concert" && artist?.photos && artist.photos.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
-                  <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
-                  Photos
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                  {artist.photos.map((photo, index) => (
-                    <div key={index} className="relative pb-[75%] overflow-hidden rounded-lg">
-                      <img 
-                        src={getImagePath(photo)} 
-                        alt={`${event.artistName} - photo ${index + 1}`}
-                        className="absolute top-0 left-0 object-cover w-full h-full"
-                        loading="lazy"
-                        onError={(e) => {
-                          console.error(`Erreur de chargement de l'image: ${photo}`);
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Affichage des vidéos si présentes */}
-            {event.type === "concert" && artist?.videos && artist.videos.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
-                  <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
-                  Vidéos
-                </h4>
-                <div className="grid grid-cols-1 gap-4 w-full">
-                  {artist.videos.map((videoUrl, index) => {
-                    // Déterminer le type de vidéo (YouTube, Vimeo, etc.)
-                    let embedUrl = videoUrl;
-                    
-                    // Traitement des URLs YouTube
-                    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-                      // Extraire l'ID de la vidéo YouTube
-                      let videoId = '';
-                      
-                      if (videoUrl.includes('youtube.com/watch?v=')) {
-                        videoId = videoUrl.split('v=')[1];
-                        // Gérer les paramètres supplémentaires
-                        const ampersandPosition = videoId.indexOf('&');
-                        if (ampersandPosition !== -1) {
-                          videoId = videoId.substring(0, ampersandPosition);
-                        }
-                      } else if (videoUrl.includes('youtu.be/')) {
-                        videoId = videoUrl.split('youtu.be/')[1];
-                      }
-                      
-                      if (videoId) {
-                        embedUrl = `https://www.youtube.com/embed/${videoId}`;
-                      }
-                    }
-                    // Traitement des URLs Vimeo (à ajouter si nécessaire)
-                    // else if (videoUrl.includes('vimeo.com')) { ... }
-                    
-                    return (
-                      <div key={index} className="relative w-full pb-[56.25%] overflow-hidden rounded-lg">
-                        <iframe
-                          src={embedUrl}
-                          title={`${event.artistName} - vidéo ${index + 1}`}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          className="absolute top-0 left-0 w-full h-full"
-                          loading="lazy"
-                        ></iframe>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            
-            {/* Nous ne montrons plus l'adresse Instagram car le widget l'affiche déjà */}
-            
-            {/* Instagram Embed - Show actual Instagram feed */}
-            {artist && artist.instagram && artist.instagram.includes('instagram') && (() => {
-              // Extract handle robustly (handles trailing slashes and query params)
-              const extractInstagramHandle = (url: string): string => {
-                try {
-                  const u = new URL(url);
-                  const cleanedPath = u.pathname.replace(/\/$/, "");
-                  const parts = cleanedPath.split('/').filter(Boolean);
-                  return parts.pop() || "";
-                } catch {
-                  const cleaned = url.split('?')[0].replace(/\/$/, "");
-                  const parts = cleaned.split('/').filter(Boolean);
-                  return parts.pop() || "";
-                }
-              };
-              const handle = extractInstagramHandle(artist.instagram);
-              if (!handle) return null;
-              return (
-              <div className="border-t border-[#d8e3ff] pt-4 mt-4">
-                {/* <h4 className="text-sm font-medium mb-3 text-[#4a5d94] flex items-center">
-                  <span className="w-2 h-2 rounded-full bg-[#4a5d94] mr-2"></span>
-                  Photos Instagram de l'artiste
-                </h4> */}
-                <div 
-                  className="instagram-embed-container w-full overflow-hidden rounded-lg relative" 
-                  style={{
-                    paddingBottom: '100%',
-                    height: 0
-                  }}
-                >
-                  <iframe
-                    title={`Instagram feed de ${event.artistName}`}
-                    src={`https://www.instagram.com/${handle}/embed?hidecaption=1&header=0`}
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    scrolling="no"
-                    allowtransparency="true"
-                    loading="lazy"
-                    style={{
-                      position: 'absolute',
-                      top: '-43px',
-                      left: 0,
-                      width: '100%',
-                      height: 'calc(100% + 43px)'
-                    }}
-                  ></iframe>
-                </div>
-              </div>
-              );
-            })()}
-            
-            <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-6 border-t border-[#d8e3ff] pt-4">
-              {source === "program" ? (
-                <Button 
-                  className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1 text-xs sm:text-sm"
-                  onClick={navigateToMap}
-                >
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Voir sur la carte
-                </Button>
-              ) : (
-                <Button 
-                  className="bg-[#ff7a45] hover:bg-[#ff9d6e] flex-1 text-xs sm:text-sm"
-                  onClick={() => navigate("/program")}
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Voir le programme
-                </Button>
-              )}
-              
-              <Button 
-                variant="outline"
-                className="border-[#4a5d94] text-[#4a5d94] flex-1 text-xs sm:text-sm"
-                onClick={() => {
-                  if (event) {
-                    // Tracking: clic histoire du lieu
-                    trackInteraction(EventAction.CLICK, 'history_button', {
-                      from: 'event_details',
-                      event_id: event.id,
-                      location_id: event.locationId
-                    });
-                    // Tracking: vue de l'histoire du bâtiment (déclenchée depuis détails)
-                    analytics.trackBuildingHistoryView(event.locationId, 'from_event_details');
-                  }
-                  navigate('/location-history', { 
-                    state: { 
-                      selectedLocationId: event.locationId,
-                      fromEvent: true
-                    } 
-                  });
-                  onClose();
-                }}
-              >
-                <Info className="h-4 w-4 mr-2" />
-                Histoire du lieu
-              </Button>
             </div>
-            
-            {/* Bouton pour ajouter au calendrier */}
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-3">
-              <Button 
-                variant="outline"
-                className="border-[#4a5d94] text-[#4a5d94] flex-1 text-xs sm:text-sm min-w-0"
-                onClick={handleAddToCalendar}
-                disabled={!calendarSupported}
-              >
-                {calendarSupported ? (
-                  <>
-                    <Calendar className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="truncate">Ajouter au calendrier</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="truncate">Partager l'événement</span>
-                  </>
-                )}
-              </Button>
-              
-              <Button 
-                variant="outline"
-                className="border-[#ff7a45] text-[#ff7a45] flex-1 text-xs sm:text-sm min-w-0"
-                onClick={handleContribute}
-              >
-                <Camera className="h-4 w-4 mr-2 shrink-0" />
-                <span className="truncate">Partager un souvenir</span>
-              </Button>
-            </div>
-            
+          )}
+
+          {/* Actions du bas - Style LocationDetailsModern */}
+          <div className="space-y-3">
             <Button 
-              className="w-full mt-3 border-[#8c9db5] text-[#8c9db5] text-xs sm:text-sm"
-              variant="outline"
-              onClick={onClose}
+              onClick={handleContribute}
+              className="w-full bg-[#1a2138] hover:bg-[#2a3148] text-white rounded-full font-medium"
             >
-              Retour
+              Contribuer à la galerie
             </Button>
           </div>
         </div>

@@ -1,19 +1,17 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { analytics, EventAction, trackInteraction } from "@/services/firebaseAnalytics";
+import { BackButton } from "@/components/ui/BackButton";
+import { analytics, EventAction } from "@/services/firebaseAnalytics";
 import "@/styles/decorations.css"; // Import des décorations
-import { useNavigate } from "react-router-dom";
-import { events, getEventsByDay, type Event } from "@/data/events";
+import { getEventsByDay, type Event } from "@/data/events";
 import { EventFilter } from "@/components/EventFilter";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { EventDetails } from "@/components/EventDetails";
+import { EventDetailsNew as EventDetails } from "@/components/EventDetailsModern";
 import { EventCardModern } from "@/components/EventCardModern";
 import { getSavedEvents, saveEvent, removeSavedEvent } from "../services/savedEvents";
 
 const Program = () => {
-  const navigate = useNavigate();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [currentFilter, setCurrentFilter] = useState<string>("exposition");
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
@@ -70,58 +68,56 @@ const Program = () => {
       <div 
         className="fixed bottom-14 right-[-120px] w-[360px] h-[360px] opacity-90 pointer-events-none z-20"
         style={{
-          backgroundImage: 'url(/images/background/Pinceaux.png)',
+          backgroundImage: 'url(/images/background/small/Pinceau.png)',
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
           transform: 'rotate(20deg)'
         }}
       />
       
-      <div className="container mx-auto px-4 py-6 max-w-4xl relative z-10">
-        <header className="mb-6 flex items-center justify-between">
-          <Button 
-            variant="default" 
-            size="sm" 
-            onClick={() => navigate("/")}
-            className="bg-[#1a2138] hover:bg-[#2a3148] text-white rounded-full px-6 py-2 font-medium"
-          >
-            Retour
-          </Button>
-          <h1 className="text-2xl font-bold text-[#1a2138]">Programme</h1>
-          <div className="flex items-center space-x-2">
-            <div className="relative">
+      {/* Tabs englobant header + contenu pour que TabsList réside dans le header */}
+      <Tabs defaultValue="dimanche" className="w-full">
+        {/* Header fixe en haut */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-textured-cream border-b border-gray-200/50">
+          <div className="container mx-auto px-4 py-4 max-w-4xl">
+            <header className="mb-4 flex items-center justify-between">
+              <BackButton to="/" />
+              <h1 className="text-2xl font-bold text-[#1a2138]">Programme</h1>
               <ShareButton 
                 title="Programme - Collectif Île Feydeau"
                 text="Découvrez le programme des événements du Collectif Île Feydeau"
                 url={typeof window !== 'undefined' ? window.location.href : ''}
               />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+            </header>
+            
+            <div className="mb-3 fade-in">
+              <EventFilter onFilterChange={handleFilterChange} currentFilter={currentFilter} />
+            </div>
+            
+            {/* Onglets jours directement sous les filtres, toujours visibles */}
+            <div className="mb-1">
+              <div className="flex justify-center">
+                <TabsList className="bg-transparent p-0 h-auto gap-2">
+                  <TabsTrigger 
+                    value="samedi"
+                    className="bg-white/80 text-gray-700 data-[state=active]:bg-[#ff7a45] data-[state=active]:text-white data-[state=active]:border-[#ff7a45] rounded-full px-6 py-2 border border-gray-300 font-medium text-sm min-w-[100px] shadow-sm hover:bg-white transition-all duration-200"
+                  >
+                    Samedi
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="dimanche"
+                    className="bg-white/80 text-gray-700 data-[state=active]:bg-[#ff7a45] data-[state=active]:text-white data-[state=active]:border-[#ff7a45] rounded-full px-6 py-2 border border-gray-300 font-medium text-sm min-w-[100px] shadow-sm hover:bg-white transition-all duration-200"
+                  >
+                    Dimanche
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </div>
           </div>
-        </header>
-        
-        <div className="mb-4 fade-in">
-          <EventFilter onFilterChange={handleFilterChange} currentFilter={currentFilter} />
         </div>
         
-        <Tabs defaultValue="dimanche" className="w-full">
-          <div className="flex justify-center gap-2 mb-4">
-            <TabsList className="bg-transparent p-0 h-auto gap-2">
-              <TabsTrigger 
-                value="samedi"
-                className="bg-transparent text-gray-700 data-[state=active]:bg-[#ff7a45] data-[state=active]:text-white data-[state=active]:border-[#ff7a45] rounded-full px-4 py-2 border border-gray-300"
-              >
-                Samedi
-              </TabsTrigger>
-              <TabsTrigger 
-                value="dimanche"
-                className="bg-transparent text-gray-700 data-[state=active]:bg-[#ff7a45] data-[state=active]:text-white data-[state=active]:border-[#ff7a45] rounded-full px-4 py-2 border border-gray-300"
-              >
-                Dimanche
-              </TabsTrigger>
-            </TabsList>
-          </div>
-          
+        {/* Contenu avec padding-top pour compenser le header fixe (hauteur titre + filtres + onglets) */}
+        <div className="container mx-auto px-4 max-w-4xl relative z-10" style={{ paddingTop: '200px' }}>
           <TabsContent value="samedi" className="space-y-4">
             {sortByStartTime(filterEvents(getEventsByDay("samedi"), currentFilter)).map((event, index) => (
               <div key={`samedi-${event.id}`}>
@@ -149,15 +145,17 @@ const Program = () => {
               </div>
             ))}
           </TabsContent>
-        </Tabs>
-
-        <EventDetails 
-          event={selectedEvent}
-          isOpen={!!selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          source="program"
-        />
-      </div>
+        </div>
+        
+        {/* Fin Tabs englobant */}
+      </Tabs>
+      
+      <EventDetails 
+        event={selectedEvent}
+        isOpen={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        source="program"
+      />
       
       <BottomNavigation />
     </div>

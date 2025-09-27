@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ui/ActionButton";
+import { BackButton } from "@/components/ui/BackButton";
 import { ArrowLeft, MapPin, Info } from "lucide-react";
+import X from "lucide-react/dist/esm/icons/x";
 import Camera from "lucide-react/dist/esm/icons/camera";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Volume2 from "lucide-react/dist/esm/icons/volume-2";
@@ -195,46 +197,56 @@ export function LocationHistory() {
   }, [selectedLocation]);
 
   return (
-    <div className="container max-w-md mx-auto px-4 pb-20 pt-4">
-      <div className="flex items-center mb-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="mr-2" 
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-xl font-bold">Histoire des lieux</h1>
-      </div>
+    <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
+      backgroundImage: `url('/images/background/small/Historical Parchment Background Portrait.jpg')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      {/* Overlay pour améliorer la lisibilité */}
+      <div className="absolute inset-0 bg-white/10" />
+      
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <header className="mb-4 flex items-center justify-between">
+          <BackButton onClick={() => navigate(-1)} />
+          <h1 className="text-xl font-bold text-[#1a2138] font-serif">Histoire des lieux</h1>
+          <button
+            aria-label="Fermer"
+            title="Fermer"
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </header>
 
-      {/* Liste déroulante des lieux */}
-      <div className="mb-6">
-        <h2 className="text-lg font-medium mb-2 text-[#4a5d94]">Sélectionnez un lieu</h2>
-        <Select
-          value={selectedLocation}
-          onValueChange={(value) => setSelectedLocation(value)}
-        >
-          <SelectTrigger className="w-full border-[#4a5d94] text-[#4a5d94]">
-            <SelectValue placeholder="Choisir un lieu" />
-          </SelectTrigger>
-          <SelectContent>
-            {locationsWithHistory.map((location) => (
-              <SelectItem key={location.id} value={location.id}>
-                {location.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        {/* Liste déroulante des lieux */}
+        <div className="mb-6">
+          <h2 className="text-lg font-medium mb-3 text-[#1a2138]">Sélectionnez un lieu</h2>
+          <Select
+            value={selectedLocation}
+            onValueChange={(value) => setSelectedLocation(value)}
+          >
+            <SelectTrigger className="w-full bg-amber-50/95 backdrop-blur-sm border-2 border-amber-600/30 text-[#1a2138] shadow-lg rounded-xl">
+              <SelectValue placeholder="Choisir un lieu" />
+            </SelectTrigger>
+            <SelectContent className="bg-amber-50/95 backdrop-blur-sm border-2 border-amber-600/30 shadow-lg">
+              {locationsWithHistory.map((location) => (
+                <SelectItem key={location.id} value={location.id} className="hover:bg-amber-50">
+                  {location.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
       {/* Détails du lieu sélectionné */}
       {selectedLocationData ? (
-        <Card className="shadow-md border-[#d8e3ff] mb-6">
+        <Card className="bg-amber-50/95 backdrop-blur-sm border-2 border-amber-600/30 shadow-lg rounded-xl mb-6">
           <CardHeader className="pb-6">
             <div className="flex flex-col mb-2">
               <div className="flex justify-between items-center w-full mb-4">
-                <CardTitle className="text-xl font-bold text-[#4a5d94] mr-2">
+                <CardTitle className="text-xl font-bold text-[#1a2138] font-lora mr-2 leading-tight">
                   {selectedLocationData.name}
                 </CardTitle>
                 <div className="flex items-center space-x-2">
@@ -245,10 +257,10 @@ export function LocationHistory() {
                     showCount={true}
                   />
                   
-                  <Button 
+                  <ActionButton 
                     variant="outline" 
                     size="sm"
-                    className="border-[#4a5d94] text-[#4a5d94] hover:bg-[#4a5d94] hover:text-white whitespace-nowrap px-2 py-1 text-xs flex-shrink-0"
+                    className="bg-white/70 border-amber-300 text-[#4a5d94] hover:bg-amber-50 hover:border-amber-400 whitespace-nowrap px-3 py-1 text-xs flex-shrink-0 rounded-full"
                     onClick={() => {
                       // Rediriger vers la carte avec le point mis en évidence
                       navigate('/map', { 
@@ -263,12 +275,11 @@ export function LocationHistory() {
                       });
                     }}
                   >
-                    <MapPin className="h-3 w-3 mr-1" />
                     Voir sur la carte
-                  </Button>
+                  </ActionButton>
                 </div>
               </div>
-              <CardDescription className="text-sm text-slate-600 mt-2 mb-2">
+              <CardDescription className="text-sm text-gray-600 leading-relaxed">
                 {selectedLocationData.description}
               </CardDescription>
             </div>
@@ -278,7 +289,7 @@ export function LocationHistory() {
               <div className="mb-4">
                 {/* Utiliser une div avec background-image comme solution de secours */}
                 <div 
-                  className="w-full h-64 rounded-md shadow-md border border-[#d8e3ff] relative"
+                  className="w-full h-64 rounded-xl shadow-lg border-2 border-amber-200 relative"
                   style={{
                     backgroundImage: `url(${getImagePath(selectedLocationData.image)})`,
                     backgroundPosition: 'center',
@@ -318,13 +329,13 @@ export function LocationHistory() {
             
             {/* Lecteur audio si disponible */}
             {selectedLocationData.audio && (
-              <div className="mb-4 p-3 bg-[#f5f8ff] rounded-md border border-[#d8e3ff]">
+              <div className="mb-4 p-4 bg-white/60 backdrop-blur-sm rounded-xl border-2 border-amber-200 shadow-md">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center">
                     <Volume2 className="h-4 w-4 text-[#4a5d94] mr-2" />
                     <span className="text-sm font-medium text-[#4a5d94]">Écouter l'histoire</span>
                   </div>
-                  <Button 
+                  <ActionButton 
                     variant="ghost" 
                     size="sm" 
                     className="h-8 w-8 p-0 rounded-full" 
@@ -338,7 +349,7 @@ export function LocationHistory() {
                     ) : (
                       <Play className="h-4 w-4 text-[#4a5d94]" />
                     )}
-                  </Button>
+                  </ActionButton>
                 </div>
                 
                 <div className="space-y-1">
@@ -433,7 +444,7 @@ export function LocationHistory() {
       {/* Boutons fixes */}
       <div className="fixed bottom-20 left-0 right-0 mx-auto max-w-md px-4 z-10 space-y-2">
         {selectedLocationData && (
-          <Button 
+          <ActionButton 
             className="w-full border-[#ff7a45] text-[#ff7a45] hover:bg-[#fff5f0] text-sm min-h-[44px]"
             variant="outline"
             onClick={() => {
@@ -451,13 +462,13 @@ export function LocationHistory() {
               }
             }}
           >
-            <Camera className="h-4 w-4 mr-2" />
             Partager un souvenir de ce lieu
-          </Button>
+          </ActionButton>
         )}
         
-        <Button 
-          className="w-full bg-[#ff7a45] hover:bg-[#ff9d6e] text-white text-sm min-h-[44px]"
+        <ActionButton 
+          variant="primary"
+          className="w-full text-sm min-h-[44px]"
           onClick={() => {
             // Rediriger vers la carte avec le lieu sélectionné mis en évidence
             navigate('/map', {
@@ -469,12 +480,12 @@ export function LocationHistory() {
             });
           }}
         >
-          <MapPin className="h-4 w-4 mr-2" />
           Voir sur la carte
-        </Button>
+        </ActionButton>
       </div>
 
-      <BottomNavigation />
+        <BottomNavigation />
+      </div>
     </div>
   );
 };
