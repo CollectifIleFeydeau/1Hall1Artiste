@@ -8,7 +8,7 @@ import { CommunityEntry } from "../../types/communityTypes";
 import { cn } from "../../lib/utils";
 import { LazyImage } from "../ui/LazyImage";
 import { LikeButton } from "./LikeButton";
-import { IMAGE_PATHS } from '../constants/imagePaths';
+import { IMAGE_PATHS } from '../../constants/imagePaths';
 
 // Interface pour les photos historiques
 interface HistoricalPhoto {
@@ -149,5 +149,6 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
     </div>
   );
 };
+
 
 
