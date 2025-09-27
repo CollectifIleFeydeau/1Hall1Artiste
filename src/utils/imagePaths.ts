@@ -27,14 +27,27 @@ export function getImagePath(path: string): string {
   // S'assurer que le chemin commence par un slash
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   
+  // Utiliser la fonction getBasePath pour obtenir le préfixe dynamique
+  const basePath = getBasePath();
+  
+  // PROTECTION CONTRE LA DOUBLE PRÉFIXATION
+  // Si le chemin contient déjà le basePath, ne pas l'ajouter à nouveau
+  if (basePath && normalizedPath.startsWith(basePath)) {
+    console.log('🚨 [getImagePath] Double prefixing detected! Using path as-is:', {
+      input: path,
+      normalizedPath,
+      basePath,
+      result: normalizedPath
+    });
+    return normalizedPath;
+  }
+  
   // Encoder les espaces et caractères spéciaux pour les URL
   // Mais préserver les slashes et autres caractères d'URL valides
   const encodedPath = normalizedPath.split('/').map(segment => 
     segment ? encodeURIComponent(segment) : ''
   ).join('/');
   
-  // Utiliser la fonction getBasePath pour obtenir le préfixe dynamique
-  const basePath = getBasePath();
   const fullPath = `${basePath}${encodedPath}`;
   
   // Log détaillé pour debug

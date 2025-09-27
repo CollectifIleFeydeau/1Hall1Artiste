@@ -196,7 +196,7 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
                     <div 
                       className="absolute inset-0 opacity-60 z-0"
                       style={{
-                        backgroundImage: `url('${getImagePath(IMAGE_PATHS.BACKGROUNDS.PARCHMENT)}')`,
+                        backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
                         backgroundSize: 'cover',
                         backgroundPosition: index % 2 === 0 ? 'top left' : 'top right',
                         transform: index % 2 === 1 ? 'scaleX(-1)' : 'none',

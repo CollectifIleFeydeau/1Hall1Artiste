@@ -406,7 +406,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
   if (domError) {
     return (
       <div className="min-h-screen pb-20 overflow-x-hidden flex items-center justify-center" style={{
-        backgroundImage: `url('${getImagePath(IMAGE_PATHS.BACKGROUNDS.PARCHMENT)}')`,
+        backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
@@ -421,7 +421,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
 
   return (
     <div className="min-h-screen pb-20 overflow-x-hidden relative" style={{
-      backgroundImage: `url('${getImagePath(IMAGE_PATHS.BACKGROUNDS.PARCHMENT)}')`,
+      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'

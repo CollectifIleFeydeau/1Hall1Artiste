@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "start": "powershell -ExecutionPolicy Bypass -File ./start-dev.ps1",
-    "build": "vite build && node -e \"const fs=require('fs'); const path=require('path'); if(fs.existsSync('public/images/background')){fs.cpSync('public/images/background', 'dist/images/background', {recursive:true}); console.log('✅ Background images copied');}\"",
+    "build": "vite build && node -e \"const fs=require('fs'); const path=require('path'); console.log('📁 Checking source:', fs.existsSync('public/images/background')); if(fs.existsSync('public/images/background')){fs.mkdirSync('dist/images', {recursive:true}); fs.cpSync('public/images/background', 'dist/images/background', {recursive:true}); console.log('✅ Background images copied'); console.log('📁 Files copied:', fs.readdirSync('dist/images/background/small'));}else{console.log('❌ Source directory not found');}\"",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
