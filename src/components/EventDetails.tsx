@@ -1,6 +1,5 @@
 import { getImagePath } from '@/utils/imagePaths';
 import { IMAGE_PATHS } from '../constants/imagePaths';
-import { IMAGE_PATHS } from '../constants/paths';
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { TreasureButton } from "@/components/ui/TreasureButton";
@@ -392,6 +391,7 @@ export const EventDetails = ({ event, isOpen, onClose, source }: EventDetailsPro
     </Dialog>
   );
 };
+
 
 
 

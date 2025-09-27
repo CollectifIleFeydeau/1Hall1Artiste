@@ -1,6 +1,5 @@
 import { getImagePath } from '@/utils/imagePaths';
 import { IMAGE_PATHS } from '../constants/imagePaths';
-import { IMAGE_PATHS } from '../constants/paths';
 import React from 'react';
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Card } from "@/components/ui/card";
@@ -324,6 +323,7 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
 };
 
 export default LocationDetailsModern;
+
 
 
 

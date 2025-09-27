@@ -1,6 +1,5 @@
 import { getImagePath } from '@/utils/imagePaths';
 import { IMAGE_PATHS } from '../constants/imagePaths';
-import { IMAGE_PATHS } from '../constants/paths';
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Event } from "@/data/events";
@@ -128,6 +127,7 @@ export const EventCardSimple: React.FC<EventCardSimpleProps> = ({
 };
 
 export default EventCardSimple;
+
 
 
 

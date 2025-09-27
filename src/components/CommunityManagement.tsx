@@ -1,3 +1,4 @@
+import { IMAGE_PATHS } from '../constants/imagePaths';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +16,6 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import XCircle from "lucide-react/dist/esm/icons/x-circle";
 import Heart from "lucide-react/dist/esm/icons/heart";
 import { LikesCounter } from "@/components/admin/LikesCounter";
-import { IMAGE_PATHS } from "@/constants/paths";
 
 // Créer un logger pour le composant
 const logger = createLogger('CommunityManagement');
@@ -324,4 +324,5 @@ export function CommunityManagement() {
     );
   }
 }
+
 
