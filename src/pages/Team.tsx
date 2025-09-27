@@ -1,5 +1,5 @@
-import { getImagePath } from '@/utils/imagePaths';
-import { IMAGE_PATHS } from '../constants/imagePaths';
+import { getImagePath } from "@/utils/imagePaths";
+import { IMAGE_PATHS } from "../constants/imagePaths";
 
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +13,7 @@ const Team = () => {
 
   return (
     <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
-      backgroundImage: `url('/images/background/small/Historical_Parchment_Background_Portrait.jpg')`,
+      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'

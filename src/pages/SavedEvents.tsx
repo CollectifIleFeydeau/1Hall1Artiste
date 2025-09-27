@@ -127,7 +127,7 @@ export default function SavedEvents() {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundImage: `url('${getBackgroundFallback('/images/background/small/Historical_Parchment_Background_Portrait.jpg')}')`,
+      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
       backgroundSize: 'cover',
       backgroundPosition: positions[intensity] || 'center',
       backgroundRepeat: 'no-repeat',
@@ -140,7 +140,7 @@ export default function SavedEvents() {
 
   return (
     <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
-      backgroundImage: `url('/images/background/small/Historical_Parchment_Background_Portrait.jpg')`,
+      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'
@@ -486,6 +486,7 @@ export default function SavedEvents() {
     </div>
   );
 }
+
 
 
 

@@ -1,5 +1,5 @@
-import { getImagePath } from '@/utils/imagePaths';
-import { IMAGE_PATHS } from '../constants/imagePaths';
+import { getImagePath } from "@/utils/imagePaths";
+import { IMAGE_PATHS } from "../constants/imagePaths";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/ui/BackButton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,7 +21,7 @@ const Donate = () => {
 
   return (
     <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
-      backgroundImage: `url('/images/background/small/Historical_Parchment_Background_Portrait.jpg')`,
+      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'
@@ -92,6 +92,7 @@ const Donate = () => {
 };
 
 export default Donate;
+
 
 
 

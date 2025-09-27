@@ -10,6 +10,7 @@ import Volume2 from "lucide-react/dist/esm/icons/volume-2";
 import Pause from "lucide-react/dist/esm/icons/pause";
 import Play from "lucide-react/dist/esm/icons/play";
 import { getImagePath } from "@/utils/imagePaths";
+import { IMAGE_PATHS } from "../constants/imagePaths";
 import { getAssetPath } from "@/utils/assetUtils";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -198,7 +199,7 @@ export function LocationHistory() {
 
   return (
     <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
-      backgroundImage: `url('/images/background/small/Historical_Parchment_Background_Portrait.jpg')`,
+      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'
@@ -496,6 +497,7 @@ export function LocationHistory() {
     </div>
   );
 };
+
 
 
 
