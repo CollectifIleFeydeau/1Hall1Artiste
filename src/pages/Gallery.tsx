@@ -40,7 +40,6 @@ import { PageHeader } from "../components/PageHeader";
 import { ContributionForm } from "../components/community/ContributionForm";
 import { GalleryGrid } from "../components/community/GalleryGrid";
 import { EntryDetail } from "../components/community/EntryDetail";
-import { PullToRefresh } from "../components/community/PullToRefresh";
 
 const Gallery: React.FC = () => {
   const { toast } = useToast();
@@ -335,7 +334,6 @@ const Gallery: React.FC = () => {
                 </div>
 
                 {/* Grille de la galerie */}
-                <PullToRefresh onRefresh={handleRefresh}>
                   <GalleryGrid 
                     entries={filteredEntries}
                     onEntryClick={(entry) => { 
@@ -345,7 +343,6 @@ const Gallery: React.FC = () => {
                       analytics.trackCommunityInteraction(EventAction.VIEW, { content_type: 'entry', entry_id: entry.id });
                     }}
                   />
-                </PullToRefresh>
               </>
             )}
           </div>
