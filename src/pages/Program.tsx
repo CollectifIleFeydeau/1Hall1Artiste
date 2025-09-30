@@ -75,11 +75,11 @@ const Program = () => {
       <div 
         className="fixed bottom-14 right-0 pointer-events-none z-20 transition-all duration-500"
         style={{
-          width: currentFilter === 'concert' ? '149px' : '669px',
-          height: currentFilter === 'concert' ? '418px' : '862px',
+          width: currentFilter === 'concert' ? '75px' : '201px',
+          height: currentFilter === 'concert' ? '210px' : '259px',
           backgroundImage: currentFilter === 'concert' 
-            ? `url('${getImagePath('/images/Petite Clef.png')}')`
-            : `url('${getImagePath('/images/background/Pinceaux.png')}')`,
+            ? `url('${getImagePath('/images/Petite Clef 50.png')}')`
+            : `url('${getImagePath('/images/Pinceaux.png')}')`,
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'bottom right'

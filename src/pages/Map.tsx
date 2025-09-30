@@ -430,9 +430,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
       <div 
         className="fixed bottom-14 right-0 pointer-events-none z-20"
         style={{
-          width: '254px',
-          height: '272px',
-          backgroundImage: `url('${getImagePath('/images/Rose Transparent.png')}')`,
+          width: '168px',
+          height: '180px',
+          backgroundImage: `url('${getImagePath('/images/Rose Transparent 66.png')}')`,
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'bottom right'
