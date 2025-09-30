@@ -555,20 +555,16 @@ const Map = ({ fullScreen = false }: MapProps) => {
               Localisation
             </button>
 
-            <button
-              className="px-6 py-2 rounded-full text-sm font-medium bg-transparent text-[#1a2138] border-2 border-[#1a2138] hover:bg-[#1a2138] hover:text-white transition-colors duration-200"
-              onClick={() => {
-                // Toggle ambiance/audio features  
+            <AudioActivator 
+              onAudioEnabled={() => {
                 analytics.trackFeatureUse('ambiance_toggle', { enabled: true });
-                // Pour l'instant, juste un feedback visuel
-                toast({
-                  title: "Ambiance",
-                  description: "Fonctionnalité à venir - Sons d'ambiance de l'Île Feydeau",
-                });
+                logger.info('Son d\'ambiance activé');
               }}
-            >
-              Ambiance
-            </button>
+              onAudioDisabled={() => {
+                analytics.trackFeatureUse('ambiance_toggle', { enabled: false });
+                logger.info('Son d\'ambiance désactivé');
+              }}
+            />
           </div>
         </div>
         

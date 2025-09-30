@@ -19,6 +19,7 @@ import { AudioGuideButton } from "@/components/AudioGuideButton";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
 import { getBackgroundFallback } from "@/utils/backgroundUtils";
 import { ShareButton } from "@/components/ShareButton";
+import { audioGuideService } from "@/services/audioGuideService";
 
 // Composant Like simple avec logique partagée
 interface LikeButtonSimpleProps {
@@ -274,9 +275,21 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
               {location.audio ? (
                 <button
                   onClick={() => {
-                    // Logique pour jouer l'audio guide
-                    const audio = new Audio(location.audio);
-                    audio.play().catch(console.error);
+                    // Déterminer le chemin audio en fonction de l'environnement
+                    const audioPath = window.location.hostname.includes('github.io')
+                      ? `/1Hall1Artiste${location.audio}`
+                      : location.audio;
+                    
+                    // Utiliser le service audioGuideService pour une gestion robuste
+                    audioGuideService.play(audioPath, location.name).catch(error => {
+                      console.error('Erreur lors de la lecture de l\'audio guide:', error);
+                    });
+                    
+                    // Analytics
+                    analytics.trackFeatureUse('audio_guide_play', { 
+                      location_id: location.id,
+                      location_name: location.name 
+                    });
                   }}
                   className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
                 >
