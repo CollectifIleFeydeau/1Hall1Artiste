@@ -83,10 +83,14 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
               <img
                 src={getOptimizedCloudinaryUrl(entry.thumbnailUrl || entry.imageUrl, isMobile)}
                 alt={entry.description || "Photo communautaire"}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-opacity duration-300 opacity-0"
                 loading={index < 6 ? "eager" : "lazy"}
                 decoding="async"
                 style={{ imageRendering: 'auto' }}
+                onLoad={(e) => {
+                  // Afficher l'image en douceur une fois chargée
+                  e.currentTarget.style.opacity = '1';
+                }}
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
@@ -117,8 +121,13 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
 
           {/* Plus de badge "En cours" - Système instantané ! */}
 
-          {/* Bouton de like - désactivé sur mobile pour éviter le scintillement */}
-          {/* Les likes causent des re-renders constants qui créent du scintillement */}
+          {/* Bouton de like - désactivé pour photos historiques */}
+          {entry.type !== 'historical' && (
+            <LikeButton 
+              entryId={entry.id} 
+              variant="compact"
+            />
+          )}
 
           {/* Informations communes */}
           <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-xs">
@@ -203,10 +212,14 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
               <img
                 src={getOptimizedCloudinaryUrl(entry.thumbnailUrl || entry.imageUrl, false)}
                 alt={entry.description || "Photo communautaire"}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-opacity duration-300 opacity-0"
                 loading={index < 6 ? "eager" : "lazy"}
                 decoding="async"
                 style={{ imageRendering: 'auto' }}
+                onLoad={(e) => {
+                  // Afficher l'image en douceur une fois chargée
+                  e.currentTarget.style.opacity = '1';
+                }}
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
