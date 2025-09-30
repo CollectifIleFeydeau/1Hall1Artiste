@@ -4,7 +4,7 @@
 
 ### GESTION DES DONNEES
 
-gPS ne marche pas et le bouton bruitage quand on reclique dessus il ne s'éteint pas 
+ le bouton bruitage quand on reclique dessus il ne s'éteint pas 
 - [ ] **rajouter les MP3** : 
 - [ ] **rajouter les images** : 
   12 allée Duguay-Trouin / 22 rue Kervégan
