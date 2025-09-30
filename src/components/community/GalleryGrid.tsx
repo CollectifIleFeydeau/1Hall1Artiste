@@ -47,8 +47,8 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
   console.log('[GalleryGrid] RENDER - Nombre d\'entrées:', entries.length);
   console.log('[GalleryGrid] Première entrée:', entries[0]?.id, entries[0]?.type);
   
-  // Détection mobile pour désactiver les animations
-  const isMobile = false; // FORCÉ À FALSE POUR TEST - utiliser le système desktop partout
+  // TEST SCINTILLEMENT : Forcer le système mobile PARTOUT (pas de Framer Motion)
+  const isMobile = true; // FORCÉ À TRUE POUR TEST - désactiver Framer Motion partout
   
   // Sur mobile, utiliser des divs simples sans animation
   if (isMobile) {
