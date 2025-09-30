@@ -2,7 +2,6 @@ import { getImagePath } from '@/utils/imagePaths';
 import { IMAGE_PATHS } from '../constants/imagePaths';
 import React from 'react';
 import { ActionButton } from "@/components/ui/ActionButton";
-import { Card } from "@/components/ui/card";
 import { Location } from "@/data/locations";
 import { Event } from "@/data/events";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +14,7 @@ import Calendar from "lucide-react/dist/esm/icons/calendar";
 import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
 import Navigation from "lucide-react/dist/esm/icons/navigation";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import { AudioGuideButton } from "@/components/AudioGuideButton";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
 import { getBackgroundFallback } from "@/utils/backgroundUtils";
@@ -100,6 +100,21 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
       >
         
         <div className="relative z-10 p-6">
+          {/* Indication bâtiment fermé */}
+          {location.hasProgram === false && (
+            <div className="mb-4 p-3 bg-gray-100 border border-gray-300 rounded-lg flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-gray-600 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Bâtiment actuellement fermé
+                </p>
+                <p className="text-xs text-gray-600">
+                  Ce lieu n'accueille pas d'événements pour le moment, mais vous pouvez découvrir son histoire et écouter l'audio guide.
+                </p>
+              </div>
+            </div>
+          )}
+          
           {/* Header avec titre et boutons - Style épuré */}
           <div className="mb-6">
             {/* Boutons en haut à droite */}

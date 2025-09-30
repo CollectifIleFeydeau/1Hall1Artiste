@@ -14,9 +14,22 @@ import { cn } from "../../lib/utils";
 import { LocalImage } from "./LocalImage";
 import { LikeButton } from "./LikeButton";
 
+// Interface pour les photos historiques
+interface HistoricalPhoto {
+  id: string;
+  path: string;
+  type: 'historical';
+  displayName: string;
+  timestamp: string;
+  description: string;
+}
+
+// Type unifié
+type UnifiedEntry = CommunityEntry | HistoricalPhoto;
+
 interface EntryDetailProps {
-  entry: CommunityEntry;
-  entries: CommunityEntry[];
+  entry: UnifiedEntry;
+  entries: UnifiedEntry[];
   currentIndex: number;
   onClose: () => void;
   onNavigate: (index: number) => void;
@@ -102,7 +115,7 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, curren
         onClick={onClose}
       >
         <motion.div
-          className="bg-white/90 backdrop-blur-sm border-2 border-amber-300 shadow-lg dark:bg-slate-900 rounded-lg w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col"
+          className="bg-white/90 backdrop-blur-sm border-2 border-amber-300 shadow-lg dark:bg-slate-900 rounded-lg w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
@@ -124,15 +137,48 @@ export const EntryDetail: React.FC<EntryDetailProps> = ({ entry, entries, curren
 
           {/* Contenu */}
           <div className="flex-grow overflow-auto">
-            {entry.type === "photo" ? (
+            {entry.type === "historical" ? (
+              // Photo historique
               <div className="flex flex-col">
-                <div className="relative">
+                <div className="relative cursor-zoom-in" onClick={() => {
+                  // Ouvrir l'image en plein écran dans un nouvel onglet
+                  window.open(entry.path, '_blank');
+                }}>
+                  <img
+                    src={entry.path}
+                    alt={entry.description}
+                    className="w-full h-auto"
+                    onError={(e) => {
+                      console.error('[EntryDetail] Image historique non trouvée:', entry.path);
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                  {/* Indicateur de zoom */}
+                  <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+                    🔍 Cliquer pour agrandir
+                  </div>
+                </div>
+                {entry.description && (
+                  <p className="p-4 text-sm">{entry.description}</p>
+                )}
+              </div>
+            ) : entry.type === "photo" ? (
+              // Photo communautaire
+              <div className="flex flex-col">
+                <div className="relative cursor-zoom-in" onClick={() => {
+                  // Ouvrir l'image en plein écran dans un nouvel onglet
+                  window.open(entry.imageUrl, '_blank');
+                }}>
                   <LocalImage
                     src={entry.imageUrl}
                     alt={entry.description || "Photo communautaire"}
                     className="w-full h-auto"
                   />
-                  
+                  {/* Indicateur de zoom */}
+                  <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+                    🔍 Cliquer pour agrandir
+                  </div>
                 </div>
                 {entry.description && (
                   <p className="p-4 text-sm">{entry.description}</p>

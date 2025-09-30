@@ -5,7 +5,7 @@
 ## BATIMENTS
 
 - [ ] **rajouter les autres batîments** : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice
-- [ ] **Batiment pas ouvert**: indiquer que c'est pas ouvert
+- [x] **Batiment pas ouvert**: indiquer que c'est pas ouvert
 - [ ] **Lieux** : parcourir les lieux depuis la page details lieux en allant à gauche et droite ?
 
 ### GESTION DES DONNEES
@@ -15,7 +15,9 @@
 
 ### DESIGN
 
-- [ ] **Surimpressions** : Pinceaux, notes de musique, boussoles
+- [X] **Surimpressions** : Pinceaux, 
+- [X] **Surimpressions** : notes de musique, 
+- [X] **Surimpressions** : boussoles
 - [ ] **Images de fallback** : `concert-default.jpg`, `exposition-default.jpg`
 - [ ] **Images d'événements principaux** : 5-10 événements phares (400x300px, <50KB)
 

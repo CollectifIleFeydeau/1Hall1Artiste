@@ -71,14 +71,17 @@ const Program = () => {
       <div className="brush-stroke-left"></div>
       <div className="brush-stroke-left-2"></div>
 
-      {/* Pinceaux en bas à droite, au-dessus du menu (agrandis) */}
+      {/* Pinceaux pour expositions OU Clé de sol pour concerts en bas à droite */}
       <div 
-        className="fixed bottom-14 right-[-120px] w-[360px] h-[360px] opacity-90 pointer-events-none z-20"
+        className="fixed bottom-14 w-[360px] h-[360px] opacity-90 pointer-events-none z-20 transition-all duration-500"
         style={{
-          backgroundImage: `url('${getImagePath('/images/background/Pinceaux.png')}')`,
+          right: currentFilter === 'concert' ? '-240px' : '-120px',
+          backgroundImage: currentFilter === 'concert' 
+            ? `url('${getImagePath('/images/Petite Clef.png')}')`
+            : `url('${getImagePath('/images/background/Pinceaux.png')}')`,
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
-          transform: 'rotate(20deg)'
+          transform: currentFilter === 'concert' ? 'rotate(0deg)' : 'rotate(20deg)'
         }}
       />
       
