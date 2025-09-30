@@ -44,7 +44,7 @@ const getOptimizedCloudinaryUrl = (url: string, isMobile: boolean): string => {
 
 export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick }) => {
   // Détection mobile pour désactiver les animations
-  const isMobile = window.innerWidth < 768;
+  const isMobile = false; // FORCÉ À FALSE POUR TEST - utiliser le système desktop partout
   
   // Sur mobile, utiliser des divs simples sans animation
   if (isMobile) {
