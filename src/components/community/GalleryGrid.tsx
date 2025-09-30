@@ -27,6 +27,21 @@ interface GalleryGridProps {
   onEntryClick: (entry: UnifiedGalleryEntry) => void;
 }
 
+// Fonction pour optimiser les URLs Cloudinary
+const getOptimizedCloudinaryUrl = (url: string, isMobile: boolean): string => {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  
+  // Taille optimisée selon l'écran
+  const width = isMobile ? 400 : 600;
+  const quality = 'auto:low'; // Qualité automatique basse pour réduire le poids
+  
+  // Insérer les transformations Cloudinary
+  return url.replace(
+    '/upload/',
+    `/upload/w_${width},q_${quality},f_auto,c_fill/`
+  );
+};
+
 export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick }) => {
   // Détection mobile pour désactiver les animations
   const isMobile = window.innerWidth < 768;
@@ -64,13 +79,14 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
             </div>
           ) : entry.type === "photo" && ('thumbnailUrl' in entry || 'imageUrl' in entry) && (entry.thumbnailUrl || entry.imageUrl) ? (
             // Affichage d'une photo
-            <div className="aspect-square relative">
+            <div className="aspect-square relative bg-slate-200">
               <img
-                src={entry.thumbnailUrl || entry.imageUrl}
+                src={getOptimizedCloudinaryUrl(entry.thumbnailUrl || entry.imageUrl, isMobile)}
                 alt={entry.description || "Photo communautaire"}
                 className="w-full h-full object-cover"
                 loading={index < 6 ? "eager" : "lazy"}
                 decoding="async"
+                style={{ imageRendering: 'auto' }}
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
@@ -188,13 +204,14 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
             </div>
           ) : entry.type === "photo" && ('thumbnailUrl' in entry || 'imageUrl' in entry) && (entry.thumbnailUrl || entry.imageUrl) ? (
             // Affichage d'une photo
-            <div className="aspect-square relative">
+            <div className="aspect-square relative bg-slate-200">
               <img
-                src={entry.thumbnailUrl || entry.imageUrl}
+                src={getOptimizedCloudinaryUrl(entry.thumbnailUrl || entry.imageUrl, false)}
                 alt={entry.description || "Photo communautaire"}
                 className="w-full h-full object-cover"
                 loading={index < 6 ? "eager" : "lazy"}
                 decoding="async"
+                style={{ imageRendering: 'auto' }}
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
