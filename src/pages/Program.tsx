@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BackButton } from "@/components/ui/BackButton";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
@@ -17,6 +17,7 @@ const Program = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [currentFilter, setCurrentFilter] = useState<string>("exposition");
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
+  const [eventSwipeIndex, setEventSwipeIndex] = useState<number>(0);
   
   useEffect(() => {
     analytics.trackPageView('/program', 'Programme');
@@ -59,6 +60,27 @@ const Program = () => {
   const sortByStartTime = (items: Event[]): Event[] => {
     return [...items].sort((a, b) => startMinutes(a.time) - startMinutes(b.time));
   };
+  
+  // Tous les événements triés chronologiquement pour la navigation - MÉMOÏSÉ
+  const allEventsSorted = useMemo(() => sortByStartTime([
+    ...getEventsByDay("samedi"),
+    ...getEventsByDay("dimanche")
+  ]), []);
+  
+  // Événements filtrés et triés - MÉMOÏSÉ
+  const filteredEventsSorted = useMemo(() => sortByStartTime(
+    filterEvents(allEventsSorted, currentFilter)
+  ), [allEventsSorted, currentFilter]);
+  
+  // Synchroniser l'index avec l'événement sélectionné
+  useEffect(() => {
+    if (selectedEvent) {
+      const index = filteredEventsSorted.findIndex(e => e.id === selectedEvent.id);
+      if (index !== -1) {
+        setEventSwipeIndex(index);
+      }
+    }
+  }, [selectedEvent, filteredEventsSorted]);
   
   return (
     <div className="min-h-screen pb-20 relative" style={{
@@ -170,6 +192,21 @@ const Program = () => {
         isOpen={!!selectedEvent}
         onClose={() => setSelectedEvent(null)}
         source="program"
+        navigableEvents={filteredEventsSorted}
+        currentIndex={eventSwipeIndex}
+        onIndexChange={(newIndex) => {
+          const newEvent = filteredEventsSorted[newIndex];
+          if (newEvent) {
+            setSelectedEvent(newEvent);
+            setEventSwipeIndex(newIndex);
+            analytics.trackFeatureUse('swipe_navigation', {
+              direction: newIndex > eventSwipeIndex ? 'next' : 'previous',
+              from_event: selectedEvent?.id,
+              to_event: newEvent.id,
+              page: 'program'
+            });
+          }
+        }}
       />
       
       <BottomNavigation />

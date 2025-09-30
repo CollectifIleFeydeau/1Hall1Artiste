@@ -2,12 +2,6 @@
 
 # Priorités actuelles
 
-## BATIMENTS
-
-- [X] **Swiper entre les fiches batiments**: dans map et histoires des batiments et swiper dans le programme aussi
-- [X] **AudioGuide Map**: Placer l'audio guide dans la fiche ou est préssé le bouton
-- [X] **Batiment pas ouvert**: indiquer que c'est pas ouvert
-
 ### GESTION DES DONNEES
 
 - [ ] **rajouter les autres batîments** : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice

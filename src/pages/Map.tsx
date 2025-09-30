@@ -58,6 +58,9 @@ const Map = ({ fullScreen = false }: MapProps) => {
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
   const [highlightedLocation, setHighlightedLocation] = useState<string | null>(null);
   
+  // États pour la navigation par swipe entre lieux
+  const [locationSwipeIndex, setLocationSwipeIndex] = useState<number>(0);
+  
   // État pour la position de l'utilisateur sur la carte et GPS
   const [userPosition, setUserPosition] = useState<{ x: number, y: number } | null>(null);
   const [userGpsPosition, setUserGpsPosition] = useState<GeoPosition | null>(null);
@@ -74,6 +77,24 @@ const Map = ({ fullScreen = false }: MapProps) => {
     // Force à false pour les tests sur le terrain
     return false;
   }, []);
+  
+  // Lieux navigables (avec historique, audio ou événements)
+  const navigableLocations = useMemo(() => 
+    mapLocations.filter(loc => 
+      loc.id && (loc.history || loc.audio || getLocationEvents(loc.id).length > 0)
+    ),
+    [mapLocations]
+  );
+  
+  // Synchroniser l'index avec le lieu actif
+  useEffect(() => {
+    if (activeLocation) {
+      const index = navigableLocations.findIndex(loc => loc.id === activeLocation);
+      if (index !== -1) {
+        setLocationSwipeIndex(index);
+      }
+    }
+  }, [activeLocation, navigableLocations]);
 
   // Tracker les changements de zoom de la carte
   useEffect(() => {
@@ -579,6 +600,21 @@ const Map = ({ fullScreen = false }: MapProps) => {
           events={getLocationEvents(activeLocation)}
           savedEventIds={savedEventIds}
           showLocationFeatures={showLocationFeatures}
+          navigableLocations={navigableLocations}
+          currentIndex={locationSwipeIndex}
+          onIndexChange={(newIndex) => {
+            const newLocation = navigableLocations[newIndex];
+            if (newLocation) {
+              setActiveLocation(newLocation.id);
+              setLocationSwipeIndex(newIndex);
+              analytics.trackFeatureUse('swipe_navigation', {
+                direction: newIndex > locationSwipeIndex ? 'next' : 'previous',
+                from_location: activeLocation,
+                to_location: newLocation.id,
+                page: 'map'
+              });
+            }
+          }}
           onClose={() => {
             if (activeLocation) {
               analytics.trackInteraction(EventAction.BACK, 'location_details_close', { building_id: activeLocation });

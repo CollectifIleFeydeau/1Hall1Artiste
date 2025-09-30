@@ -11,43 +11,14 @@ const mainRoutes = [
   '/donate',    // Dons
 ];
 
-// Define different animation variants for transitions
+// Pas d'animation de transition entre les pages
 const transitionVariants = {
-  fade: {
-    initial: { opacity: 0 },
+  none: {
+    initial: { opacity: 1 },
     animate: { opacity: 1 },
-    exit: { opacity: 0 },
-    transition: { duration: 0.3 }
-  },
-  slide: {
-    initial: { x: '100%', opacity: 0 },
-    animate: { x: 0, opacity: 1 },
-    exit: { x: '-100%', opacity: 0 },
-    transition: { type: 'spring', stiffness: 300, damping: 30 }
-  },
-  scale: {
-    initial: { scale: 0.8, opacity: 0 },
-    animate: { scale: 1, opacity: 1 },
-    exit: { scale: 0.8, opacity: 0 },
-    transition: { type: 'spring', stiffness: 300, damping: 30 }
-  },
-  flip: {
-    initial: { rotateY: 90, opacity: 0 },
-    animate: { rotateY: 0, opacity: 1 },
-    exit: { rotateY: -90, opacity: 0 },
-    transition: { duration: 0.4 }
+    exit: { opacity: 1 },
+    transition: { duration: 0 }
   }
-};
-
-// Map routes to transition types
-const routeTransitionMap: Record<string, 'fade' | 'slide' | 'scale' | 'flip'> = {
-  '/map': 'scale',
-  '/program': 'slide',
-  '/saved-events': 'slide',
-  '/donate': 'fade',
-  '/about': 'fade',
-  '/admin': 'fade',
-  '/location-history': 'flip'
 };
 
 // Define swipeable routes - DÉSACTIVÉ (swipe supprimé)
@@ -55,7 +26,7 @@ const swipeableRoutes: string[] = [];
 
 interface AnimatedPageTransitionProps {
   children: React.ReactNode;
-  transitionType?: 'fade' | 'slide' | 'scale' | 'flip';
+  transitionType?: 'none';
   enableSwipe?: boolean;
 }
 
@@ -80,14 +51,8 @@ export function AnimatedPageTransition({
     }
   }, [location.pathname]);
   
-  // Determine the transition type to use
-  const getTransitionType = () => {
-    if (transitionType) return transitionType;
-    return routeTransitionMap[location.pathname] || 'fade';
-  };
-  
-  const currentTransition = getTransitionType();
-  const variant = transitionVariants[currentTransition];
+  // Pas d'animation - toujours 'none'
+  const variant = transitionVariants.none;
   
   // Touch event handlers for swipe navigation
   const handleTouchStart = (e: React.TouchEvent) => {

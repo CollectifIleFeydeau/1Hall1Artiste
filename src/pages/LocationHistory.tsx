@@ -9,6 +9,9 @@ import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Volume2 from "lucide-react/dist/esm/icons/volume-2";
 import Pause from "lucide-react/dist/esm/icons/pause";
 import Play from "lucide-react/dist/esm/icons/play";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
+import { SwipeIndicator } from "@/components/ui/SwipeIndicator";
 import { getImagePath } from "@/utils/imagePaths";
 import { IMAGE_PATHS } from "../constants/imagePaths";
 import { getAssetPath } from "@/utils/assetUtils";
@@ -86,6 +89,15 @@ export function LocationHistory() {
     return result;
   }, [locationIdFromState, locationFromState]);
   
+  // État pour l'index de navigation par swipe
+  const [historySwipeIndex, setHistorySwipeIndex] = useState(() => {
+    if (locationIdFromState) {
+      const index = locationsWithHistory.findIndex(loc => loc.id === locationIdFromState);
+      return index !== -1 ? index : 0;
+    }
+    return 0;
+  });
+  
   const [selectedLocation, setSelectedLocation] = useState(() => {
     // Si on a reçu un ID valide, l'utiliser
     if (locationIdFromState && locations.find(loc => loc.id === locationIdFromState) && 
@@ -151,6 +163,42 @@ export function LocationHistory() {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
   
+  // Hook de swipe
+  const swipe = useSwipeNavigation({
+    items: locationsWithHistory,
+    currentIndex: historySwipeIndex,
+    onIndexChange: (newIndex) => {
+      const newLocation = locationsWithHistory[newIndex];
+      if (newLocation) {
+        setSelectedLocation(newLocation.id);
+        setHistorySwipeIndex(newIndex);
+        analytics.trackFeatureUse('swipe_navigation', {
+          direction: newIndex > historySwipeIndex ? 'next' : 'previous',
+          from_location: selectedLocation,
+          to_location: newLocation.id,
+          page: 'history'
+        });
+      }
+    },
+    enabled: locationsWithHistory.length > 1
+  });
+  
+  // Hook de navigation clavier
+  useKeyboardNavigation({
+    onPrevious: swipe.goPrevious,
+    onNext: swipe.goNext,
+    onClose: () => navigate('/map'),
+    enabled: locationsWithHistory.length > 1
+  });
+  
+  // Synchroniser l'index avec le lieu sélectionné (pour le dropdown)
+  useEffect(() => {
+    const index = locationsWithHistory.findIndex(loc => loc.id === selectedLocation);
+    if (index !== -1 && index !== historySwipeIndex) {
+      setHistorySwipeIndex(index);
+    }
+  }, [selectedLocation, locationsWithHistory, historySwipeIndex]);
+  
   // Précharger l'image du lieu sélectionné pour le mode hors-ligne
   useEffect(() => {
     // Page view for history page
@@ -203,12 +251,16 @@ export function LocationHistory() {
   }, [selectedLocation]);
 
   return (
-    <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
-      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
-    }}>
+    <div 
+      className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" 
+      style={{
+        backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+      {...swipe.handlers}
+    >
       {/* Overlay pour améliorer la lisibilité */}
       <div className="absolute inset-0 bg-white/10" />
       
@@ -232,6 +284,22 @@ export function LocationHistory() {
             <X className="h-5 w-5" />
           </button>
         </header>
+
+        {/* Indicateur de swipe */}
+        {locationsWithHistory.length > 1 && (
+          <div className="mb-4 flex justify-center">
+            <SwipeIndicator
+              currentIndex={swipe.currentIndex}
+              totalCount={swipe.totalCount}
+              canGoPrevious={swipe.canGoPrevious}
+              canGoNext={swipe.canGoNext}
+              onPrevious={swipe.goPrevious}
+              onNext={swipe.goNext}
+              showArrows={true}
+              showCounter={true}
+            />
+          </div>
+        )}
 
         {/* Liste déroulante des lieux */}
         <div className="mb-6">

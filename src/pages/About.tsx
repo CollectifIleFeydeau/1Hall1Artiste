@@ -19,11 +19,6 @@ import { IMAGE_PATHS } from "../constants/imagePaths";
 const About = () => {
   const navigate = useNavigate();
 
-  // Scroller en haut de la page au chargement
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
   return (
     <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
       backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,

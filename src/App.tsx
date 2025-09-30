@@ -81,6 +81,11 @@ const AnimatedRoutes: React.FC = () => {
     }
   }, [location.pathname]);
   
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location.pathname]);
+  
   
   // Configuration des routes principales
   const mainRoutes: RouteConfig[] = [

@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { TreasureButton } from "@/components/ui/TreasureButton";
 import { ActionButton } from "@/components/ui/ActionButton";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
+import { SwipeIndicator } from "@/components/ui/SwipeIndicator";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { getImagePath } from "@/utils/imagePaths";
@@ -36,6 +39,9 @@ interface EventDetailsProps {
   isOpen: boolean;
   onClose: () => void;
   source: "map" | "program" | "saved";
+  navigableEvents?: Event[];
+  currentIndex?: number;
+  onIndexChange?: (index: number) => void;
 }
 
 // Composant Like simple avec logique partagée
@@ -134,7 +140,15 @@ const ArtistDescription = ({ text }: ArtistDescriptionProps) => {
   );
 };
 
-export const EventDetailsNew = ({ event, isOpen, onClose, source }: EventDetailsProps) => {
+export const EventDetailsNew = ({ 
+  event, 
+  isOpen, 
+  onClose, 
+  source,
+  navigableEvents = [],
+  currentIndex = 0,
+  onIndexChange
+}: EventDetailsProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -171,6 +185,22 @@ export const EventDetailsNew = ({ event, isOpen, onClose, source }: EventDetails
   
   // Vérifier si l'événement actuel est sauvegardé
   const isSaved = event ? savedEvents.some(saved => saved.id === event.id) : false;
+  
+  // Hook de swipe
+  const swipe = useSwipeNavigation({
+    items: navigableEvents,
+    currentIndex,
+    onIndexChange: onIndexChange || (() => {}),
+    enabled: navigableEvents.length > 1
+  });
+  
+  // Hook de navigation clavier
+  useKeyboardNavigation({
+    onPrevious: swipe.goPrevious,
+    onNext: swipe.goNext,
+    onClose,
+    enabled: navigableEvents.length > 1 && isOpen
+  });
   
   // Fonction pour naviguer vers la carte
   const navigateToMap = () => {
@@ -288,69 +318,85 @@ export const EventDetailsNew = ({ event, isOpen, onClose, source }: EventDetails
       <div 
         className="max-w-lg w-full max-h-[75vh] overflow-y-auto rounded-2xl shadow-2xl relative bg-amber-50/95 backdrop-blur-sm"
         onClick={(e) => e.stopPropagation()}
+        {...swipe.handlers}
       >
         
         <div className="relative z-10 p-6">
-          {/* Header avec titre et boutons - Style épuré */}
-          <div className="flex justify-between items-start mb-6 pb-4">
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-[#1a2138] font-serif mb-2">
-                {event.title}
-              </h2>
-              <p className="text-sm text-gray-600 font-medium">
-                {event.artistName} • {event.type === 'exposition' ? 'Exposition' : 'Concert'}
-              </p>
-            </div>
+          {/* Boutons en haut à droite */}
+          <div className="flex justify-end items-center gap-2 mb-2">
+            {/* Bouton de like - Logique partagée, UI simple */}
+            <LikeButtonSimple entryId={`event-${event.id}`} />
             
-            <div className="flex items-center gap-2 ml-4">
-              {/* Bouton de like - Logique partagée, UI simple */}
-              <LikeButtonSimple entryId={`event-${event.id}`} />
-              
-              {/* Bouton save - Style uniforme */}
-              <button
-                onClick={toggleSaveEvent}
-                className={`h-10 w-10 flex items-center justify-center rounded-full border-2 transition-colors ${
-                  isSaved 
-                    ? 'bg-amber-50 border-amber-500 text-amber-500' 
-                    : 'bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500'
-                }`}
-                title={isSaved ? "Retirer des favoris" : "Ajouter aux favoris"}
-              >
-                {isSaved ? 
-                  <BookmarkCheck className="h-5 w-5" /> : 
-                  <Bookmark className="h-5 w-5" />
+            {/* Bouton save - Style uniforme */}
+            <button
+              onClick={toggleSaveEvent}
+              className={`h-10 w-10 flex items-center justify-center rounded-full border-2 transition-colors ${
+                isSaved 
+                  ? 'bg-amber-50 border-amber-500 text-amber-500' 
+                  : 'bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500'
+              }`}
+              title={isSaved ? "Retirer des favoris" : "Ajouter aux favoris"}
+            >
+              {isSaved ? 
+                <BookmarkCheck className="h-5 w-5" /> : 
+                <Bookmark className="h-5 w-5" />
+              }
+            </button>
+            
+            {/* Bouton share - Style uniforme */}
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: `${event.title} - Île Feydeau`,
+                    text: `Découvrez ${event.title} par ${event.artistName} sur l'Île Feydeau à Nantes!`,
+                    url: window.location.href
+                  });
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert('Lien copié !');
                 }
-              </button>
-              
-              {/* Bouton share - Style uniforme */}
-              <button
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: `${event.title} - Île Feydeau`,
-                      text: `Découvrez ${event.title} par ${event.artistName} sur l'Île Feydeau à Nantes!`,
-                      url: window.location.href
-                    });
-                  } else {
-                    navigator.clipboard.writeText(window.location.href);
-                    alert('Lien copié !');
-                  }
-                }}
-                className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
-                title="Partager"
-              >
-                <Share2 className="h-5 w-5" />
-              </button>
-              
-              {/* Bouton fermer - Style uniforme */}
-              <button
-                onClick={onClose}
-                className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
-                title="Fermer"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              }}
+              className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+              title="Partager"
+            >
+              <Share2 className="h-5 w-5" />
+            </button>
+            
+            {/* Bouton fermer - Style uniforme */}
+            <button
+              onClick={onClose}
+              className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+              title="Fermer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
+          {/* Indicateur de swipe */}
+          {navigableEvents.length > 1 && (
+            <div className="flex justify-center mb-4">
+              <SwipeIndicator
+                currentIndex={swipe.currentIndex}
+                totalCount={swipe.totalCount}
+                canGoPrevious={swipe.canGoPrevious}
+                canGoNext={swipe.canGoNext}
+                onPrevious={swipe.goPrevious}
+                onNext={swipe.goNext}
+                showArrows={true}
+                showCounter={true}
+              />
             </div>
+          )}
+          
+          {/* Header avec titre - Style épuré */}
+          <div className="mb-6 pb-4">
+            <h2 className="text-2xl font-bold text-[#1a2138] font-serif mb-2">
+              {event.title}
+            </h2>
+            <p className="text-sm text-gray-600 font-medium">
+              {event.artistName} • {event.type === 'exposition' ? 'Exposition' : 'Concert'}
+            </p>
           </div>
           
           {/* Informations pratiques */}

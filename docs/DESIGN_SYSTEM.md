@@ -22,8 +22,43 @@
 
 ### 🎯 **Boutons d'interface**
 
+#### **BackButton - Bouton Retour Standard**
+```tsx
+// Composant : src/components/ui/BackButton.tsx
+// Style : Cercle blanc avec flèche, ombre portée
+<BackButton to="/map" />
+```
+
+**Spécifications :**
+- **Taille** : `h-10 w-10` (40x40px)
+- **Forme** : Cercle parfait `rounded-full`
+- **Fond** : Blanc `bg-white`
+- **Ombre** : `shadow-md` au repos, `shadow-lg` au hover
+- **Icône** : Flèche gauche `<ArrowLeft />` grise foncée (`text-gray-800`)
+- **Taille icône** : `h-5 w-5`
+- **Transition** : `transition-shadow`
+
+**Usage :**
+```tsx
+// Navigation simple
+<BackButton to="/map" />
+
+// Avec fonction personnalisée
+<BackButton onClick={() => handleCustomBack()} />
+
+// Avec classes additionnelles
+<BackButton to="/home" className="absolute top-4 left-4" />
+```
+
 #### Styles de base
 ```css
+/* Bouton Retour */
+.btn-back {
+  @apply h-10 w-10 flex items-center justify-center rounded-full
+         bg-white shadow-md hover:shadow-lg
+         transition-shadow;
+}
+
 /* Boutons d'icône inactifs */
 .btn-icon {
   @apply w-10 h-10 flex items-center justify-center rounded-full
@@ -50,12 +85,13 @@
 #### Tailles standardisées
 | Type | Taille | Usage |
 |------|--------|-------|
-| Normal | `w-10 h-10` | Headers, modaux |
+| Normal | `w-10 h-10` | Headers, modaux, BackButton |
 | Compact | `w-8 h-8` | Espace limité |
 | Grand | `w-12 h-12` | Actions principales |
 | Icônes | `h-5 w-5` | Pour boutons de 10x10 |
 
 #### Règles d'utilisation
+- ✅ **BackButton** : Toujours utiliser `<BackButton />` pour la navigation retour
 - ✅ Utiliser les composants partagés (`LikeButton`, `ShareButton`)
 - ❌ Ne pas créer de boutons personnalisés sans validation
 - 🎨 Couleur de survol : `hover:border-amber-500 hover:text-amber-500`

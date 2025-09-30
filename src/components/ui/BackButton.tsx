@@ -1,34 +1,25 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import { TreasureButton } from "./TreasureButton";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 
 interface BackButtonProps {
   /** URL de destination. Par défaut : "/" */
   to?: string;
   /** Fonction personnalisée de navigation. Si fournie, ignore 'to' */
   onClick?: () => void;
-  /** Texte du bouton. Par défaut : "Retour" */
-  children?: React.ReactNode;
   /** Classes CSS supplémentaires */
   className?: string;
-  /** Variant du bouton. Par défaut : "primary" */
-  variant?: 'primary' | 'secondary' | 'outline';
-  /** Taille du bouton. Par défaut : "md" */
-  size?: 'sm' | 'md' | 'lg';
 }
 
 /**
- * Bouton "Retour" standardisé avec le style "carte au trésor"
- * Utilisé dans toutes les pages pour une cohérence visuelle
- * Maintenant basé sur TreasureButton pour une cohérence maximale
+ * Bouton "Retour" standardisé avec icône flèche dans un cercle blanc
+ * Style cohérent : cercle blanc avec ombre, flèche noire
+ * Utilisé dans toutes les pages pour une navigation cohérente
  */
 export const BackButton: React.FC<BackButtonProps> = ({
   to = "/",
   onClick,
-  children = "Retour",
-  className = "",
-  variant = "outline",
-  size = "md"
+  className = ""
 }) => {
   const navigate = useNavigate();
 
@@ -41,14 +32,13 @@ export const BackButton: React.FC<BackButtonProps> = ({
   };
 
   return (
-    <TreasureButton
-      variant={variant}
-      size={size}
+    <button
       onClick={handleClick}
-      className={className}
+      className={`h-10 w-10 flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg transition-shadow ${className}`}
+      aria-label="Retour"
     >
-      {children}
-    </TreasureButton>
+      <ArrowLeft className="h-5 w-5 text-gray-800" />
+    </button>
   );
 };
 

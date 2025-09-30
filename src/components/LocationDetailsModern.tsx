@@ -25,6 +25,9 @@ import { getBackgroundFallback } from "@/utils/backgroundUtils";
 import { ShareButton } from "@/components/ShareButton";
 import { audioGuideService } from "@/services/audioGuideService";
 import { Slider } from "@/components/ui/slider";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
+import { SwipeIndicator } from "@/components/ui/SwipeIndicator";
 
 // Composant Like simple avec logique partagée
 interface LikeButtonSimpleProps {
@@ -70,6 +73,9 @@ interface LocationDetailsModernProps {
   events: Event[];
   savedEventIds: string[];
   showLocationFeatures: boolean;
+  navigableLocations?: Location[];
+  currentIndex?: number;
+  onIndexChange?: (index: number) => void;
   onClose: () => void;
   onSaveEvent: (event: Event, e: React.MouseEvent) => void;
   onSelectEvent: (event: Event) => void;
@@ -83,6 +89,9 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
   events,
   savedEventIds,
   showLocationFeatures,
+  navigableLocations = [],
+  currentIndex = 0,
+  onIndexChange,
   onClose,
   onSaveEvent,
   onSelectEvent,
@@ -153,12 +162,29 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
       }
     };
   }, []);
+  
+  // Hook de swipe
+  const swipe = useSwipeNavigation({
+    items: navigableLocations,
+    currentIndex,
+    onIndexChange: onIndexChange || (() => {}),
+    enabled: navigableLocations.length > 1
+  });
+  
+  // Hook de navigation clavier
+  useKeyboardNavigation({
+    onPrevious: swipe.goPrevious,
+    onNext: swipe.goNext,
+    onClose,
+    enabled: navigableLocations.length > 1
+  });
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
       <div 
         className="max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl relative bg-amber-50/95 backdrop-blur-sm"
         onClick={(e) => e.stopPropagation()}
+        {...swipe.handlers}
       >
         
         <div className="relative z-10 p-6">
@@ -229,6 +255,22 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
                 <X className="h-5 w-5" />
               </button>
             </div>
+            
+            {/* Indicateur de swipe */}
+            {navigableLocations.length > 1 && (
+              <div className="flex justify-center mb-4">
+                <SwipeIndicator
+                  currentIndex={swipe.currentIndex}
+                  totalCount={swipe.totalCount}
+                  canGoPrevious={swipe.canGoPrevious}
+                  canGoNext={swipe.canGoNext}
+                  onPrevious={swipe.goPrevious}
+                  onNext={swipe.goNext}
+                  showArrows={true}
+                  showCounter={true}
+                />
+              </div>
+            )}
             
             {/* Titre et sous-titre */}
             <div>
@@ -380,7 +422,7 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
 
           {/* Actions du bas */}
           <div className="space-y-3">
-            {/* Première ligne : Histoire et Retour */}
+            {/* Ligne unique : Histoire et Témoignage */}
             <div className="flex gap-3">
               <button
                 onClick={handleHistoryClick}
@@ -389,16 +431,6 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
                 Histoire
               </button>
               
-              <button
-                onClick={onClose}
-                className="flex-1 h-12 bg-[#1a2138] hover:bg-[#2a3148] text-white rounded-full font-medium text-sm transition-colors"
-              >
-                Retour
-              </button>
-            </div>
-            
-            {/* Deuxième ligne : Témoignage */}
-            <div className="flex gap-3">
               <button
                 onClick={() => {
                   // Navigation vers la galerie communautaire avec contexte du lieu
@@ -410,13 +442,13 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
                   });
                   onClose();
                 }}
-                className="w-full h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
+                className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
               >
                 Témoignage
               </button>
             </div>
             
-            {/* Troisième ligne : Navigation (si géolocalisation active) */}
+            {/* Deuxième ligne : Navigation (si géolocalisation active) */}
             {showLocationFeatures && (
               <div className="flex gap-3">
                 <button

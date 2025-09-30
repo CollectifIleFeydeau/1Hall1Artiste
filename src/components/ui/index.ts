@@ -4,6 +4,7 @@ export { FilterButton } from './FilterButton';
 export { ActionButton } from './ActionButton';
 export { NavigationButton } from './NavigationButton';
 export { BackButton } from './BackButton';
+export { SwipeIndicator } from './SwipeIndicator';
 
 // Composants UI existants
 export { Button } from './button';
