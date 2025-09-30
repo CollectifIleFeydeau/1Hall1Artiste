@@ -257,7 +257,7 @@ export function LocationHistory() {
         backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
+        backgroundAttachment: 'scroll'
       }}
       {...swipe.handlers}
     >

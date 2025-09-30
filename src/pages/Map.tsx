@@ -430,7 +430,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
         backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
+        backgroundAttachment: 'scroll'
       }}>
         <div className="text-center p-4">
           <p className="text-red-500 mb-2">{domError}</p>
@@ -445,7 +445,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
       backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
+      backgroundAttachment: 'scroll'
     }}>
       {/* Rose décorative en bas à droite */}
       <div 

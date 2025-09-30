@@ -143,7 +143,7 @@ export default function SavedEvents() {
       backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
+      backgroundAttachment: 'scroll'
     }}>
       {/* Overlay pour améliorer la lisibilité */}
       <div className="absolute inset-0 bg-white/10" />

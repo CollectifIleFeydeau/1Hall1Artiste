@@ -57,7 +57,6 @@ const Gallery: React.FC = () => {
   const [selectedEntry, setSelectedEntry] = useState<UnifiedGalleryEntry | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [visibleHistoricalCount, setVisibleHistoricalCount] = useState<number>(151); // Charger toutes les photos d'un coup pour éviter les re-renders
-  const [displayedCount, setDisplayedCount] = useState<number>(20); // Pagination : afficher 20 photos à la fois
 
   // Vérifier si un onglet est spécifié dans l'URL
   useEffect(() => {
@@ -235,13 +234,6 @@ const Gallery: React.FC = () => {
     return entry.type === filter;
   });
 
-  // Pagination : afficher seulement les N premières entrées
-  const displayedEntries = filteredEntries.slice(0, displayedCount);
-  const hasMore = displayedCount < filteredEntries.length;
-
-  const loadMore = () => {
-    setDisplayedCount(prev => Math.min(prev + 20, filteredEntries.length));
-  };
 
   return (
     <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
@@ -346,7 +338,7 @@ const Gallery: React.FC = () => {
 
                 {/* Grille de la galerie */}
                   <GalleryGrid 
-                    entries={displayedEntries}
+                    entries={filteredEntries}
                     onEntryClick={(entry) => { 
                       const index = filteredEntries.findIndex(e => e.id === entry.id);
                       setSelectedIndex(index);
@@ -354,18 +346,6 @@ const Gallery: React.FC = () => {
                       analytics.trackCommunityInteraction(EventAction.VIEW, { content_type: 'entry', entry_id: entry.id });
                     }}
                   />
-
-                  {/* Bouton "Charger plus" */}
-                  {hasMore && (
-                    <div className="flex justify-center mt-6 mb-8">
-                      <button
-                        onClick={loadMore}
-                        className="px-6 py-3 bg-[#1a2138] text-white rounded-full font-medium hover:bg-[#2a3148] transition-colors"
-                      >
-                        Charger plus ({filteredEntries.length - displayedCount} restantes)
-                      </button>
-                    </div>
-                  )}
               </>
             )}
           </div>

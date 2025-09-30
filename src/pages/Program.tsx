@@ -109,7 +109,7 @@ const Program = () => {
       backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.TEXTURED_CREAM}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
+      backgroundAttachment: 'scroll'
     }}>
       {/* Touches de pinceau décoratives */}
       <div className="brush-stroke-left"></div>

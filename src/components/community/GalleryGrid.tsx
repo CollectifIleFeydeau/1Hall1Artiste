@@ -43,12 +43,8 @@ const getOptimizedCloudinaryUrl = (url: string, isMobile: boolean): string => {
 };
 
 export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick }) => {
-  // Logs pour diagnostiquer le scintillement
-  console.log('[GalleryGrid] RENDER - Nombre d\'entrées:', entries.length);
-  console.log('[GalleryGrid] Première entrée:', entries[0]?.id, entries[0]?.type);
-  
-  // TEST SCINTILLEMENT : Forcer le système mobile PARTOUT (pas de Framer Motion)
-  const isMobile = true; // FORCÉ À TRUE POUR TEST - désactiver Framer Motion partout
+  // Détection mobile pour désactiver les animations
+  const isMobile = window.innerWidth < 768;
   
   // Sur mobile, utiliser des divs simples sans animation
   if (isMobile) {
@@ -120,13 +116,13 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
 
           {/* Plus de badge "En cours" - Système instantané ! */}
 
-          {/* Bouton de like - TEMPORAIREMENT DÉSACTIVÉ POUR TEST */}
-          {/* {entry.type !== 'historical' && (
+          {/* Bouton de like - désactivé pour photos historiques */}
+          {entry.type !== 'historical' && (
             <LikeButton 
               entryId={entry.id} 
               variant="compact"
             />
-          )} */}
+          )}
 
           {/* Informations communes */}
           <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-xs">
@@ -215,13 +211,6 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
                 loading={index < 6 ? "eager" : "lazy"}
                 decoding="async"
                 style={{ imageRendering: 'auto' }}
-                onLoad={(e) => {
-                  console.log(`[GalleryGrid] Image chargée: ${entry.id}`);
-                  e.currentTarget.style.opacity = '1';
-                }}
-                onError={(e) => {
-                  console.error(`[GalleryGrid] Erreur chargement: ${entry.id}`);
-                }}
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
