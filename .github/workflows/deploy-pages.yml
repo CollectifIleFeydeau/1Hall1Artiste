@@ -1,8 +1,6 @@
 name: 🚀 Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
   workflow_call:
     # Permet d'être appelé par d'autres workflows
