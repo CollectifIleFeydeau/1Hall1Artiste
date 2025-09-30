@@ -58,18 +58,44 @@ const AnimatedRoutes: React.FC = () => {
   const navigate = useNavigate();
   const prevPathRef = useRef<string>(location.pathname);
   
-  
+  // Vérifier si le splash screen a déjà été vu
+  const hasSeenSplash = () => {
+    try {
+      return localStorage.getItem('hasSeenSplash') === 'true';
+    } catch {
+      return false;
+    }
+  };
 
   // État pour l'écran d'accueil
-  const [showSplash, setShowSplash] = useState<boolean>(true);
+  const [showSplash, setShowSplash] = useState<boolean>(!hasSeenSplash());
   
   // Gérer la fin de l'écran d'accueil
   const handleSplashComplete = () => {
     setShowSplash(false);
-    // Aller directement à la carte après le splash screen
-    navigate('/map');
+    try {
+      localStorage.setItem('hasSeenSplash', 'true');
+    } catch (error) {
+      console.warn('[App] Could not save splash screen state:', error);
+    }
+    // Rester sur la page actuelle au lieu de rediriger vers /map
+    // Si on est sur la racine, aller vers /map
+    if (location.pathname === '/') {
+      navigate('/map', { replace: true });
+    }
   };
   
+
+  // Sauvegarder la dernière page visitée
+  useEffect(() => {
+    if (location.pathname !== '/' && !showSplash) {
+      try {
+        localStorage.setItem('lastVisitedPath', location.pathname);
+      } catch (error) {
+        console.warn('[App] Could not save last visited path:', error);
+      }
+    }
+  }, [location.pathname, showSplash]);
 
   // Track route changes for analytics
   useEffect(() => {
@@ -128,8 +154,15 @@ const AnimatedRoutes: React.FC = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Rediriger vers la carte */}
-        <Route path="/" element={<Navigate to="/map" replace />} />
+        {/* Rediriger vers la dernière page visitée ou la carte */}
+        <Route path="/" element={<Navigate to={(() => {
+          try {
+            const lastPath = localStorage.getItem('lastVisitedPath');
+            return lastPath || '/map';
+          } catch {
+            return '/map';
+          }
+        })()} replace />} />
         
         {/* Rediriger l'ancienne page galleries vers la galerie unifiée */}
         <Route path="/galleries" element={<Navigate to="/community" replace />} />

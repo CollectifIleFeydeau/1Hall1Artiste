@@ -56,7 +56,7 @@ const Gallery: React.FC = () => {
   const [lastKnownCount, setLastKnownCount] = useState<number>(0);
   const [selectedEntry, setSelectedEntry] = useState<UnifiedGalleryEntry | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const [visibleHistoricalCount, setVisibleHistoricalCount] = useState<number>(20);
+  const [visibleHistoricalCount, setVisibleHistoricalCount] = useState<number>(151); // Charger toutes les photos d'un coup pour éviter les re-renders
 
   // Vérifier si un onglet est spécifié dans l'URL
   useEffect(() => {
@@ -169,24 +169,8 @@ const Gallery: React.FC = () => {
     return () => clearInterval(interval);
   }, [activeTab, lastKnownCount]);
 
-  // Lazy loading progressif des photos historiques au scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      // Charger plus de photos quand on approche du bas (500px avant)
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
-        setVisibleHistoricalCount(prev => {
-          const next = Math.min(prev + 20, 151);
-          if (next > prev) {
-            console.log(`[Gallery] Chargement de ${next - prev} photos historiques supplémentaires (${next}/151)`);
-          }
-          return next;
-        });
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Lazy loading désactivé - charger toutes les photos d'un coup
+  // Le lazy loading causait 6+ re-renders qui créaient le scintillement
 
   // Fonction de rafraîchissement pour Pull-to-Refresh
   const handleRefresh = async () => {

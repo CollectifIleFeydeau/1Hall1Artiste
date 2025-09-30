@@ -43,6 +43,10 @@ const getOptimizedCloudinaryUrl = (url: string, isMobile: boolean): string => {
 };
 
 export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick }) => {
+  // Logs pour diagnostiquer le scintillement
+  console.log('[GalleryGrid] RENDER - Nombre d\'entrées:', entries.length);
+  console.log('[GalleryGrid] Première entrée:', entries[0]?.id, entries[0]?.type);
+  
   // Détection mobile pour désactiver les animations
   const isMobile = false; // FORCÉ À FALSE POUR TEST - utiliser le système desktop partout
   
@@ -217,8 +221,11 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
                 decoding="async"
                 style={{ imageRendering: 'auto' }}
                 onLoad={(e) => {
-                  // Afficher l'image en douceur une fois chargée
+                  console.log(`[GalleryGrid] Image chargée: ${entry.id}`);
                   e.currentTarget.style.opacity = '1';
+                }}
+                onError={(e) => {
+                  console.error(`[GalleryGrid] Erreur chargement: ${entry.id}`);
                 }}
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
