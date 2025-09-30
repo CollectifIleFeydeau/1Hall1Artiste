@@ -1,4 +1,4 @@
-import { getImagePath } from '@/utils/imagePaths';
+import { getImagePath, getBasePath } from '@/utils/imagePaths';
 import { IMAGE_PATHS } from '../constants/imagePaths';
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -72,16 +72,13 @@ const Gallery: React.FC = () => {
   // Fonction pour charger les photos historiques
   const loadHistoricalPhotos = (): HistoricalPhoto[] => {
     const photos: HistoricalPhoto[] = [];
-    const isGitHubPages = window.location.hostname.includes('github.io');
-    const basePath = isGitHubPages
-      ? '/1Hall1Artiste/images/historical'
-      : '/images/historical';
+    const basePath = getBasePath();
     
     // Ajouter les photos historiques (151 photos)
     for (let i = 1; i <= 151; i++) {
       photos.push({
         id: `historical-${i}`,
-        path: `${basePath}/photos-${i}.jpg`,
+        path: `${basePath}/images/historical/photos-${i}.jpg`,
         type: 'historical',
         displayName: 'Archives historiques',
         timestamp: '1900-01-01T00:00:00.000Z', // Date ancienne pour les trier après les nouvelles

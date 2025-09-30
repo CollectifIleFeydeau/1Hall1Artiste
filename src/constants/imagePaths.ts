@@ -41,8 +41,12 @@ export const IMAGE_PATHS = {
   
   // Images de placeholder
   PLACEHOLDERS: {
-    IMAGE: '/images/placeholder-image.jpg',
-    SVG: '/placeholder.svg',
+    get IMAGE() { 
+      return getImagePathWithLogs('/images/placeholder-image.jpg', 'PLACEHOLDER_IMAGE'); 
+    },
+    get SVG() { 
+      return getImagePathWithLogs('/placeholder.svg', 'PLACEHOLDER_SVG'); 
+    },
   },
   
   // Cartes et plans (seulement celle utilisée)
