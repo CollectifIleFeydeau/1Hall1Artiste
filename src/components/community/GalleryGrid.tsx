@@ -87,14 +87,9 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
               <img
                 src={getOptimizedCloudinaryUrl(entry.thumbnailUrl || entry.imageUrl, isMobile)}
                 alt={entry.description || "Photo communautaire"}
-                className="w-full h-full object-cover transition-opacity duration-300 opacity-0"
+                className="w-full h-full object-cover"
                 loading={index < 6 ? "eager" : "lazy"}
                 decoding="async"
-                style={{ imageRendering: 'auto' }}
-                onLoad={(e) => {
-                  // Afficher l'image en douceur une fois chargée
-                  e.currentTarget.style.opacity = '1';
-                }}
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
