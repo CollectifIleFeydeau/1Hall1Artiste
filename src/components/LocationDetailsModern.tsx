@@ -1,6 +1,6 @@
 import { getImagePath } from '@/utils/imagePaths';
 import { IMAGE_PATHS } from '../constants/imagePaths';
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Location } from "@/data/locations";
 import { Event } from "@/data/events";
@@ -15,11 +15,16 @@ import Bookmark from "lucide-react/dist/esm/icons/bookmark";
 import BookmarkCheck from "lucide-react/dist/esm/icons/bookmark-check";
 import Navigation from "lucide-react/dist/esm/icons/navigation";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import Volume2 from "lucide-react/dist/esm/icons/volume-2";
+import Play from "lucide-react/dist/esm/icons/play";
+import Pause from "lucide-react/dist/esm/icons/pause";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import { AudioGuideButton } from "@/components/AudioGuideButton";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
 import { getBackgroundFallback } from "@/utils/backgroundUtils";
 import { ShareButton } from "@/components/ShareButton";
 import { audioGuideService } from "@/services/audioGuideService";
+import { Slider } from "@/components/ui/slider";
 
 // Composant Like simple avec logique partagée
 interface LikeButtonSimpleProps {
@@ -86,12 +91,68 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
   isVisited
 }) => {
   const navigate = useNavigate();
+  
+  // États pour le lecteur audio
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioLoading, setAudioLoading] = useState(false);
 
   const handleHistoryClick = () => {
     navigate('/location-history', { 
       state: { selectedLocationId: location.id }
     });
   };
+  
+  // Fonctions pour le lecteur audio
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        analytics.trackAudio('pause', location.id);
+      } else {
+        audioRef.current.play();
+        analytics.trackAudio('play', location.id);
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+  
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+  
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+  
+  const handleSliderChange = (value: number[]) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = value[0];
+      setCurrentTime(value[0]);
+    }
+  };
+  
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
@@ -261,9 +322,65 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
             </div>
           )}
 
+          {/* Lecteur audio intégré si disponible */}
+          {location.audio && (
+            <div className="mb-4 p-4 bg-white/60 backdrop-blur-sm rounded-xl border-2 border-amber-200 shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <Volume2 className="h-4 w-4 text-[#4a5d94] mr-2" />
+                  <span className="text-sm font-medium text-[#4a5d94]">Audio guide</span>
+                </div>
+                <button
+                  onClick={togglePlayPause}
+                  disabled={audioLoading}
+                  className="h-10 w-10 flex items-center justify-center rounded-full bg-[#4a5d94] hover:bg-[#3a4d84] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-md"
+                >
+                  {audioLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                  ) : isPlaying ? (
+                    <Pause className="h-5 w-5 text-white fill-white" />
+                  ) : (
+                    <Play className="h-5 w-5 text-white fill-white" />
+                  )}
+                </button>
+              </div>
+              
+              <div className="space-y-1">
+                <Slider
+                  value={[currentTime]}
+                  max={duration || 100}
+                  step={0.1}
+                  onValueChange={handleSliderChange}
+                  disabled={audioLoading}
+                  className="cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-[#4a5d94]">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>{formatTime(duration)}</span>
+                </div>
+              </div>
+              
+              <audio
+                ref={audioRef}
+                src={location.audio ? 
+                  (window.location.hostname.includes('github.io') 
+                    ? `/1Hall1Artiste${location.audio}` 
+                    : location.audio) 
+                  : ''}
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onEnded={() => setIsPlaying(false)}
+                onCanPlay={() => setAudioLoading(false)}
+                onError={() => setAudioLoading(false)}
+                preload="metadata"
+                className="hidden"
+              />
+            </div>
+          )}
+
           {/* Actions du bas */}
           <div className="space-y-3">
-            {/* Première ligne : Histoire et Audio Guide */}
+            {/* Première ligne : Histoire et Retour */}
             <div className="flex gap-3">
               <button
                 onClick={handleHistoryClick}
@@ -272,40 +389,15 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
                 Histoire
               </button>
               
-              {location.audio ? (
-                <button
-                  onClick={() => {
-                    // Déterminer le chemin audio en fonction de l'environnement
-                    const audioPath = window.location.hostname.includes('github.io')
-                      ? `/1Hall1Artiste${location.audio}`
-                      : location.audio;
-                    
-                    // Utiliser le service audioGuideService pour une gestion robuste
-                    audioGuideService.play(audioPath, location.name).catch(error => {
-                      console.error('Erreur lors de la lecture de l\'audio guide:', error);
-                    });
-                    
-                    // Analytics
-                    analytics.trackFeatureUse('audio_guide_play', { 
-                      location_id: location.id,
-                      location_name: location.name 
-                    });
-                  }}
-                  className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
-                >
-                  Audio guide
-                </button>
-              ) : (
-                <button
-                  onClick={onClose}
-                  className="flex-1 h-12 bg-[#1a2138] hover:bg-[#2a3148] text-white rounded-full font-medium text-sm transition-colors"
-                >
-                  Retour
-                </button>
-              )}
+              <button
+                onClick={onClose}
+                className="flex-1 h-12 bg-[#1a2138] hover:bg-[#2a3148] text-white rounded-full font-medium text-sm transition-colors"
+              >
+                Retour
+              </button>
             </div>
             
-            {/* Deuxième ligne : Témoignage et Retour */}
+            {/* Deuxième ligne : Témoignage */}
             <div className="flex gap-3">
               <button
                 onClick={() => {
@@ -318,16 +410,9 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
                   });
                   onClose();
                 }}
-                className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
+                className="w-full h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
               >
                 Témoignage
-              </button>
-              
-              <button
-                onClick={onClose}
-                className="flex-1 h-12 bg-[#1a2138] hover:bg-[#2a3148] text-white rounded-full font-medium text-sm transition-colors"
-              >
-                Retour
               </button>
             </div>
             

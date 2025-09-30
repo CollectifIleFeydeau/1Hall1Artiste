@@ -27,7 +27,7 @@ export const BackButton: React.FC<BackButtonProps> = ({
   onClick,
   children = "Retour",
   className = "",
-  variant = "primary",
+  variant = "outline",
   size = "md"
 }) => {
   const navigate = useNavigate();

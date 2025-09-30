@@ -4,12 +4,13 @@
 
 ## BATIMENTS
 
-- [ ] **rajouter les autres batîments** : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice
-- [x] **Batiment pas ouvert**: indiquer que c'est pas ouvert
-- [ ] **Lieux** : parcourir les lieux depuis la page details lieux en allant à gauche et droite ?
+- [X] **Swiper entre les fiches batiments**: dans map et histoires des batiments et swiper dans le programme aussi
+- [X] **AudioGuide Map**: Placer l'audio guide dans la fiche ou est préssé le bouton
+- [X] **Batiment pas ouvert**: indiquer que c'est pas ouvert
 
 ### GESTION DES DONNEES
 
+- [ ] **rajouter les autres batîments** : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice
 - [ ] **Mise à jour** : Récupérer les informations depuis Google sheet
 - [ ] **Mise à jour** : Exporter les informations pour les copier sur OpenAgenda facilement
 

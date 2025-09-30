@@ -52,37 +52,39 @@ export function LocationHistory() {
   // Vérifier d'abord si l'ID reçu correspond à un lieu existant
   const locationFromState = locationIdFromState ? locations.find(loc => loc.id === locationIdFromState) : null;
   
-  // Filtrer uniquement les lieux qui ont un historique ou une référence à un historique
-  // et éliminer les doublons basés sur le nom
-  let locationsWithHistory = [];
-  const processedNames = new Set();
-  
-  // Donner priorité aux lieux avec un historique direct plutôt qu'une référence
-  const sortedLocations = [...locations].sort((a, b) => {
-    // Les lieux avec history viennent avant ceux avec historyRef
-    if (a.history && !b.history) return -1;
-    if (!a.history && b.history) return 1;
-    return 0;
-  });
-  
-  // Filtrer les lieux
-  for (const loc of sortedLocations) {
-    // Vérifier si le lieu a un historique ou une référence
-    if (loc.history || loc.historyRef) {
-      // Vérifier si on a déjà un lieu avec le même nom
-      if (!processedNames.has(loc.name)) {
-        locationsWithHistory.push(loc);
-        processedNames.add(loc.name);
+  // MÉMOÏSER les calculs pour éviter les re-renders infinis
+  const locationsWithHistory = React.useMemo(() => {
+    const result = [];
+    const processedNames = new Set();
+    
+    // Donner priorité aux lieux avec un historique direct plutôt qu'une référence
+    const sortedLocations = [...locations].sort((a, b) => {
+      // Les lieux avec history viennent avant ceux avec historyRef
+      if (a.history && !b.history) return -1;
+      if (!a.history && b.history) return 1;
+      return 0;
+    });
+    
+    // Filtrer les lieux
+    for (const loc of sortedLocations) {
+      // Vérifier si le lieu a un historique ou une référence
+      if (loc.history || loc.historyRef) {
+        // Vérifier si on a déjà un lieu avec le même nom
+        if (!processedNames.has(loc.name)) {
+          result.push(loc);
+          processedNames.add(loc.name);
+        }
       }
     }
-  }
-  
-  // Si le lieu reçu en paramètre a un historique ou une référence mais n'est pas dans la liste, l'ajouter
-  if ((locationFromState?.history || locationFromState?.historyRef) && 
-      !locationsWithHistory.some(loc => loc.id === locationIdFromState)) {
-    locationsWithHistory.push(locationFromState);
-    // Le lieu reçu en paramètre a été ajouté à la liste
-  }
+    
+    // Si le lieu reçu en paramètre a un historique ou une référence mais n'est pas dans la liste, l'ajouter
+    if ((locationFromState?.history || locationFromState?.historyRef) && 
+        !result.some(loc => loc.id === locationIdFromState)) {
+      result.push(locationFromState);
+    }
+    
+    return result;
+  }, [locationIdFromState, locationFromState]);
   
   const [selectedLocation, setSelectedLocation] = useState(() => {
     // Si on a reçu un ID valide, l'utiliser
@@ -95,8 +97,11 @@ export function LocationHistory() {
     return locationsWithHistory[0]?.id || null;
   });
 
-  // Trouver le lieu sélectionné
-  const selectedLocationData = locationsWithHistory.find(loc => loc.id === selectedLocation);
+  // Trouver le lieu sélectionné - MÉMOÏSÉ
+  const selectedLocationData = React.useMemo(
+    () => locationsWithHistory.find(loc => loc.id === selectedLocation),
+    [locationsWithHistory, selectedLocation]
+  );
   
   // Fonctions pour le lecteur audio
   const togglePlayPause = () => {
@@ -322,21 +327,19 @@ export function LocationHistory() {
                     <Volume2 className="h-4 w-4 text-[#4a5d94] mr-2" />
                     <span className="text-sm font-medium text-[#4a5d94]">Écouter l'histoire</span>
                   </div>
-                  <ActionButton 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 w-8 p-0 rounded-full" 
+                  <button
                     onClick={togglePlayPause}
                     disabled={audioLoading}
+                    className="h-10 w-10 flex items-center justify-center rounded-full bg-[#4a5d94] hover:bg-[#3a4d84] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-md"
                   >
                     {audioLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-[#4a5d94]" />
+                      <Loader2 className="h-5 w-5 animate-spin text-white" />
                     ) : isPlaying ? (
-                      <Pause className="h-4 w-4 text-[#4a5d94]" />
+                      <Pause className="h-5 w-5 text-white fill-white" />
                     ) : (
-                      <Play className="h-4 w-4 text-[#4a5d94]" />
+                      <Play className="h-5 w-5 text-white fill-white" />
                     )}
-                  </ActionButton>
+                  </button>
                 </div>
                 
                 <div className="space-y-1">

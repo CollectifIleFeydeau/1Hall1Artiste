@@ -50,15 +50,8 @@ const routeTransitionMap: Record<string, 'fade' | 'slide' | 'scale' | 'flip'> = 
   '/location-history': 'flip'
 };
 
-// Define swipeable routes
-const swipeableRoutes = [
-  '/',
-  '/map',
-  '/program',
-  '/saved',
-  '/about',
-  '/donate'
-];
+// Define swipeable routes - DÉSACTIVÉ (swipe supprimé)
+const swipeableRoutes: string[] = [];
 
 interface AnimatedPageTransitionProps {
   children: React.ReactNode;

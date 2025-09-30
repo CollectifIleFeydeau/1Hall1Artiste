@@ -84,14 +84,14 @@ const AnimatedRoutes: React.FC = () => {
   
   // Configuration des routes principales
   const mainRoutes: RouteConfig[] = [
-    { path: '/map', component: Map, swipeable: true },
+    { path: '/map', component: Map, swipeable: false },
     // Route de débogage pour Firebase Analytics (uniquement en dev)
     { path: '/debug-analytics', component: AnalyticsDebugger },
-    { path: '/program', component: Program, swipeable: true },
-    { path: '/saved', component: SavedEvents, swipeable: true },
-    { path: '/community', component: Gallery, swipeable: true },
-    { path: '/about', component: About, swipeable: true },
-    { path: '/donate', component: Donate, swipeable: true },
+    { path: '/program', component: Program, swipeable: false },
+    { path: '/saved', component: SavedEvents, swipeable: false },
+    { path: '/community', component: Gallery, swipeable: false },
+    { path: '/about', component: About, swipeable: false },
+    { path: '/donate', component: Donate, swipeable: false },
   ];
   
   // Configuration des routes secondaires

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavigationButton } from "@/components/ui/NavigationButton";
 import { BackButton } from "@/components/ui/BackButton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +18,11 @@ import { IMAGE_PATHS } from "../constants/imagePaths";
 
 const About = () => {
   const navigate = useNavigate();
+
+  // Scroller en haut de la page au chargement
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   return (
     <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{

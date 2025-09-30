@@ -42,11 +42,9 @@ export function getImagePath(path: string): string {
     return normalizedPath;
   }
   
-  // Encoder les espaces et caractères spéciaux pour les URL
-  // Mais préserver les slashes et autres caractères d'URL valides
-  const encodedPath = normalizedPath.split('/').map(segment => 
-    segment ? encodeURIComponent(segment) : ''
-  ).join('/');
+  // Encoder uniquement les espaces en %20 pour les URLs
+  // Ne pas encoder les autres caractères pour éviter les problèmes
+  const encodedPath = normalizedPath.replace(/ /g, '%20');
   
   const fullPath = `${basePath}${encodedPath}`;
   

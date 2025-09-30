@@ -309,6 +309,19 @@ class AudioGuideService {
       const audioElement = event.target as HTMLAudioElement;
       const error = audioElement?.error;
       
+      // Ignorer les erreurs "Empty src" causées par le cleanup
+      // Quand src est vide, il devient égal à l'URL de la page courante
+      const srcUrl = audioElement.src || '';
+      const isEmptySrc = !srcUrl || 
+                         srcUrl === '' || 
+                         srcUrl === window.location.href ||
+                         srcUrl === window.location.origin + window.location.pathname;
+      
+      if (isEmptySrc || error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED && !srcUrl.includes('/audio/')) {
+        // Ignorer silencieusement les erreurs de cleanup
+        return;
+      }
+      
       let errorMessage = 'Erreur lors de la lecture du fichier audio';
       let logDetails: any = { event };
       
