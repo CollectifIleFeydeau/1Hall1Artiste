@@ -195,7 +195,8 @@ export default function SavedEvents() {
                 }`}
                 style={getEventBackgroundStyle(index)}
                 onClick={() => {
-                  setSelectedEventForActions(event);
+                  // Navigation vers l'événement dans le programme
+                  navigate(`/program?event=${event.id}`);
                   analytics.trackContentInteraction(EventAction.CLICK, "event", event.id, { source: "saved" });
                 }}
               >

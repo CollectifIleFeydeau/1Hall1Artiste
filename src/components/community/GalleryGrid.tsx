@@ -6,7 +6,6 @@ import { fr } from "date-fns/locale";
 
 import { CommunityEntry } from "../../types/communityTypes";
 import { cn } from "../../lib/utils";
-import { LazyImage } from "../ui/LazyImage";
 import { LikeButton } from "./LikeButton";
 import { IMAGE_PATHS } from '../../constants/imagePaths';
 
@@ -29,13 +28,16 @@ interface GalleryGridProps {
 }
 
 export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick }) => {
-  // Animation pour les éléments de la grille
+  // Détection mobile pour désactiver les animations
+  const isMobile = window.innerWidth < 768;
+  
+  // Animation pour les éléments de la grille (désactivée sur mobile)
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: isMobile ? { opacity: 1 } : { opacity: 0, y: 20 },
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: {
+      transition: isMobile ? { duration: 0 } : {
         delay: i * 0.1,
         duration: 0.5
       }
@@ -78,11 +80,12 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
           ) : entry.type === "photo" && ('thumbnailUrl' in entry || 'imageUrl' in entry) && (entry.thumbnailUrl || entry.imageUrl) ? (
             // Affichage d'une photo
             <div className="aspect-square relative">
-              <LazyImage
+              <img
                 src={entry.thumbnailUrl || entry.imageUrl}
                 alt={entry.description || "Photo communautaire"}
                 className="w-full h-full object-cover"
-                priority={index < 6} // Charger immédiatement les 6 premières images
+                loading={index < 6 ? "eager" : "lazy"}
+                decoding="async"
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">

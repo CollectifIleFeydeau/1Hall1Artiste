@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BackButton } from "@/components/ui/BackButton";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
@@ -14,6 +15,8 @@ import { IMAGE_PATHS } from "../constants/imagePaths";
 import { getImagePath } from "@/utils/imagePaths";
 
 const Program = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [currentFilter, setCurrentFilter] = useState<string>("exposition");
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
@@ -24,6 +27,25 @@ const Program = () => {
     const saved = getSavedEvents();
     setSavedEventIds(saved.map(e => e.id));
   }, []);
+  
+  // Effet séparé pour gérer l'ouverture d'événement depuis l'URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const eventId = params.get('event');
+    if (eventId) {
+      // Chercher l'événement dans tous les jours
+      const allEvents = [...getEventsByDay("samedi"), ...getEventsByDay("dimanche")];
+      const event = allEvents.find(e => e.id === eventId);
+      if (event) {
+        // Petit délai pour s'assurer que le composant est monté
+        setTimeout(() => {
+          setSelectedEvent(event);
+        }, 100);
+        // Nettoyer le paramètre de l'URL
+        navigate('/program', { replace: true });
+      }
+    }
+  }, [location.search, navigate]);
 
   const handleSaveEvent = (event: Event, e: React.MouseEvent) => {
     e.stopPropagation();

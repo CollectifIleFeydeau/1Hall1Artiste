@@ -56,6 +56,7 @@ const Gallery: React.FC = () => {
   const [lastKnownCount, setLastKnownCount] = useState<number>(0);
   const [selectedEntry, setSelectedEntry] = useState<UnifiedGalleryEntry | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [visibleHistoricalCount, setVisibleHistoricalCount] = useState<number>(20);
 
   // Vérifier si un onglet est spécifié dans l'URL
   useEffect(() => {
@@ -69,13 +70,14 @@ const Gallery: React.FC = () => {
     }
   }, [location]);
 
-  // Fonction pour charger les photos historiques
-  const loadHistoricalPhotos = (): HistoricalPhoto[] => {
+  // Fonction pour charger les photos historiques (avec limite)
+  const loadHistoricalPhotos = (limit?: number): HistoricalPhoto[] => {
     const photos: HistoricalPhoto[] = [];
     const basePath = getBasePath();
+    const maxPhotos = limit || 151;
     
-    // Ajouter les photos historiques (151 photos)
-    for (let i = 1; i <= 151; i++) {
+    // Ajouter les photos historiques (jusqu'à la limite)
+    for (let i = 1; i <= maxPhotos; i++) {
       photos.push({
         id: `historical-${i}`,
         path: `${basePath}/images/historical/photos-${i}.jpg`,
@@ -115,8 +117,8 @@ const Gallery: React.FC = () => {
         });
       }
       
-      // Charger les photos historiques
-      const historical = loadHistoricalPhotos();
+      // Charger les photos historiques (avec limite progressive)
+      const historical = loadHistoricalPhotos(visibleHistoricalCount);
       
       // Fusionner toutes les entrées
       const merged = mergeAllEntries(data, historical);
@@ -153,7 +155,7 @@ const Gallery: React.FC = () => {
     // Les notifications sont maintenant gérées par BottomNavigation
     
     return () => {};
-  }, []);
+  }, [visibleHistoricalCount]);
 
   // Vérification périodique des nouvelles contributions (toutes les 2 minutes)
   useEffect(() => {
@@ -166,6 +168,25 @@ const Gallery: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [activeTab, lastKnownCount]);
+
+  // Lazy loading progressif des photos historiques au scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      // Charger plus de photos quand on approche du bas (500px avant)
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+        setVisibleHistoricalCount(prev => {
+          const next = Math.min(prev + 20, 151);
+          if (next > prev) {
+            console.log(`[Gallery] Chargement de ${next - prev} photos historiques supplémentaires (${next}/151)`);
+          }
+          return next;
+        });
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fonction de rafraîchissement pour Pull-to-Refresh
   const handleRefresh = async () => {

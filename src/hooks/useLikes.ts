@@ -79,14 +79,14 @@ export function useLikes(entryId: string): UseLikesReturn {
     // Charger les données initiales
     loadLikeData();
     
-    // Setup polling avec données fraîches (toutes les 5 secondes)
+    // Setup polling avec données fraîches (toutes les 30 secondes pour réduire le scintillement)
     const interval = setInterval(() => {
       // Log seulement pour les entrées non-historiques
       if (!entryId.startsWith('historical-')) {
         console.log(`⏰ Polling automatique pour ${entryId}`);
       }
       loadFreshLikeData();
-    }, 5000);
+    }, 30000); // 30s au lieu de 5s
 
     // Cleanup
     return () => {
