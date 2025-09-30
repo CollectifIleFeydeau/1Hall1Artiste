@@ -144,16 +144,15 @@ export const artists: Artist[] = [
     presentation: "Puisant son inspiration entre la Bretagne et le Maroc, entre pêche à pied et scènes de vie quotidienne, Mostapha Rouine crée avec aquarelles, brou de noix et huiles. L'artiste peintre autodidacte fait vibrer la lumière, l'ambiance et les couleurs de ces deux mondes.",
     instagram: "https://www.instagram.com/mostapharouine"
   },
-  // {
-  //   id: "elizaveta-vodyanova",
-  //   name: "Elizaveta Vodyanova",
-  //   type: "exposition",
-  //   title: "Peinture",
-  //   presentation: "Artiste peintre contemporaine basée à Nantes, Elizaveta Vodyanova explore la peinture figurative à l'acrylique. Ses œuvres, intimes et poétiques, capturent des instants de vie — intérieurs, visages, paysages marins — avec une palette subtile et vibrante.",
-  //   email: "vojnovich@yandex.com",
-  //   instagram: "https://www.instagram.com/elvodyanova"
-
-  // },
+  {
+    id: "elizaveta-vodyanova",
+    name: "Elizaveta Vodyanova",
+    type: "exposition",
+    title: "Peinture",
+    presentation: "Artiste peintre contemporaine basée à Nantes, Elizaveta Vodyanova explore la peinture figurative à l'acrylique. Ses œuvres, intimes et poétiques, capturent des instants de vie — intérieurs, visages, paysages marins — avec une palette subtile et vibrante.",
+    email: "vojnovich@yandex.com",
+    instagram: "https://www.instagram.com/elvodyanova"
+  },
   {
     id: "fabienne-choyau",
     name: "Fabienne Choyau",

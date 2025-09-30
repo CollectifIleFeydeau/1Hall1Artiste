@@ -257,34 +257,13 @@ export function LocationHistory() {
                 <CardTitle className="text-xl font-bold text-[#1a2138] font-lora mr-2 leading-tight">
                   {selectedLocationData.name}
                 </CardTitle>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-shrink-0">
                   {/* Bouton de like pour le lieu */}
                   <LikeButton 
                     entryId={`location-${selectedLocationData.id}`}
                     variant="icon"
                     showCount={true}
                   />
-                  
-                  <ActionButton 
-                    variant="outline" 
-                    size="sm"
-                    className="bg-white/70 border-amber-300 text-[#4a5d94] hover:bg-amber-50 hover:border-amber-400 whitespace-nowrap px-3 py-1 text-xs flex-shrink-0 rounded-full"
-                    onClick={() => {
-                      // Rediriger vers la carte avec le point mis en évidence
-                      navigate('/map', { 
-                        state: { 
-                          highlightLocationId: selectedLocationData.id,
-                          fromHistory: true // Indiquer que la navigation vient de l'historique
-                        } 
-                      });
-                      analytics.trackMapInteraction(EventAction.LOCATION_VIEW, {
-                        building_id: selectedLocationData.id,
-                        from: 'history_page'
-                      });
-                    }}
-                  >
-                    Voir sur la carte
-                  </ActionButton>
                 </div>
               </div>
               <CardDescription className="text-sm text-gray-600 leading-relaxed">

@@ -73,15 +73,16 @@ const Program = () => {
 
       {/* Pinceaux pour expositions OU Clé de sol pour concerts en bas à droite */}
       <div 
-        className="fixed bottom-14 w-[360px] h-[360px] opacity-90 pointer-events-none z-20 transition-all duration-500"
+        className="fixed bottom-14 right-0 pointer-events-none z-20 transition-all duration-500"
         style={{
-          right: currentFilter === 'concert' ? '-240px' : '-120px',
+          width: currentFilter === 'concert' ? '149px' : '669px',
+          height: currentFilter === 'concert' ? '418px' : '862px',
           backgroundImage: currentFilter === 'concert' 
             ? `url('${getImagePath('/images/Petite Clef.png')}')`
             : `url('${getImagePath('/images/background/Pinceaux.png')}')`,
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
-          transform: currentFilter === 'concert' ? 'rotate(0deg)' : 'rotate(20deg)'
+          backgroundPosition: 'bottom right'
         }}
       />
       

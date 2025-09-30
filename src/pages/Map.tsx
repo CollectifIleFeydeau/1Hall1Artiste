@@ -428,11 +428,14 @@ const Map = ({ fullScreen = false }: MapProps) => {
     }}>
       {/* Rose décorative en bas à droite */}
       <div 
-        className="fixed bottom-14 right-[-120px] w-[360px] h-[360px] opacity-90 pointer-events-none z-20"
+        className="fixed bottom-14 right-0 pointer-events-none z-20"
         style={{
+          width: '254px',
+          height: '272px',
           backgroundImage: `url('${getImagePath('/images/Rose Transparent.png')}')`,
           backgroundSize: 'contain',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'bottom right'
         }}
       />
       
