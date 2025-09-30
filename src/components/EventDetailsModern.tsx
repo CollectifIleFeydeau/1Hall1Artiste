@@ -191,6 +191,7 @@ export const EventDetailsNew = ({
     items: navigableEvents,
     currentIndex,
     onIndexChange: onIndexChange || (() => {}),
+    threshold: 100, // Seuil augmenté pour éviter les faux positifs (clic interprété comme swipe)
     enabled: navigableEvents.length > 1
   });
   
@@ -329,7 +330,10 @@ export const EventDetailsNew = ({
             
             {/* Bouton save - Style uniforme */}
             <button
-              onClick={toggleSaveEvent}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSaveEvent(e);
+              }}
               className={`h-10 w-10 flex items-center justify-center rounded-full border-2 transition-colors ${
                 isSaved 
                   ? 'bg-amber-50 border-amber-500 text-amber-500' 
@@ -345,7 +349,8 @@ export const EventDetailsNew = ({
             
             {/* Bouton share - Style uniforme */}
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (navigator.share) {
                   navigator.share({
                     title: `${event.title} - Île Feydeau`,
@@ -365,7 +370,10 @@ export const EventDetailsNew = ({
             
             {/* Bouton fermer - Style uniforme */}
             <button
-              onClick={onClose}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
               className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
               title="Fermer"
             >
@@ -679,14 +687,20 @@ export const EventDetailsNew = ({
             {/* Première ligne : Situer et Sauver */}
             <div className="flex gap-3">
               <button
-                onClick={navigateToMap}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigateToMap();
+                }}
                 className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
               >
                 Situer
               </button>
               
               <button
-                onClick={handleAddToCalendar}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToCalendar(e);
+                }}
                 className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
               >
                 Sauver
@@ -696,14 +710,20 @@ export const EventDetailsNew = ({
             {/* Deuxième ligne : Témoignage et Retour */}
             <div className="flex gap-3">
               <button
-                onClick={handleContribute}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContribute(e);
+                }}
                 className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
               >
                 Témoignage
               </button>
               
               <button
-                onClick={onClose}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
                 className="flex-1 h-12 bg-[#1a2138] hover:bg-[#2a3148] text-white rounded-full font-medium text-sm transition-colors"
               >
                 Retour

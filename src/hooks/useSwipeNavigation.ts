@@ -77,6 +77,7 @@ export const useSwipeNavigation = <T>({
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (!enabled) return;
     touchStartX.current = e.touches[0].clientX;
+    touchEndX.current = e.touches[0].clientX; // Initialiser à la même position
     setIsSwiping(true);
   }, [enabled]);
 
@@ -90,7 +91,8 @@ export const useSwipeNavigation = <T>({
     
     const diff = touchStartX.current - touchEndX.current;
     
-    // Vérifier si le swipe dépasse le seuil
+    // Vérifier qu'il y a eu un mouvement réel (pas juste un clic)
+    // ET que le swipe dépasse le seuil
     if (Math.abs(diff) > threshold) {
       if (diff > 0) {
         // Swipe left → next

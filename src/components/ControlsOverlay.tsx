@@ -35,7 +35,10 @@ export const ControlsOverlay: React.FC<ControlsOverlayProps> = ({
             "rounded-full bg-white/90 hover:bg-white shadow-md",
             locationActive && "bg-blue-100 border-blue-300"
           )}
-          onClick={onLocationClick}
+          onClick={(e) => {
+            e.stopPropagation();
+            onLocationClick();
+          }}
           title={locationActive ? "Localisation activée" : "Activer la localisation"}
         >
           <MapPin className={cn(

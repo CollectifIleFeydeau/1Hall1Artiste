@@ -102,7 +102,9 @@ export const AudioPlayer = ({ audioSrc, autoPlay = true }: AudioPlayerProps) => 
     }
   }, [isPlaying]);
 
-  const togglePlayback = () => {
+  const togglePlayback = (e: React.MouseEvent) => {
+    // Empêcher la propagation pour éviter le conflit avec le swipe
+    e.stopPropagation();
     // Basculer l'état de lecture
     setIsPlaying(!isPlaying);
   };

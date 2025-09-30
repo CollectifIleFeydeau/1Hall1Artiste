@@ -167,6 +167,7 @@ export function LocationHistory() {
   const swipe = useSwipeNavigation({
     items: locationsWithHistory,
     currentIndex: historySwipeIndex,
+    threshold: 100, // Seuil augmenté pour éviter les faux positifs (clic interprété comme swipe)
     onIndexChange: (newIndex) => {
       const newLocation = locationsWithHistory[newIndex];
       if (newLocation) {

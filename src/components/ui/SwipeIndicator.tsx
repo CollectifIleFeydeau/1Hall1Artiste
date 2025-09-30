@@ -57,7 +57,10 @@ export const SwipeIndicator: React.FC<SwipeIndicatorProps> = ({
         {/* Flèche gauche */}
         {showArrows && (
           <button
-            onClick={onPrevious}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrevious();
+            }}
             disabled={!canGoPrevious}
             className="h-8 w-8 flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             aria-label="Fiche précédente"
@@ -79,7 +82,10 @@ export const SwipeIndicator: React.FC<SwipeIndicatorProps> = ({
         {/* Flèche droite */}
         {showArrows && (
           <button
-            onClick={onNext}
+            onClick={(e) => {
+              e.stopPropagation();
+              onNext();
+            }}
             disabled={!canGoNext}
             className="h-8 w-8 flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             aria-label="Fiche suivante"
