@@ -40,6 +40,7 @@ import Analytics from "./pages/Analytics";
 import Gallery from "./pages/Gallery";
 import AnalyticsDebugger from "./debug/AnalyticsDebugger";
 import About from "./pages/About";
+import CoordinatesPicker from "./pages/CoordinatesPicker";
 
 const queryClient = new QueryClient();
 
@@ -86,9 +87,10 @@ const AnimatedRoutes: React.FC = () => {
   };
   
 
-  // Sauvegarder la dernière page visitée
+  // Sauvegarder la dernière page visitée (sauf admin et pages techniques)
   useEffect(() => {
-    if (location.pathname !== '/' && !showSplash) {
+    const excludedPaths = ['/admin', '/coordinates', '/analytics', '/location-history'];
+    if (location.pathname !== '/' && !showSplash && !excludedPaths.includes(location.pathname)) {
       try {
         localStorage.setItem('lastVisitedPath', location.pathname);
       } catch (error) {
@@ -128,6 +130,7 @@ const AnimatedRoutes: React.FC = () => {
   // Configuration des routes secondaires
   const secondaryRoutes: RouteConfig[] = [
     { path: '/admin', component: Admin },
+    { path: '/coordinates', component: CoordinatesPicker },
     { path: '/location-history', component: LocationHistory },
     { path: '/analytics', component: Analytics },
   ];

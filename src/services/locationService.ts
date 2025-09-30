@@ -136,12 +136,6 @@ class LocationService implements LocationServiceInterface {
     // Notifier que la permission n'est pas refusée
     this.notifyPermissionChange(false);
     
-    // Si la localisation n'est pas activée, ne pas démarrer le suivi
-    if (!this.isLocationActivated()) {
-      logger.info('La localisation n\'est pas activée, le suivi ne démarre pas');
-      return;
-    }
-    
     // En mode développement local, simuler la position
     if (this.isLocalDevelopment) {
       this.startPositionSimulation();

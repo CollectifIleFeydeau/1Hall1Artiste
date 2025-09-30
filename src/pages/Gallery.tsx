@@ -236,53 +236,97 @@ const Gallery: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen pb-20 px-4 pt-4 overflow-x-hidden" style={{
-      backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'scroll'
-    }}>
-      {/* Overlay pour améliorer la lisibilité */}
-      <div className="absolute inset-0 bg-white/20" />
-      
-      <div className="relative z-10 max-w-4xl mx-auto">
-        {/* Header avec bouton retour */}
-        <header className="mb-6 flex items-center justify-between">
-          <button
-            aria-label="Retour"
-            title="Retour"
-            onClick={() => navigate("/")}
-            className="w-10 h-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-[#1a2138] font-serif">Galerie</h1>
-            <p className="text-sm text-amber-700 font-medium">Photos communautaires et archives historiques de l'Île Feydeau</p>
+    <div className="min-h-screen pb-20" style={{ backgroundColor: '#fbe5b7' }}>
+      {/* Header fixe avec fond parchemin */}
+      <div 
+        className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 pb-4 border-b border-gray-200/50"
+        style={{
+          backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="max-w-4xl mx-auto">
+          {/* Header avec bouton retour */}
+          <header className="mb-4 flex items-center justify-between">
+            <button
+              aria-label="Retour"
+              title="Retour"
+              onClick={() => navigate("/")}
+              className="w-10 h-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-[#1a2138] font-serif">Galerie</h1>
+              <p className="text-sm text-amber-700 font-medium">Photos communautaires et archives historiques de l'Île Feydeau</p>
+            </div>
+            <div className="w-20" /> {/* Spacer pour centrer le titre */}
+          </header>
+          
+          {/* Bouton Contribuer et Filtres */}
+          <div className="flex justify-center items-center gap-2 mb-4 flex-wrap">
+            {/* Bouton Contribuer */}
+            <button
+              onClick={() => {
+                setShowContributeModal(true);
+                analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'button_click' });
+              }}
+              className="h-12 border-2 border-[#1a2138] text-[#1a2138] bg-white/70 hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors px-6 flex items-center gap-2"
+            >
+              <MessageSquare size={16} />
+              <span>Contribuer</span>
+            </button>
+
+            {/* Filtres */}
+              <FilterButton 
+                active={filter === "all"}
+                onClick={() => { 
+                  setFilter("all"); 
+                  analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'all' }); 
+                }}
+              >
+                Tous
+              </FilterButton>
+              <FilterButton 
+                active={filter === "photo"}
+                onClick={() => { 
+                  setFilter("photo"); 
+                  analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'photo' }); 
+                }}
+              >
+                Photos
+              </FilterButton>
+              <FilterButton 
+                active={filter === "testimonial"}
+                onClick={() => { 
+                  setFilter("testimonial"); 
+                  analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'testimonial' }); 
+                }}
+              >
+                Témoignages
+              </FilterButton>
+              <FilterButton 
+                active={filter === "historical"}
+                onClick={() => { 
+                  setFilter("historical"); 
+                  analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'historical' }); 
+                }}
+              >
+                Historiques
+              </FilterButton>
           </div>
-          <div className="w-20" /> {/* Spacer pour centrer le titre */}
-        </header>
-        
+        </div>
+      </div>
+
+      {/* Contenu scrollable avec padding-top pour compenser le header fixe */}
+      <div className="max-w-4xl mx-auto px-4" style={{ paddingTop: '220px' }}>
         <motion.div
           initial="hidden"
           animate="visible"
-          className="flex flex-col h-full pb-32" //Augmentation du padding-bottom pour le menu
+          className="flex flex-col"
         >
-          <div className="bg-transparent rounded-xl p-4 mb-6">
-            {/* Bouton Contribuer en haut à droite */}
-            <div className="flex justify-end mb-4">
-              <button
-                onClick={() => {
-                  setShowContributeModal(true);
-                  analytics.trackCommunityInteraction(EventAction.CONTRIBUTION, { stage: 'start', source: 'button_click' });
-                }}
-                className="h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors px-6 flex items-center gap-2"
-              >
-                <MessageSquare size={16} />
-                <span>Contribuer</span>
-              </button>
-            </div>
-
+          <div className="bg-transparent rounded-xl">
             {loading ? (
               <div className="flex items-center justify-center h-64">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -294,48 +338,6 @@ const Gallery: React.FC = () => {
               </div>
             ) : (
               <>
-                {/* Filtres */}
-                <div className="flex justify-end mb-4">
-                  <div className="flex gap-1 flex-wrap">
-                    <FilterButton 
-                      active={filter === "all"}
-                      onClick={() => { 
-                        setFilter("all"); 
-                        analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'all' }); 
-                      }}
-                    >
-                      Tous
-                    </FilterButton>
-                    <FilterButton 
-                      active={filter === "photo"}
-                      onClick={() => { 
-                        setFilter("photo"); 
-                        analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'photo' }); 
-                      }}
-                    >
-                      Photos
-                    </FilterButton>
-                    <FilterButton 
-                      active={filter === "testimonial"}
-                      onClick={() => { 
-                        setFilter("testimonial"); 
-                        analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'testimonial' }); 
-                      }}
-                    >
-                      Témoignages
-                    </FilterButton>
-                    <FilterButton 
-                      active={filter === "historical"}
-                      onClick={() => { 
-                        setFilter("historical"); 
-                        analytics.trackCommunityInteraction(EventAction.FILTER, { filter: 'historical' }); 
-                      }}
-                    >
-                      Historiques
-                    </FilterButton>
-                  </div>
-                </div>
-
                 {/* Grille de la galerie */}
                   <GalleryGrid 
                     entries={filteredEntries}
@@ -353,9 +355,18 @@ const Gallery: React.FC = () => {
 
         {/* Modal de contribution */}
         {showContributeModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowContributeModal(false)}
+          >
             <div 
-              className="max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl relative bg-amber-50/95 backdrop-blur-sm"
+              className="max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl relative"
+              style={{
+                backgroundImage: `url('${IMAGE_PATHS.BACKGROUNDS.PARCHMENT}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundAttachment: 'local'
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative z-10 p-6">

@@ -4,30 +4,26 @@
 
 ### GESTION DES DONNEES
 
-- [ ] **rajouter les autres batîments** : https://patrimonia.nantes.fr/lpav/index.html?data_id=dataSource_1-186bb733533-layer-1%3A475&views=Notice
+- [ ] **rajouter les MP3** : 
+- [ ] **rajouter les images** : 
+  12 allée Duguay-Trouin / 22 rue Kervégan
+  9-10 allée Duguay-Trouin / 16-18 rue Kervégan 
 - [ ] **Mise à jour** : Récupérer les informations depuis Google sheet
 - [ ] **Mise à jour** : Exporter les informations pour les copier sur OpenAgenda facilement
-
-### DESIGN
-
-- [X] **Surimpressions** : Pinceaux, 
-- [X] **Surimpressions** : notes de musique, 
-- [X] **Surimpressions** : boussoles
-- [ ] **Images de fallback** : `concert-default.jpg`, `exposition-default.jpg`
 - [ ] **Images d'événements principaux** : 5-10 événements phares (400x300px, <50KB)
 
 ### "Carte au Trésor"
 
 #### 🗺️ **Compteur en haut de la carte **
 - [ ] **Compteur "X Visité, Y À découvrir"** : Style parchemin vintage en haut de la page Carte
-- [ ] **Boutons "Localisation" et "Ambiance"** : Style cohérent avec le compteur
+- [ ] **Boutons "Localisation" et "Ambiance"** : Style cohérent avec le compteur et les bouger en haut
 - [ ] **Intégration harmonieuse** : Même esthétique que le design system
 
 #### 🎨 **Marqueurs de carte améliorés**
 - [ ] **Rose des vents miniature** : Remplacer les cercles par des boussoles (bleu si visité, gris sinon)
-- [ ] **Coffre au trésor** : Pour les lieux spéciaux ou événements importants / concerts ?
-- [ ] **Pin stylisé** : Version "carte ancienne" du marqueur classique
-- [ ] **Animation subtile** : Hover et états actifs avec transitions douces
+<!-- - [ ] **Coffre au trésor** : Pour les lieux spéciaux ou événements importants / concerts ? -->
+<!-- - [ ] **Pin stylisé** : Version "carte ancienne" du marqueur classique -->
+<!-- - [ ] **Animation subtile** : Hover et états actifs avec transitions douces -->
 
 #### 🏛️ **Fenêtres modales améliorées**
 - [ ] **Rose des vents décorative** : Sous les titres des modales

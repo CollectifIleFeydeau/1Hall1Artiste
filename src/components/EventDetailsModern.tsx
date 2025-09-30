@@ -20,6 +20,9 @@ import X from "lucide-react/dist/esm/icons/x";
 import Heart from "lucide-react/dist/esm/icons/heart";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import MessageSquareQuote from "lucide-react/dist/esm/icons/message-square-quote";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import { analytics, EventAction, trackInteraction } from "@/services/firebaseAnalytics";
 import { addToCalendar, isCalendarSupported, CalendarErrorType } from "@/services/calendarService";
 import { toast } from "@/components/ui/use-toast";
@@ -328,23 +331,40 @@ export const EventDetailsNew = ({
             {/* Bouton de like - Logique partagée, UI simple */}
             <LikeButtonSimple entryId={`event-${event.id}`} />
             
-            {/* Bouton save - Style uniforme */}
+            {/* Bouton témoignage/citation */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                toggleSaveEvent(e);
+                handleContribute(e);
               }}
-              className={`h-10 w-10 flex items-center justify-center rounded-full border-2 transition-colors ${
-                isSaved 
-                  ? 'bg-amber-50 border-amber-500 text-amber-500' 
-                  : 'bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500'
-              }`}
-              title={isSaved ? "Retirer des favoris" : "Ajouter aux favoris"}
+              className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+              title="Partager un témoignage"
             >
-              {isSaved ? 
-                <BookmarkCheck className="h-5 w-5" /> : 
-                <Bookmark className="h-5 w-5" />
-              }
+              <MessageSquareQuote className="h-5 w-5" />
+            </button>
+            
+            {/* Bouton sauvegarder/calendrier */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCalendar(e);
+              }}
+              className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+              title="Ajouter au calendrier"
+            >
+              <Calendar className="h-5 w-5" />
+            </button>
+            
+            {/* Bouton situer sur la carte */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigateToMap();
+              }}
+              className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+              title="Voir sur la carte"
+            >
+              <MapPin className="h-5 w-5" />
             </button>
             
             {/* Bouton share - Style uniforme */}
@@ -368,16 +388,16 @@ export const EventDetailsNew = ({
               <Share2 className="h-5 w-5" />
             </button>
             
-            {/* Bouton fermer - Style uniforme */}
+            {/* Bouton retour - Style uniforme */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onClose();
               }}
               className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
-              title="Fermer"
+              title="Retour"
             >
-              <X className="h-5 w-5" />
+              <ArrowLeft className="h-5 w-5" />
             </button>
           </div>
           
@@ -668,71 +688,8 @@ export const EventDetailsNew = ({
             </div>
           )}
 
-          {/* Bouton de navigation selon la source */}
-          <div className="flex justify-center mb-6 pt-4">
-            {source === "program" && (
-              <TreasureButton 
-                variant="primary"
-                size="md"
-                fullWidth
-                onClick={navigateToMap}
-              >
-                Voir sur la carte
-              </TreasureButton>
-            )}
-          </div>
-
-          {/* Actions du bas */}
-          <div className="space-y-3">
-            {/* Première ligne : Situer et Sauver */}
-            <div className="flex gap-3">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateToMap();
-                }}
-                className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
-              >
-                Situer
-              </button>
-              
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddToCalendar(e);
-                }}
-                className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
-              >
-                Sauver
-              </button>
-            </div>
-            
-            {/* Deuxième ligne : Témoignage et Retour */}
-            <div className="flex gap-3">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContribute(e);
-                }}
-                className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
-              >
-                Témoignage
-              </button>
-              
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClose();
-                }}
-                className="flex-1 h-12 bg-[#1a2138] hover:bg-[#2a3148] text-white rounded-full font-medium text-sm transition-colors"
-              >
-                Retour
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
   );
 };
-

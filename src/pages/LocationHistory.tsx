@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { BackButton } from "@/components/ui/BackButton";
-import { ArrowLeft, MapPin, Info } from "lucide-react";
+import { ArrowLeft, Info } from "lucide-react";
 import X from "lucide-react/dist/esm/icons/x";
 import Camera from "lucide-react/dist/esm/icons/camera";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
@@ -33,10 +33,13 @@ import {
 import { locations } from "@/data/locations";
 import { setLocationContributionContext } from "@/services/contextualContributionService";
 import { LikeButton } from "@/components/community/LikeButton";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
+import MessageSquareQuote from "lucide-react/dist/esm/icons/message-square-quote";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import { AudioGuide } from "@/components/AudioGuide";
 
 // Créer un logger pour le composant LocationHistory
 const logger = createLogger('LocationHistory');
-
 export function LocationHistory() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -331,13 +334,62 @@ export function LocationHistory() {
                 <CardTitle className="text-xl font-bold text-[#1a2138] font-lora mr-2 leading-tight">
                   {selectedLocationData.name}
                 </CardTitle>
-                <div className="flex items-center space-x-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   {/* Bouton de like pour le lieu */}
                   <LikeButton 
                     entryId={`location-${selectedLocationData.id}`}
                     variant="icon"
                     showCount={true}
                   />
+                  
+                  {/* Bouton témoignage */}
+                  <button
+                    onClick={() => {
+                      setLocationContributionContext(selectedLocationData);
+                      navigate("/community?tab=contribute");
+                    }}
+                    className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+                    title="Partager un témoignage"
+                  >
+                    <MessageSquareQuote className="h-5 w-5" />
+                  </button>
+                  
+                  {/* Bouton situer sur la carte */}
+                  <button
+                    onClick={() => {
+                      navigate('/map', {
+                        state: {
+                          highlightLocationId: selectedLocationData.id,
+                          fromHistory: true,
+                          timestamp: new Date().getTime()
+                        }
+                      });
+                    }}
+                    className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+                    title="Voir sur la carte"
+                  >
+                    <MapPin className="h-5 w-5" />
+                  </button>
+                  
+                  {/* Bouton partager */}
+                  <button
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: `${selectedLocationData.name} - Île Feydeau`,
+                          text: `Découvrez l'histoire de ${selectedLocationData.name} sur l'Île Feydeau à Nantes!`,
+                          url: window.location.href
+                        });
+                      } else {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert('Lien copié !');
+                      }
+                    }}
+                    className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+                    title="Partager"
+                  >
+                    <Share2 className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
               <CardDescription className="text-sm text-gray-600 leading-relaxed">
@@ -390,66 +442,11 @@ export function LocationHistory() {
             
             {/* Lecteur audio si disponible */}
             {selectedLocationData.audio && (
-              <div className="mb-4 p-4 bg-white/60 backdrop-blur-sm rounded-xl border-2 border-amber-200 shadow-md">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center">
-                    <Volume2 className="h-4 w-4 text-[#4a5d94] mr-2" />
-                    <span className="text-sm font-medium text-[#4a5d94]">Écouter l'histoire</span>
-                  </div>
-                  <button
-                    onClick={togglePlayPause}
-                    disabled={audioLoading}
-                    className="h-10 w-10 flex items-center justify-center rounded-full bg-[#4a5d94] hover:bg-[#3a4d84] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-md"
-                  >
-                    {audioLoading ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-white" />
-                    ) : isPlaying ? (
-                      <Pause className="h-5 w-5 text-white fill-white" />
-                    ) : (
-                      <Play className="h-5 w-5 text-white fill-white" />
-                    )}
-                  </button>
-                </div>
-                
-                <div className="space-y-1">
-                  <Slider
-                    value={[currentTime]}
-                    max={duration || 100}
-                    step={0.1}
-                    onValueChange={handleSliderChange}
-                    disabled={audioLoading}
-                    className="cursor-pointer"
-                  />
-                  <div className="flex justify-between text-xs text-[#4a5d94]">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{formatTime(duration)}</span>
-                  </div>
-                </div>
-                
-                <audio
-                  ref={audioRef}
-                  src={selectedLocationData.audio ? 
-                    (window.location.hostname.includes('github.io') 
-                      ? `/1Hall1Artiste${selectedLocationData.audio}` 
-                      : selectedLocationData.audio) 
-                    : ''}
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  onEnded={() => {
-                    setIsPlaying(false);
-                    if (selectedLocationData?.id) {
-                      analytics.trackAudio('pause', selectedLocationData.id);
-                    }
-                  }}
-                  onCanPlay={() => setAudioLoading(false)}
-                  onError={(e) => {
-                    console.error("Erreur de chargement audio:", e, selectedLocationData.audio);
-                    setAudioLoading(false);
-                  }}
-                  preload="metadata"
-                  className="hidden"
-                />
-              </div>
+              <AudioGuide 
+                audioSrc={selectedLocationData.audio} 
+                locationId={selectedLocationData.id}
+                className="mb-4 mx-auto max-w-md"
+              />
             )}
             
             <h3 className="text-base font-bold text-[#4a5d94] mb-3 pb-1 border-b border-[#d8e3ff]">

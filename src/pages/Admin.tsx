@@ -14,6 +14,7 @@ import { ImportExportPanel } from "@/components/ImportExportPanel";
 import { EventForm } from "@/components/EventForm";
 import { AdminLogin } from "@/components/AdminLogin";
 import { toast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 import { CommunityManagement } from "@/components/CommunityManagement";
 import { LikesTestComponent } from "@/components/test/LikesTestComponent";
 import { LikesStatsComponent } from "@/components/admin/LikesStatsComponent";
@@ -77,6 +78,9 @@ export default function Admin() {
       // Définir les coordonnées pour le point sélectionné
       setCoordinates({ x, y });
       setMapClicked(true);
+      
+      // Afficher une alerte avec les coordonnées (solution simple qui fonctionne toujours)
+      alert(`📍 Coordonnées récupérées\n\nX: ${x}\nY: ${y}\n\nCes coordonnées sont maintenant dans les champs ci-dessus.`);
       
       // Tester immédiatement les nouvelles coordonnées
       testCoordinatesOnMap();
@@ -180,33 +184,38 @@ export default function Admin() {
   const testCoordinatesOnMap = () => {
     logger.info('Test des coordonnées sur la carte');
     
-    if (!activeLocation) {
-      logger.warn('Tentative de test sans lieu sélectionné');
-      alert("Veuillez d'abord sélectionner un lieu");
-      return;
-    }
-    
-    // Créer une copie temporaire des lieux avec les nouvelles coordonnées pour le lieu actif
-    const testLocations = mapLocations.map(location => {
-      if (location.id === activeLocation) {
-        // Utiliser les coordonnées actuelles du formulaire
-        const newLocation = { ...location, x: coordinates.x, y: coordinates.y };
-        logger.debug('Mise à jour temporaire des coordonnées pour le test', {
-          id: location.id,
-          name: location.name,
-          oldX: location.x,
-          oldY: location.y,
-          newX: coordinates.x,
-          newY: coordinates.y
-        });
-        return newLocation;
+    try {
+      // Pas besoin de lieu sélectionné pour afficher les coordonnées
+      if (!activeLocation) {
+        logger.info('Affichage des coordonnées sans lieu sélectionné');
+        // On affiche quand même les coordonnées
+        return;
       }
-      return location;
-    });
-    
-    // Mettre à jour l'état local pour afficher les nouvelles coordonnées sur la carte
-    setMapLocations(testLocations);
-    logger.info('Coordonnées de test appliquées temporairement', coordinates);
+      
+      // Créer une copie temporaire des lieux avec les nouvelles coordonnées pour le test
+      const testLocations = mapLocations.map(location => {
+        if (location.id === activeLocation) {
+          // Utiliser les coordonnées actuelles du formulaire
+          const newLocation = { ...location, x: coordinates.x, y: coordinates.y };
+          logger.debug('Mise à jour temporaire des coordonnées pour le test', {
+            id: location.id,
+            name: location.name,
+            oldX: location.x,
+            oldY: location.y,
+            newX: coordinates.x,
+            newY: coordinates.y
+          });
+          return newLocation;
+        }
+        return location;
+      });
+      
+      // Mettre à jour l'état local pour afficher les nouvelles coordonnées sur la carte
+      setMapLocations(testLocations);
+      logger.info('Coordonnées de test appliquées temporairement', coordinates);
+    } catch (error) {
+      logger.error('Erreur lors du test des coordonnées', error);
+    }
   };
 
   const exportLocations = () => {
@@ -301,6 +310,22 @@ export default function Admin() {
                 <CardTitle className="text-[#4a5d94]">Gestion des coordonnées</CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Lien vers le récupérateur de coordonnées */}
+                <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-2 text-blue-900">
+                    🎯 Récupérateur de Coordonnées
+                  </h3>
+                  <p className="text-sm text-blue-700 mb-3">
+                    Utilisez cet outil simple pour récupérer les coordonnées X, Y en cliquant sur la carte.
+                  </p>
+                  <Button
+                    onClick={() => navigate('/coordinates')}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    📍 Ouvrir le récupérateur de coordonnées
+                  </Button>
+                </div>
+
                 <div className="grid grid-cols-1 gap-4">
                   <div>
                     <h2 className="text-lg font-semibold mb-2">Lieux</h2>
@@ -459,7 +484,7 @@ export default function Admin() {
           </TabsContent>
         </Tabs>
       </div>
+      <Toaster />
     </div>
   );
 }
-

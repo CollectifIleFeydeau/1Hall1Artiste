@@ -449,7 +449,7 @@ const Map = ({ fullScreen = false }: MapProps) => {
     }}>
       {/* Rose décorative en bas à droite */}
       <div 
-        className="fixed bottom-14 right-0 pointer-events-none z-20"
+        className="fixed bottom-14 right-0 pointer-events-none z-30"
         style={{
           width: '168px',
           height: '180px',

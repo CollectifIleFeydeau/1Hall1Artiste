@@ -18,7 +18,10 @@ import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import Volume2 from "lucide-react/dist/esm/icons/volume-2";
 import Play from "lucide-react/dist/esm/icons/play";
 import Pause from "lucide-react/dist/esm/icons/pause";
+import MessageSquareQuote from "lucide-react/dist/esm/icons/message-square-quote";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import { AudioGuideButton } from "@/components/AudioGuideButton";
 import { analytics, EventAction } from "@/services/firebaseAnalytics";
 import { getBackgroundFallback } from "@/utils/backgroundUtils";
@@ -28,6 +31,7 @@ import { Slider } from "@/components/ui/slider";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { SwipeIndicator } from "@/components/ui/SwipeIndicator";
+import { AudioGuide } from "@/components/AudioGuide";
 
 // Composant Like simple avec logique partagée
 interface LikeButtonSimpleProps {
@@ -104,9 +108,10 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
   // États pour le lecteur audio
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [audioLoading, setAudioLoading] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   const handleHistoryClick = () => {
     navigate('/location-history', { 
@@ -188,25 +193,25 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
       >
         
         <div className="relative z-10 p-6">
-          {/* Indication bâtiment fermé */}
-          {location.hasProgram === false && (
-            <div className="mb-4 p-3 bg-gray-100 border border-gray-300 rounded-lg flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-gray-600 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-1">
-                  Bâtiment actuellement fermé
-                </p>
-                <p className="text-xs text-gray-600">
-                  Ce lieu n'accueille pas d'événements pour le moment, mais vous pouvez découvrir son histoire et écouter l'audio guide.
-                </p>
-              </div>
-            </div>
-          )}
-          
           {/* Header avec titre et boutons - Style épuré */}
           <div className="mb-6">
-            {/* Boutons en haut à droite */}
-            <div className="flex justify-end items-center gap-2 mb-2">
+            {/* Boutons en haut à droite avec indication bâtiment fermé */}
+            <div className="flex justify-between items-center gap-2 mb-2">
+              {/* Indication bâtiment fermé à gauche */}
+              {location.hasProgram === false && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-full">
+                  <AlertCircle className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                  <p className="text-xs font-medium text-gray-700">
+                    Bâtiment fermé
+                  </p>
+                </div>
+              )}
+              
+              {/* Spacer pour pousser les boutons à droite si pas de message */}
+              {location.hasProgram !== false && <div className="flex-1" />}
+              
+              {/* Boutons à droite */}
+              <div className="flex items-center gap-2">
               {/* Bouton de like */}
               <LikeButtonSimple entryId={`building-${location.id}`} />
               
@@ -224,6 +229,23 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
                   <BookmarkCheck className="h-5 w-5" /> : 
                   <Bookmark className="h-5 w-5" />
                 }
+              </button>
+              
+              {/* Bouton témoignage/citation */}
+              <button
+                onClick={() => {
+                  navigate("/community?tab=contribute", { 
+                    state: { 
+                      locationContext: location,
+                      fromLocation: true 
+                    } 
+                  });
+                  onClose();
+                }}
+                className="h-10 w-10 flex items-center justify-center rounded-full border-2 bg-white/70 border-gray-300 text-gray-600 hover:border-amber-500 hover:text-amber-500 transition-colors"
+                title="Partager un témoignage"
+              >
+                <MessageSquareQuote className="h-5 w-5" />
               </button>
               
               {/* Bouton share */}
@@ -254,6 +276,7 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
               >
                 <X className="h-5 w-5" />
               </button>
+              </div>
             </div>
             
             {/* Indicateur de swipe */}
@@ -283,15 +306,53 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
             </div>
           </div>
 
-          {/* Description du lieu */}
+          {/* Description du lieu avec expand/collapse */}
           {location.description && (
             <div className="mb-6">
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {location.description}
-              </p>
+              <div 
+                className="cursor-pointer"
+                onClick={() => setShowFullDescription(!showFullDescription)}
+              >
+                <p className={`text-sm text-gray-700 leading-relaxed ${
+                  showFullDescription ? '' : 'line-clamp-2'
+                }`}>
+                  {location.description}
+                </p>
+                {location.description.length > 100 && (
+                  <div className="flex items-center text-xs text-gray-500 mt-1">
+                    {showFullDescription ? (
+                      <>
+                        <ChevronUp className="h-3 w-3 mr-1" />
+                        <span>Réduire</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-3 w-3 mr-1" />
+                        <span>Voir plus</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+              {location.history && showFullDescription && (
+                <button
+                  onClick={handleHistoryClick}
+                  className="mt-2 text-sm text-[#4a5d94] hover:text-[#3a4d84] font-medium underline"
+                >
+                  La suite →
+                </button>
+              )}
             </div>
           )}
 
+          {/* Lecteur audio intégré si disponible et fichier existe */}
+          {location.audio && location.audio !== '' && (
+            <AudioGuide 
+              audioSrc={location.audio} 
+              locationId={location.id}
+              className="mb-4 mx-auto max-w-md"
+            />
+          )}
 
           {/* Événements à cet endroit */}
           {events.length > 0 && (
@@ -364,89 +425,9 @@ export const LocationDetailsModern: React.FC<LocationDetailsModernProps> = ({
             </div>
           )}
 
-          {/* Lecteur audio intégré si disponible */}
-          {location.audio && (
-            <div className="mb-4 p-4 bg-white/60 backdrop-blur-sm rounded-xl border-2 border-amber-200 shadow-md">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <Volume2 className="h-4 w-4 text-[#4a5d94] mr-2" />
-                  <span className="text-sm font-medium text-[#4a5d94]">Audio guide</span>
-                </div>
-                <button
-                  onClick={togglePlayPause}
-                  disabled={audioLoading}
-                  className="h-10 w-10 flex items-center justify-center rounded-full bg-[#4a5d94] hover:bg-[#3a4d84] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-md"
-                >
-                  {audioLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-white" />
-                  ) : isPlaying ? (
-                    <Pause className="h-5 w-5 text-white fill-white" />
-                  ) : (
-                    <Play className="h-5 w-5 text-white fill-white" />
-                  )}
-                </button>
-              </div>
-              
-              <div className="space-y-1">
-                <Slider
-                  value={[currentTime]}
-                  max={duration || 100}
-                  step={0.1}
-                  onValueChange={handleSliderChange}
-                  disabled={audioLoading}
-                  className="cursor-pointer"
-                />
-                <div className="flex justify-between text-xs text-[#4a5d94]">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(duration)}</span>
-                </div>
-              </div>
-              
-              <audio
-                ref={audioRef}
-                src={location.audio ? 
-                  (window.location.hostname.includes('github.io') 
-                    ? `/1Hall1Artiste${location.audio}` 
-                    : location.audio) 
-                  : ''}
-                onTimeUpdate={handleTimeUpdate}
-                onLoadedMetadata={handleLoadedMetadata}
-                onEnded={() => setIsPlaying(false)}
-                onCanPlay={() => setAudioLoading(false)}
-                onError={() => setAudioLoading(false)}
-                preload="metadata"
-                className="hidden"
-              />
-            </div>
-          )}
 
           {/* Actions du bas */}
           <div className="space-y-3">
-            {/* Ligne unique : Histoire et Témoignage */}
-            <div className="flex gap-3">
-              <button
-                onClick={handleHistoryClick}
-                className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
-              >
-                Histoire
-              </button>
-              
-              <button
-                onClick={() => {
-                  // Navigation vers la galerie communautaire avec contexte du lieu
-                  navigate("/community?tab=contribute", { 
-                    state: { 
-                      locationContext: location,
-                      fromLocation: true 
-                    } 
-                  });
-                  onClose();
-                }}
-                className="flex-1 h-12 border-2 border-[#1a2138] text-[#1a2138] bg-transparent hover:bg-[#1a2138] hover:text-white rounded-full font-medium text-sm transition-colors"
-              >
-                Témoignage
-              </button>
-            </div>
             
             {/* Deuxième ligne : Navigation (si géolocalisation active) */}
             {showLocationFeatures && (
