@@ -5,7 +5,7 @@
 ### GESTION DES DONNEES
 
  le bouton bruitage quand on reclique dessus il ne s'éteint pas 
-- [ ] **rajouter les MP3** : 
+- [X] **rajouter les MP3** : 
 - [ ] **rajouter les images** : 
   12 allée Duguay-Trouin / 22 rue Kervégan
   9-10 allée Duguay-Trouin / 16-18 rue Kervégan 
