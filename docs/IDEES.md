@@ -5,6 +5,7 @@
 ### GESTION DES DONNEES
 
  le bouton bruitage quand on reclique dessus il ne s'éteint pas 
+on a plus le bouton marqué comme visiter et avec tous les boutons il reste pas beaucoup de place 
 - [X] **rajouter les MP3** : 
 - [ ] **rajouter les images** : 
   12 allée Duguay-Trouin / 22 rue Kervégan
