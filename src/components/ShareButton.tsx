@@ -48,9 +48,14 @@ export function ShareButton({ title, text, url, className }: ShareButtonProps) {
               text,
               url: absoluteUrl,
             });
-          } catch (error) {
+          } catch (error: any) {
+            // Ignorer silencieusement si l'utilisateur annule le partage
+            if (error?.name === 'AbortError' || error?.message?.includes('canceled') || error?.message?.includes('cancelled')) {
+              console.log('[ShareButton] Share canceled by user');
+              return;
+            }
             console.error("Error sharing:", error);
-            // Fallback en cas d'erreur
+            // Fallback en cas d'erreur réelle
             copyToClipboard(absoluteUrl);
           }
         } else {
