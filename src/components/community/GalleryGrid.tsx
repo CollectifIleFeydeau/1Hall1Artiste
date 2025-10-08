@@ -27,18 +27,20 @@ interface GalleryGridProps {
   onEntryClick: (entry: UnifiedGalleryEntry) => void;
 }
 
-// Fonction pour optimiser les URLs Cloudinary
+// Fonction pour générer des miniatures Cloudinary optimisées
 const getOptimizedCloudinaryUrl = (url: string, isMobile: boolean): string => {
   if (!url || !url.includes('cloudinary.com')) return url;
   
-  // Taille optimisée selon l'écran
-  const width = isMobile ? 400 : 600;
-  const quality = 'auto:low'; // Qualité automatique basse pour réduire le poids
+  // Taille miniature optimisée pour la grille
+  const width = isMobile ? 300 : 400;
+  const height = isMobile ? 300 : 400;
+  const quality = 'auto:good'; // Qualité automatique bonne pour miniatures
   
-  // Insérer les transformations Cloudinary
+  // Insérer les transformations Cloudinary pour miniatures
+  // c_fill = recadrage intelligent, g_auto = focus automatique
   return url.replace(
     '/upload/',
-    `/upload/w_${width},q_${quality},f_auto,c_fill/`
+    `/upload/w_${width},h_${height},c_fill,g_auto,q_${quality},f_auto/`
   );
 };
 
@@ -207,10 +209,14 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ entries, onEntryClick 
               <img
                 src={getOptimizedCloudinaryUrl(entry.thumbnailUrl || entry.imageUrl, false)}
                 alt={entry.description || "Photo communautaire"}
-                className="w-full h-full object-cover transition-opacity duration-300 opacity-0"
+                className="w-full h-full object-cover"
                 loading={index < 6 ? "eager" : "lazy"}
                 decoding="async"
-                style={{ imageRendering: 'auto' }}
+                onLoad={(e) => {
+                  // Afficher l'image une fois chargée
+                  (e.target as HTMLImageElement).style.opacity = '1';
+                }}
+                style={{ opacity: 0, transition: 'opacity 0.3s' }}
               />
               {/* Overlay avec description - visible sur mobile, hover sur desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pb-8">
