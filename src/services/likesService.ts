@@ -1,7 +1,7 @@
 import { LikeData, LikeResponse, LikeStats } from '@/types/likesTypes';
 
 // Configuration Firebase
-const FIREBASE_URL = 'https://collectif-feydeau-default-rtdb.europe-west1.firebasedatabase.app';
+const FIREBASE_URL = 'https://collectif-ile-feydeau----app-default-rtdb.europe-west1.firebasedatabase.app';
 const LIKES_PATH = 'likes-data';
 const STATS_PATH = 'likes-stats';
 
