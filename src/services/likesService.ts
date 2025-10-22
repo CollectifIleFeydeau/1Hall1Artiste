@@ -350,6 +350,23 @@ async function updateGlobalStats(): Promise<void> {
   }
 }
 
+// Fonction de surveillance automatique
+export async function healthCheck(): Promise<{status: 'ok' | 'error', message: string}> {
+  try {
+    // Test simple de lecture
+    const response = await fetchWithTimeout(`${FIREBASE_URL}/.json`);
+    if (response.ok) {
+      return { status: 'ok', message: 'Firebase Realtime Database accessible' };
+    } else if (response.status === 401) {
+      return { status: 'error', message: 'ALERTE: Règles de sécurité expirées ou incorrectes!' };
+    } else {
+      return { status: 'error', message: `Erreur Firebase: ${response.status}` };
+    }
+  } catch (error) {
+    return { status: 'error', message: `Connexion Firebase impossible: ${error}` };
+  }
+}
+
 // Fonction de test pour vérifier la connexion Firebase
 export async function testFirebaseConnection(): Promise<boolean> {
   try {

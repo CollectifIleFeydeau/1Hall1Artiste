@@ -1,0 +1,33 @@
+{
+  "rules": {
+    "likes-data": {
+      "$entryId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['likes', 'likedBy', 'lastLiked'])",
+        "likes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "likedBy": {
+          ".validate": "newData.isString() || (newData.hasChildren() && newData.val() != null)"
+        },
+        "lastLiked": {
+          ".validate": "newData.isString()"
+        }
+      }
+    },
+    "likes-stats": {
+      ".read": true,
+      ".write": true,
+      ".validate": "newData.hasChildren(['total', 'today'])"
+    },
+    "test-connection": {
+      ".read": true,
+      ".write": true
+    },
+    "community-photos": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
