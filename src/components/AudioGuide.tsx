@@ -107,11 +107,7 @@ export const AudioGuide = ({ audioSrc, locationId, className = "" }: AudioGuideP
 
       <audio
         ref={audioRef}
-        src={audioSrc ? 
-          (window.location.hostname.includes('github.io') 
-            ? `/1Hall1Artiste${audioSrc}` 
-            : audioSrc) 
-          : ''}
+        src={audioSrc || ''}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onPlay={() => setIsPlaying(true)}

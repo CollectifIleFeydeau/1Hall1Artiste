@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "start": "powershell -ExecutionPolicy Bypass -File ./start-dev.ps1",
-    "build": "vite build && node -e \"const fs=require('fs'); const path=require('path'); console.log('📁 Checking sources...'); fs.mkdirSync('dist/images', {recursive:true}); if(fs.existsSync('public/images/background')){fs.cpSync('public/images/background', 'dist/images/background', {recursive:true}); console.log('✅ Background images copied');}else{console.log('❌ Background source not found');} if(fs.existsSync('public/images/historical')){fs.cpSync('public/images/historical', 'dist/images/historical', {recursive:true}); const count=fs.readdirSync('dist/images/historical').length; console.log('✅ Historical images copied:', count, 'files');}else{console.log('❌ Historical source not found');}\"",
+    "build": "vite build && node -e \"const fs=require('fs'); const path=require('path'); console.log('📁 Checking sources...'); fs.mkdirSync('dist/images', {recursive:true}); if(fs.existsSync('public/images/background')){fs.cpSync('public/images/background', 'dist/images/background', {recursive:true}); console.log('✅ Background images copied');}else{console.log('❌ Background source not found');}\"",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && tsc -p tsconfig.api.json",

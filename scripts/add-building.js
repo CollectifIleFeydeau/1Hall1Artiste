@@ -14,6 +14,7 @@ import * as readline from 'readline';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { uploadToCloudinary, resourceTypeForExtension } from './cloudinaryUpload.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,16 +53,21 @@ function normalizeId(address) {
     .replace(/^-|-$/g, ''); // Retirer tirets début/fin
 }
 
-// Fonction pour normaliser un nom de fichier audio
-function normalizeAudioFilename(address) {
-  return address
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '') + '.mp3';
+// Uploade un fichier m\u00e9dia local vers Cloudinary avec le public_id donn\u00e9.
+async function uploadBuildingMedia(localPath, publicId) {
+  if (!fs.existsSync(localPath)) {
+    printError(`Fichier introuvable: ${localPath} (image/audio non upload\u00e9)`);
+    return null;
+  }
+  try {
+    const resourceType = resourceTypeForExtension(path.extname(localPath));
+    const url = await uploadToCloudinary(localPath, publicId, resourceType);
+    printSuccess(`Upload\u00e9 sur Cloudinary: ${url}`);
+    return url;
+  } catch (error) {
+    printError(`Upload \u00e9chou\u00e9 (${error.message}) \u2014 champ laiss\u00e9 vide, \u00e0 compl\u00e9ter manuellement`);
+    return null;
+  }
 }
 
 // Fonction pour afficher un titre
@@ -199,15 +205,23 @@ async function main() {
     building.history = null;
   }
 
-  printSection('6. Fichiers média');
+  printSection('6. Fichiers média (upload Cloudinary)');
+  console.log('Les médias sont hébergés sur Cloudinary (static/locations/..., static/audio/...), pas dans public/.');
+  console.log('Indiquez le chemin d\'un fichier local à uploader, ou laissez vide pour l\'ajouter plus tard.\n');
 
-  const defaultImageName = `${building.id}.jpg`;
-  building.imageName = await question(`Nom du fichier image (défaut: "${defaultImageName}") : `) || defaultImageName;
-  building.image = `/images/locations/${building.imageName}`;
+  const imageLocalPath = await question('Chemin local de l\'image (ex: C:\\photos\\batiment.jpg), vide pour ignorer : ');
+  if (imageLocalPath.trim()) {
+    building.image = await uploadBuildingMedia(imageLocalPath.trim(), `static/locations/${building.id}`);
+  } else {
+    building.image = null;
+  }
 
-  const defaultAudioName = normalizeAudioFilename(building.name);
-  building.audioName = await question(`Nom du fichier audio (défaut: "${defaultAudioName}") : `) || defaultAudioName;
-  building.audio = `/audio/${building.audioName}`;
+  const audioLocalPath = await question('Chemin local de l\'audio (ex: C:\\audio\\batiment.mp3), vide pour ignorer : ');
+  if (audioLocalPath.trim()) {
+    building.audio = await uploadBuildingMedia(audioLocalPath.trim(), `static/audio/${building.id}`);
+  } else {
+    building.audio = null;
+  }
 
   printSection('7. Programmation d\'événements');
 
@@ -223,8 +237,8 @@ async function main() {
   console.log(`${colors.bright}Position carte :${colors.reset} (${x}, ${y})`);
   console.log(`${colors.bright}Description :${colors.reset} ${description.substring(0, 80)}...`);
   console.log(`${colors.bright}Histoire :${colors.reset} ${building.history ? 'Oui' : 'Non'}`);
-  console.log(`${colors.bright}Image :${colors.reset} ${building.image}`);
-  console.log(`${colors.bright}Audio :${colors.reset} ${building.audio}`);
+  console.log(`${colors.bright}Image :${colors.reset} ${building.image || '(non fournie)'}`);
+  console.log(`${colors.bright}Audio :${colors.reset} ${building.audio || '(non fourni)'}`);
   console.log(`${colors.bright}Événements :${colors.reset} ${building.hasProgram ? 'Oui' : 'Non'}`);
 
   const confirm = await question('\nConfirmer l\'ajout de ce bâtiment ? (o/n) : ');
@@ -266,8 +280,12 @@ async function main() {
 
   console.log('1. Copiez le code TypeScript généré');
   console.log(`2. Ajoutez-le dans ${colors.bright}src/data/locations.ts${colors.reset}`);
-  console.log(`3. Placez l'image dans ${colors.bright}public/images/locations/${building.imageName}${colors.reset}`);
-  console.log(`4. Placez l'audio dans ${colors.bright}public/audio/${building.audioName}${colors.reset}`);
+  if (!building.image) {
+    console.log(`3. Uploadez l'image plus tard: relancez ce script, ou uploadez-la manuellement (public_id "static/locations/${building.id}") et complétez le champ "image"`);
+  }
+  if (!building.audio) {
+    console.log(`4. Uploadez l'audio plus tard: relancez ce script, ou uploadez-le manuellement (public_id "static/audio/${building.id}") et complétez le champ "audio"`);
+  }
   console.log(`5. Testez l'affichage sur la carte`);
   console.log(`6. Validez le fonctionnement complet\n`);
 
@@ -278,18 +296,18 @@ async function main() {
 
 // Fonction pour générer le code TypeScript
 function generateTypeScriptCode(building, lat, lng, x, y) {
-  const historyCode = building.history 
+  const historyCode = building.history
     ? `\n    history: \`${building.history.replace(/`/g, '\\`')}\`,`
     : '';
+  const imageCode = building.image ? `\n    image: "${building.image}",` : '';
+  const audioCode = building.audio ? `\n    audio: "${building.audio}",` : '';
 
   return `  {
     id: "${building.id}",
     name: "${building.name}",
     x: ${x},
     y: ${y},
-    description: "${building.description.replace(/"/g, '\\"')}",
-    image: "${building.image}",
-    audio: "${building.audio}",${historyCode}
+    description: "${building.description.replace(/"/g, '\\"')}",${imageCode}${audioCode}${historyCode}
     visited: false,
     hasProgram: ${building.hasProgram},
     gps: {
@@ -313,8 +331,8 @@ function generateMarkdownDoc(building, lat, lng, x, y) {
 - **Nom** : ${building.name}
 - **GPS** : ${lat}, ${lng}
 - **Position carte** : (${x}, ${y})
-- **Image** : \`${building.image}\`
-- **Audio** : \`${building.audio}\`
+- **Image** : \`${building.image || '(non fournie)'}\`
+- **Audio** : \`${building.audio || '(non fourni)'}\`
 - **Événements** : ${building.hasProgram ? 'Oui' : 'Non'}
 
 ## Description
@@ -326,8 +344,8 @@ ${building.history ? `## Histoire complète\n\n${building.history}` : ''}
 ## Checklist d'intégration
 
 - [ ] Code ajouté dans \`src/data/locations.ts\`
-- [ ] Image placée dans \`public/images/locations/${building.imageName}\`
-- [ ] Audio placé dans \`public/audio/${building.audioName}\`
+- [ ] Image uploadée sur Cloudinary (public_id \`static/locations/${building.id}\`)
+- [ ] Audio uploadé sur Cloudinary (public_id \`static/audio/${building.id}\`)
 - [ ] Test affichage carte
 - [ ] Test fiche détail
 - [ ] Test audio

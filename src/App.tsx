@@ -386,12 +386,7 @@ const App: React.FC = () => {
 
   // Aucun code de gestion de localisation n'est nécessaire ici
   // La gestion de la localisation est maintenant gérée directement dans le composant AudioActivator
-  
-  // Déterminer le chemin audio en fonction de l'environnement
-  const audioPath = window.location.hostname.includes('github.io')
-    ? '/1Hall1Artiste/audio/Port-marchand.mp3'
-    : '/audio/Port-marchand.mp3';
-    
+
   return (
     <QueryClientProvider client={queryClient}>
       <LoadingProvider>

@@ -189,7 +189,12 @@ function buildExpoRows(
       artistName: name,
       type: "exposition",
       category,
+      // Pas de colonne photo pour les expos dans le Sheet : la vignette vient du
+      // portail artiste (override Firebase "thumbnail"), fusionnée uniquement par
+      // /api/program (lecture protégée par secret). Ce chemin de repli (Sheets
+      // direct, sans /api/program) ne peut donc jamais afficher de photo d'expo.
       image: artist.image,
+      imageUrl: artist.image,
     });
   }
 
@@ -263,6 +268,7 @@ function buildConcertRows(
         type: "concert",
         category,
         image: artist.image,
+        imageUrl: artist.image,
       });
     }
   }
