@@ -12,9 +12,9 @@ import Play from "lucide-react/dist/esm/icons/play";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { SwipeIndicator } from "@/components/ui/SwipeIndicator";
-import { getImagePath } from "@/utils/imagePaths";
 import { IMAGE_PATHS } from "../constants/imagePaths";
 import { getAssetPath } from "@/utils/assetUtils";
+import { cloudinaryOptimize } from "@/utils/cloudinary";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -214,7 +214,7 @@ export function LocationHistory() {
   // Track building selection and section view
   useEffect(() => {
     if (selectedLocationData?.image) {
-      const imagePath = getImagePath(selectedLocationData.image);
+      const imagePath = cloudinaryOptimize(selectedLocationData.image) || selectedLocationData.image;
       
       // Vérifier si l'image est déjà en cache
       if (!isHistoryImageCached(imagePath)) {
@@ -409,7 +409,7 @@ export function LocationHistory() {
               <div className="mb-4">
                 <div className="relative w-full rounded-xl shadow-lg border-2 border-amber-200 bg-amber-50/50 overflow-hidden flex items-center justify-center">
                   <img
-                    src={getImagePath(selectedLocationData.image)}
+                    src={cloudinaryOptimize(selectedLocationData.image) || selectedLocationData.image}
                     alt={`Photo historique de ${selectedLocationData.name}`}
                     className="max-h-[70vh] w-full object-contain"
                     onError={() => {
@@ -424,7 +424,7 @@ export function LocationHistory() {
                       });
                     }}
                   />
-                  {imagesLoading[getImagePath(selectedLocationData.image)] && (
+                  {imagesLoading[cloudinaryOptimize(selectedLocationData.image) || selectedLocationData.image] && (
                     <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70">
                       <Loader2 className="h-8 w-8 animate-spin text-[#4a5d94]" />
                     </div>

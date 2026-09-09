@@ -1,5 +1,5 @@
-import { getImagePath, getBasePath } from '@/utils/imagePaths';
 import { IMAGE_PATHS } from '../constants/imagePaths';
+import { cloudinaryThumb } from '@/utils/cloudinary';
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ActionButton } from "../components/ui/ActionButton";
@@ -93,21 +93,21 @@ const Gallery: React.FC = () => {
   // Fonction pour charger les photos historiques (avec limite)
   const loadHistoricalPhotos = (limit?: number): HistoricalPhoto[] => {
     const photos: HistoricalPhoto[] = [];
-    const basePath = getBasePath();
     const maxPhotos = limit || 151;
-    
+
     // Ajouter les photos historiques (jusqu'à la limite)
     for (let i = 1; i <= maxPhotos; i++) {
+      const cloudinaryUrl = `https://res.cloudinary.com/dpatqkgsc/image/upload/static/historical/photos-${i}`;
       photos.push({
         id: `historical-${i}`,
-        path: `${basePath}/images/historical/photos-${i}.jpg`,
+        path: cloudinaryThumb(cloudinaryUrl, 400, 400) || cloudinaryUrl,
         type: 'historical',
         displayName: 'Archives historiques',
         timestamp: '1900-01-01T00:00:00.000Z', // Date ancienne pour les trier après les nouvelles
         description: `Photo historique ${i} de l'Île Feydeau`
       });
     }
-    
+
     return photos;
   };
 

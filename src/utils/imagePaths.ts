@@ -24,6 +24,11 @@ export const getBasePath = (): string => {
  * @returns Chemin complet de l'image avec le préfixe de base si en production
  */
 export function getImagePath(path: string): string {
+  // URL déjà absolue (ex: Cloudinary) : la laisser telle quelle
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+
   // S'assurer que le chemin commence par un slash
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "@/components/ui/use-toast";
 import { createLogger } from "@/utils/logger";
+import { AMBIANCE_AUDIO_URL } from "@/constants/mediaUrls";
 
 const logger = createLogger('AudioContext');
 
@@ -37,12 +38,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     audio.loop = true;
     audio.volume = 0.5;
     
-    // Déterminer le chemin audio en fonction de l'environnement
-    const audioPath = window.location.hostname.includes('github.io')
-      ? '/1Hall1Artiste/audio/Port-marchand.mp3'
-      : '/audio/Port-marchand.mp3';
-    
-    audio.src = audioPath;
+    audio.src = AMBIANCE_AUDIO_URL;
     setAudioElement(audio);
     
     // Nettoyage lors du démontage de l'application

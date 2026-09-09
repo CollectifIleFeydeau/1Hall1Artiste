@@ -14,3 +14,13 @@ export function cloudinaryThumb(
   const transform = `w_${width},h_${height},c_fill,g_auto,q_auto,f_auto`;
   return url.replace("/upload/", `/upload/${transform}/`);
 }
+
+// Optimise une URL Cloudinary (compression + format automatiques) sans recadrer
+// ni redimensionner l'image. À utiliser pour les affichages en pleine taille
+// (ex: image détaillée d'un lieu) où cloudinaryThumb() couperait le sujet.
+export function cloudinaryOptimize(url: string | undefined | null): string | undefined {
+  if (!url) return url ?? undefined;
+  if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url;
+  if (/\/upload\/[^/]*[wc]_\d/.test(url)) return url;
+  return url.replace("/upload/", `/upload/q_auto,f_auto/`);
+}

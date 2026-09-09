@@ -13,8 +13,8 @@ import { associationInfo } from "@/data/association";
 import { teamMembers } from "@/data/team";
 import { ShareButton } from "@/components/ShareButton";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { getImagePath } from "@/utils/imagePaths";
 import { IMAGE_PATHS } from "../constants/imagePaths";
+import { cloudinaryOptimize } from "@/utils/cloudinary";
 
 const About = () => {
   const navigate = useNavigate();
@@ -144,8 +144,8 @@ const About = () => {
                   className="w-full h-full object-contain" 
                   controls 
                   playsInline
-                  poster={getImagePath("intro-video-image.png")}
-                  src={getImagePath("/video/intro-video.mp4")}
+                  poster={cloudinaryOptimize("https://res.cloudinary.com/dpatqkgsc/image/upload/static/video/intro-video-image")}
+                  src="https://res.cloudinary.com/dpatqkgsc/video/upload/static/video/intro-video"
                   aria-label="Vidéo de présentation du Collectif Île Feydeau"
                 />
               </div>

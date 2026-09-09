@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { AMBIANCE_AUDIO_URL } from '@/constants/mediaUrls';
 
 // Audio global partagé entre toutes les instances / pages
 let globalAudioElement: HTMLAudioElement | null = null;
@@ -11,11 +12,7 @@ function ensureAudio(): HTMLAudioElement | null {
     globalAudioElement.loop = true;
     globalAudioElement.volume = 0.5;
 
-    const audioPath = window.location.hostname.includes('github.io')
-      ? '/1Hall1Artiste/audio/Port-marchand.mp3'
-      : '/audio/Port-marchand.mp3';
-
-    globalAudioElement.src = audioPath;
+    globalAudioElement.src = AMBIANCE_AUDIO_URL;
   }
   return globalAudioElement;
 }
